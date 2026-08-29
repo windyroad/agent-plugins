@@ -39,6 +39,20 @@ teardown() {
   [ "$(jq '[.hooks[] | length] | add' "$PACKAGE/hooks-codex/hooks.json")" -eq 5 ]
 }
 
+@test "generated Codex work-problems uses the persisted Goal tool surface" {
+  run node "$PACKAGE/scripts/sync-codex-skills.mjs" --build
+  [ "$status" -eq 0 ]
+  skill="$PACKAGE/skills-codex/work-problems/SKILL.md"
+
+  grep -Fq '`thread/goal/set`' "$skill"
+  grep -Fq '`thread/goal/get`' "$skill"
+  grep -Fq '`thread/goal/clear`' "$skill"
+  grep -Fq 'The /wr-itil:work-problems AFK backlog drain is complete:' "$skill"
+  ! grep -Fq 'If the task has a persistent Codex goal' "$skill"
+  ! grep -Fq 'code.claude.com/docs/en/goal' "$skill"
+  ! grep -Fq '`/goal`' "$skill"
+}
+
 @test "Codex agent registration is exact, scoped, repairable, and ownership-safe" {
   run node "$PACKAGE/scripts/codex-agent.mjs" --scope user
   [ "$status" -eq 0 ]

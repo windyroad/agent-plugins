@@ -12,7 +12,16 @@ Continuously work the highest-priority actionable problem until the backlog is d
 1. If `docs/problems/` is absent, direct the user to `/wr-itil:scaffold-intake` and stop.
 2. Run the installed ITIL maintenance commands required by the repository, including layout migration, README reconciliation, catch-up scanning, stale upstream-cache checks, and unresolved-response checks. Resolve them from the plugin's bundled `bin/`; do not use source-repository paths.
 3. Resolve the exact checkout with `git rev-parse --show-toplevel`. Preserve unrelated working-tree changes and record the pre-iteration status. Revert only paths proven to have been created by a failed iteration.
-4. If the task has a persistent Codex goal, keep it active until this drain reaches a genuine terminal state. A slow process is not a blocker.
+4. Anchor the orchestrator with the native persisted Goal tools exposed by Codex. These are Goal tool calls, not a slash command:
+   - Call `thread/goal/get`. Reuse the active Goal only when it carries the canonical condition below; otherwise call `thread/goal/set` with that condition and active status before entering the loop.
+   - Call `thread/goal/get` again at every continue-or-stop decision. Keep the Goal active while any ticket remains dispatchable. A slow process is not a blocker.
+   - Call `thread/goal/clear` only after the final summary prints a fresh Step 2.4 Gate (0) table showing zero dispatchable tickets followed by `ALL_DONE`, or after the summary records another canonical terminal condition: a Hard-fail halt naming the gate that could not complete, or quota exhaustion.
+
+   **Canonical Goal condition:**
+
+   ```text
+   The /wr-itil:work-problems AFK backlog drain is complete: the final summary printed in the conversation contains a Step 2.4 Gate (0) re-scan table (fresh open/known-error glob) classifying every ticket and showing ZERO dispatchable tickets, followed by the ALL_DONE sentinel — or the session ends with a Hard-fail halt directive naming the gate that could not complete — or the summary reports quota exhaustion.
+   ```
 
 ## Loop
 

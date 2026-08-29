@@ -27,3 +27,5 @@
 > Last reviewed: 2026-08-29 **index reconciled** — STORY-069 added at `accepted` for one isolated Codex CLI iteration; reverse traces are present on P529, JTBD-006, and RFC-075's release row on STORY-MAP-002.
 
 > Last reviewed: 2026-08-29 **index reconciled** — STORY-070 added at `accepted` for the Codex persisted-Goal loop anchor; reverse traces are present on P528, JTBD-006, and RFC-076's release row on STORY-MAP-011.
+
+> Last reviewed: 2026-08-29 **index reconciled** — STORY-070 moved to `in-progress` with its first implementing change.

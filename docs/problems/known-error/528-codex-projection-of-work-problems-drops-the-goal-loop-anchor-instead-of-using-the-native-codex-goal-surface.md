@@ -65,16 +65,17 @@ The honest-degradation clause in Step 0e (*"below the floor the loop degrades ho
 
 - [x] Establish the concrete Codex Goal API surface — how a Goal is created, read, and completed from inside a running skill, and whether it is available to the orchestrator session only (the Claude Code anchor is orchestrator-session-only per Step 0e's placement clause; iters must not inherit a backlog-empty goal).
 - [x] Correct the superseded capture conclusion: the Codex Goal arm belongs in the wholesale Codex overlay; the canonical Claude Code Step 0e remains unchanged.
-- [ ] Make the Codex arm inspect the Goal at the continue/stop decision and complete it only on printed-Gate-(0)-zero-dispatchable + `ALL_DONE`.
-- [ ] Replace the passive Goal line in `packages/itil/scripts/codex-work-problems.md` with the active create/inspect/complete contract.
+- [x] Make the Codex arm inspect the Goal at the continue/stop decision and complete it only on printed-Gate-(0)-zero-dispatchable + `ALL_DONE` or another canonical ADR-094 terminal condition.
+- [x] Replace the passive Goal line in `packages/itil/scripts/codex-work-problems.md` with the active create/inspect/complete contract.
 - [x] Establish whether the sanitizer rewrites the Claude-Code-specific `/goal` prose in this skill - it does not; the overlay replaces the whole body first (Finding 1). It does rewrite it in the singular sibling skill (Finding 2), which remains open below.
 - [ ] **Remaining (Finding 2)**: give the singular `/wr-itil:work-problem` skill a Codex-executable anchor instruction, or suppress the Claude-Code-only Goal paragraph from its projection. Needs its own mechanism - the singular skill has no runtime overlay.
-- [ ] Add a behavioural check that the projected Codex skill does not instruct the agent to invoke `/goal` or cite a `code.claude.com` URL.
+- [x] Add a generator-exercising contract check that the projected Codex skill does not instruct the agent to invoke `/goal` or cite a `code.claude.com` URL.
 - [x] Create a reproduction test - a generator-exercising check in `packages/itil/scripts/test/codex-pack-install.bats` that builds the projection and asserts the drain's Goal contract is active rather than passive.
+- [x] Exercise the Codex overlay through the existing Promptfoo harness for Goal creation, continued dispatch, and all three ADR-094 terminal conditions.
 
 ## Fix Strategy
 
-RFC-076 — *Keep the Codex backlog drain running until no dispatchable work remains* — is a release row on confirmed STORY-MAP-011 under activity D, *Close it out*. It carries accepted STORY-070, *Leave the Codex backlog draining until no dispatchable work remains*.
+RFC-076 — *Keep the Codex backlog drain running until no dispatchable work remains* — is a release row on confirmed STORY-MAP-011 under activity D, *Close it out*. It carries in-progress STORY-070, *Leave the Codex backlog draining until no dispatchable work remains*.
 
 The row limits the implementation to the Codex projection overlay: create or reuse the persisted Goal with ADR-094's canonical completion condition, read it at continuation decisions, and clear it only at a ratified terminal condition. The Claude Code skill, including `claude -p` and its `/goal` branch, remains unchanged.
 
@@ -100,6 +101,6 @@ The row limits the implementation to the Codex projection overlay: create or reu
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | accepted |
+| STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | in-progress |
 
 **Hang-off check (Step 2b)**: not dispatched. The mechanical pre-filter on the `/wr-itil:work-problems` signal returned more than 40 candidates, over the 5-candidate cap, so the candidate-cap short-circuit fired per the SKILL contract. The nearest absorb candidates are the Codex-projection cluster P526 and P527; both are transform-level defects in the sanitizer's field handling, whereas this is a missing runtime branch in the skill body and overlay, so a sibling ticket is the honest shape. Re-evaluate the cluster at the next `/wr-itil:review-problems` pass.

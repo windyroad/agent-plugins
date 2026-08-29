@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: leave-the-codex-backlog-draining-until-no-dispatchable-work-remains
 reported: 2026-08-29
 decision-makers: [Tom Howard]
@@ -25,12 +25,12 @@ In order to trust that an unattended Codex backlog drain will not stop early, as
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] The installed Codex `/wr-itil:work-problems` contract creates or reuses a persisted Goal carrying ADR-094's canonical backlog-drain completion condition before the loop starts.
-- [ ] The Codex orchestrator reads the persisted Goal at every continue-or-stop decision and keeps it active while dispatchable work remains.
-- [ ] The Codex orchestrator clears the persisted Goal only after the final summary prints a fresh Step 2.4 Gate (0) table with zero dispatchable tickets followed by `ALL_DONE`, or another canonical terminal condition is reached.
-- [ ] The installed Codex drain does not instruct the agent to invoke a fictional `/goal` command or follow the Claude Code Goal URL.
-- [ ] The canonical Claude Code source retains its `claude -p` dispatch and `/goal` branch unchanged.
-- [ ] A generator-exercising behavioural test protects the installed Codex contract, and a patch changeset ships the correction for `@windyroad/itil`.
+- [x] The installed Codex `/wr-itil:work-problems` contract creates or reuses a persisted Goal carrying ADR-094's canonical backlog-drain completion condition before the loop starts.
+- [x] The Codex orchestrator reads the persisted Goal at every continue-or-stop decision and keeps it active while dispatchable work remains.
+- [x] The Codex orchestrator clears the persisted Goal only after the final summary prints a fresh Step 2.4 Gate (0) table with zero dispatchable tickets followed by `ALL_DONE`, or another canonical terminal condition is reached.
+- [x] The installed Codex drain does not instruct the agent to invoke a fictional `/goal` command or follow the Claude Code Goal URL.
+- [x] The canonical Claude Code source retains its `claude -p` dispatch and `/goal` branch unchanged.
+- [x] A generator-exercising contract test protects the installed Codex artifact, focused Codex Promptfoo cases exercise its Goal lifecycle, and a patch changeset ships the correction for `@windyroad/itil`.
 
 ## Driving problem trace (required — I7 invariant)
 
@@ -44,7 +44,7 @@ Serves JTBD-006 — progress the backlog while I am away. The persisted Goal kee
 
 - Implement only the Codex projection overlay under ADR-083. Do not change `packages/itil/skills/work-problems/SKILL.md`, its Claude Code `claude -p` dispatch, or its `/goal` branch.
 - Reuse ADR-094's completion condition verbatim and use the native persisted Goal tools exposed to the running Codex agent; do not invent a `/goal` command.
-- Exercise the generator and assert against the built Codex artifact.
+- Exercise the generator against the built Codex artifact and the existing Promptfoo harness against the Codex overlay.
 
 ## Dependencies
 

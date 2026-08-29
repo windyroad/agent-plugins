@@ -84,6 +84,7 @@
 # @problem P390
 # @problem P370
 # @problem P413
+# @problem P528
 # @problem P529
 # @rfc RFC-012
 # @rfc RFC-034
@@ -744,6 +745,100 @@ tests:
           blocks on the user, fires AskUserQuestion, or claims to set the
           goal programmatically. Saying it does NOT halt / does NOT ask
           PASSES.
+
+  # --- P528: Codex native persisted Goal lifecycle ---------------------------
+
+  - description: P528 Codex Goal preflight — missing anchor uses get then set
+    provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'
+    vars:
+      prompt: |
+        This is a Codex /wr-itil:work-problems run. The persisted Goal is
+        missing at preflight. List the Goal tool calls the orchestrator makes
+        before entering the loop and state what condition it stores. Do not
+        describe the Claude Code slash-command flow.
+    assert:
+      - type: regex
+        value: 'thread/goal/get[\s\S]*thread/goal/set'
+      - type: regex
+        value: 'Gate \(0\)[\s\S]*(ZERO|zero)[\s\S]*ALL_DONE'
+      - type: llm-rubric
+        value: |
+          PASS only if the response says Codex first calls thread/goal/get,
+          then calls thread/goal/set because the persisted Goal is missing,
+          and stores the canonical condition covering Gate (0) zero
+          dispatchable tickets plus ALL_DONE, a named Hard-fail gate, or quota
+          exhaustion. FAIL if it tells the user to type /goal or merely emits
+          a passive reminder instead of setting the Goal with the native tool.
+
+  - description: P528 Codex Goal decision — dispatchable work keeps Goal active and continues
+    provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'
+    vars:
+      prompt: |
+        This is a Codex /wr-itil:work-problems continue-or-stop decision. The
+        persisted Goal already carries the canonical condition and the fresh
+        backlog scan still has one dispatchable ticket. Which Goal tool is
+        called, is the Goal cleared, and what happens next?
+    assert:
+      - type: icontains
+        value: 'thread/goal/get'
+      - type: regex
+        value: 'active[\s\S]*(continue|dispatch)|(continue|dispatch)[\s\S]*active'
+      - type: llm-rubric
+        value: |
+          PASS only if the response calls thread/goal/get at the decision,
+          keeps the canonical Goal active, does not call thread/goal/clear,
+          and continues by dispatching the remaining ticket. FAIL if it stops,
+          clears the Goal, or emits ALL_DONE while work remains dispatchable.
+
+  - description: P528 Codex Goal terminal — Gate (0) zero plus ALL_DONE clears Goal
+    provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'
+    vars:
+      prompt: |
+        This is a Codex /wr-itil:work-problems stop decision. The final summary
+        has printed a fresh Step 2.4 Gate (0) table showing zero dispatchable
+        tickets, followed by ALL_DONE. List the Goal calls at this decision and
+        the resulting Goal state.
+    assert:
+      - type: regex
+        value: 'thread/goal/get[\s\S]*thread/goal/clear'
+      - type: llm-rubric
+        value: |
+          PASS only if the response calls thread/goal/get and then
+          thread/goal/clear because the printed Gate (0) zero-dispatchable
+          evidence followed by ALL_DONE is a canonical terminal condition.
+
+  - description: P528 Codex Goal terminal — named Hard-fail gate clears Goal
+    provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'
+    vars:
+      prompt: |
+        This is a Codex /wr-itil:work-problems stop decision. The summary has
+        recorded a Hard-fail halt naming the governance gate that could not
+        complete. List the Goal calls at this decision and the resulting Goal
+        state.
+    assert:
+      - type: regex
+        value: 'thread/goal/get[\s\S]*thread/goal/clear'
+      - type: llm-rubric
+        value: |
+          PASS only if the response calls thread/goal/get and then
+          thread/goal/clear because a Hard-fail halt naming the gate that could
+          not complete is a canonical terminal condition.
+
+  - description: P528 Codex Goal terminal — quota exhaustion clears Goal
+    provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'
+    vars:
+      prompt: |
+        This is a Codex /wr-itil:work-problems stop decision. The summary has
+        reported quota exhaustion. List the Goal calls at this decision and
+        the resulting Goal state.
+    assert:
+      - type: regex
+        value: 'thread/goal/get[\s\S]*thread/goal/clear'
+      - type: llm-rubric
+        value: |
+          PASS only if the response calls thread/goal/get and then
+          thread/goal/clear because reported quota exhaustion is a canonical
+          terminal condition.
 
   - description: ADR-099 AFK remediation affects shipped behaviour and has no graduation queue
     vars:

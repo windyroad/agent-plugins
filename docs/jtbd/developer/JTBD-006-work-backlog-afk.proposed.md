@@ -66,7 +66,7 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-065 | STORY-065: A fix proposal draws a release row, not a document | accepted |
 | STORY-066 | STORY-066: A fix I can prove works gets closed without me | accepted |
 | STORY-069 | STORY-069: Drain one Codex ticket through an isolated Codex CLI | in-progress |
-| STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | accepted |
+| STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | in-progress |
 | STORY-003 | STORY-003: /wr-itil:list-stories read-only display skill | done |
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-018 | STORY-018: Capture the problem in seconds, mid-flow | done |
