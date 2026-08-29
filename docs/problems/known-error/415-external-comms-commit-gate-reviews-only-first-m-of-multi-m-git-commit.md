@@ -35,8 +35,8 @@ The `-m` extraction in `external-comms-gate.sh` returns the FIRST regex match an
 ### Investigation Tasks
 
 - [ ] Re-rate Priority and Effort at next /wr-itil:review-problems
-- [ ] Investigate root cause — confirm the first-match-`break` in the `-m` pattern loop; decide join semantics (`\n\n`) vs git's exact composition
-- [ ] Create reproduction test — behavioural bats: multi-`-m` commit + full-message reviewer marker → gate PASS
+- [x] Investigate root cause — confirmed the first-match-`break` in the `-m` pattern loop; repeated values now use Git's `\n\n` composition
+- [x] Create reproduction test — behavioural bats: multi-`-m` commit + full-message reviewer marker → gate PASS
 
 ## Dependencies
 
@@ -60,10 +60,17 @@ The `-m` extraction in `external-comms-gate.sh` returns the FIRST regex match an
 **Observed flaw**: the `-m`/`--message` extraction returns the first regex match and `break`s, hashing only the subject line of a multi-`-m` commit.
 **Edit summary**: accumulate ALL `-m`/`--message` values in command order and join with `\n\n` (git's multi-`-m` composition rule) before computing the marker key, so the gate hashes the same full message the reviewer wraps in `<draft>`.
 **Evidence**: 3 blocked commit attempts 2026-07-03 P363 iter; marker key `9cfde227…` (full message) present but gate computed subject-only key.
+**Release vehicle**: `.changeset/calm-complete-messages.md` (queued; not published)
+
+## Fix Implemented
+
+- 2026-08-29 — commit `ff974cc1` updates the canonical shared hook, synchronizes the risk-scorer and voice-tone copies, and adds the focused behavioural regression.
+- Verification: the external-comms Bats suite passed 38/38; fresh package extracts for both affected packages passed multi-message, single-message, and heredoc marker scenarios; the sync check confirmed byte-identical consumer copies.
+- Lifecycle: remains Known Error until the affected packages are published. Publication is the release evidence required for the transition to Verification Pending.
 
 
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-071 | STORY-071: Review the complete commit message once | accepted |
+| STORY-071 | STORY-071: Review the complete commit message once | in-progress |

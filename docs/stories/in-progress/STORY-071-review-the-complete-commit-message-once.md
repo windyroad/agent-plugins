@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: review-the-complete-commit-message-once
 reported: 2026-08-29
 decision-makers: [Tom Howard]
@@ -25,9 +25,9 @@ In order to land a multi-paragraph commit after one successful external-comms re
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] A review marker keyed to `subject\n\nbody\n\ntrailer` permits a public-repository `git commit` that supplies those paragraphs with mixed `-m` and `--message` flags.
-- [ ] The gate extracts quoted message values in command order and joins them with exactly one blank line.
-- [ ] The existing single-message and heredoc commit-message forms retain their marker-key behaviour.
+- [x] A review marker keyed to `subject\n\nbody\n\ntrailer` permits a public-repository `git commit` that supplies those paragraphs with mixed `-m` and `--message` flags.
+- [x] The gate extracts quoted message values in command order and joins them with exactly one blank line.
+- [x] The existing single-message and heredoc commit-message forms retain their marker-key behaviour.
 
 ## Driving problem trace (required — I7 invariant)
 
