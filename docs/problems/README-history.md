@@ -1414,3 +1414,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-30 **P469 known error** - confirmed split verdict authority, drew RFC-079 / STORY-073, and implemented hook-owned fail-closed output parsing for style-guide and voice-tone.
 
 > Last reviewed: 2026-08-30 **P469 verification pending** - the fail-closed reviewer-verdict fix shipped in `@windyroad/style-guide@0.6.1` and `@windyroad/voice-tone@0.8.2`; awaiting user verification.
+
+> Last reviewed: 2026-08-30 **P526 known error** - whole-file sanitisation crosses YAML frontmatter, and the copy filter reads absolute path components.

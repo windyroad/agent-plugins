@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-30 **P526 known error** - whole-file sanitisation crosses YAML frontmatter, and the copy filter reads absolute path components.
+> Last reviewed: 2026-08-30 **P526 verification pending** - the projection repair shipped in `@windyroad/itil@2.1.4`; the published package has valid frontmatter on both skill surfaces and all 29 Codex skills.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -13,7 +13,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | | | **Tier 0 — Critical-bypass** (Severity Very High ≥17, security-classified, or incident-linked) | | | | | |
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
-| 40 | P526 | Codex projection sanitizer corrupts YAML frontmatter while expanding internal IDs | 20 (Very High) | Known Error | S | 2026-08-29 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Critical) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported** | | | | | |
@@ -273,6 +272,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P528 | Codex projection of work-problems drops the Goal loop-anchor instead of using the native Codex Goal surface | 2026-08-29 (`@windyroad/itil@2.1.2`; merge commit `fa8a43f77fd07e57015df8155a81f4bbb5ba6a14`, PR #456) | no — not observed |
 | P529 | Codex work-problems cannot use refreshed Codex CLI quota | 2026-08-29 (`@windyroad/itil@2.1.1`; merge commit `b45959d436953c4648a53de68b94cefb5bde87e5`, PR #455) | no — not observed |
 | P469 | style-guide and voice-tone reviewer agents spawn without Bash, so they cannot write the verdict marker their own gate reads | 2026-08-30 (`@windyroad/style-guide@0.6.1`, `@windyroad/voice-tone@0.8.2`; version-packages commit `5de641525c67cb0558789d5eea206d82dc34ff2d`, merge commit `45f84cf15c26561db6cb080d5faba34fdd1085c6`, PR #459) | no — not observed |
+| P526 | Codex projection sanitizer corrupts YAML frontmatter while expanding internal IDs | 2026-08-30 (`@windyroad/itil@2.1.4`; version-packages commit `c717d203`, merge commit `22375d28`, PR #462; published frontmatter PASS across both skill surfaces with all 29 Codex skills) | no — not observed |
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no — not observed |
 | P037 | jtbd-reviewer returns bare verdict without reason | commit 6e7c2e4 | no — not observed |
 | P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) | no — not observed |

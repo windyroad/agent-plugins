@@ -1,6 +1,6 @@
 # Problem 526: Codex projection sanitizer corrupts YAML frontmatter while expanding internal IDs
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-08-29
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5 — nine generated ITIL Codex skills have invalid frontmatter on every projection build and in the published 2.1.0 cache
 **Origin**: internal
@@ -77,6 +77,14 @@ It has gone unnoticed because the maintainer checkout has no offending path comp
 - Fresh build on 2026-08-29 produced nine YAML parse failures.
 - Installed `@windyroad/itil@2.1.0` reproduces the failure.
 - Source frontmatter remains valid, isolating the defect to projection generation.
+
+## Fix Released
+
+- **Released**: 2026-08-30 in `@windyroad/itil@2.1.4`.
+- **Release vehicle**: `.changeset/calm-codex-projections.md`; version-packages commit `c717d203`; merge commit `22375d28`; PR #462; successful release workflow `33280655523`.
+- **Fix**: published Markdown frontmatter is sanitized and serialized separately from the body, and copy exclusions are evaluated relative to each skill source.
+- **Exercise evidence**: the focused packed-install suite passed 6/6 after rebasing; CI run `33280199429` passed all quality gates and 12/12 agent-prose evaluations; the npm `2.1.4` artifact has parseable frontmatter across both shipped skill surfaces and contains all 29 Codex skills.
+- Awaiting user verification.
 
 ## Dependencies
 
