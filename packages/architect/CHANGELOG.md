@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 0.21.6
+
+### Patch Changes
+
+- c5a0cb2: Bind oversight confirmation markers to the exact successful helper command's session and document in both plugins. This stops evidence grants to unrelated recent sessions and keeps long-running sessions working after announce markers expire.
+
 ## 0.21.5
 
 ### Patch Changes
