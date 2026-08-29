@@ -1,6 +1,6 @@
 # Problem 529: Codex work-problems cannot use refreshed Codex CLI quota
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-08-29
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5 — derived at capture. Impact 4: the installed `/wr-itil:work-problems` skill cannot continue a Codex-native backlog drain when the unrelated Claude CLI quota is exhausted, so a core plugin workflow fails for an installed user even though the active runtime has capacity. Likelihood 5: the report reproduces the failure after the ChatGPT/Codex quota refreshed while the drain still stopped on the Claude CLI weekly limit, and describes the dispatch as applying to every isolated iteration in ChatGPT/Codex sessions.
 **Origin**: internal
@@ -67,6 +67,18 @@ Observed 2026-08-29: exit 1, with the prohibition matched on installed line 19. 
 RFC-075 — *Use available Codex capacity for isolated backlog iterations* — is a release row on confirmed STORY-MAP-002 under activity D, *Implement the changes*. It carries in-progress STORY-069, *Drain one Codex ticket through an isolated Codex CLI*.
 
 The row limits the fix to the Codex projection/adapter: one exact-checkout `codex exec` iteration, governance and suppression controls, separate JSONL metadata plus final-output `ITERATION_SUMMARY`, path-scoped recovery, error classification, retro-on-exit, and an installed-artifact behavioural test. The canonical Claude Code branch and ADR-094 remain unchanged.
+
+**Release vehicle**: .changeset/codex-isolated-problem-iterations.md
+
+## Fix Released
+
+Released in `@windyroad/itil@2.1.1` (merge commit `b45959d436953c4648a53de68b94cefb5bde87e5`, PR #455, released 2026-08-29).
+
+The Codex backlog drain now dispatches each isolated iteration through `codex exec` while preserving the existing Claude Code workflow and governed iteration contract.
+
+Exercise evidence: the packed installed-skill smoke launched a real outer Codex process, dispatched exactly one fake nested Codex iteration for P529 in the exact checkout, did not invoke the fail-fast fake Claude process, and consumed separate JSONL progress plus the final-output sentinel summary.
+
+Awaiting user verification.
 
 ## Dependencies
 
