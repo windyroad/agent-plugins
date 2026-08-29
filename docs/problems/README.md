@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-29 **P528 captured** — the Codex build of the AFK backlog drain drops the external stop-check anchor instead of using Codex’s own durable Goal surface, so the loop can declare itself done early (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-08-29 **P529 captured** — Codex-native backlog drains still dispatch isolated iterations through `claude -p`, so an unrelated Claude CLI weekly limit stops work while Codex quota is available (lightweight aside via /wr-itil:capture-problem).
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -17,6 +17,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 20 | P519 | The Verification Pending -> Closed transition is reserved for the maintainer, so evidence-based closure never fires and the verification queue grows without bound | 20 (Very High) | Known Error | M | 2026-08-24 | internal |
 | 20 | P526 | Codex projection sanitizer corrupts YAML frontmatter while expanding internal IDs | 20 (Very High) | Open | S | 2026-08-29 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
+| 10 | P529 | Codex work-problems drain stops on Claude CLI quota because iterations dispatch through claude -p | 20 (Very High) | Open | M | 2026-08-29 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Critical) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported** | | | | | |
 | 24 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 (High) | Known Error | S | 2026-07-06 | inbound-reported (#169) |
