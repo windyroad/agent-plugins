@@ -1386,3 +1386,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-29 **P528 captured** — the Codex build of the AFK backlog drain drops the external stop-check anchor instead of using Codex’s own durable Goal surface, so the loop can declare itself done early (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-08-29 **P529 captured** — Codex-native backlog drains still dispatch isolated iterations through `claude -p`, so an unrelated Claude CLI weekly limit stops work while Codex quota is available (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-08-29 **P528 moved to Known Error** — investigation confirmed that the wholesale Codex `work-problems` overlay omits ADR-094's active Goal contract; RFC-076 and STORY-070 carry the overlay-only correction.
