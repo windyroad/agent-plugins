@@ -383,6 +383,19 @@ run_hook() {
   [ -z "$output" ]
 }
 
+@test "P415: repeated -m and --message values use the complete commit message marker" {
+  mock_gh_visibility PUBLIC
+  BODY=$'subject\n\nbody\n\ntrailer'
+  SURFACE="git-commit-message"
+  KEY=$(printf '%s\n%s' "$BODY" "$SURFACE" | shasum -a 256 | cut -d' ' -f1)
+  touch "${RDIR}/external-comms-risk-reviewed-${KEY}"
+
+  INPUT=$(build_bash_input "git commit -m \"subject\" --message 'body' -m \"trailer\"")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
 # ---------------------------------------------------------------------------
 # P365 — repo-visibility precondition on the git-commit-message surface.
 # A commit message is external-facing prose ONLY when it lands in a PUBLIC

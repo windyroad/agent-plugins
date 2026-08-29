@@ -214,6 +214,7 @@ except Exception:
         DRAFT=$(printf '%s' "$COMMAND" | python3 -c "
 import sys, re
 cmd = sys.stdin.read()
+surface = sys.argv[1]
 # P364: bash double-quote unescape. The double-quoted body capture groups
 # carry RAW shell-escaped command text — an orchestrator must backslash-escape
 # backticks (and \$, \", \\) inside \"...\" to survive bash parsing, e.g.
@@ -240,6 +241,25 @@ def unescape_dq(s):
             out.append(s[i])
             i += 1
     return ''.join(out)
+
+# Git joins repeated -m/--message values with one blank line. Extract every
+# quoted value in command order so the gate hashes the message Git will create.
+# Preserve the existing heredoc-first behaviour for the AI-dominant form.
+if surface == 'git-commit-message':
+    heredoc = re.search(r\"[<][<]\s*['\\\"]?EOF['\\\"]?\s*\n(.*?)\nEOF\", cmd, re.DOTALL)
+    if heredoc:
+        print(heredoc.group(1))
+        raise SystemExit
+
+    messages = []
+    for match in re.finditer(r\"(?:-m|--message)(?:=|\s+)(?:'([^']*)'|\\\"([^\\\"]*)\\\")\", cmd):
+        if match.group(1) is not None:
+            messages.append(match.group(1))
+        else:
+            messages.append(unescape_dq(match.group(2)))
+    if messages:
+        print('\n\n'.join(messages))
+        raise SystemExit
 # (pattern, flags, unescape) — first match wins. unescape=True for the
 # double-quoted forms only (P364).
 patterns = [
@@ -268,7 +288,7 @@ for pat, flags, unescape in patterns:
             body = unescape_dq(body)
         print(body)
         break
-" 2>/dev/null || echo "")
+" "$SURFACE" 2>/dev/null || echo "")
         ;;
 
     Write|Edit)
