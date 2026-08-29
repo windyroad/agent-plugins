@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-30 **P469 known error** - confirmed split verdict authority, drew RFC-079 / STORY-073, and implemented hook-owned fail-closed output parsing for style-guide and voice-tone.
+> Last reviewed: 2026-08-30 **P469 verification pending** - the fail-closed reviewer-verdict fix shipped in `@windyroad/style-guide@0.6.1` and `@windyroad/voice-tone@0.8.2`; awaiting user verification.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -50,7 +50,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 16 | P511 | The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate | 8 (Medium) | Known Error | S | 2026-08-21 | internal |
 | 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Known Error | M | 2026-08-20 | internal |
 | 15 | P527 | Codex skill names render with a duplicated plugin prefix and title-case branding | 15 (High) | Known Error | S | 2026-08-29 | internal |
-| 12 | P469 | style-guide and voice-tone reviewer agents spawn without Bash, so they cannot write the verdict marker their own gate reads | 6 (Medium) | Known Error | S | 2026-07-26 | internal |
 | 12 | P148 | Agent defers ticket creation to retro summary instead of immediately capturing it | 12 (High) | Known Error | M | 2026-04-29 | internal |
 | 12 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 (High) | Known Error | M | 2026-06-10 | internal |
 | 12 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Known Error | M | 2026-07-26 | internal |
@@ -274,6 +273,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P415 | External-comms commit-msg gate reviews only the first `-m` of a multi-`-m` git commit, causing deny-after-PASS on multi-paragraph commits | 2026-08-29 (`@windyroad/risk-scorer@0.18.19`, `@windyroad/voice-tone@0.8.1`; release workflow `33246825673`, merge `5b80b942`) | no — not observed |
 | P528 | Codex projection of work-problems drops the Goal loop-anchor instead of using the native Codex Goal surface | 2026-08-29 (`@windyroad/itil@2.1.2`; merge commit `fa8a43f77fd07e57015df8155a81f4bbb5ba6a14`, PR #456) | no — not observed |
 | P529 | Codex work-problems cannot use refreshed Codex CLI quota | 2026-08-29 (`@windyroad/itil@2.1.1`; merge commit `b45959d436953c4648a53de68b94cefb5bde87e5`, PR #455) | no — not observed |
+| P469 | style-guide and voice-tone reviewer agents spawn without Bash, so they cannot write the verdict marker their own gate reads | 2026-08-30 (`@windyroad/style-guide@0.6.1`, `@windyroad/voice-tone@0.8.2`; version-packages commit `5de641525c67cb0558789d5eea206d82dc34ff2d`, merge commit `45f84cf15c26561db6cb080d5faba34fdd1085c6`, PR #459) | no — not observed |
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no — not observed |
 | P037 | jtbd-reviewer returns bare verdict without reason | commit 6e7c2e4 | no — not observed |
 | P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) | no — not observed |

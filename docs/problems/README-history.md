@@ -1408,3 +1408,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-08-30
 
 > Last reviewed: 2026-08-29 **P368 verification pending** - the exact-session oversight fix shipped in `@windyroad/architect@0.21.6` and `@windyroad/jtbd@0.14.1`; awaiting user verification.
+
+> Last reviewed: 2026-08-30 **P469 known error** - confirmed split verdict authority, drew RFC-079 / STORY-073, and implemented hook-owned fail-closed output parsing for style-guide and voice-tone.

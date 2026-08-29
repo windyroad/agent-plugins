@@ -1,6 +1,6 @@
 # Problem 469: style-guide and voice-tone reviewer agents spawn without Bash, so they cannot write the verdict marker their own gate reads
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-26
 **Priority**: 6 (Medium) — Impact: 2 × Likelihood: 3 — derived at capture from the description per Step 4a
 **Origin**: internal
@@ -66,6 +66,8 @@ Sibling audit established the safe existing pattern. Architect and risk-scorer h
 
 RFC-079 / STORY-073 keeps both reviewers read-only and moves marker authority into their existing PostToolUse hooks. Each hook parses the first canonical verdict heading from `_get_tool_output`; only PASS creates the review marker, policy hash, and plan marker. Failure headings, unknown or missing output, and stale legacy verdict files create nothing. The agent prompts no longer instruct callers or reviewers to write verdict files.
 
+**Release vehicle**: .changeset/calm-reviewer-verdicts.md
+
 ## Verification Evidence
 
 - `packages/shared/test/reviewer-verdict-marker-enforcement.bats` failed against the previous hooks because a stale legacy PASS file unlocked canonical FAIL output.
@@ -84,6 +86,14 @@ That is a materially different consequence from the style-guide / voice-tone cas
 `wr-style-guide:agent` also reproduced the original symptom in the same iteration: *"I could not write `/tmp/style-guide-verdict` — no Bash tool is available in this session, so please record `FAIL` on my behalf."* The caller declined to forge it, per the P348 hollow-marker rule.
 
 - [x] Classify the wider evidence without widening this fix: `wr-risk-scorer:pipeline` is read-side and requires a separate input-contract treatment, while P469 repairs the shared marker-authority defect in style-guide and voice-tone.
+
+## Fix Released
+
+- **Released**: 2026-08-30 in `@windyroad/style-guide@0.6.1` and `@windyroad/voice-tone@0.8.2`.
+- **Release vehicle**: `.changeset/calm-reviewer-verdicts.md`; version-packages commit `5de641525c67cb0558789d5eea206d82dc34ff2d`; merge commit `45f84cf15c26561db6cb080d5faba34fdd1085c6`; PR #459; successful release workflow `33275728138`.
+- **Fix**: the existing PostToolUse hooks now treat the read-only reviewers' returned canonical verdict as the sole authority and fail closed for FAIL, missing, malformed, or stale-file input.
+- **Exercise evidence**: focused behavioural tests passed 104 checks; both promptfoo evaluations passed uncached; packed hooks passed the stale FAIL, malformed, missing, error, and PASS cases; CI run `33260251941` passed Quality Gates and Agent-Prose Behavioural Evals after the flaky unrelated job retry.
+- Awaiting user verification.
 
 ## Dependencies
 
