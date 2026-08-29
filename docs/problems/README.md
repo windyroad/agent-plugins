@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-29 **P368 verification pending** - the exact-session oversight fix shipped in `@windyroad/architect@0.21.6` and `@windyroad/jtbd@0.14.1`; awaiting user verification.
+> Last reviewed: 2026-08-30 **P469 known error** - confirmed split verdict authority, drew RFC-079 / STORY-073, and implemented hook-owned fail-closed output parsing for style-guide and voice-tone.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -50,6 +50,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 16 | P511 | The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate | 8 (Medium) | Known Error | S | 2026-08-21 | internal |
 | 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Known Error | M | 2026-08-20 | internal |
 | 15 | P527 | Codex skill names render with a duplicated plugin prefix and title-case branding | 15 (High) | Known Error | S | 2026-08-29 | internal |
+| 12 | P469 | style-guide and voice-tone reviewer agents spawn without Bash, so they cannot write the verdict marker their own gate reads | 6 (Medium) | Known Error | S | 2026-07-26 | internal |
 | 12 | P148 | Agent defers ticket creation to retro summary instead of immediately capturing it | 12 (High) | Known Error | M | 2026-04-29 | internal |
 | 12 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 (High) | Known Error | M | 2026-06-10 | internal |
 | 12 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Known Error | M | 2026-07-26 | internal |
@@ -72,7 +73,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 (Med) | Known Error | M | 2026-05-26 | internal |
 | 6 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 6 (Medium) | Known Error | M | 2026-07-03 | internal |
 | 6 | P468 | architect-mark-reviewed misses a genuine PASS whose verdict line is a markdown heading rather than bold | 6 (Medium) | Open | S | 2026-07-26 | internal |
-| 6 | P469 | style-guide and voice-tone reviewer agents spawn without Bash, so they cannot write the verdict marker their own gate reads | 6 (Medium) | Open | S | 2026-07-26 | internal |
 | 6 | P481 | Two ratified decisions describe a story-map format that no longer exists | 6 (Medium) | Open | S | 2026-08-08 | architect-review |
 | 6 | P504 | No skill surface reopens a closed problem ticket, and closure notes prescribe a command that refuses | 6 (Medium) | Open | S | 2026-08-20 | internal |
 | 6 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 (High) | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |

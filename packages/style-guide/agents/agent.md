@@ -66,17 +66,15 @@ If the code introduces a UI component, visual pattern, or design token not cover
 > The code introduces [component/pattern/token] which is not covered by the current style guide.
 > Recommended addition to `docs/STYLE-GUIDE.md`: [specific section/content to add]
 
-This is a FAIL verdict — the guide must be updated before the code can proceed. Write `printf 'FAIL' > /tmp/style-guide-verdict` for guide gaps.
+This is a FAIL verdict — the guide must be updated before the code can proceed.
 
 ## Verdict
 
-After completing your review, write your verdict to `/tmp/style-guide-verdict`:
-- `printf 'PASS' > /tmp/style-guide-verdict` — styling is compliant and guide covers the patterns used
-- `printf 'FAIL' > /tmp/style-guide-verdict` — violations found or guide gap detected
+After completing your review, emit exactly one canonical verdict heading from the report shapes above. The PostToolUse hook parses the first canonical heading and writes any gate marker; you do not write marker files.
 
 ## Constraints
 
-- You are read-only. You do not edit files (except writing the verdict file).
+- You are read-only. You do not edit files.
 - You review styling in `.css` files and `<style>` blocks in component files.
 - If the change has no visual/styling impact (logic, copy, structure only), report PASS.
 - Do not review copy or text content (that is the voice-and-tone-lead's job).

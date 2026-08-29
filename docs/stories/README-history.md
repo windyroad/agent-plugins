@@ -33,3 +33,7 @@
 > Last reviewed: 2026-08-29 **index reconciled** — STORY-071 moved to `in-progress` with the P415 implementation.
 
 > Last reviewed: 2026-08-29 **STORY-071 done** — all acceptance criteria passed and RFC-077 shipped in the P415 release.
+
+## 2026-08-30
+
+> Last reviewed: 2026-08-29 **STORY-072 accepted** — I6-I10 and map-derived I12 passed; all three criteria are backed by the committed P368 evidence.

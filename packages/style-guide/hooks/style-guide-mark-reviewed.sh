@@ -6,10 +6,11 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/review-gate.sh"
 
-INPUT=$(cat)
+_parse_input
 
-SUBAGENT=$(echo "$INPUT" | jq -r '.tool_input.subagent_type // empty') || true
-SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty') || true
+[ "$(_get_tool_name)" = "Agent" ] || exit 0
+SUBAGENT=$(_get_subagent_type)
+SESSION_ID=$(_get_session_id)
 
 if [ -z "$SESSION_ID" ]; then
   exit 0
@@ -17,32 +18,20 @@ fi
 
 case "$SUBAGENT" in
   *style-guide-lead*|*wr-style-guide*)
-    VERDICT_FILE="/tmp/style-guide-verdict"
-    VERDICT=""
-    if [ -f "$VERDICT_FILE" ]; then
-      VERDICT=$(cat "$VERDICT_FILE")
-      rm -f "$VERDICT_FILE"
-    fi
+    HEADING=$(printf '%s\n' "$(_get_tool_output)" \
+      | sed -nE 's/^[[:space:]]*>?[[:space:]]*\*\*(Style Guide Review: (PASS|VIOLATIONS FOUND|GUIDE UPDATE NEEDED))\*\*.*/\1/p' \
+      | head -n 1)
 
-    case "$VERDICT" in
-      PASS)
+    case "$HEADING" in
+      "Style Guide Review: PASS")
         touch "/tmp/style-guide-reviewed-${SESSION_ID}"
         store_review_hash "$SESSION_ID" "style-guide" "docs/STYLE-GUIDE.md"
-        ;;
-      FAIL)
-        # Do NOT create marker — review found issues
+        touch "/tmp/style-guide-plan-reviewed-${SESSION_ID}"
         ;;
       *)
-        # No verdict file — backward compat, allow with marker
-        touch "/tmp/style-guide-reviewed-${SESSION_ID}"
-        store_review_hash "$SESSION_ID" "style-guide" "docs/STYLE-GUIDE.md"
+        # Fail closed: issues and unparseable output do not unlock edits.
         ;;
     esac
-
-    # Plan review: agent completion = reviewed.
-    # The main agent must actually run the review agent to reach this hook.
-    # No verdict file needed — PostToolUse:Agent is the unforgeable signal.
-    touch "/tmp/style-guide-plan-reviewed-${SESSION_ID}"
     ;;
 esac
 

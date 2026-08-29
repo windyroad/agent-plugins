@@ -31,7 +31,7 @@ Output shape when the guide is absent:
 > **Voice & Tone Review: PASS**
 > voice-tone gate inactive — no `docs/VOICE-AND-TONE.md` present. Run `/wr-voice-tone:update-guide` to enable voice-tone reviews.
 
-Then `printf 'PASS' > /tmp/voice-tone-verdict` and stop.
+Then stop.
 
 ## What You Check
 
@@ -71,17 +71,15 @@ If the code introduces a UI context, audience, or copy pattern not covered by `d
 > The code introduces [context/audience/pattern] which is not covered by the current voice and tone guide.
 > Recommended addition to `docs/VOICE-AND-TONE.md`: [specific section/content to add]
 
-This is a FAIL verdict — the guide must be updated before the code can proceed. Write `printf 'FAIL' > /tmp/voice-tone-verdict` for guide gaps.
+This is a FAIL verdict — the guide must be updated before the code can proceed.
 
 ## Verdict
 
-After completing your review, write your verdict to `/tmp/voice-tone-verdict`:
-- `printf 'PASS' > /tmp/voice-tone-verdict` — copy is compliant and guide covers the context
-- `printf 'FAIL' > /tmp/voice-tone-verdict` — violations found or guide gap detected
+After completing your review, emit exactly one canonical verdict heading from the report shapes above. The PostToolUse hook parses the first canonical heading and writes any gate marker; you do not write marker files.
 
 ## Constraints
 
-- You are read-only. You do not edit files (except writing the verdict file).
+- You are read-only. You do not edit files.
 - You review copy in user-facing source files.
 - If the change is purely structural (no user-visible text changes), report PASS.
 - Do not block styling-only changes (CSS classes, layout, imports with no copy).

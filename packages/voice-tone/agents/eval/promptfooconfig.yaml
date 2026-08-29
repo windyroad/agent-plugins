@@ -1,0 +1,30 @@
+description: Voice-and-tone reviewer canonical verdict output
+
+providers:
+  - id: 'exec:bash ./run-agent-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: A copy-neutral change emits one PASS heading and no file-write instruction
+    vars:
+      prompt: |
+        Review this proposed change: reorder two imports in a TypeScript utility.
+        It changes no user-visible copy, labels, help text, or messages.
+        Return your normal review report.
+    assert:
+      - type: regex
+        value: '^(?:(?!\*\*Voice & Tone Review:)[\s\S])*\*\*Voice & Tone Review: PASS\*\*(?:(?!\*\*Voice & Tone Review:)[\s\S])*$'
+      - type: not-regex
+        value: '/tmp/voice-tone-verdict'
+      - type: llm-rubric
+        value: |
+          PASS only when the output contains exactly one canonical Voice & Tone
+          Review verdict heading, that heading is PASS, and the output does not
+          instruct any caller or reviewer to write a /tmp verdict file.

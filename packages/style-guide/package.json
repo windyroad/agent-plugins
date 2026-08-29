@@ -33,6 +33,7 @@
     ".claude-plugin/",
     ".codex-plugin/",
     "lib/",
+    "!agents/eval/",
     "!hooks/test/"
   ]
 }

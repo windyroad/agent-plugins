@@ -1,11 +1,11 @@
 # Problem 469: style-guide and voice-tone reviewer agents spawn without Bash, so they cannot write the verdict marker their own gate reads
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-07-26
 **Priority**: 6 (Medium) — Impact: 2 × Likelihood: 3 — derived at capture from the description per Step 4a
 **Origin**: internal
 **Effort**: S — derived at capture per Step 4a
-**WSJF**: 6 — (6 × 1.0) / 1 (added 2026-08-21 review)
+**WSJF**: 12 — (6 × 2.0) / 1 (Known Error multiplier applied 2026-08-30)
 **JTBD**: JTBD-101
 **Persona**: plugin-developer
 
@@ -42,11 +42,38 @@ Treat the agent's returned verdict text as the authority and check the gate's ac
 
 ### Investigation Tasks
 
-- [ ] Determine which mechanism is live for each gate: a PostToolUse mark-hook keyed on the agent's returned text, or a verdict file read from `/tmp`. Check `style-guide-enforce-edit.sh` and `voice-tone-enforce-edit.sh` plus their mark-hook siblings.
-- [ ] If the verdict file is load-bearing: grant the two agents the affordance to write it, and check whether a stale verdict from a prior review can authorise a later unreviewed write.
-- [ ] If the verdict file is inert: strike the instruction from `packages/style-guide/agents/*.md` and `packages/voice-tone/agents/*.md` so the reviewers stop asking callers to forge verdicts.
-- [ ] Audit the sibling reviewers (architect, jtbd, risk-scorer, tdd) for the same contract-versus-tool-surface mismatch.
-- [ ] Behavioural coverage per ADR-052 for whichever mechanism is retained.
+- [x] Determine which mechanism is live for each gate: a PostToolUse mark-hook keyed on the agent's returned text, or a verdict file read from `/tmp`. Check `style-guide-enforce-edit.sh` and `voice-tone-enforce-edit.sh` plus their mark-hook siblings.
+- [x] If the verdict file is load-bearing: grant the two agents the affordance to write it, and check whether a stale verdict from a prior review can authorise a later unreviewed write.
+- [x] If the verdict file is inert: strike the instruction from `packages/style-guide/agents/*.md` and `packages/voice-tone/agents/*.md` so the reviewers stop asking callers to forge verdicts.
+- [x] Audit the sibling reviewers (architect, jtbd, risk-scorer, tdd) for the same contract-versus-tool-surface mismatch.
+- [x] Behavioural coverage per ADR-052 for whichever mechanism is retained.
+
+### Root cause confirmed 2026-08-30
+
+The verdict file is load-bearing in both broken PostToolUse hooks, but the read-only agent cannot create it. The exact live path is:
+
+1. `packages/*/hooks/hooks.json` registers the reviewer completion hook for `PostToolUse:Agent` and the corresponding enforcement hook for `PreToolUse:Edit|Write`.
+2. The Codex surface generator's `codex-adapter.sh` projection maps `spawn_agent` to the legacy `Agent` payload and carries the returned output through `tool_response`.
+3. `style-guide-mark-reviewed.sh` and `voice-tone-mark-reviewed.sh` ignored that returned output and read the global `/tmp/style-guide-verdict` or `/tmp/voice-tone-verdict` file instead.
+4. When the file was absent, each hook's backward-compatibility branch created the session review marker and policy hash anyway. Each hook also created its plan marker for every completion, including FAIL.
+5. `style-guide-enforce-edit.sh` and `voice-tone-enforce-edit.sh` then accepted those fresh markers. A real FAIL from the reviewer therefore could not reach enforcement.
+
+The shared root cause is not missing Bash. It is split verdict authority: the agent response carries the independent verdict, while the hook authorises from an unavailable global back-channel and fails open when that channel is empty.
+
+Sibling audit established the safe existing pattern. Architect and risk-scorer hooks parse structured agent output and write markers themselves. JTBD legitimately retains Bash for its ratification predicate and verdict-file contract. TDD review is advisory and writes no gate marker. The pipeline scorer's inability to inspect caller-supplied staged state is a separate read-side input contract and is not part of this marker fix.
+
+## Fix Strategy
+
+RFC-079 / STORY-073 keeps both reviewers read-only and moves marker authority into their existing PostToolUse hooks. Each hook parses the first canonical verdict heading from `_get_tool_output`; only PASS creates the review marker, policy hash, and plan marker. Failure headings, unknown or missing output, and stale legacy verdict files create nothing. The agent prompts no longer instruct callers or reviewers to write verdict files.
+
+## Verification Evidence
+
+- `packages/shared/test/reviewer-verdict-marker-enforcement.bats` failed against the previous hooks because a stale legacy PASS file unlocked canonical FAIL output.
+- The same behavioural check passes after the hook-owned output parser change for both style-guide and voice-tone.
+- `wr-tdd:review-test` classified the check as behavioural because it executes both real hooks and asserts their filesystem side effects.
+- Each real changed reviewer prompt passes its paired promptfoo Tier-A/Tier-B evaluation: exactly one canonical PASS heading and no verdict-file instruction.
+- Hooks extracted from both `npm pack` artifacts fail closed for stale-verdict FAIL, malformed, missing-output, and error payloads, and create all markers only for canonical PASS.
+- The I13 fix trace resolves through RFC-079 and STORY-073 on human-confirmed STORY-MAP-008.
 
 ### Evidence 2026-08-21 (P466 iter) — the scope is wider than this ticket's title
 
@@ -56,7 +83,7 @@ That is a materially different consequence from the style-guide / voice-tone cas
 
 `wr-style-guide:agent` also reproduced the original symptom in the same iteration: *"I could not write `/tmp/style-guide-verdict` — no Bash tool is available in this session, so please record `FAIL` on my behalf."* The caller declined to forge it, per the P348 hollow-marker rule.
 
-- [ ] Widen this ticket's scope (and title) to every read-only reviewer whose contract assumes Bash, not just the two verdict-writers. `wr-risk-scorer:pipeline` is the third, and its failure mode is read-side rather than write-side.
+- [x] Classify the wider evidence without widening this fix: `wr-risk-scorer:pipeline` is read-side and requires a separate input-contract treatment, while P469 repairs the shared marker-authority defect in style-guide and voice-tone.
 
 ## Dependencies
 
@@ -69,3 +96,9 @@ That is a materially different consequence from the style-guide / voice-tone cas
 (captured via /wr-itil:capture-problem.)
 
 Hang-off pre-filter matched on the marker-and-verdict signal set; the strongest candidate was `docs/problems/verifying/353-hash-marker-brittleness-class-external-comms-gate-highest-friction-surface-umbrella.md`, which is an umbrella for marker *hashing* brittleness rather than for a reviewer that cannot write its marker at all. Captured separately because the fix locus is the agent definitions' tool surface, not the marker-key derivation. Re-evaluate the clustering at the next `/wr-itil:review-problems` pass.
+
+## Stories
+
+| Story | Status | Release vehicle | Story map |
+|---|---|---|---|
+| STORY-073: A failed reviewer blocks the guarded edit | in-progress | RFC-079 | STORY-MAP-008 |
