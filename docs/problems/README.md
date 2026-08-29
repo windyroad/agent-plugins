@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-30 **P469 verification pending** - the fail-closed reviewer-verdict fix shipped in `@windyroad/style-guide@0.6.1` and `@windyroad/voice-tone@0.8.2`; awaiting user verification.
+> Last reviewed: 2026-08-30 **P477 closed on evidence** - the installed Codex risk-receipt bridge produced a checkout-bound marker that the governed `9712a054` commit accepted.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -265,7 +265,6 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P497 | An upstream pull-request diff is not scored against the upstream's conventions | 2026-08-13 (`@windyroad/itil@1.1.0`) | no — not observed |
 | P498 | WSJF uses the pre-transition status multiplier | 2026-08-17 (`@windyroad/itil@1.1.1`) | no — not observed |
 | P466 | The story-map HTML template ships sub-3:1 borders, no focus ring, and no viewport meta | 2026-08-21 (`@windyroad/itil@1.1.2`) | no — not observed |
-| P477 | Codex collaboration completion bypasses the risk-marker bridge | 2026-08-27 (`@windyroad/risk-scorer@0.18.17`; repair commit `e67183ad0d56d23d9e02a3721af8183264db5d4c`, merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451; npm published 2026-08-28T11:15:04Z) | no — not observed |
 | P500 | Foreign tracker issues close on local evidence alone | 2026-08-27 (`@windyroad/itil@2.1.0`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
 | P519 | The Verification Pending -> Closed transition is reserved for the maintainer, so evidence-based closure never fires and the verification queue grows without bound | 2026-08-27 (`@windyroad/itil@2.1.0`, `@windyroad/retrospective@0.27.5`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
 | P525 | An agent-invented carve-out leaves our own tracker issues open forever | 2026-08-27 (`@windyroad/itil@2.1.0`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
@@ -402,6 +401,7 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 
 | ID | Title | Closed via |
 |----|-------|-----------|
+| P477 | Codex collaboration completion bypasses the risk-marker bridge | Closed 2026-08-30 on direct installed-runtime evidence: a native `wr-risk-scorer:pipeline` collaboration completed, its checkout-bound marker was accepted by governed commit `9712a054`, and the same agent completed after `followup_task`. Recovery: `/wr-itil:transition-problem 477 known-error`. |
 | P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | Closed 2026-08-21 (run-retro Step 4a sub-step 9 prior-session evidence drain per P282). Fix released `@windyroad/architect@0.21.1` 2026-08-17, live in published 0.21.3. Evidence: `yes — observed: installed v0.21.3 hook permits a clean declared checkout and denies an unpaired one, both from the target index`; regression suite 24/24 green. Recovery: `/wr-itil:transition-problem 499 known-error`. |
 | P164 | Latent octal-eval bug in the next-ID formula across six ticket-creator skills | verified in the field 2026-07-15; drained by the 2026-08-20 retro |
 | P019 | Deprecate single-file JTBD fallback (ADR-008 Option 3) | Closed 2026-07-15 (review-problems Step 4 verification prompt — user confirmed). Fix `@windyroad/jtbd@0.6.0` (breaking, migration via update-guide); ~3 months in production, no regressions. Recovery: `/wr-itil:transition-problem 19 known-error`. |

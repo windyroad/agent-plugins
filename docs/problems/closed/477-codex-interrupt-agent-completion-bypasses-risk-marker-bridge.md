@@ -1,6 +1,6 @@
 # Problem 477: Codex collaboration completion bypasses the risk-marker bridge
 
-**Status**: Verification Pending
+**Status**: Closed (closed-on-evidence 2026-08-30 — an installed native `wr-risk-scorer:pipeline` collaboration completed, its checkout-bound marker was accepted by the governed commit of `9712a054`, and the same agent completed again after `followup_task`. Recovery: rerun /wr-itil:transition-problem 477 known-error to reopen)
 **Reported**: 2026-08-12
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5
 **Origin**: internal
