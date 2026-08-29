@@ -69,6 +69,7 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-018 | STORY-018: Capture the problem in seconds, mid-flow | done |
 | STORY-026 | STORY-026: Work the RFC's stories one at a time | done |
+| STORY-071 | STORY-071: Review the complete commit message once | done |
 | STORY-014 | STORY-014: Unattended, the agent works the plan and pauses for real decisions | draft |
 | STORY-036 | STORY-036: Write the create-gate marker under every candidate session id | draft |
 | STORY-038 | STORY-038: Fix-titled commits surface a lifecycle-drift advisory | draft |
@@ -79,7 +80,7 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-059 | STORY-059: See why the loop did not work what I expected | draft |
 | STORY-060 | STORY-060: Pick up a captured ticket and know what was observed | draft |
 | STORY-064 | STORY-064: A ticket that only names a decision as background stays open | draft |
+| STORY-072 | STORY-072: Record oversight evidence only for the confirming session | draft |
 | STORY-062 | STORY-062: Keep problem ranking correct after a status transition | in-progress |
 | STORY-069 | STORY-069: Drain one Codex ticket through an isolated Codex CLI | in-progress |
 | STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | in-progress |
-| STORY-071 | STORY-071: Review the complete commit message once | done |

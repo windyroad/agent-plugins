@@ -14,6 +14,7 @@
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-033 | STORY-033: Loud cold-path diagnostic for oversight-marker shims | draft |
+| STORY-072 | STORY-072: Record oversight evidence only for the confirming session | draft |
 
 ## Fix Released — COLD PATH ONLY; does NOT close this ticket
 
@@ -185,4 +186,3 @@ Fix committed 2026-07-03 via **RFC-038** / **STORY-033** — both `mark-oversigh
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-038 | proposed | Loud cold-path diagnostic for oversight-marker shims when no session-id is discoverable |
-
