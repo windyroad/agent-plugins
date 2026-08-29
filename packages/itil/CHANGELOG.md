@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 2.1.2
+
+### Patch Changes
+
+- 98d01c0: The Codex problem backlog drain now uses Codex's persisted Goal tools and stays active until it prints its canonical terminal evidence. Claude Code keeps its existing `/goal` and `claude -p` flow.
+
 ## 2.1.1
 
 ### Patch Changes
