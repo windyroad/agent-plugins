@@ -7,6 +7,7 @@
 #
 #   Shape 1 — file-no-longer-exists  (Phase 1, original)
 #   Shape 2 — ADR-shipped with `human-oversight: confirmed`  (Phase 2)
+#             CORROBORATING-ONLY — never a clean CLOSE on its own.
 #   Shape 3 — named-skill-or-feature-exists  (Phase 2)
 #   Shape 4 — self-marker-in-body (line-anchored)  (Phase 2)
 #   Shape 5 — driver-child-ticket-closed  (Phase 2)
@@ -318,6 +319,12 @@ if [ -n "$adr_refs" ]; then
   done <<< "$adr_refs"
 fi
 if [ -n "$shape2_confirmed" ]; then
+  # Corroborating-only. `human-oversight: confirmed` attests that a human
+  # ratified a DECISION (ADR-066), not that anything was built or released
+  # — treating it as delivery evidence is the marker-is-not-an-
+  # implementation-licence conflation ADR-066's 2026-05-27 amendment names.
+  # It is recorded so the cite survives (ADR-026 cumulative evidence), but
+  # the demotion below stops it closing a ticket by itself.
   record_shape "ADR-shipped-confirmed" "ADRs human-oversight-confirmed: ${shape2_confirmed}"
 fi
 
@@ -483,7 +490,27 @@ fi
 # caveat short-tag + one-line prose so the SKILL Step 4.6b template can
 # splice the **Caveat** field directly.
 
-if [ -n "$shapes" ]; then
+# Shape 2 demotion (P463 Option C, shape 2) — ratification is not
+# delivery. When shape 2 is the ONLY shape that fired, the verdict is
+# demoted from a clean CLOSE-CANDIDATE to CLOSE-CANDIDATE-WITH-CAVEAT so
+# the review-problems Step 4.6 AFK path queues it for the maintainer
+# instead of closing it silently. Measured against origin/main
+# 2026-08-30: 107/120 decision records carried the marker and 91/118
+# open/known-error tickets cited at least one, so the shape fired on ~77%
+# of the live backlog and discriminated almost nothing. P463 holds the
+# wider shape-2/shape-3 tightening pending a superseding decision; this
+# changes the verdict lane only, not the recorded mechanical check.
+#
+# Evaluated BEFORE the multi-phase block so this tag wins when both would
+# fire — the caveat field is a single structured tag per architect
+# condition C2, and "the evidence is the wrong kind" is the more
+# fundamental reason the verdict cannot be clean.
+if [ "$shapes" = "ADR-shipped-confirmed" ]; then
+  caveat_tag="ratification-is-not-delivery"
+  caveat_msg="only evidence is ADR ratification, which records a human approving a decision — not that a fix shipped; confirm the work actually landed before closing"
+fi
+
+if [ -n "$shapes" ] && [ -z "$caveat_tag" ]; then
   # Multi-phase umbrella detection: unticked checkboxes in the ticket
   # body + at least one shipped-evidence shape match. The shape match
   # itself is the "progress made" signal — unticked tasks indicate

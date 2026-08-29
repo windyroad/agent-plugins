@@ -337,7 +337,7 @@ EOF
 #                        docs/decisions/<NNN>-*.md exists AND frontmatter has
 #                        `human-oversight: confirmed`.
 
-@test "evaluate-relevance: Phase 2 shape 2 — ADR-shipped-confirmed → CLOSE-CANDIDATE exit 0" {
+@test "evaluate-relevance: Phase 2 shape 2 alone — ADR-shipped-confirmed → CLOSE-CANDIDATE-WITH-CAVEAT (ratification is not delivery)" {
   cat > docs/decisions/037-confirmed-adr.proposed.md <<EOF
 ---
 status: "proposed"
@@ -361,9 +361,91 @@ ADR-037 was the design decision; the implementation has landed and the
 ADR is human-oversight: confirmed. Concern no longer concerning.
 EOF
   run "$SCRIPT" docs/problems/open/120-adr-confirmed.md
+  # `human-oversight: confirmed` records that a human ratified a DECISION
+  # (ADR-066) — NOT that a fix shipped. Shape 2 on its own must never
+  # produce a clean CLOSE-CANDIDATE, because review-problems Step 4.6
+  # closes those silently under AFK. It is demoted to the caveat verdict,
+  # which that same step routes to the maintainer's confirm surface.
   [ "$status" -eq 0 ]
-  [[ "$output" == "CLOSE-CANDIDATE "*"shapes: "*"ADR-shipped-confirmed"* ]]
+  [[ "${lines[0]}" == "CLOSE-CANDIDATE-WITH-CAVEAT "* ]]
+  [[ "$output" == *"ratification-is-not-delivery"* ]]
+  # The cite survives — corroborating evidence is still recorded (ADR-026).
+  [[ "$output" == *"ADR-shipped-confirmed"* ]]
   [[ "$output" == *"ADR-037"* ]]
+}
+
+@test "evaluate-relevance: Phase 2 shape 2 — corroborated by another shape → clean CLOSE-CANDIDATE (demotion is shape-2-ALONE only)" {
+  cat > docs/decisions/042-corroborated.proposed.md <<EOF
+---
+status: "proposed"
+human-oversight: confirmed
+oversight-date: 2026-05-25
+---
+
+# ADR-042: Confirmed ADR with corroborating delivery evidence
+EOF
+  git add docs/decisions/042-corroborated.proposed.md
+
+  cat > docs/problems/open/122-adr-corroborated.md <<EOF
+# Problem 122: adr-corroborated
+
+**Status**: Open
+**Reported**: $OLD_DATE
+
+## Description
+
+ADR-042 was the design decision.
+
+## Fix Released
+
+Shipped and verified.
+EOF
+  run "$SCRIPT" docs/problems/open/122-adr-corroborated.md
+  # Shape 2 + shape 4. A real delivery signal corroborates the
+  # ratification, so the verdict stays a clean CLOSE-CANDIDATE.
+  [ "$status" -eq 0 ]
+  [[ "${lines[0]}" == "CLOSE-CANDIDATE "* ]]
+  [[ "${lines[0]}" != "CLOSE-CANDIDATE-WITH-CAVEAT "* ]]
+  [[ "$output" == *"ADR-shipped-confirmed"* ]]
+  [[ "$output" == *"self-marker-in-body"* ]]
+}
+
+@test "evaluate-relevance: caveat precedence — shape 2 alone + unticked boxes emits ratification-is-not-delivery, not multi-phase" {
+  cat > docs/decisions/043-precedence.proposed.md <<EOF
+---
+status: "proposed"
+human-oversight: confirmed
+oversight-date: 2026-05-25
+---
+
+# ADR-043: Confirmed
+EOF
+  git add docs/decisions/043-precedence.proposed.md
+
+  cat > docs/problems/open/123-precedence.md <<EOF
+# Problem 123: precedence
+
+**Status**: Open
+**Reported**: $OLD_DATE
+
+## Description
+
+ADR-043 captures the design.
+
+## Investigation Tasks
+
+- [x] Design captured
+- [ ] Implementation outstanding
+EOF
+  run "$SCRIPT" docs/problems/open/123-precedence.md
+  # Both caveat triggers match. The caveat field is a single structured
+  # tag (architect condition C2), and "the evidence is the wrong kind" is
+  # the more fundamental reason the verdict cannot be clean — so the
+  # ratification tag wins deterministically, not by statement order.
+  [ "$status" -eq 0 ]
+  [[ "${lines[0]}" == "CLOSE-CANDIDATE-WITH-CAVEAT "* ]]
+  [[ "$output" == *"ratification-is-not-delivery"* ]]
+  [[ "$output" != *"multi-phase-mixed-progress"* ]]
 }
 
 @test "evaluate-relevance: Phase 2 shape 2 — ADR exists but NOT confirmed → no shape 2 fire" {
