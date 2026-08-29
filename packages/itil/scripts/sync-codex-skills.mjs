@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, extname, join, resolve } from "node:path";
+import { dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -92,6 +92,17 @@ function sanitize(text) {
   }).replaceAll("the the ", "the ").replaceAll("The the ", "The ");
 }
 
+function sanitizeMarkdown(text) {
+  if (!text.startsWith("---\n")) return sanitize(text);
+  const end = text.indexOf("\n---\n", 4);
+  if (end === -1) return sanitize(text);
+  const frontmatter = text.slice(0, end + 5).replace(/^description:\s*(.+)$/m, (_, value) => {
+    const description = value.startsWith('"') ? JSON.parse(value) : value;
+    return `description: ${JSON.stringify(sanitize(description))}`;
+  });
+  return frontmatter + sanitize(text.slice(end + 5));
+}
+
 function sanitizeCode(text) {
   return text.replace(sourceId, (id) => {
     const parsed = key(id);
@@ -154,7 +165,7 @@ git commit -m "docs(problems): capture P<NNN> <title>"
 # Add docs/problems/README-history.md to the git add list when it changed.
 \`\`\``);
   result = result.replace(/(?<![\w/])(wr-itil-[a-z0-9-]+)/g, "<itil-plugin-root>/bin/$1");
-  result = runtimeTerms(sanitize(result));
+  result = runtimeTerms(sanitizeMarkdown(result));
   const runtimeNote = preamble;
   if (!result.startsWith("---\n")) return runtimeNote + result;
   const end = result.indexOf("\n---\n", 4);
@@ -206,7 +217,7 @@ if (process.argv.includes("--pack")) {
     mkdirSync(dirname(saved), { recursive: true });
     cpSync(file, saved);
     const text = readFileSync(file, "utf8");
-    writeFileSync(file, isCode(file) ? sanitizeCode(text) : sanitize(text), "utf8");
+    writeFileSync(file, isCode(file) ? sanitizeCode(text) : sanitizeMarkdown(text), "utf8");
   }
 }
 
@@ -216,9 +227,10 @@ for (const skill of skills) {
   const target = join(output, skill);
   cpSync(source, target, {
     recursive: true,
-    filter: (path) => !path.split("/").some((part) => ["test", "eval", "evals"].includes(part)),
+    filter: (path) => !relative(source, path).split(/[\\/]/).some((part) => ["test", "eval", "evals"].includes(part)),
   });
   const file = join(target, "SKILL.md");
+  if (!existsSync(file)) throw new Error(`Codex projection copy filter excluded ${skill}/SKILL.md`);
   const sourceText = readFileSync(file, "utf8");
   const runtimeSource = skill === "work-problems" ? "codex-work-problems.md" : undefined;
   const runtimeText = runtimeSource ? readFileSync(join(root, "scripts", runtimeSource), "utf8") : sourceText;

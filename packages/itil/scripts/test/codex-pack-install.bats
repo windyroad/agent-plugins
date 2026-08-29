@@ -13,6 +13,21 @@ teardown() {
   rm -rf "$TMP"
 }
 
+assert_skill_frontmatter() {
+  node --input-type=module - "$1" <<'NODE'
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import { parse } from "yaml";
+
+for (const skill of readdirSync(process.argv[2])) {
+  const text = readFileSync(join(process.argv[2], skill, "SKILL.md"), "utf8");
+  const end = text.indexOf("\n---\n", 4);
+  if (!text.startsWith("---\n") || end === -1) throw new Error(`${skill}: missing YAML frontmatter`);
+  parse(text.slice(4, end));
+}
+NODE
+}
+
 @test "default installer remains Claude-only" {
   run node "$PACKAGE/bin/install.mjs" --dry-run
   [ "$status" -eq 0 ]
@@ -37,6 +52,16 @@ teardown() {
   ! grep -Fq 'mark-rfc-capture-gate' "$PACKAGE/skills-codex/capture-rfc/SKILL.md"
   [ "$(find "$PACKAGE/skills-codex" -path '*/agents/openai.yaml' | wc -l | tr -d ' ')" -eq "$source_count" ]
   [ "$(jq '[.hooks[] | length] | add' "$PACKAGE/hooks-codex/hooks.json")" -eq 5 ]
+
+  assert_skill_frontmatter "$PACKAGE/skills-codex"
+
+  checkout="$TMP/test/checkout"
+  mkdir -p "$checkout/packages"
+  cp -R "$PACKAGE" "$checkout/packages/itil"
+  cp -R "$REPO_ROOT/docs" "$checkout/docs"
+  run node "$checkout/packages/itil/scripts/sync-codex-skills.mjs" --build
+  [ "$status" -eq 0 ]
+  [ -f "$checkout/packages/itil/skills-codex/work-problem/SKILL.md" ]
 }
 
 @test "generated Codex work-problems uses the persisted Goal tool surface" {
@@ -184,6 +209,8 @@ NODE
   [ -f "$TMP/package/skills-codex/capture-problem/SKILL.md" ]
   [ -f "$TMP/package/skills-codex/manage-problem/SKILL.md" ]
   [ -f "$TMP/package/skills-codex/work-problems/SKILL.md" ]
+  assert_skill_frontmatter "$TMP/package/skills"
+  assert_skill_frontmatter "$TMP/package/skills-codex"
   grep -Fq 'add-band' "$TMP/package/skills/capture-rfc/SKILL.md"
   grep -Fq 'add-band' "$TMP/package/skills-codex/capture-rfc/SKILL.md"
   ! grep -Fq 'docs/rfcs/RFC-' "$TMP/package/skills/capture-rfc/SKILL.md"

@@ -25,9 +25,9 @@ In order to use a generated Codex skill after upgrading without repairing it, as
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] A fresh Codex projection preserves valid YAML frontmatter in every generated skill.
-- [ ] A projection built from a checkout whose parent path contains a `test` component copies every skill file.
-- [ ] The packed ITIL artefact passes the same generated-output checks.
+- [x] A fresh Codex projection preserves valid YAML frontmatter in every generated skill.
+- [x] A projection built from a checkout whose parent path contains a `test` component copies every skill file.
+- [x] The packed ITIL artefact passes the same generated-output checks.
 
 ## Driving problem trace (required — I6 invariant)
 

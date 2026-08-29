@@ -41,9 +41,9 @@ The projection transform applies `sanitize()` to the complete markdown file. `sa
 
 - [x] Reproduce against a fresh `sync-codex-skills.mjs --build` output.
 - [x] Parse every generated ITIL `SKILL.md` frontmatter and identify the affected set.
-- [ ] Restrict title expansion to markdown bodies, or parse and safely serialize frontmatter before body sanitisation.
-- [ ] Add a behavioural check that builds the Codex projection and parses every generated skill frontmatter.
-- [ ] Confirm the packed artefact and a clean Codex installation load all 29 skills without metadata parse failures.
+- [x] Restrict title expansion to markdown bodies, or parse and safely serialize frontmatter before body sanitisation.
+- [x] Add a behavioural check that builds the Codex projection and parses every generated skill frontmatter.
+- [x] Confirm the packed artefact loads all 29 skills without metadata parse failures.
 
 ## Second defect in the same file — absolute-path copy filter
 
@@ -55,8 +55,8 @@ Reproduced directly on 2026-08-29: `--build` under a path containing a `test` co
 
 It has gone unnoticed because the maintainer checkout has no offending path component. Only the itil generator carries this filter; the architect and risk-scorer scripts do not.
 
-- [ ] Scope the exclusion filter to the path **relative to the skill directory** being copied, so a directory name anywhere above the package root cannot suppress the copy.
-- [ ] Name the filter in the failure when a skill's copy yields no `SKILL.md`, instead of surfacing a bare `ENOENT` on the output path.
+- [x] Scope the exclusion filter to the path **relative to the skill directory** being copied, so a directory name anywhere above the package root cannot suppress the copy.
+- [x] Name the filter in the failure when a skill's copy yields no `SKILL.md`, instead of surfacing a bare `ENOENT` on the output path.
 
 ## Fix Strategy
 
@@ -69,6 +69,8 @@ It has gone unnoticed because the maintainer checkout has no offending path comp
 **Observed flaw**: whole-file identifier expansion injects unsafe prose into YAML scalars.
 
 **Edit summary**: preserve or safely serialize frontmatter while applying public-title expansion to the markdown body, then parse every generated frontmatter document in `packages/itil/scripts/test/codex-pack-install.bats`.
+
+**Release vehicle**: `.changeset/calm-codex-projections.md`
 
 **Evidence**:
 
