@@ -2,9 +2,9 @@
 # Architecture - PostToolUse:Agent|Bash|Skill slide-marker hook (P111 + P213).
 # Slides the parent session's existing architect-reviewed marker forward on
 # subprocess return, treating subprocess wall-clock as continuous parent-
-# session work for TTL purposes. Only TOUCHES an existing marker — never
-# creates one (creation requires a real architect review parsed from the
-# agent's verdict text in architect-mark-reviewed.sh).
+# session work for TTL purposes. It only TOUCHES existing architecture-review
+# markers. P368 also lets an exact successful oversight-helper event create
+# its separate document-and-session evidence marker.
 #
 # This addresses P111 / ADR-009 "Subprocess-boundary refresh": Agent, Bash,
 # and Skill tool calls that wrap long-running subprocesses (other subagents,
@@ -23,6 +23,50 @@ source "$SCRIPT_DIR/lib/gate-helpers.sh"
 _parse_input
 
 SESSION_ID=$(_get_session_id)
+
+# P368: the successful standalone helper invocation and its PostToolUse event
+# are the only place where the confirming session id and artefact path coexist.
+OVERSIGHT_PATH=$(printf '%s' "$_HOOK_INPUT" | python3 -c '
+import json, shlex, sys
+try:
+    data = json.load(sys.stdin)
+    response = data.get("tool_response", {})
+    argv = shlex.split(data.get("tool_input", {}).get("command", ""))
+    if (data.get("tool_name") == "Bash"
+            and isinstance(response, dict)
+            and response.get("is_error") is not True
+            and len(argv) == 2
+            and argv[0] == "wr-architect-mark-oversight-confirmed"):
+        print(argv[1])
+except Exception:
+    pass
+' 2>/dev/null)
+
+if [ -n "$OVERSIGHT_PATH" ]; then
+  if [ -z "$SESSION_ID" ]; then
+    echo "wr-architect-mark-oversight-confirmed: missing session id; no oversight marker written" >&2
+  else
+    ABS_DIR="$(cd "$(dirname "$OVERSIGHT_PATH")" 2>/dev/null && pwd)" || ABS_DIR=""
+    ABS_PATH="${ABS_DIR:+$ABS_DIR/}$(basename "$OVERSIGHT_PATH")"
+    case "$ABS_PATH" in
+      */docs/decisions/*.md)
+        if command -v sha256sum >/dev/null 2>&1; then
+          PATH_HASH=$(printf '%s' "$ABS_PATH" | sha256sum | cut -d' ' -f1 | cut -c1-16)
+        elif command -v shasum >/dev/null 2>&1; then
+          PATH_HASH=$(printf '%s' "$ABS_PATH" | shasum -a 256 | cut -d' ' -f1 | cut -c1-16)
+        else
+          echo "wr-architect-mark-oversight-confirmed: no SHA-256 utility; no oversight marker written" >&2
+          PATH_HASH=""
+        fi
+        if [ -n "$PATH_HASH" ] && ! : > "${SESSION_MARKER_DIR:-/tmp}/oversight-confirmed-${PATH_HASH}-${SESSION_ID}"; then
+          echo "wr-architect-mark-oversight-confirmed: marker write failed" >&2
+        fi
+        ;;
+      *) echo "wr-architect-mark-oversight-confirmed: invalid ADR path; no oversight marker written" >&2 ;;
+    esac
+  fi
+fi
+
 [ -n "$SESSION_ID" ] || exit 0
 
 slide_marker_on_subprocess_return "/tmp/architect-reviewed-${SESSION_ID}"

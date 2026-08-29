@@ -16,6 +16,12 @@
 | STORY-033 | STORY-033: Loud cold-path diagnostic for oversight-marker shims | draft |
 | STORY-072 | STORY-072: Record oversight evidence only for the confirming session | draft |
 
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-038 | proposed | Loud cold-path diagnostic for oversight-marker shims when no session-id is discoverable |
+
 ## Fix Released — COLD PATH ONLY; does NOT close this ticket
 
 - **Released**: 2026-07-03 in `@windyroad/architect@0.18.4` (+ `@windyroad/jtbd`)
@@ -166,6 +172,24 @@ Fix committed 2026-07-03 via **RFC-038** / **STORY-033** — both `mark-oversigh
 
 **Release vehicle** (cold path only): changeset `p368-oversight-shim-cold-path-diagnostic`, released 2026-07-03 (patch bump @windyroad/architect + @windyroad/jtbd). Stays Known Error until the changeset releases; the work-problems post-release Known Error → Verifying enumerator moves it (P380 precedent — release cadence owned by the orchestrator, not this iter).
 
+## Warm-path fix implemented 2026-08-29 — release pending
+
+The root cause was candidate-session discovery in the helper: every recent `*-announced-*` session received a marker, while a live caller whose announce marker had aged out received none. The helper had no authoritative caller session id, so both the silent miss and the cross-session grant were consequences of the same guessing mechanism.
+
+The smallest shared fix moves marker creation to the existing `PostToolUse:Bash` slide-marker hook, where the exact successful standalone helper command, artefact path, and injected session id coexist. The architect and JTBD hooks now write one path-and-session marker only for that event. Invalid paths, missing session ids, unavailable hashing, and marker-write failures diagnose to stderr without weakening the oversight gate. The helper shims only validate their single path argument; they no longer enumerate or write for candidate sessions.
+
+All four callers were inspected and now state the standalone-command contract: `create-adr`, `review-decisions`, `update-guide`, and `confirm-jobs-and-personas`. ADR-110 already authorises event-bound evidence, so no unratified architecture choice was needed. Vehicle: **RFC-078** / **STORY-072**. Release vehicle: changeset `odd-apes-trade` for patch releases of `@windyroad/architect` and `@windyroad/jtbd`.
+
+Evidence:
+
+- Behavioural RED: 6 expected failures exposed unrelated-session spray, aged-caller invisibility, and missing-session silence across architect and JTBD.
+- Behavioural GREEN: the focused oversight suites pass 28/28 after the fix.
+- The wider related hook run passes 54/55; the sole failure is the existing unrelated architect SessionStart dispatch assertion.
+- Packed-package exercise passes for both packages and creates exactly one marker per representative session (`PACK_RUNTIME_OK architect=1 jtbd=1`).
+- Architecture, JTBD, voice, style, accessibility, agent-instruction, shim-wrapper, executable-mode, and plugin-manifest checks pass. The rendered story map remains keyboard reachable and semantically labelled.
+
+The ticket stays **Known Error** until the new changeset is released and the fix can enter verification. This iteration does not push or release.
+
 ## Dependencies
 
 - **Blocks**: in-session ADR confirmations via `/wr-architect:review-decisions` when announce-marker preconditions don't hold (e.g. the 2026-06-17 ADR-082 drain).
@@ -180,9 +204,3 @@ Fix committed 2026-07-03 via **RFC-038** / **STORY-033** — both `mark-oversigh
 - P348 — substance-confirm marker contract (ADR-066 amendment)
 - ADR-082 — the ADR whose drain witnessed this gap
 - ADR-066 — human-oversight marker mechanism
-
-## RFCs
-
-| RFC | Status | Title |
-|-----|--------|-------|
-| RFC-038 | proposed | Loud cold-path diagnostic for oversight-marker shims when no session-id is discoverable |

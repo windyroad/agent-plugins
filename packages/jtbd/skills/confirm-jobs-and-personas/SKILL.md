@@ -55,7 +55,7 @@ This is a genuine human-decision surface (the point of P288/ADR-068) — `AskUse
 
 ### Step 4: Apply the outcome
 
-- **Confirm / Amend**: write `human-oversight: confirmed` + `oversight-date: <today, YYYY-MM-DD>` into the file's frontmatter (insert after the `status:`/`date-created:` line if absent; never duplicate). For Amend, apply the directed change first. Edits go through the standard JTBD / architect edit gate per ADR-014.
+- **Confirm / Amend**: for Amend, apply the directed change first. Then run `wr-jtbd-mark-oversight-confirmed <job-or-persona-path>` as a standalone Bash command; do not combine it with another command, because its PostToolUse event binds the evidence to this exact session and file. Finally, write `human-oversight: confirmed` + `oversight-date: <today, YYYY-MM-DD>` into the file's frontmatter (insert after the `status:`/`date-created:` line if absent; never duplicate). Edits go through the standard JTBD / architect edit gate per ADR-014.
 - **Reject** (ADR-068 amendment per P316, mirroring ADR-066):
   1. Capture the supersede ticket via a follow-up `AskUserQuestion`: "Which problem ticket tracks the rework?" — options: existing `P<NNN>` IDs surfaced from `docs/problems/`, **Capture a new ticket** (delegate to `/wr-itil:capture-problem`), or **Defer (leave un-tracked for now)**.
   2. If a ticket ID is captured, write `human-oversight: rejected-pending-supersede` + `supersede-ticket: P<NNN>` into the file's frontmatter. The detector excludes artifacts carrying both, so the drain stops re-asking until either the rework lands (file renamed to `*.superseded.md`) or the rejection is revisited.

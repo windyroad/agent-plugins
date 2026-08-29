@@ -2,11 +2,10 @@
 # wr-architect — mark a decision/ADR's human-oversight: confirmed marker write
 # as user-substance-confirmed (P348 / ADR-110).
 #
-# Companion to the architect-oversight-marker-discipline.sh PreToolUse hook
-# (also P348). SKILLs invoke this script AFTER an AskUserQuestion lands the
-# user's substance-confirm answer for a specific ADR; the script writes the
-# evidence marker that the hook reads to permit the subsequent Edit/Write
-# that introduces `human-oversight: confirmed` into that ADR's frontmatter.
+# Companion to the architect-oversight-marker-discipline.sh PreToolUse hook.
+# SKILLs invoke this as a standalone Bash command AFTER an AskUserQuestion
+# lands the user's substance-confirm answer. The existing PostToolUse:Bash
+# hook binds that exact command event's path and session id into the marker.
 #
 # Why the marker is required:
 #   ADR-066 establishes that `human-oversight: confirmed` is a write-once-
@@ -19,106 +18,25 @@
 #   enforces the boundary structurally; this script is the evidence-write
 #   side that legitimate substance-confirm flows use.
 #
-# Marker convention:
-#   /tmp/oversight-confirmed-<sha256-of-path>-<session-id>
-#   Written under EVERY recent candidate session SID per ADR-050 Option C
-#   (concurrent orchestrator + subprocess sessions in the same project, the
-#   per-machine runtime-sid marker is last-writer-wins). The PreToolUse hook
-#   reads the SID from its stdin JSON; marking under every candidate
-#   guarantees a matching marker exists whichever SID the hook reads.
-#
 # Usage:
 #   wr-architect-mark-oversight-confirmed <artefact-path>
-#     <artefact-path> — the ADR file path the user just substance-confirmed.
-#                       The script computes sha256 of the absolute path.
+#     Must be the whole Bash command, with exactly one ADR path argument.
 #
 # Exit codes:
-#   0 — marker(s) written for at least one candidate SID, OR no candidate
-#       SID was discoverable (cold path: no announce markers yet). The latter
-#       writes no marker and prints a loud stderr diagnostic (P368) explaining
-#       the downstream hook deny, then exits 0 so SKILL flows do not crash
-#       before any hook has fired in the session.
-#   2 — bad argument (missing or empty artefact-path).
+#   0 — command validated; PostToolUse writes the exact-session marker.
+#   2 — bad argument count.
 #
 # @adr ADR-066 (human-oversight marker)
 # @adr ADR-049 (PATH shim grammar)
-# @adr ADR-050 (multi-SID candidate enumeration)
 # @adr ADR-013 (Rule 6 fail-safe-defer in non-interactive contexts)
 # @problem P348 (iter subprocesses set human-oversight: confirmed without user event)
+# @problem P368 (candidate enumeration grants unrelated sessions)
 
 set -uo pipefail
 
-ARTEFACT_PATH="${1:-}"
-
-if [ -z "$ARTEFACT_PATH" ]; then
-  echo "wr-architect-mark-oversight-confirmed: missing <artefact-path>" >&2
+if [ "$#" -ne 1 ] || [ -z "$1" ]; then
+  echo "wr-architect-mark-oversight-confirmed: expected exactly one <artefact-path>" >&2
   exit 2
 fi
-
-# Normalize to absolute path so the hash is stable regardless of CWD.
-# `cd $(dirname)` works whether the file exists or not (basename + abs dir).
-abs_dir="$(cd "$(dirname "$ARTEFACT_PATH")" 2>/dev/null && pwd)" || abs_dir=""
-if [ -n "$abs_dir" ]; then
-  ABS_PATH="$abs_dir/$(basename "$ARTEFACT_PATH")"
-else
-  ABS_PATH="$ARTEFACT_PATH"
-fi
-
-# Path hash — use shasum/sha256sum portably (macOS ships shasum; Linux usually
-# has both). First 16 hex chars are plenty for unique marker filenames.
-if command -v sha256sum >/dev/null 2>&1; then
-  PATH_HASH=$(printf '%s' "$ABS_PATH" | sha256sum | cut -d' ' -f1 | cut -c1-16)
-elif command -v shasum >/dev/null 2>&1; then
-  PATH_HASH=$(printf '%s' "$ABS_PATH" | shasum -a 256 | cut -d' ' -f1 | cut -c1-16)
-else
-  echo "wr-architect-mark-oversight-confirmed: no sha256 tool available" >&2
-  exit 2
-fi
-
-MARKER_DIR="${SESSION_MARKER_DIR:-/tmp}"
-WINDOW_MINS="${SESSION_CANDIDATE_WINDOW_MINS:-1440}"
-
-# Candidate SID enumeration — recent announce markers across all systems
-# within the mtime window. Mirrors get_candidate_session_ids in
-# packages/itil/hooks/lib/session-id.sh; inlined here so this script is
-# self-contained (no cross-plugin lib source — architect must not depend on
-# itil-internal helpers per ADR-002 plugin packaging).
-candidates=$(
-  {
-    # Env-var fast path. Not exported in agent contexts today, but if a
-    # future Claude Code release adds it, this branch picks it up for free.
-    if [ -n "${CLAUDE_SESSION_ID:-}" ]; then
-      echo "$CLAUDE_SESSION_ID"
-    fi
-    # Recent announce markers. `-L` follows the start-point symlink — on macOS
-    # MARKER_DIR defaults to /tmp, a symlink to /private/tmp, which `find` would
-    # otherwise refuse to descend (no-op on Linux where /tmp is a real dir). P380.
-    find -L "$MARKER_DIR" -maxdepth 1 -name '*-announced-*' -mmin "-${WINDOW_MINS}" 2>/dev/null \
-      | sed 's|.*/||; s/.*-announced-//'
-  } | awk 'NF && !seen[$0]++'
-)
-
-# No candidate SID — cold path. Emit a loud stderr diagnostic (P368) and still
-# exit 0. Exit 0 preserves the documented contract (do not crash SKILL flows
-# before any announce marker has fired this session); the diagnostic replaces the
-# prior SILENT no-op, which masqueraded as success and left the caller to hit the
-# oversight-marker-discipline hook's deny with no idea why — the confusing loop
-# P368 documents (the deny points back at this shim, which the caller already ran).
-if [ -z "$candidates" ]; then
-  {
-    echo "wr-architect-mark-oversight-confirmed: no candidate session id discoverable"
-    echo "  (CLAUDE_SESSION_ID empty and no *-announced-* markers in ${MARKER_DIR} within ${WINDOW_MINS}min)."
-    echo "  NO oversight marker was written for: ${ABS_PATH}"
-    echo "  The oversight-marker-discipline hook will DENY the 'human-oversight: confirmed' Edit"
-    echo "  until a session announce marker exists. Start a fresh session, or point SESSION_MARKER_DIR"
-    echo "  at a dir containing a *-announced-<sid> file, then re-run this shim."
-  } >&2
-  exit 0
-fi
-
-while IFS= read -r sid; do
-  [ -n "$sid" ] || continue
-  : > "$MARKER_DIR/oversight-confirmed-${PATH_HASH}-${sid}"
-done <<< "$candidates"
 
 exit 0

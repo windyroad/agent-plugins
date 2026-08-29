@@ -12,6 +12,7 @@
 setup() {
   REPO_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/../../../.." && pwd)"
   HOOK="$REPO_ROOT/packages/architect/hooks/architect-oversight-marker-discipline.sh"
+  POST_HOOK="$REPO_ROOT/packages/architect/hooks/architect-slide-marker.sh"
   MARK_SCRIPT="$REPO_ROOT/packages/architect/scripts/mark-oversight-confirmed.sh"
 
   DIR="$(mktemp -d)"
@@ -34,6 +35,7 @@ teardown() {
 # Helper: compute the marker path the hook expects for an ADR file.
 expected_marker() {
   local f="$1"
+  local sid="${2:-$SID}"
   local abs_dir abs path_hash
   abs_dir="$(cd "$(dirname "$f")" && pwd)"
   abs="$abs_dir/$(basename "$f")"
@@ -42,7 +44,7 @@ expected_marker() {
   else
     path_hash=$(printf '%s' "$abs" | shasum -a 256 | cut -d' ' -f1 | cut -c1-16)
   fi
-  printf '%s/oversight-confirmed-%s-%s\n' "$MARK_DIR" "$path_hash" "$SID"
+  printf '%s/oversight-confirmed-%s-%s\n' "$MARK_DIR" "$path_hash" "$sid"
 }
 
 mk_existing_adr() {
@@ -182,15 +184,20 @@ mk_existing_adr() {
 
 # ── End-to-end: mark-oversight-confirmed.sh + the hook ──────────────────
 
-@test "mark-oversight-confirmed.sh writes a marker that satisfies the hook" {
+@test "exact helper Bash event marks only the confirming session and satisfies the hook" {
   mk_existing_adr "250-e2e.proposed.md"
   adr="$DIR/docs/decisions/250-e2e.proposed.md"
-  # Seed an announce marker so candidate enumeration finds the SID.
+  other_sid="unrelated-session-$$"
   : > "$MARK_DIR/architect-announced-$SID"
+  : > "$MARK_DIR/architect-announced-$other_sid"
   bash "$MARK_SCRIPT" "$adr"
-  # The mark script writes under every candidate; the hook's expected marker
-  # filename for our SID must now exist.
+  post_json=$(jq -nc --arg p "$adr" --arg s "$SID" \
+    '{tool_name:"Bash",session_id:$s,tool_input:{command:("wr-architect-mark-oversight-confirmed " + $p)},tool_response:{is_error:false}}')
+  run bash -c "echo '$(echo "$post_json" | sed "s/'/'\\\\''/g")' | bash '$POST_HOOK'"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
   [ -f "$(expected_marker "$adr")" ]
+  [ ! -f "$(expected_marker "$adr" "$other_sid")" ]
   new_content=$'---\nstatus: "proposed"\ndate: 2026-06-02\nhuman-oversight: confirmed\noversight-date: 2026-06-02\n---\n\n# 250-e2e\n'
   json=$(jq -nc --arg p "$adr" --arg s "$SID" --arg c "$new_content" \
     '{tool_name:"Write",session_id:$s,tool_input:{file_path:$p,content:$c}}')
@@ -199,40 +206,42 @@ mk_existing_adr() {
   [[ "$output" != *"BLOCKED"* ]]
 }
 
-# P380: on macOS SESSION_MARKER_DIR defaults to /tmp, a symlink to /private/tmp.
-# `find <symlink> -maxdepth 1` in default (-P) mode refuses to descend the
-# start-point symlink, so candidate enumeration returns empty and the script
-# writes ZERO markers (silent cold-path exit 0). The `-L` flag follows it. This
-# test points SESSION_MARKER_DIR at a SYMLINK to the marker dir (reproducing the
-# macOS /tmp shape on any platform); RED without `-L`, GREEN with it.
-@test "mark-oversight-confirmed.sh enumerates candidates when SESSION_MARKER_DIR is a symlink (P380)" {
-  mk_existing_adr "251-symlink.proposed.md"
-  adr="$DIR/docs/decisions/251-symlink.proposed.md"
-  : > "$MARK_DIR/architect-announced-$SID"
-  link_dir="${MARK_DIR}.link"
-  ln -s "$MARK_DIR" "$link_dir"
-  SESSION_MARKER_DIR="$link_dir" bash "$MARK_SCRIPT" "$adr"
-  rm -f "$link_dir"
-  # Marker written under the discovered SID despite the symlinked marker dir.
+# P368: the exact PostToolUse event carries the session id even when announce
+# markers have aged out or were never created.
+@test "exact helper Bash event works without announce markers" {
+  mk_existing_adr "251-aged-session.proposed.md"
+  adr="$DIR/docs/decisions/251-aged-session.proposed.md"
+  bash "$MARK_SCRIPT" "$adr"
+  post_json=$(jq -nc --arg p "$adr" --arg s "$SID" \
+    '{tool_name:"Bash",session_id:$s,tool_input:{command:("wr-architect-mark-oversight-confirmed " + $p)},tool_response:{is_error:false}}')
+  run bash -c "echo '$(echo "$post_json" | sed "s/'/'\\\\''/g")' | bash '$POST_HOOK'"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
   [ -f "$(expected_marker "$adr")" ]
 }
 
-# P368: genuine cold path — no CLAUDE_SESSION_ID and no announce markers at all.
-# The shim correctly writes zero markers (nothing to key on) but must NOT do so
-# SILENTLY: a loud stderr diagnostic explains why the subsequent discipline-hook
-# deny happens, breaking the confusing "you didn't run the shim" loop the shim's
-# prior silent exit 0 produced. Exit stays 0 (documented contract: do not crash
-# SKILL flows before any hook has fired this session).
-@test "mark-oversight-confirmed.sh emits a loud stderr diagnostic on the no-candidate cold path (P368)" {
-  mk_existing_adr "252-coldpath.proposed.md"
-  adr="$DIR/docs/decisions/252-coldpath.proposed.md"
-  # MARK_DIR is empty (no *-announced-* markers); unset the env SID fast-path too.
-  run env -u CLAUDE_SESSION_ID bash "$MARK_SCRIPT" "$adr"
-  [ "$status" -eq 0 ]                              # contract: cold path still exits 0
-  [ ! -f "$(expected_marker "$adr")" ]             # no marker written
-  [[ "$output" == *"no candidate session id"* ]]   # loud, not silent
-  [[ "$output" == *"Start a fresh session"* ]]
-  [[ "$output" == *"re-run this shim"* ]]
+# P368: only a successful standalone helper event may create evidence.
+@test "failed or non-exact Bash events write no oversight marker" {
+  mk_existing_adr "252-rejected-event.proposed.md"
+  adr="$DIR/docs/decisions/252-rejected-event.proposed.md"
+  failed_json=$(jq -nc --arg p "$adr" --arg s "$SID" \
+    '{tool_name:"Bash",session_id:$s,tool_input:{command:("wr-architect-mark-oversight-confirmed " + $p)},tool_response:{is_error:true}}')
+  echo "$failed_json" | bash "$POST_HOOK"
+  extra_json=$(jq -nc --arg p "$adr" --arg s "$SID" \
+    '{tool_name:"Bash",session_id:$s,tool_input:{command:("wr-architect-mark-oversight-confirmed " + $p + " && echo extra")},tool_response:{is_error:false}}')
+  echo "$extra_json" | bash "$POST_HOOK"
+  [ ! -f "$(expected_marker "$adr")" ]
+}
+
+@test "exact helper Bash event without a session id writes no marker and diagnoses the failure" {
+  mk_existing_adr "253-no-session.proposed.md"
+  adr="$DIR/docs/decisions/253-no-session.proposed.md"
+  post_json=$(jq -nc --arg p "$adr" \
+    '{tool_name:"Bash",session_id:"",tool_input:{command:("wr-architect-mark-oversight-confirmed " + $p)},tool_response:{is_error:false}}')
+  run bash -c "echo '$(echo "$post_json" | sed "s/'/'\\\\''/g")' | bash '$POST_HOOK'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"missing session id"* ]]
+  [ -z "$(find "$MARK_DIR" -name 'oversight-confirmed-*' -print -quit)" ]
 }
 
 # ── Non-Edit/Write tool calls always exit 0 silently ────────────────────

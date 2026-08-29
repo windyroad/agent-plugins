@@ -305,12 +305,14 @@ Only after every draft edit is complete, call the marker-evidence helper and ins
 wr-architect-mark-oversight-confirmed docs/decisions/<NNN>-<slug>.proposed.md
 ```
 
+Run that helper as the complete standalone Bash command. Do not combine it with another command: the PostToolUse hook binds this exact successful command event's session id and ADR path into the evidence marker.
+
 ```yaml
 human-oversight: confirmed
 oversight-date: YYYY-MM-DD   # today
 ```
 
-The helper writes the session-scoped evidence marker consumed by `architect-oversight-marker-discipline.sh`. Calling it without a real substance-confirm event is forbidden. Once these lines land, do not edit the ADR body or clear the marker; a later choice requires a new superseding ADR.
+The PostToolUse hook writes the session-scoped evidence marker consumed by `architect-oversight-marker-discipline.sh`. Calling the helper without a real substance-confirm event is forbidden. Once these lines land, do not edit the ADR body or clear the marker; a later choice requires a new superseding ADR.
 
 **Refresh the decisions compendium (ADR-077).** After the ADR file is written and any born-confirmed marker is applied, regenerate `docs/decisions/README.md` so the architect-agent routine load surface includes the new entry. Run:
 
