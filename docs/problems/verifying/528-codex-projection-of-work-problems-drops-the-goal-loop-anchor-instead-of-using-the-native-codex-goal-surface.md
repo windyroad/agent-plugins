@@ -1,6 +1,6 @@
 # Problem 528: Codex projection of work-problems drops the Goal loop-anchor instead of using the native Codex Goal surface
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-08-29
 **Priority**: 15 (High) — Impact: 3 × Likelihood: 5 — derived at capture. Impact 3: Step 0e's external-evaluator anchor is the reopened-P390 defense against the orchestrator declaring `ALL_DONE` while dispatchable tickets remain. In Codex that defense is absent, so the loop degrades to the same-actor self-assessment P390 was reopened to fix — an AFK drain can stop early and leave the backlog unworked. This is loop-discipline loss on the AFK surface, not corruption: no ticket, decision, or repository state is damaged, and Gate (0) still fires as the first-line self-check. Impact is not higher because the degradation is honest-by-design in the source contract (`below the floor the loop degrades honestly to Gate (0)-only behaviour`) — the defect is that Codex is treated as below the floor when it is not. Likelihood 5: it is a property of the projection output and the Codex runtime overlay, not of any particular session, so every Codex run of the drain loses the anchor.
 **Origin**: internal
@@ -68,7 +68,7 @@ The honest-degradation clause in Step 0e (*"below the floor the loop degrades ho
 - [x] Make the Codex arm inspect the Goal at the continue/stop decision and complete it only on printed-Gate-(0)-zero-dispatchable + `ALL_DONE` or another canonical ADR-094 terminal condition.
 - [x] Replace the passive Goal line in `packages/itil/scripts/codex-work-problems.md` with the active create/inspect/complete contract.
 - [x] Establish whether the sanitizer rewrites the Claude-Code-specific `/goal` prose in this skill - it does not; the overlay replaces the whole body first (Finding 1). It does rewrite it in the singular sibling skill (Finding 2), which remains open below.
-- [ ] **Remaining (Finding 2)**: give the singular `/wr-itil:work-problem` skill a Codex-executable anchor instruction, or suppress the Claude-Code-only Goal paragraph from its projection. Needs its own mechanism - the singular skill has no runtime overlay.
+- [ ] **Separate, nonblocking follow-up (Finding 2; outside P528 / STORY-070 scope)**: give the singular `/wr-itil:work-problem` skill a Codex-executable anchor instruction, or suppress the Claude-Code-only Goal paragraph from its projection. It needs its own mechanism because the singular skill has no runtime overlay; this released slice covers only the plural `/wr-itil:work-problems` overlay.
 - [x] Add a generator-exercising contract check that the projected Codex skill does not instruct the agent to invoke `/goal` or cite a `code.claude.com` URL.
 - [x] Create a reproduction test - a generator-exercising check in `packages/itil/scripts/test/codex-pack-install.bats` that builds the projection and asserts the drain's Goal contract is active rather than passive.
 - [x] Exercise the Codex overlay through the existing Promptfoo harness for Goal creation, continued dispatch, and all three ADR-094 terminal conditions.
@@ -78,6 +78,18 @@ The honest-degradation clause in Step 0e (*"below the floor the loop degrades ho
 RFC-076 — *Keep the Codex backlog drain running until no dispatchable work remains* — is a release row on confirmed STORY-MAP-011 under activity D, *Close it out*. It carries in-progress STORY-070, *Leave the Codex backlog draining until no dispatchable work remains*.
 
 The row limits the implementation to the Codex projection overlay: create or reuse the persisted Goal with ADR-094's canonical completion condition, read it at continuation decisions, and clear it only at a ratified terminal condition. The Claude Code skill, including `claude -p` and its `/goal` branch, remains unchanged.
+
+**Release vehicle**: `.changeset/steady-goals-anchor.md`
+
+## Fix Released
+
+Released in `@windyroad/itil@2.1.2` (merge commit `fa8a43f77fd07e57015df8155a81f4bbb5ba6a14`, PR #456, released 2026-08-29).
+
+The Codex `/wr-itil:work-problems` overlay now creates or reuses the persisted Goal, inspects it at continuation decisions, and completes it only at a canonical terminal condition. The singular `/wr-itil:work-problem` projection defect remains separate, nonblocking follow-up work.
+
+Awaiting user verification.
+
+Release evidence: `.changeset/steady-goals-anchor.md` was consumed by version-packages commit `87fa432d9b1c91008a9e8322d22449dcb89363c2`; the released 2.1.2 changelog cites fix commit `98d01c0a`.
 
 ## Dependencies
 
