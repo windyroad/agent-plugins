@@ -1,6 +1,6 @@
 # Problem 477: Codex collaboration completion bypasses the risk-marker bridge
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-08-12
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5
 **Origin**: internal
@@ -72,6 +72,33 @@ cleanup candidates.
 - Release and supported-install the patch before the downstream consumer retries its normal gate.
 
 No new hook or ADR is required: this restores the intended completed-agent compatibility path using the already-enabled `SubagentStop`, `PreToolUse:Bash`, and `UserPromptSubmit` events without changing the scoring or delivery contract.
+
+## Fix Strategy
+
+The complete recurrence repair is the bounded risk-scorer patch in commit
+`e67183ad0d56d23d9e02a3721af8183264db5d4c`. It preserves checkout binding
+while repairing the caller and cleanup edges exposed by the 2026-08-27 replay.
+
+**Release vehicle**: `.changeset/calm-risk-receipts.md`
+
+## Fix Released
+
+Released in `@windyroad/risk-scorer@0.18.17` from complete repair commit
+`e67183ad0d56d23d9e02a3721af8183264db5d4c` via
+`.changeset/calm-risk-receipts.md` (version-packages commit
+`cb749f1f53650ae933106aaefd5f93b8ea47e1c4`, PR #451, merge commit
+`cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, release date 2026-08-27;
+npm published 2026-08-28T11:15:04Z).
+
+The complete repair requires explicit checkout-bound governed commands,
+preserves valid scores across hidden-workdir mismatches, prevents recursive
+pipeline scoring, and reaps only expired receipt-shaped files. The focused
+behavioural suites passed 94 of 94 on 2026-08-29. Versions 0.18.10 through
+0.18.16 and the release vehicles listed under Prior Fix Released were partial
+and are not the recurrence fix cited here.
+
+Awaiting post-release verification through a supported installed Codex
+collaboration and governed-command journey.
 
 ## Prior Fix Released
 

@@ -1398,3 +1398,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-29 **P525 verification pending** — owned-tracker evidence closure shipped in `@windyroad/itil@2.1.0`; npm publication, the tagged artefact, and 41/41 contract checks verify the release.
 
 > Last reviewed: 2026-08-29 **P528 verification pending** — the plural Codex backlog drain Goal anchor shipped in `@windyroad/itil@2.1.2`; the singular `work-problem` defect remains separate follow-up work.
+
+> Last reviewed: 2026-08-29 **P529 verification pending** — isolated Codex backlog iterations shipped in `@windyroad/itil@2.1.1`; awaiting user verification.

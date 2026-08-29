@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-29 **P529 verification pending** — isolated Codex backlog iterations shipped in `@windyroad/itil@2.1.1`; awaiting user verification.
+> Last reviewed: 2026-08-29 **P477 verification pending** — the complete Codex receipt-handoff recurrence repair shipped in `@windyroad/risk-scorer@0.18.17` from commit `e67183ad`; awaiting a supported installed Codex journey.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -12,7 +12,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 |------|-----|-------|----------|--------|--------|----------|--------|
 | | | **Tier 0 — Critical-bypass** (Severity Very High ≥17, security-classified, or incident-linked) | | | | | |
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
-| 20 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Known Error | S | 2026-08-12 | internal |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
 | 20 | P526 | Codex projection sanitizer corrupts YAML frontmatter while expanding internal IDs | 20 (Very High) | Open | S | 2026-08-29 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
@@ -269,6 +268,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P497 | An upstream pull-request diff is not scored against the upstream's conventions | 2026-08-13 (`@windyroad/itil@1.1.0`) | no — not observed |
 | P498 | WSJF uses the pre-transition status multiplier | 2026-08-17 (`@windyroad/itil@1.1.1`) | no — not observed |
 | P466 | The story-map HTML template ships sub-3:1 borders, no focus ring, and no viewport meta | 2026-08-21 (`@windyroad/itil@1.1.2`) | no — not observed |
+| P477 | Codex collaboration completion bypasses the risk-marker bridge | 2026-08-27 (`@windyroad/risk-scorer@0.18.17`; repair commit `e67183ad0d56d23d9e02a3721af8183264db5d4c`, merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451; npm published 2026-08-28T11:15:04Z) | no — not observed |
 | P500 | Foreign tracker issues close on local evidence alone | 2026-08-27 (`@windyroad/itil@2.1.0`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
 | P519 | The Verification Pending -> Closed transition is reserved for the maintainer, so evidence-based closure never fires and the verification queue grows without bound | 2026-08-27 (`@windyroad/itil@2.1.0`, `@windyroad/retrospective@0.27.5`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
 | P525 | An agent-invented carve-out leaves our own tracker issues open forever | 2026-08-27 (`@windyroad/itil@2.1.0`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
