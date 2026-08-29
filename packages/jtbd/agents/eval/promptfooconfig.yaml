@@ -12,7 +12,7 @@
 # directly. A second LLM judge adds no semantic signal here and made identical
 # correct outputs alternate PASS/FAIL in CI run 31537137532.
 #
-# JTBD-006 currently carries `human-oversight: unconfirmed`, so the first
+# JTBD-011 currently carries `human-oversight: unconfirmed`, so the first
 # fixture pins the positive [Unratified Dependency] branch. The second pins
 # the inverse-P078/P132 over-fire guard for an ambient change with no explicit
 # dependency. See P324 + RFC-012.
@@ -22,7 +22,7 @@
 #
 # @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
 # @jtbd JTBD-002 (Ship AI-Assisted Code with Confidence)
-# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @jtbd JTBD-011 (Have a Correction to the Agent's Conduct Hold Everywhere)
 # @problem P324
 # @rfc RFC-012 S1
 # @adr ADR-075 (per-package agent eval; Tier-A/Tier-B)
@@ -47,16 +47,16 @@ prompts:
   - '{{prompt}}'
 
 tests:
-  - description: ISSUES FOUND on a proposal explicitly citing unratified JTBD-006
+  - description: ISSUES FOUND on a proposal explicitly citing unratified JTBD-011
     vars:
       prompt: |
         PRE-EDIT alignment gate. Review this PROPOSED change against the
         documented jobs and personas in docs/jtbd/.
 
-        Proposed change: edit `packages/itil/skills/work-problems/SKILL.md`
-        to improve the AFK orchestrator loop that drains the problem backlog
-        by WSJF priority while the user is away. The change adds an
-        `@jtbd JTBD-006` annotation marking the file as serving that job.
+        Proposed change: edit `docs/agent-instructions/shared-governance.md`
+        so a correction to agent conduct is captured once and holds across
+        both runtime surfaces. The change adds an `@jtbd JTBD-011` annotation
+        marking the file as serving that job.
         Nothing else in the jtbd corpus changes.
 
         Classify the alignment of this proposal and give your verdict inline,
