@@ -1,6 +1,6 @@
 {
   "name": "@windyroad/risk-scorer",
-  "version": "0.18.18",
+  "version": "0.18.19",
   "description": "Pipeline risk scoring, commit/push gates, and secret leak detection",
   "scripts": {
     "prepack": "node scripts/sync-codex-skills.mjs --pack",

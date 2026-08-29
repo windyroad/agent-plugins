@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.19
+
+### Patch Changes
+
+- ff974cc: Fix the external-communications commit-message gate so it reviews repeated `-m` and `--message` values as the complete Git message and accepts reviewed multi-paragraph commits.
+
 ## 0.18.18
 
 ### Patch Changes
