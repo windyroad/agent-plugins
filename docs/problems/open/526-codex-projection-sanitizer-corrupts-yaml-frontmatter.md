@@ -80,7 +80,7 @@ It has gone unnoticed because the maintainer checkout has no offending path comp
 
 - **Blocks**: reliable Codex discovery and invocation of nine ITIL skills.
 - **Blocked by**: (none)
-- **Composes with**: JTBD-303 (plugin-generated content must remain valid in adopter environments).
+- **Composes with**: JTBD-101 (plugin structure and packaging checks keep generated runtime surfaces installable).
 
 ## Related
 
@@ -89,3 +89,10 @@ It has gone unnoticed because the maintainer checkout has no offending path comp
 - **P148** — this finding was initially reported by the retrospective without the mandatory automatic ticket capture; recovered after user correction.
 - Hang-off check considered P375 and returned `PROCEED_NEW`: the shared ADR-083 citation was surface-text overlap, while P375 concerns unreachable deferred work.
 - Captured automatically from the 2026-08-29 retrospective correction via `/wr-itil:capture-problem`.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-074 | STORY-074: Use generated Codex skills after upgrading without repairs | draft |

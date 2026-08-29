@@ -72,4 +72,5 @@ Copy an existing plugin and modify it, read ADRs and BRIEFING.md
 | STORY-056 | STORY-056: Clear a block with a command my repository actually has | draft |
 | STORY-057 | STORY-057: Get the fix by upgrading, not by patching a cache | draft |
 | STORY-058 | STORY-058: Read a README that describes the version I installed | draft |
+| STORY-074 | STORY-074: Use generated Codex skills after upgrading without repairs | draft |
 | STORY-073 | STORY-073: A failed reviewer blocks the guarded edit | in-progress |

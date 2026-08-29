@@ -139,6 +139,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | in-progress | STORY-070 | Leave the Codex backlog draining until no dispatchable work remains | S | P528 | RFC-076 | STORY-MAP-011 |
 | accepted | STORY-072 | Record oversight evidence only for the confirming session | M | P368 | RFC-078 | STORY-MAP-002 |
 | in-progress | STORY-073 | A failed reviewer blocks the guarded edit | S | P469 | RFC-079 | STORY-MAP-008 |
+| draft | STORY-074 | Use generated Codex skills after upgrading without repairs | S | P526 | RFC-080 | STORY-MAP-008 |
 | draft | STORY-064 | A ticket that only names a decision as background stays open | M | P463 | RFC-070 | STORY-MAP-011 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |
