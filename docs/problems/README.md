@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-29 **P528 moved to Known Error** — the Codex `work-problems` overlay omits ADR-094's active Goal contract; RFC-076 and STORY-070 carry the overlay-only correction.
+> Last reviewed: 2026-08-29 **P500 verification pending** — the tracker-authority fix shipped in `@windyroad/itil@2.1.0`; foreign issues remain open without target-bound upstream-party confirmation.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -70,7 +70,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 9 | P502 | The marker shim's 24h candidate-SID window excludes long sessions, so it silently writes no marker | 9 (Medium) | Open | S | 2026-08-20 | internal |
 | 8 | P419 | capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the JTBD edit gate mid-session | 8 (Medium) | Known Error | M | 2026-07-05 | internal |
 | 8 | P459 | Agent-Prose Behavioural Eval Flaky — Red-Lines CI on Unrelated Commits | 8 (Medium) | Known Error | M | 2026-07-24 | internal |
-| 8 | P500 | Foreign tracker issues close on local evidence alone | 16 (High) | Known Error | L | 2026-08-17 | internal |
 | 8 | P508 | The fix proposal still instantiates a standalone RFC document, after ADR-103 made it a release row | 16 (High) | Known Error | L | 2026-08-20 | internal |
 | 8 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a "run interactive run-retro" recommendation instead of performing the split | 8 (Medium) | Open | S | 2026-07-03 | internal |
 | 8 | P472 | reconcile-stories reports permanent false MISSING_REVERSE_TRACE drift against ADR-090's ratified-stories-only rule | 8 (Medium) | Open | S | 2026-07-26 | internal |
@@ -274,6 +273,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P497 | An upstream pull-request diff is not scored against the upstream's conventions | 2026-08-13 (`@windyroad/itil@1.1.0`) | no — not observed |
 | P498 | WSJF uses the pre-transition status multiplier | 2026-08-17 (`@windyroad/itil@1.1.1`) | no — not observed |
 | P466 | The story-map HTML template ships sub-3:1 borders, no focus ring, and no viewport meta | 2026-08-21 (`@windyroad/itil@1.1.2`) | no — not observed |
+| P500 | Foreign tracker issues close on local evidence alone | 2026-08-27 (`@windyroad/itil@2.1.0`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no — not observed |
 | P037 | jtbd-reviewer returns bare verdict without reason | commit 6e7c2e4 | no — not observed |
 | P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) | no — not observed |

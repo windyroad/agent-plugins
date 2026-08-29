@@ -1,6 +1,6 @@
 # Problem 500: Foreign tracker issues close on local evidence alone
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-08-17
 **Priority**: 16 (High) - Impact: 4 x Likelihood: 4
 **Origin**: internal
@@ -33,6 +33,12 @@ Post the lifecycle comment but leave a foreign issue open when only local eviden
 
 The local evidence-based close and foreign issue close were coupled even though their authority boundaries differ. Local evidence can justify our lifecycle transition; only the upstream party's confirmation can supply the missing authority to close their issue.
 
+## Fix Strategy
+
+Keep local evidence-based lifecycle transitions separate from foreign tracker authority: comment on foreign issues, close only this project's own issues on evidence, and keep pull requests comment-only.
+
+**Release vehicle**: .changeset/close-inbound-issues-on-our-own-tracker.md
+
 ### Investigation Tasks
 
 - [x] Reproduce the foreign close from an evidence-based local verification transition.
@@ -45,6 +51,14 @@ The local evidence-based close and foreign issue close were coupled even though 
 - **Blocks**: a trustworthy reporter feedback loop.
 - **Blocked by**: (none)
 - **Composes with**: P450's separate verification-evidence persistence problem and ADR-044's framework-resolved local lifecycle actions.
+
+## Fix Released
+
+Released in `@windyroad/itil@2.1.0` (merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451, released 2026-08-27; version-packages commit `cb749f1f53650ae933106aaefd5f93b8ea47e1c4`).
+
+The released update separates local evidence-based closure from foreign tracker authority: foreign issues receive lifecycle comments but remain open without target-bound upstream-party confirmation, while pull requests remain comment-only.
+
+Awaiting user verification.
 
 ## Related
 

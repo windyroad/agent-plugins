@@ -1388,3 +1388,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-29 **P529 captured** — Codex-native backlog drains still dispatch isolated iterations through `claude -p`, so an unrelated Claude CLI weekly limit stops work while Codex quota is available (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-08-29 **P528 moved to Known Error** — investigation confirmed that the wholesale Codex `work-problems` overlay omits ADR-094's active Goal contract; RFC-076 and STORY-070 carry the overlay-only correction.
+
+> Last reviewed: 2026-08-29 **P528 moved to Known Error** — the Codex `work-problems` overlay omits ADR-094's active Goal contract; RFC-076 and STORY-070 carry the overlay-only correction.
