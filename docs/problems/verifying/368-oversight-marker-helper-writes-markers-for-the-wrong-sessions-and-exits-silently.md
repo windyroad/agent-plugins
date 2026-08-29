@@ -1,6 +1,6 @@
 # Problem 368: The oversight-marker helper writes markers for the wrong sessions and exits silently
 
-**Status**: Known Error (auto-transitioned 2026-08-24 review — the ticket declares "Root cause identified 2026-06-17" with the `find` invocation named as the mechanism, and documents three workarounds; only the fix is outstanding)
+**Status**: Verification Pending (released 2026-08-29 in `@windyroad/architect@0.21.6` and `@windyroad/jtbd@0.14.1`; awaiting user verification)
 **Reported**: 2026-06-17
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — **re-rated 2026-08-21 at the reopen**. The 2026-07-02 rating (9, Impact 3 × Likelihood 3, "one-line env fix") scoped only the cold path. Impact 3: the unguarded write loop hands every in-window session a standing pass to write `human-oversight: confirmed` on the artefact, which inverts the control ADR-110 exists to provide — a governance-integrity failure, not a friction one. Likelihood 4: no control on the warm path, adopter-observed 2026-08-12, and reproduced here at 3310 markers across 3099 session ids.
 **Origin**: inbound-reported (adopter-repo P212)
@@ -21,6 +21,12 @@
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-038 | proposed | Loud cold-path diagnostic for oversight-marker shims when no session-id is discoverable |
+
+## Fix Strategy
+
+Ship the exact-session warm-path repair carried by RFC-078 / STORY-072 in the architect and JTBD plugins.
+
+**Release vehicle**: .changeset/odd-apes-trade.md
 
 ## Fix Released — COLD PATH ONLY; does NOT close this ticket
 
@@ -172,7 +178,7 @@ Fix committed 2026-07-03 via **RFC-038** / **STORY-033** — both `mark-oversigh
 
 **Release vehicle** (cold path only): changeset `p368-oversight-shim-cold-path-diagnostic`, released 2026-07-03 (patch bump @windyroad/architect + @windyroad/jtbd). Stays Known Error until the changeset releases; the work-problems post-release Known Error → Verifying enumerator moves it (P380 precedent — release cadence owned by the orchestrator, not this iter).
 
-## Warm-path fix implemented 2026-08-29 — release pending
+## Warm-path fix implemented 2026-08-29 - released
 
 The root cause was candidate-session discovery in the helper: every recent `*-announced-*` session received a marker, while a live caller whose announce marker had aged out received none. The helper had no authoritative caller session id, so both the silent miss and the cross-session grant were consequences of the same guessing mechanism.
 
@@ -188,14 +194,22 @@ Evidence:
 - Packed-package exercise passes for both packages and creates exactly one marker per representative session (`PACK_RUNTIME_OK architect=1 jtbd=1`).
 - Architecture, JTBD, voice, style, accessibility, agent-instruction, shim-wrapper, executable-mode, and plugin-manifest checks pass. The rendered story map remains keyboard reachable and semantically labelled.
 
-The ticket stays **Known Error** until the new changeset is released and the fix can enter verification. This iteration does not push or release.
+The warm-path changeset has released, so the fix can enter verification.
 
 Lifecycle repair on 2026-08-29: STORY-072 passed I6-I10 and map-derived I12, and its three acceptance criteria were checked against the committed evidence above. The implementation had already landed in c5a0cb23 while the story was draft, and that commit carries `Refs: P368` rather than `Refs: STORY-072`. This repair therefore stops at `accepted`; it does not reconstruct `in-progress` or `done` without the story-trailer and release evidence required by the installed lifecycle contract.
+
+## Fix Released - WARM PATH
+
+- **Released**: 2026-08-29 in `@windyroad/architect@0.21.6` and `@windyroad/jtbd@0.14.1`.
+- **Release evidence**: `.changeset/odd-apes-trade.md`; version commit `c6fdde2dd1804386d029ff69bf9ec8643106f455`; merge commit `48442b174468db8e5670c13b86d27af81a39b939`, PR #458; successful release workflow `33255219603`. Both npm packages report the merge commit as `gitHead`.
+- **Fix**: confirmation evidence is now written only for the exact successful helper invocation's session, removing both cross-session marker spray and the aged-caller silent miss.
+- **Exercise evidence**: focused oversight suites passed 28/28, and packed-package exercises created exactly one marker per representative session (`PACK_RUNTIME_OK architect=1 jtbd=1`).
+- Awaiting user verification.
 
 ## Dependencies
 
 - **Blocks**: in-session ADR confirmations via `/wr-architect:review-decisions` when announce-marker preconditions don't hold (e.g. the 2026-06-17 ADR-082 drain).
-- **Blocked by**: (none — direction-setting fix shape needs user pick)
+- **Blocked by**: (none)
 - **Composes with**: P260 (candidate-SID enumeration sibling), ADR-050 Option C, P348 (substance-confirm marker contract), feedback_land_gate_blocked_commit_externally.md (workaround precedent).
 
 ## Related

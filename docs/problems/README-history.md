@@ -1402,3 +1402,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-29 **P529 verification pending** — isolated Codex backlog iterations shipped in `@windyroad/itil@2.1.1`; awaiting user verification.
 
 > Last reviewed: 2026-08-29 **P477 verification pending** — the complete Codex receipt-handoff recurrence repair shipped in `@windyroad/risk-scorer@0.18.17` from commit `e67183ad`; awaiting a supported installed Codex journey.
+
+> Last reviewed: 2026-08-29 **P415 verification pending** — the complete commit-message review fix shipped in `@windyroad/risk-scorer@0.18.19` and `@windyroad/voice-tone@0.8.1`; awaiting post-release invocation evidence.
