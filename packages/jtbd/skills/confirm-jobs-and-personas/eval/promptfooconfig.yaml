@@ -1,0 +1,37 @@
+description: confirm-jobs-and-personas exact-session oversight contract
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: P368 confirmation uses one standalone helper event before the marker write
+    vars:
+      prompt: |
+        An unconfirmed job or persona is in the confirmation drain. The user
+        selects Confirm. State the exact apply-outcome sequence. May the helper
+        share a shell command with another action, and what binds the evidence
+        to this session and file?
+    assert:
+      - type: regex
+        value: 'wr-jtbd-mark-oversight-confirmed'
+      - type: regex
+        value: '[Ss]tandalone|[Cc]omplete standalone'
+      - type: regex
+        value: 'PostToolUse|exact session|session id|session and file'
+      - type: llm-rubric
+        value: |
+          PASS only if the response runs
+          `wr-jtbd-mark-oversight-confirmed <job-or-persona-path>` as a
+          standalone Bash command after any directed amendment and before
+          writing `human-oversight: confirmed` plus the oversight date. It must
+          say the successful helper command's PostToolUse event binds evidence
+          to the exact session and file, and must forbid command chaining. FAIL
+          if the helper is combined, omitted, or follows the marker write.

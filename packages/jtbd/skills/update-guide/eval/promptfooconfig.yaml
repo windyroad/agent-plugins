@@ -1,0 +1,38 @@
+description: update-guide exact-session oversight contract
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../confirm-jobs-and-personas/eval/grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: P368 born-confirmed write uses one standalone helper event
+    vars:
+      prompt: |
+        The user has confirmed the drafted personas and jobs in update-guide.
+        State the exact born-confirmed write sequence for each file. May the
+        helper share a shell command with another action, and what binds the
+        evidence to this session and path?
+    assert:
+      - type: regex
+        value: 'wr-jtbd-mark-oversight-confirmed'
+      - type: regex
+        value: '[Ss]tandalone|[Cc]omplete standalone'
+      - type: regex
+        value: 'PostToolUse|exact session|session id|session and (?:file|path)'
+      - type: llm-rubric
+        value: |
+          PASS only if the response runs
+          `wr-jtbd-mark-oversight-confirmed <persona-or-job-path>` separately
+          for each confirmed file as the complete standalone Bash command,
+          before writing `human-oversight: confirmed` plus the oversight date.
+          It must explain that each successful helper command's PostToolUse
+          event binds evidence to the exact session and path, and must forbid
+          combining the helper with another command. FAIL if the helper is
+          chained, omitted, or follows the marker write.

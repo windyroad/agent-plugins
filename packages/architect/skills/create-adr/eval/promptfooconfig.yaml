@@ -532,3 +532,28 @@ tests:
           carve-out with the Step 5 substance-confirm carve-out (those
           have different authorising ADRs — Step 5 is ADR-074, Step 2b
           is ADR-044 cat 4). Saying the skill does NOT halt PASSES.
+
+  - description: P368 confirmation uses one standalone helper event before the marker write
+    vars:
+      prompt: |
+        The Step 5a substance-confirm answer matches the completed ADR draft.
+        State the exact final confirmation sequence. May the oversight helper
+        be combined with another shell command, and what binds its evidence to
+        the confirming session and ADR?
+    assert:
+      - type: regex
+        value: 'wr-architect-mark-oversight-confirmed'
+      - type: regex
+        value: '[Ss]tandalone|[Cc]omplete standalone'
+      - type: regex
+        value: 'PostToolUse|exact session|session id|session and ADR'
+      - type: llm-rubric
+        value: |
+          PASS only if the response orders confirmation as: finish every ADR
+          content edit, run `wr-architect-mark-oversight-confirmed <adr-path>`
+          as the complete standalone Bash command, then write
+          `human-oversight: confirmed` and the oversight date. It must explain
+          that the successful helper command's PostToolUse event binds evidence
+          to that exact session and ADR, and must forbid combining the helper
+          with another command. FAIL if the helper is combined, omitted, or run
+          after the confirmed marker write.

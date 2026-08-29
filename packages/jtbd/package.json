@@ -34,6 +34,7 @@
     ".agents/",
     ".codex-plugin/",
     "lib/",
+    "!skills/*/eval/",
     "!agents/eval/",
     "!agents/test/",
     "!hooks/test/",
