@@ -1,6 +1,6 @@
 # Problem 525: An agent-invented carve-out leaves our own tracker issues open forever
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-08-26
 **Priority**: 16 (High) — Impact: 4 (Significant — our issue tracker stops reflecting reality; every inbound report that reaches evidence-based closure stays open indefinitely, and nothing enumerates it) × Likelihood: 4 (Likely — fires on every inbound-reported ticket that closes on agent evidence)
 **Origin**: corrective-feedback (user, 2026-08-26)
@@ -64,7 +64,17 @@ Raised by the architect and JTBD gates while landing the skill change, and defer
 
 - [x] ADR-121 receives valid structured ratification against its rendered option set.
 - [x] The cache-proven issue guard, story trace, generated maps, behavioural evals, and corrected changesets land together and pass the targeted verification suite.
-- [ ] The fix is published and verified before this ticket leaves Known Error.
+- [x] The fix is published and verified before this ticket leaves Known Error.
+
+## Fix Released
+
+Released in `@windyroad/itil@2.1.0` (merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451, released 2026-08-27).
+
+The inbound lifecycle-update path now closes provenance-proven issues on this repository after evidence-backed local closure while leaving foreign tracker state to its maintainer.
+
+Awaiting user verification.
+
+Exercise evidence: npm reported `@windyroad/itil@2.1.0` published at `2026-08-28T11:15:05.325Z`; the tagged 2.1.0 artefact contains the owned-issue close path; and `bats packages/itil/skills/update-upstream/test/update-upstream-contract.bats` passed 41/41 on 2026-08-29.
 
 ## Dependencies
 
@@ -83,3 +93,7 @@ Raised by the architect and JTBD gates while landing the skill change, and defer
 ## Stories
 
 - [STORY-066 — A fix I can prove works gets closed without me](../../stories/accepted/STORY-066-a-fix-i-can-prove-works-gets-closed-without-me.md)
+
+## Fix Strategy
+
+**Release vehicle**: .changeset/close-inbound-issues-on-our-own-tracker.md

@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-29 **P519 verification pending** — evidence-backed closure shipped in `@windyroad/itil@2.1.0` and `@windyroad/retrospective@0.27.5`; the separate standing-queue evidence backfill remains follow-on work.
+> Last reviewed: 2026-08-29 **P525 verification pending** — owned-tracker evidence closure shipped in `@windyroad/itil@2.1.0`; npm publication, the tagged artefact, and 41/41 contract checks verify the release.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -52,7 +52,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 16 | P420 | check-briefing-budgets.sh crashes with `must_split[@]: unbound variable` on empty arrays under macOS default bash 3.2 | 8 (Medium) | Known Error | S | 2026-07-05 | internal |
 | 16 | P471 | run-retro Step 2d ask-hygiene trail path collides across same-day iterations, clobbering prior entries | 8 (Medium) | Known Error | S | 2026-07-26 | internal |
 | 16 | P511 | The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate | 8 (Medium) | Known Error | S | 2026-08-21 | internal |
-| 16 | P525 | An agent-invented carve-out leaves our own tracker issues open forever | 16 (High) | Known Error | M | 2026-08-26 | corrective-feedback (user, 2026-08-26) |
 | 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Known Error | M | 2026-08-20 | internal |
 | 15 | P527 | Codex skill names render with a duplicated plugin prefix and title-case branding | 15 (High) | Known Error | S | 2026-08-29 | internal |
 | 15 | P528 | Codex projection of work-problems drops the Goal loop-anchor instead of using the native Codex Goal surface | 15 (High) | Known Error | S | 2026-08-29 | internal |
@@ -274,6 +273,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P466 | The story-map HTML template ships sub-3:1 borders, no focus ring, and no viewport meta | 2026-08-21 (`@windyroad/itil@1.1.2`) | no — not observed |
 | P500 | Foreign tracker issues close on local evidence alone | 2026-08-27 (`@windyroad/itil@2.1.0`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
 | P519 | The Verification Pending -> Closed transition is reserved for the maintainer, so evidence-based closure never fires and the verification queue grows without bound | 2026-08-27 (`@windyroad/itil@2.1.0`, `@windyroad/retrospective@0.27.5`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
+| P525 | An agent-invented carve-out leaves our own tracker issues open forever | 2026-08-27 (`@windyroad/itil@2.1.0`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no — not observed |
 | P037 | jtbd-reviewer returns bare verdict without reason | commit 6e7c2e4 | no — not observed |
 | P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) | no — not observed |
