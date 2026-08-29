@@ -295,7 +295,7 @@ For each `.open.md` / `.known-error.md` ticket aged ≥ 7 days, evaluate whether
 | Shape | Phase | Mechanical check | Empirical closes (2026-05-31) |
 |---|---|---|---|
 | 1. `file-no-longer-exists` | Phase 1 | grep ticket body for `(packages\|docs\|...)/...\.(md\|sh\|...)`; verify each via `git ls-files --error-unmatch` | 0 of 14 |
-| 2. `ADR-shipped-confirmed` | Phase 2 | grep ticket body for `ADR-NNN`; for each, verify `docs/decisions/<NNN>-*.md` exists AND frontmatter has `human-oversight: confirmed` | 8 of 14 — P012/P015/P018/P022/P033/P039/P194/P292 |
+| 2. `ADR-shipped-confirmed` **(corroborating-only)** | Phase 2 | grep ticket body for `ADR-NNN`; for each, verify `docs/decisions/<NNN>-*.md` exists AND frontmatter has `human-oversight: confirmed`. **Never a clean close on its own** — the marker records that a human ratified a DECISION (ADR-066), not that a fix shipped. Shape 2 alone demotes to `CLOSE-CANDIDATE-WITH-CAVEAT` with tag `ratification-is-not-delivery` (ADR-079 reassessment 2026-08-30) | 8 of 14 — P012/P015/P018/P022/P033/P039/P194/P292 |
 | 3. `named-skill-or-feature-exists` | Phase 2 | grep for SKILL.md / hook / agent paths + `/wr-<plugin>:<skill>` slash-command refs; verify each via `git ls-files` | 6 of 14 — P014/P034/P045/P079/P190/P289 |
 | 4. `self-marker-in-body` | Phase 2 | line-anchored grep for `Close to (Verifying\|Closed)`, `DONE 2026-`, `## Fix Released` heading, `fix shipped session`, `awaiting K→V`. Pattern MUST anchor to line-start to avoid mid-prose false-positives (architect advisory A2) | explicit in P289; contributory in P033 |
 | 5. `driver-child-ticket-closed` | Phase 2 | parse `## Related` for `P<NNN>` refs; check if any are in `docs/problems/closed/`. Suppressed when child names an unbuilt SKILL/agent path (future work, not stale; architect advisory A1) | contributory in several closes |
@@ -325,13 +325,13 @@ Exit-code routing (one verdict line per ticket on stdout):
 | Exit | Stdout prefix | Action |
 |------|--------------|--------|
 | 0 | `CLOSE-CANDIDATE <basename> — shapes: <comma-list> — <per-shape cite>; ...` | Auto-close branch (4.6b). |
-| 0 | `CLOSE-CANDIDATE-WITH-CAVEAT <basename> — shapes: <comma-list> — caveat: <short-tag>: <one-line> — cites: ...` | Surface-batch-confirm branch (4.6b-with-caveat); the caveat short-tag + one-line splices verbatim into the audit section's **Caveat** field per architect condition C2. |
+| 0 | `CLOSE-CANDIDATE-WITH-CAVEAT <basename> — shapes: <comma-list> — caveat: <short-tag>: <one-line> — cites: ...` | Surface-batch-confirm branch — **never the auto-close branch**. Under AFK, defer per 4.6a step 3: surface it, do not `git mv` it. The audit-section shape in 4.6b applies only once a maintainer has confirmed the close, and the caveat short-tag + one-line then splices verbatim into that section's **Caveat** field per architect condition C2. |
 | 1 | `KEEP <basename> — <M>/<N> paths still present` | No action; log only. |
 | 1 | `KEEP-WITH-NOTE <basename> — <note>: <evidence>` | Phase 1 false-positive class (state-suffix / sibling-file / rename) OR architect-A1 future-work disambiguation. No action; log only. |
 | 2 | `SKIP <basename> — <reason>` | No action (age gate, no Reported date, no extractable evidence). |
 | 3 | error | Log advisory; do not abort the pass — relevance-close is non-blocking per the Step 4.5 fail-soft precedent. |
 
-**Algorithm (canonical body)**: runs each of the five shape detectors over the ticket body. Multi-shape matches emit cumulatively (corroborating evidence is stronger than first-match-wins per ADR-026): the `shapes:` field carries a comma-joined list, the trailing fragment carries per-shape cites semicolon-separated. The caveat fires when at least one shape matches AND the body has any unticked checkboxes (multi-phase mixed-progress umbrella class). The verdict is intentionally conservative — tickets with no shape match AND no extractable evidence route to `SKIP`, not auto-close.
+**Algorithm (canonical body)**: runs each of the five shape detectors over the ticket body. Multi-shape matches emit cumulatively (corroborating evidence is stronger than first-match-wins per ADR-026): the `shapes:` field carries a comma-joined list, the trailing fragment carries per-shape cites semicolon-separated. Two independent triggers raise the caveat, checked in this order: (1) shape 2 is the ONLY shape that matched — tag `ratification-is-not-delivery`, because ADR ratification is not delivery evidence; (2) at least one shape matches AND the body has any unticked checkboxes — tag `multi-phase-mixed-progress`. The caveat field carries a single structured tag (architect condition C2), so trigger (1) wins when both would fire: "the evidence is the wrong kind" is the more fundamental reason the verdict cannot be clean. The verdict is intentionally conservative — tickets with no shape match AND no extractable evidence route to `SKIP`, not auto-close.
 
 **Surface-batch-confirm flow** (the methodology that produced today's 14 closes — codified for repeatable use):
 
@@ -344,7 +344,15 @@ Real-backlog smoke test 2026-05-31 against today's labeled fixtures: P012 → `C
 
 #### 4.6b. Auto-close action per CLOSE-CANDIDATE
 
-For each `CLOSE-CANDIDATE` or `CLOSE-CANDIDATE-WITH-CAVEAT` ticket, perform the following BEFORE the `git mv`:
+**Applies to clean `CLOSE-CANDIDATE` verdicts.** A `CLOSE-CANDIDATE-WITH-CAVEAT`
+verdict does NOT enter this branch on its own: under AFK it is surfaced and left
+open per 4.6a step 3, and it reaches the steps below only after a maintainer has
+confirmed the close at the next interactive review — at which point it carries
+the extra **Caveat** field noted in step 1. Closing a caveat verdict
+unattended defeats the demotion that produced it (ADR-079 reassessment
+2026-08-30, shape 2 corroborating-only).
+
+For each such ticket, perform the following BEFORE the `git mv`:
 
 1. Use the `Edit` tool to append a `## Closed as no longer relevant` section to the ticket body (cite + persist + uncertainty per ADR-026):
 
@@ -400,7 +408,7 @@ The relevance-close pass runs **unconditionally** during AFK orchestration: when
 
 **Worked example (Phase 2 surface-batch-confirm, 2026-05-31)**: 14 closes across 5 batches using shapes 2-5. Each batch surfaced via `AskUserQuestion` (≤ 5 candidates per batch); maintainer confirmed clean closes and routed caveat candidates with explicit caveat acknowledgement (e.g. P039 `shared-template-not-built`; P194 `deep-dive-bloat-remains`). All closures batched into per-batch commits per ADR-014. The 14-fixture labeled set is the regression suite (`packages/itil/scripts/test/evaluate-relevance.bats` covers each shape positive + the architect A1/A2 advisory negatives).
 
-**Cross-references**: ADR-079 (this pass's design ADR, Phase 1 + Phase 2), ADR-026 (grounding, cumulative shape cite + structured caveat field), ADR-022 + ADR-079 lifecycle extension (Open|Known Error → Closed bypassing Verifying for no-fix-needed conclusions; the Closed-row entry at `/wr-itil:manage-problem` SKILL.md line 59 names Phase 1 + Phase 2 shapes), ADR-049 (PATH shim), ADR-052 (behavioural bats at `packages/itil/scripts/test/evaluate-relevance.bats` — 33/33 GREEN), ADR-014 (batched closure commit grain per pass), ADR-044 cat 4 + P132 (mechanical-stage carve-out: ask per-batch, not per-ticket), P057 (staging trap), P346 (Phase 1 driver), P347 (Phase 2 driver).
+**Cross-references**: ADR-079 (this pass's design ADR, Phase 1 + Phase 2), ADR-026 (grounding, cumulative shape cite + structured caveat field), ADR-022 + ADR-079 lifecycle extension (Open|Known Error → Closed bypassing Verifying for no-fix-needed conclusions; the Closed-row entry at `/wr-itil:manage-problem` SKILL.md line 59 names Phase 1 + Phase 2 shapes), ADR-049 (PATH shim), ADR-052 (behavioural bats at `packages/itil/scripts/test/evaluate-relevance.bats` — 35/35 GREEN), ADR-014 (batched closure commit grain per pass), ADR-044 cat 4 + P132 (mechanical-stage carve-out: ask per-batch, not per-ticket), P057 (staging trap), P346 (Phase 1 driver), P347 (Phase 2 driver).
 
 ### 5. Rewrite `docs/problems/README.md`
 
