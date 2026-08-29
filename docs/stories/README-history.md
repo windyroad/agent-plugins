@@ -19,3 +19,7 @@
 ## 2026-07-26
 
 > Last reviewed: 2026-07-12 **STORY-044 accepted** — cruise status/telemetry skill (`/wr-cruise:status`): per-window pace vs usage, the sleep the throttle is injecting now, glide projection, cache-health (flags an inert fail-open throttle). Built + 7 bats (29 cruise bats total). Awaiting release.
+
+## 2026-08-29
+
+> Last reviewed: 2026-08-29 **index reconciled** — STORY-068 added at `accepted` for the single-prefix Codex skill name; reverse traces are present on P527, JTBD-302, and RFC-074's release row on STORY-MAP-008.

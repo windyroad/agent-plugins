@@ -59,8 +59,14 @@ Observed 2026-08-29: exit 1, with the prohibition matched on installed line 19. 
 - [x] Investigate root cause
 - [x] Create reproduction test — installed-contract RED command above
 - [x] Identify a workaround — foreground `/wr-itil:work-problem 529`
-- [ ] Draw the RFC release row and attach an accepted P529/JTBD-006 delivery story
+- [x] Draw RFC-075 and attach accepted STORY-069 tracing P529 and JTBD-006 on confirmed STORY-MAP-002
 - [ ] Implement and behaviourally verify the Codex-specific adapter
+
+## Fix Strategy
+
+RFC-075 — *Use available Codex capacity for isolated backlog iterations* — is a release row on confirmed STORY-MAP-002 under activity D, *Implement the changes*. It carries accepted STORY-069, *Drain one Codex ticket through an isolated Codex CLI*.
+
+The row limits the fix to the Codex projection/adapter: one exact-checkout `codex exec` iteration, governance and suppression controls, separate JSONL metadata plus final-output `ITERATION_SUMMARY`, path-scoped recovery, error classification, retro-on-exit, and an installed-artifact behavioural test. The canonical Claude Code branch and ADR-094 remain unchanged.
 
 ## Dependencies
 
@@ -76,3 +82,10 @@ Observed 2026-08-29: exit 1, with the prohibition matched on installed line 19. 
 Captured via `/wr-itil:capture-problem`. Hang-off arbitration was not dispatched: the mechanical pre-filter found 93 open or verifying tickets sharing the `/wr-itil:work-problems` signal, above the five-candidate latency cap. Review-time re-evaluation candidates: P035, P065, P070, P087, P096, P102, P104, P124, P126, P131, P136, P137, P140, P142, P143, P144, P151, P152, P154, P162, P168, P170, P172, P173, P175, P176, P177, P178, P179, P185, P207, P213, P220, P232, P247, P248, P251, P261, P268, P272, P273, P274, P275, P276, P278, P279, P308, P314, P315, P330, P333, P343, P346, P350, P351, P358, P361, P370, P373, P374, P375, P376, P382, P385, P386, P389, P390, P398, P399, P401, P402, P404, P412, P413, P416, P424, P427, P428, P430, P434, P441, P443, P448, P451, P456, P464, P467, P470, P473, P502, P516, P517, and P528.
 
 The title-only duplicate check matched P036, P040, P041, P053, P077, P083, P084, P089, P103, P104, P109, P122, P126, P130, P138, P140, P206, P210, P211, P212, P214, P221, P250, P307, P308, P333, P341, P344, P382, P385, P386, P413, P427, P428, P441, P451, and P528. None names native runtime CLI selection; `/wr-itil:review-problems` owns any later merge decision.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-069 | STORY-069: Drain one Codex ticket through an isolated Codex CLI | accepted |

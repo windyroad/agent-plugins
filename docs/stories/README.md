@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-08-29 **index reconciled** — STORY-068 added at `accepted` for the single-prefix Codex skill name; reverse traces are present on P527, JTBD-302, and RFC-074's release row on STORY-MAP-008.
+> Last reviewed: 2026-08-29 **index reconciled** — STORY-069 added at `accepted` for one isolated Codex CLI iteration; reverse traces are present on P529, JTBD-006, and RFC-075's release row on STORY-MAP-002.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -134,6 +134,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-065 | A fix proposal draws a release row, not a document | M | P508 | RFC-071 | STORY-MAP-002 |
 | accepted | STORY-066 | A fix I can prove works gets closed without me | M | P519 | RFC-072 | STORY-MAP-002 |
 | accepted | STORY-067 | Publish packages without expiring secrets | S | P284 | RFC-073 | STORY-MAP-002 |
+| accepted | STORY-069 | Drain one Codex ticket through an isolated Codex CLI | M | P529 | RFC-075 | STORY-MAP-002 |
 | in-progress | STORY-068 | Invoke a Codex skill by the name the card shows | S | P527 | RFC-074 | STORY-MAP-008 |
 | draft | STORY-064 | A ticket that only names a decision as background stays open | M | P463 | RFC-070 | STORY-MAP-011 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
