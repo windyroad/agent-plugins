@@ -1,11 +1,11 @@
 # Problem 526: Codex projection sanitizer corrupts YAML frontmatter while expanding internal IDs
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-29
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5 — nine generated ITIL Codex skills have invalid frontmatter on every projection build and in the published 2.1.0 cache
 **Origin**: internal
 **Effort**: S — keep frontmatter outside prose sanitisation or serialize the transformed metadata safely, then add one generated-output parse check
-**WSJF**: (20 × 1.0) / 1 = **20**
+**WSJF**: (20 × 2.0) / 1 = **40**
 **JTBD**: JTBD-101
 **Persona**: plugin-developer
 

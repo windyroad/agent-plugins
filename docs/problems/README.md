@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-30 **P477 closed on evidence** - the installed Codex risk-receipt bridge produced a checkout-bound marker that the governed `9712a054` commit accepted.
+> Last reviewed: 2026-08-30 **P526 known error** - whole-file sanitisation crosses YAML frontmatter, and the copy filter reads absolute path components.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -13,7 +13,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | | | **Tier 0 — Critical-bypass** (Severity Very High ≥17, security-classified, or incident-linked) | | | | | |
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
-| 20 | P526 | Codex projection sanitizer corrupts YAML frontmatter while expanding internal IDs | 20 (Very High) | Open | S | 2026-08-29 | internal |
+| 40 | P526 | Codex projection sanitizer corrupts YAML frontmatter while expanding internal IDs | 20 (Very High) | Known Error | S | 2026-08-29 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Critical) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported** | | | | | |
