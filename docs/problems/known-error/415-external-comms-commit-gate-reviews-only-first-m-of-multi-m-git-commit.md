@@ -60,3 +60,10 @@ The `-m` extraction in `external-comms-gate.sh` returns the FIRST regex match an
 **Observed flaw**: the `-m`/`--message` extraction returns the first regex match and `break`s, hashing only the subject line of a multi-`-m` commit.
 **Edit summary**: accumulate ALL `-m`/`--message` values in command order and join with `\n\n` (git's multi-`-m` composition rule) before computing the marker key, so the gate hashes the same full message the reviewer wraps in `<draft>`.
 **Evidence**: 3 blocked commit attempts 2026-07-03 P363 iter; marker key `9cfde227…` (full message) present but gate computed subject-only key.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-071 | STORY-071: Review the complete commit message once | draft |
