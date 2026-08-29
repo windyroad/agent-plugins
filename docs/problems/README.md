@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-29 **P500 verification pending** — the tracker-authority fix shipped in `@windyroad/itil@2.1.0`; foreign issues remain open without target-bound upstream-party confirmation.
+> Last reviewed: 2026-08-29 **P519 verification pending** — evidence-backed closure shipped in `@windyroad/itil@2.1.0` and `@windyroad/retrospective@0.27.5`; the separate standing-queue evidence backfill remains follow-on work.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -14,7 +14,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
 | 20 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Known Error | S | 2026-08-12 | internal |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
-| 20 | P519 | The Verification Pending -> Closed transition is reserved for the maintainer, so evidence-based closure never fires and the verification queue grows without bound | 20 (Very High) | Known Error | M | 2026-08-24 | internal |
 | 20 | P529 | Codex work-problems cannot use refreshed Codex CLI quota | 20 (Very High) | Known Error | M | 2026-08-29 | internal |
 | 20 | P526 | Codex projection sanitizer corrupts YAML frontmatter while expanding internal IDs | 20 (Very High) | Open | S | 2026-08-29 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
@@ -274,6 +273,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P498 | WSJF uses the pre-transition status multiplier | 2026-08-17 (`@windyroad/itil@1.1.1`) | no — not observed |
 | P466 | The story-map HTML template ships sub-3:1 borders, no focus ring, and no viewport meta | 2026-08-21 (`@windyroad/itil@1.1.2`) | no — not observed |
 | P500 | Foreign tracker issues close on local evidence alone | 2026-08-27 (`@windyroad/itil@2.1.0`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
+| P519 | The Verification Pending -> Closed transition is reserved for the maintainer, so evidence-based closure never fires and the verification queue grows without bound | 2026-08-27 (`@windyroad/itil@2.1.0`, `@windyroad/retrospective@0.27.5`; merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451) | no — not observed |
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no — not observed |
 | P037 | jtbd-reviewer returns bare verdict without reason | commit 6e7c2e4 | no — not observed |
 | P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) | no — not observed |

@@ -1390,3 +1390,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-29 **P528 moved to Known Error** — investigation confirmed that the wholesale Codex `work-problems` overlay omits ADR-094's active Goal contract; RFC-076 and STORY-070 carry the overlay-only correction.
 
 > Last reviewed: 2026-08-29 **P528 moved to Known Error** — the Codex `work-problems` overlay omits ADR-094's active Goal contract; RFC-076 and STORY-070 carry the overlay-only correction.
+
+> Last reviewed: 2026-08-29 **P500 verification pending** — the tracker-authority fix shipped in `@windyroad/itil@2.1.0`; foreign issues remain open without target-bound upstream-party confirmation.

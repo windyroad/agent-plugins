@@ -1,6 +1,6 @@
 # Problem 519: The Verification Pending → Closed transition is reserved for the maintainer, so evidence-based closure never fires and the verification queue grows without bound
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-08-24
 **Priority**: 20 (Very High) — Impact: 4 (Significant — a first-class lifecycle stage has no agent-driven exit path at all; 153 tickets are stranded and the governance audit trail systematically misrepresents which fixes are still unverified) × Likelihood: 5 (Almost certain — continuous; the reservation fires on every verifying ticket on every pass, 153/153 observed) — derived at capture per Step 4a
 **Origin**: internal
@@ -164,6 +164,8 @@ Primary harness is **promptfoo** per ADR-075, since this is SKILL-prose behaviou
 
 `@windyroad/itil` **minor** — `work-problems` gains a capability it structurally lacked (the AFK loop can drain the verification queue). `@windyroad/retrospective` **patch** — behaviour-affecting prose at `run-retro:406`/`:466`. No changeset for `docs/`.
 
+**Release vehicle**: .changeset/evidence-backed-closure-agent-authorised.md
+
 ## Dependencies
 
 - **Blocks**: (none)
@@ -175,6 +177,14 @@ Primary harness is **promptfoo** per ADR-075, since this is SKILL-prose behaviou
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-066 | STORY-066: A fix I can prove works gets closed without me | accepted |
+
+## Fix Released
+
+Released in `@windyroad/itil@2.1.0` and `@windyroad/retrospective@0.27.5` (merge commit `cf5cf39a0f6623eb4ccaf434e6239f2d641d0ea8`, PR #451, released 2026-08-27; version-packages commit `cb749f1f53650ae933106aaefd5f93b8ea47e1c4`).
+
+The released update authorises evidence-backed closure across the transition and unattended backlog workflows, preserves fail-closed handling for absent or contested evidence, and adds the mechanical DO-NOT-CLOSE predicate and foreign-reporter authority boundary.
+
+Awaiting user verification. Phase 2's separate standing-queue evidence backfill remains tracked as follow-on work and does not block verification of this release vehicle.
 
 ## Related
 
