@@ -27,6 +27,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_MD="${SCRIPT_DIR}/../SKILL.md"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 
+if [[ "${WR_EVAL_RUNTIME:-claude}" == "codex" ]]; then
+  SKILL_MD="${SCRIPT_DIR}/../../../scripts/codex-work-problems.md"
+fi
+
 if [[ ! -f "$SKILL_MD" ]]; then
   echo "run-skill-eval.sh: SKILL.md not found at $SKILL_MD" >&2
   exit 2

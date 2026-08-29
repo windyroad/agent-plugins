@@ -3,9 +3,10 @@ status: proposed
 job-id: work-backlog-afk
 persona: developer
 date-created: 2026-04-17
-human-oversight: unconfirmed
-oversight-date: 2026-05-31
+human-oversight: confirmed
+oversight-date: 2026-08-29
 oversight-confirmed-date: "2026-07-27 — re-ratified via the P357 brief AskUserQuestion this session; the ADR-101 lockstep narrowing (bounded AFK-accept carve-out for pure decomposition of already-confirmed substance; verification untouched; opt-in) confirmed in the same batch as ADR-101. SUPERSEDED — see oversight-downgraded below."
+oversight-confirmed-date-2026-08-29: "2026-08-29 — re-ratified after the exact current JTBD-006 artefact was opened and presented; the user explicitly responded 'ratified'."
 oversight-downgraded: "2026-08-21 — ADR-103 lockstep (material amendment per ADR-068), surfaced by the P508 slice-A JTBD gate. The ADR-101 amendment below conditions unattended acceptance on 'where the project has opted in'; ADR-103 superseded ADR-101 outright on 2026-08-07, dropped that opt-in protection knowingly, and removed the machinery — the config key survives only in a changelog. P508 slice A makes the staleness bind rather than merely sit there: the I13 gate now draws a release row and inherits map approval on every untraced Known Error, at the AFK surface, unconditionally. This is the job a reviewer opens to answer 'may the loop do this unattended?', and it currently answers with a precondition nobody can satisfy. Marker held until re-ratified at the next interactive /wr-jtbd:confirm-jobs-and-personas drain (ADR-066 P348 AFK fallback — no AskUserQuestion was available in the salvage session that wrote this)."
 oversight-downgraded-2026-08-24: "2026-08-24 — P519 lockstep (material amendment per ADR-068): the Persona Constraint \"does not trust the agent to verify fixes work\" is NARROWED to \"does not trust the agent to decide a fix works where no evidence is available\". Six shipped skills now cite this job as the authority for agent-authorised Verification Pending -> Closed on cited evidence. The reservation it replaces was corpus residue: ADR-044 (confirmed) already ratified close-on-evidence as a framework-mediated surface, and review-problems Bucket 1 + run-retro Step 4a had worked that way since P135/P186. Driven by a 2026-08-24 user correction — direction, NOT substance ratification per CLAUDE.md P357. Marker held until re-ratified at the next interactive /wr-jtbd:confirm-jobs-and-personas drain."
 oversight-downgraded-2026-07-26: "2026-07-26 — ADR-101 lockstep (material amendment per ADR-068): the Desired Outcome 'Problems requiring my judgment are queued for my return, not guessed at' is NARROWED by a bounded AFK-accept carve-out for pure decomposition of already-confirmed substance. Marker held until re-ratified; re-ratification queued with ADR-101's owed post-draft brief (P456 open items)."
@@ -64,7 +65,7 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-054 | STORY-054: Lifecycle transitions preserve a story's ratification | accepted |
 | STORY-065 | STORY-065: A fix proposal draws a release row, not a document | accepted |
 | STORY-066 | STORY-066: A fix I can prove works gets closed without me | accepted |
-| STORY-069 | STORY-069: Drain one Codex ticket through an isolated Codex CLI | accepted |
+| STORY-069 | STORY-069: Drain one Codex ticket through an isolated Codex CLI | in-progress |
 | STORY-003 | STORY-003: /wr-itil:list-stories read-only display skill | done |
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-018 | STORY-018: Capture the problem in seconds, mid-flow | done |

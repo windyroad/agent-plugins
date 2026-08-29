@@ -32,8 +32,6 @@ teardown() {
   grep -Fq '<itil-plugin-root>/bin/wr-itil-reconcile-readme' "$PACKAGE/skills-codex/reconcile-readme/SKILL.md"
   ! grep -Fq 'wr-risk-scorer-restage-commit' "$PACKAGE/skills-codex/capture-problem/SKILL.md"
   ! rg -q 'claude -p|claude --version|AskUserQuestion|\.claude/' "$PACKAGE/skills-codex"
-  grep -Fq "Spawn one native Codex subagent" "$PACKAGE/skills-codex/work-problems/SKILL.md"
-  ! rg -q 'claude -p|SIGTERM|--output-format' "$PACKAGE/skills-codex/work-problems/SKILL.md"
   grep -Fq 'add-band' "$PACKAGE/skills-codex/capture-rfc/SKILL.md"
   grep -Fq 'Never create a new file under `docs/rfcs/`' "$PACKAGE/skills-codex/capture-rfc/SKILL.md"
   ! grep -Fq 'mark-rfc-capture-gate' "$PACKAGE/skills-codex/capture-rfc/SKILL.md"

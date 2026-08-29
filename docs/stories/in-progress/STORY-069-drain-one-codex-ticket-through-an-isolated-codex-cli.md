@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: drain-one-codex-ticket-through-an-isolated-codex-cli
 reported: 2026-08-29
 decision-makers: [Tom Howard]
@@ -25,12 +25,12 @@ In order to keep progressing the governed problem backlog when Codex CLI capacit
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] The installed Codex `/wr-itil:work-problems` contract dispatches exactly one selected ticket through a nested `codex exec` in the exact checkout, while the canonical Claude Code `claude -p` branch and ADR-094 remain unchanged.
-- [ ] The nested command receives the selected ticket and checkout explicitly, loads the required governance hooks/plugins, exports the AFK suppression guards, preserves unrelated work, and runs the iteration retro before returning.
-- [ ] The nested Codex writes its final `ITERATION_SUMMARY` to the `codex exec` final-output file; JSONL is consumed separately for progress and error metadata, including quota-versus-non-quota classification.
-- [ ] Clean-state recovery is path-scoped and fail-closed: coherent work from the one ticket may be recovered, while ambiguous or unrelated dirty state halts without a broad reset.
-- [ ] A behavioural installed-artifact test launches a real outer Codex with a fake nested `codex` first on `PATH` and a fail-fast fake `claude`; it asserts the nested process receives P529 and the exact checkout, emits JSONL, writes the final-output summary, and the outer Codex consumes sentinel `ITERATION_SUMMARY` fields.
-- [ ] A patch changeset for `@windyroad/itil` ships the Codex runtime correction.
+- [x] The installed Codex `/wr-itil:work-problems` contract dispatches exactly one selected ticket through a nested `codex exec` in the exact checkout, while the canonical Claude Code `claude -p` branch and ADR-094 remain unchanged.
+- [x] The nested command receives the selected ticket and checkout explicitly, loads the required governance hooks/plugins, exports the AFK suppression guards, preserves unrelated work, and runs the iteration retro before returning.
+- [x] The nested Codex writes its final `ITERATION_SUMMARY` to the `codex exec` final-output file; JSONL is consumed separately for progress and error metadata, including quota-versus-non-quota classification.
+- [x] Clean-state recovery is path-scoped and fail-closed: coherent work from the one ticket may be recovered, while ambiguous or unrelated dirty state halts without a broad reset.
+- [x] A behavioural installed-artifact test launches a real outer Codex with a fake nested `codex` first on `PATH` and a fail-fast fake `claude`; it asserts the nested process receives P529 and the exact checkout, emits JSONL, writes the final-output summary, and the outer Codex consumes sentinel `ITERATION_SUMMARY` fields.
+- [x] A patch changeset for `@windyroad/itil` ships the Codex runtime correction.
 
 ## Driving problem trace (required — I6 invariant)
 

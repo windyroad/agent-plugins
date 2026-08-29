@@ -1,7 +1,7 @@
 # SKILL eval — work-problems AFK orchestrator behavioural contracts
 # (P324 / P012 / RFC-012 / ADR-075 Amendment 2026-06-02).
 #
-# Tier A deterministic regex + Tier B llm-rubric coverage for 7 contracts on
+# Tier A deterministic regex + Tier B llm-rubric coverage for behavioural contracts on
 # the work-problems SKILL.md surface:
 #
 #   - Step 0d outbound-responses pre-flight TTL-staleness branch
@@ -84,6 +84,7 @@
 # @problem P390
 # @problem P370
 # @problem P413
+# @problem P529
 # @rfc RFC-012
 # @rfc RFC-034
 # @adr ADR-075 (Amendment 2026-06-02)
@@ -91,7 +92,7 @@
 
 description: |
   work-problems SKILL eval — Tier-A regex + Tier-B llm-rubric coverage for
-  7 AFK-orchestrator behavioural contracts on the work-problems SKILL
+  AFK-orchestrator behavioural contracts on the work-problems SKILL
   surface. Passing eval satisfies the ADR-075 evidence floor and flips the
   R009 prose-surface modulator +1 → -1 for `work-problems`.
 
@@ -1213,3 +1214,100 @@ tests:
           visible on disk are explicitly rejected as grounds. The tickets stay
           Verification Pending and are queued for the user. ALL_DONE on
           stop-condition #2 is legitimate here.
+
+  # ── P529: Codex CLI isolation and ordered recovery ─────────────────────────
+  # Run only these cases against the Codex adapter:
+  #   WR_EVAL_RUNTIME=codex npx promptfoo eval -c <this-file> --filter-pattern P529 --max-concurrency 1
+
+  - description: P529 — successful Codex iteration keeps JSONL and final summary separate
+    vars:
+      prompt: |
+        The selected ticket is P529 and the exact checkout is /work/repo. Show
+        the successful isolated Codex iteration path through work-problems,
+        including the command boundary, the two output channels, validation,
+        and when the outer loop may continue.
+    assert:
+      - type: regex
+        value: 'codex\s+exec|output-last-message'
+      - type: regex
+        value: 'JSONL|ITERATION_SUMMARY|verify-iter-summary'
+      - type: llm-rubric
+        value: |
+          PASS only if the response runs exactly one selected ticket in a fresh
+          codex exec process at the exact checkout, treats JSONL as progress and
+          error metadata, reads ITERATION_SUMMARY only from the separate final
+          output after successful exit/error classification, validates it for
+          P529, and only then continues the outer loop.
+
+  - description: P529 — non-zero Codex exit halts before final-summary parsing
+    vars:
+      prompt: |
+        The P529 codex exec process exits 1. Its JSONL says authentication
+        failed, while the final-output file happens to contain a plausible
+        ITERATION_SUMMARY. What is the exact classification and parsing order?
+        State explicitly whether the outer loop halts or continues.
+    assert:
+      - type: regex
+        value: 'non[\s-]?zero|exit\s+(code|1)|authentication failed'
+      - type: regex
+        value: 'halt|stop|does not continue|cannot continue|must not continue'
+      - type: llm-rubric
+        value: |
+          PASS only if non-zero exit is classified first as authentication
+          failure, halts the loop, and prevents final-summary parsing. The
+          plausible final file must not override the failed process.
+
+  - description: P529 — exit-zero JSONL error halts before final-summary parsing
+    vars:
+      prompt: |
+        The P529 codex exec process exits 0, but JSONL contains a turn.failed
+        event reporting rate limiting. The final-output file contains a valid
+        P529 ITERATION_SUMMARY. Give the ordered exit check, JSONL check, and
+        summary decision. What happens next?
+    assert:
+      - type: regex
+        value: 'JSONL|turn\.failed|rate limit'
+      - type: regex
+        value: 'halt|stop'
+      - type: llm-rubric
+        value: |
+          PASS only if the response inspects JSONL after the zero exit, treats
+          turn.failed as terminal rate limiting, halts before parsing the final
+          summary, and says the summary cannot override the error event.
+
+  - description: P529 — invalid, wrong-ticket, or multiple summaries halt
+    vars:
+      prompt: |
+        Assume exit 0 and error-free JSONL for selected ticket P529. Explain
+        what work-problems does for each final-output variant: no
+        ITERATION_SUMMARY, two summaries, or one otherwise-valid summary naming
+        P528 instead of P529. State whether any variant authorizes recovery.
+    assert:
+      - type: regex
+        value: 'invalid iteration summary|exactly one|selected ticket|P529'
+      - type: llm-rubric
+        value: |
+          PASS only if every variant halts: missing and multiple summaries fail
+          the exactly-one rule, and a P528 summary fails selected-ticket
+          attribution. None may advance the loop or authorize recovery.
+
+  - description: P529 — recovery follows classification and stays path-scoped
+    vars:
+      prompt: |
+        A failed P529 iteration leaves staged P529-only files plus an unrelated
+        unstaged P528 file that existed before the iteration. Describe the
+        recovery order, starting with process-exit and JSONL classification,
+        whether a valid selected-ticket summary is required, and the allowed
+        Git scope, including retesting and governance. Also say what happens if
+        attribution is ambiguous.
+    assert:
+      - type: regex
+        value: 'path[\s-]?scoped|P529|P528|ambiguous'
+      - type: llm-rubric
+        value: |
+          PASS only if recovery occurs after exit and JSONL classification,
+          requires a valid selected-ticket summary plus proof that candidate
+          paths belong only to P529, preserves pre-existing P528, and reruns
+          focused tests and governance before recovery. Ambiguous or unrelated
+          dirt must halt without mutation, stash, reset, clean, broad checkout,
+          or broad restore.

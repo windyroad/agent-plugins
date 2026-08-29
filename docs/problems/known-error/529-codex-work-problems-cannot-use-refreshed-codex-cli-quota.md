@@ -60,11 +60,11 @@ Observed 2026-08-29: exit 1, with the prohibition matched on installed line 19. 
 - [x] Create reproduction test — installed-contract RED command above
 - [x] Identify a workaround — foreground `/wr-itil:work-problem 529`
 - [x] Draw RFC-075 and attach accepted STORY-069 tracing P529 and JTBD-006 on confirmed STORY-MAP-002
-- [ ] Implement and behaviourally verify the Codex-specific adapter
+- [x] Implement and behaviourally verify the Codex-specific adapter — the packed installed-skill smoke launched a real outer Codex, dispatched exactly one fake nested Codex for P529 in the exact checkout, kept the fail-fast fake Claude unused, and consumed separate JSONL progress plus the final-output sentinel summary.
 
 ## Fix Strategy
 
-RFC-075 — *Use available Codex capacity for isolated backlog iterations* — is a release row on confirmed STORY-MAP-002 under activity D, *Implement the changes*. It carries accepted STORY-069, *Drain one Codex ticket through an isolated Codex CLI*.
+RFC-075 — *Use available Codex capacity for isolated backlog iterations* — is a release row on confirmed STORY-MAP-002 under activity D, *Implement the changes*. It carries in-progress STORY-069, *Drain one Codex ticket through an isolated Codex CLI*.
 
 The row limits the fix to the Codex projection/adapter: one exact-checkout `codex exec` iteration, governance and suppression controls, separate JSONL metadata plus final-output `ITERATION_SUMMARY`, path-scoped recovery, error classification, retro-on-exit, and an installed-artifact behavioural test. The canonical Claude Code branch and ADR-094 remain unchanged.
 
@@ -88,4 +88,4 @@ The title-only duplicate check matched P036, P040, P041, P053, P077, P083, P084,
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-069 | STORY-069: Drain one Codex ticket through an isolated Codex CLI | accepted |
+| STORY-069 | STORY-069: Drain one Codex ticket through an isolated Codex CLI | in-progress |
