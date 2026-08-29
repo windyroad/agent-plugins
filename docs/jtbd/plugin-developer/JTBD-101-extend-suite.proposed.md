@@ -65,7 +65,6 @@ Copy an existing plugin and modify it, read ADRs and BRIEFING.md
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-074 | STORY-074: Use generated Codex skills after upgrading without repairs | accepted |
 | STORY-004 | STORY-004: RFC frontmatter stories: extension + capture-rfc / manage-rfc updates | done |
 | STORY-049 | STORY-049: Ask for a URL in a shape I can paste into | draft |
 | STORY-050 | STORY-050: Have my reviewer read the version I actually have | draft |
@@ -74,3 +73,4 @@ Copy an existing plugin and modify it, read ADRs and BRIEFING.md
 | STORY-057 | STORY-057: Get the fix by upgrading, not by patching a cache | draft |
 | STORY-058 | STORY-058: Read a README that describes the version I installed | draft |
 | STORY-073 | STORY-073: A failed reviewer blocks the guarded edit | in-progress |
+| STORY-074 | STORY-074: Use generated Codex skills after upgrading without repairs | in-progress |

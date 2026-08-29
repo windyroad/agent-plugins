@@ -39,3 +39,5 @@
 > Last reviewed: 2026-08-29 **STORY-072 accepted** — I6-I10 and map-derived I12 passed; all three criteria are backed by the committed P368 evidence.
 
 > Last reviewed: 2026-08-30 **STORY-073 in-progress** — the P469 reviewer-verdict enforcement slice is implemented with all acceptance criteria passing locally.
+
+> Last reviewed: 2026-08-30 **STORY-074 accepted** — I7, I8, I10, and map-derived I12 pass for the P526 Codex projection repair.

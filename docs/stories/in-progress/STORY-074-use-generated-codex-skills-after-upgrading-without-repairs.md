@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: use-generated-codex-skills-after-upgrading-without-repairs
 reported: 2026-08-30
 decision-makers: [Tom Howard]

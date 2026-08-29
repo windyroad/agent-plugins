@@ -97,4 +97,4 @@ It has gone unnoticed because the maintainer checkout has no offending path comp
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-074 | STORY-074: Use generated Codex skills after upgrading without repairs | accepted |
+| STORY-074 | STORY-074: Use generated Codex skills after upgrading without repairs | in-progress |
