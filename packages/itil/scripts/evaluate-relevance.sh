@@ -6,6 +6,7 @@
 # evidence shapes per ADR-079 (Phase 1 + Phase 2):
 #
 #   Shape 1 — file-no-longer-exists  (Phase 1, original)
+#             Elided prose references (`.../`) are not paths.
 #   Shape 2 — ADR-shipped with `human-oversight: confirmed`  (Phase 2)
 #             CORROBORATING-ONLY — never a clean CLOSE on its own.
 #   Shape 3 — named-skill-or-feature-exists  (Phase 2)
@@ -245,9 +246,19 @@ record_shape() {
 # candidate. Detects state-suffix / sibling-file / rename to avoid Phase 1
 # false-positives (P180/P244/P251); on detection routes to KEEP-WITH-NOTE.
 
+# The character class admits `.` and `/`, so an ELIDED reference in prose
+# (`packages/itil/hooks/lib/.../detectors.sh`, `docs/decisions/044-....md`)
+# extracts as a path, is found absent, and is counted as evidence the file
+# was deleted — concluding a ticket was fixed because its prose was
+# abbreviated. An abbreviation was never a path assertion, so drop any
+# candidate carrying an ASCII ellipsis. The Unicode `…` form needs no
+# filter — it is outside the character class above, so it never extracts
+# as a path in the first place (pinned by a bats case regardless). Fourth
+# member of the Phase 1 false-positive class alongside P180/P244/P251.
 candidates=$(grep -oE '(packages|docs|\.changeset|src|test|scripts)/[A-Za-z0-9._/-]+\.(md|sh|ts|tsx|js|jsx|json|yml|yaml|bats|py|txt|html)' "$ticket_file" 2>/dev/null \
   | sort -u \
   | grep -v '^docs/problems/' \
+  | grep -v '\.\.\.' \
   || true)
 
 shape1_missing=0
@@ -548,7 +559,7 @@ fi
 # No shape fired — fall back to the legacy KEEP / SKIP routing.
 
 if [ -z "$candidates" ]; then
-  echo "SKIP $basename — no extractable file paths (after self-reference exclusion)"
+  echo "SKIP $basename — no extractable file paths (after self-reference and elided-reference exclusion)"
   exit 2
 fi
 

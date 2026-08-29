@@ -853,3 +853,71 @@ EOF
   [[ "$output" == *"ADR-shipped-confirmed"* ]]
   [[ "$output" == *"self-marker-in-body"* ]]
 }
+
+# ── Phase 1 fix 4: elided prose references are not paths ─────────────────────
+#
+# Fourth member of the Phase 1 false-positive class (P180 state-suffix /
+# P244 sibling-file / P251 rename). The path regex admits `.` and `/`, so an
+# abbreviated reference inside backticks extracted as a real path, was found
+# absent, and counted as evidence the file had been deleted — concluding a
+# ticket was fixed because its prose was shortened.
+
+@test "evaluate-relevance: elided ASCII path in prose is not counted as a missing file" {
+  cat > docs/problems/open/124-elided-ascii.md <<EOF
+# Problem 124: elided-ascii
+
+**Status**: Open
+**Reported**: $OLD_DATE
+
+## Description
+
+Canonical vocabulary lives in \`packages/itil/hooks/lib/.../detectors.sh\`
+and the abbreviated form \`docs/decisions/044-....md\` is cited in prose.
+EOF
+  run "$SCRIPT" docs/problems/open/124-elided-ascii.md
+  # Neither string is a path assertion, so nothing is extracted and there is
+  # no evidence of absence. MUST NOT be a close candidate of any kind.
+  [ "$status" -eq 2 ]
+  [[ "${lines[0]}" == "SKIP "* ]]
+  [[ "$output" != *"CLOSE-CANDIDATE"* ]]
+}
+
+@test "evaluate-relevance: elided Unicode-ellipsis path in prose is not counted as a missing file" {
+  cat > docs/problems/open/125-elided-unicode.md <<EOF
+# Problem 125: elided-unicode
+
+**Status**: Open
+**Reported**: $OLD_DATE
+
+## Description
+
+See \`packages/itil/hooks/…/detectors.sh\` for the vocabulary.
+EOF
+  run "$SCRIPT" docs/problems/open/125-elided-unicode.md
+  [ "$status" -eq 2 ]
+  [[ "${lines[0]}" == "SKIP "* ]]
+  [[ "$output" != *"CLOSE-CANDIDATE"* ]]
+}
+
+@test "evaluate-relevance: elided reference alongside a real absent path does not inflate the evidence" {
+  cat > docs/problems/open/126-elided-mixed.md <<EOF
+# Problem 126: elided-mixed
+
+**Status**: Open
+**Reported**: $OLD_DATE
+
+## Description
+
+The real file \`packages/itil/scripts/deleted-thing.sh\` is gone; the
+abbreviated \`packages/itil/hooks/lib/.../detectors.sh\` is only prose.
+EOF
+  run "$SCRIPT" docs/problems/open/126-elided-mixed.md
+  # The genuinely-absent path still fires shape 1 — the filter removes the
+  # fabricated evidence, not the real evidence — and the cite names one
+  # path, not two.
+  [ "$status" -eq 0 ]
+  [[ "${lines[0]}" == "CLOSE-CANDIDATE "* ]]
+  [[ "$output" == *"all 1 file paths absent"* ]]
+  [[ "$output" == *"deleted-thing.sh"* ]]
+  [[ "$output" != *"..."* ]]
+}
