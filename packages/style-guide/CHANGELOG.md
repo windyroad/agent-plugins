@@ -1,5 +1,11 @@
 # @windyroad/style-guide
 
+## 0.6.1
+
+### Patch Changes
+
+- 93e9329: Make read-only reviewer verdicts enforceable by parsing canonical agent output and failing closed unless the first verdict heading is PASS.
+
 ## 0.6.0
 
 ### Minor Changes

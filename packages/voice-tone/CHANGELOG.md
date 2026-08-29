@@ -1,5 +1,11 @@
 # @windyroad/voice-tone
 
+## 0.8.2
+
+### Patch Changes
+
+- 93e9329: Make read-only reviewer verdicts enforceable by parsing canonical agent output and failing closed unless the first verdict heading is PASS.
+
 ## 0.8.1
 
 ### Patch Changes
