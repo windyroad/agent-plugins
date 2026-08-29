@@ -1,5 +1,26 @@
 # @windyroad/problem
 
+## 2.1.1
+
+### Patch Changes
+
+- 70c6e07: Run Codex backlog iterations in isolated Codex CLI processes
+
+  The Codex backlog drain can now use available Codex CLI capacity while keeping
+  each problem in its own governed process. Progress metadata and the final
+  iteration summary use separate structured output channels, and the existing
+  Claude Code workflow is unchanged.
+
+- 1c621db: Codex skill names carry one plugin prefix, not two
+
+  Codex namespaces every skill by the plugin it came from. These plugins were also
+  putting that prefix in each skill's own name, so it landed twice — the skill list
+  advertised `wr-itil:wr-itil:work-problems`, which is not a string you can type.
+
+  The Codex build now emits the bare skill name and lets the runtime add the prefix
+  once. Nothing changes for Claude Code, and the human-readable names on skill cards
+  are untouched.
+
 ## 2.1.0
 
 ### Minor Changes
