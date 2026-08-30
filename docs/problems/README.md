@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-31 **P426 verification pending** - `@windyroad/architect@0.22.0` was unpacked and installed in isolation; its published reviewer raised `[First-Match Footgun]` for a non-unique binding and passed the unique-key guard.
+> Last reviewed: 2026-08-31 **P426 closed on evidence** - isolated `@windyroad/architect@0.22.0` runs raised `[First-Match Footgun]` for the non-unique fixture and passed the unique-key guard.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -296,7 +296,6 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P398 | the VP carve-out holds changesets for already-shipped (verifying) code indefinitely — pointless changelog stranding | pending — @windyroad/risk-scorer patch committed, ships next release | no — not observed |
 | P400 | architect-mark-reviewed PostToolUse never fires on a SendMessage resume of an architect agent | pending — committed on main, ships next @windyroad/architect release | no — not observed |
 | P403 | Agent frames skill-mandatory mechanical steps as user-optional (detect_mechanical_optional Stop-hook detector; fix vehicle RFC-042) | pending — @windyroad/itil patch committed, ships next release | no — not observed |
-| P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 2026-08-31 (`@windyroad/architect@0.22.0`, PR #467, merge `09ef172d`) | yes — observed: installed published reviewer raised `[First-Match Footgun]` for the non-unique fixture and passed the unique-key guard |
 
 ## Inbound Upstream Reports
 
@@ -402,6 +401,7 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 
 | ID | Title | Closed via |
 |----|-------|-----------|
+| P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | Closed 2026-08-31 on installed published-artifact evidence from `@windyroad/architect@0.22.0`: the non-unique fixture raised `[First-Match Footgun]`, while the primary-key fixture passed without the finding. Recovery: `/wr-itil:transition-problem 426 known-error`. |
 | P477 | Codex collaboration completion bypasses the risk-marker bridge | Closed 2026-08-30 on direct installed-runtime evidence: a native `wr-risk-scorer:pipeline` collaboration completed, its checkout-bound marker was accepted by governed commit `9712a054`, and the same agent completed after `followup_task`. Recovery: `/wr-itil:transition-problem 477 known-error`. |
 | P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | Closed 2026-08-21 (run-retro Step 4a sub-step 9 prior-session evidence drain per P282). Fix released `@windyroad/architect@0.21.1` 2026-08-17, live in published 0.21.3. Evidence: `yes — observed: installed v0.21.3 hook permits a clean declared checkout and denies an unpaired one, both from the target index`; regression suite 24/24 green. Recovery: `/wr-itil:transition-problem 499 known-error`. |
 | P164 | Latent octal-eval bug in the next-ID formula across six ticket-creator skills | verified in the field 2026-07-15; drained by the 2026-08-20 retro |

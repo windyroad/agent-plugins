@@ -1426,3 +1426,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-08-31
 
 > Last reviewed: 2026-08-30 **P512 verification pending** - the lifecycle recovery fix shipped in `@windyroad/itil@2.1.8` and `@windyroad/retrospective@0.28.1` through workflow 33313257350 and merge `5f4b69fa`; awaiting post-release invocation evidence.
+
+> Last reviewed: 2026-08-31 **P426 verification pending** - `@windyroad/architect@0.22.0` was unpacked and installed in isolation; its published reviewer raised `[First-Match Footgun]` for a non-unique binding and passed the unique-key guard.

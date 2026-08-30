@@ -1,6 +1,6 @@
 # Problem 426: wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun)
 
-**Status**: Verification Pending
+**Status**: Closed (closed-on-evidence 2026-08-31 - isolated `@windyroad/architect@0.22.0` published-artifact runs raised `[First-Match Footgun]` for the non-unique fixture and passed the unique-key guard. Recovery: rerun `/wr-itil:transition-problem 426 known-error` to reopen)
 **Reported**: 2026-07-06
 **Priority**: 12 (High) — Impact: 4 × Likelihood: 3
 **Origin**: inbound-reported (#169)
