@@ -71,6 +71,7 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-018 | STORY-018: Capture the problem in seconds, mid-flow | done |
 | STORY-026 | STORY-026: Work the RFC's stories one at a time | done |
 | STORY-071 | STORY-071: Review the complete commit message once | done |
+| STORY-076 | STORY-076: My unattended backlog loop launches every iteration with its governance plugins on macOS | done |
 | STORY-014 | STORY-014: Unattended, the agent works the plan and pauses for real decisions | draft |
 | STORY-036 | STORY-036: Write the create-gate marker under every candidate session id | draft |
 | STORY-038 | STORY-038: Fix-titled commits surface a lifecycle-drift advisory | draft |
@@ -84,4 +85,3 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-062 | STORY-062: Keep problem ranking correct after a status transition | in-progress |
 | STORY-069 | STORY-069: Drain one Codex ticket through an isolated Codex CLI | in-progress |
 | STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | in-progress |
-| STORY-076 | STORY-076: My unattended backlog loop launches every iteration with its governance plugins on macOS | in-progress |

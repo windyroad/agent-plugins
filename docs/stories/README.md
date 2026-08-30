@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-08-30 **STORY-044 in-progress** — implementation commit 60b252a4 satisfies all acceptance criteria.
+> Last reviewed: 2026-08-30 **STORY-076 done** — all acceptance criteria passed and RFC-082 shipped in the P428 release.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -138,7 +138,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | in-progress | STORY-068 | Invoke a Codex skill by the name the card shows | S | P527 | RFC-074 | STORY-MAP-008 |
 | in-progress | STORY-070 | Leave the Codex backlog draining until no dispatchable work remains | S | P528 | RFC-076 | STORY-MAP-011 |
 | accepted | STORY-072 | Record oversight evidence only for the confirming session | M | P368 | RFC-078 | STORY-MAP-002 |
-| in-progress | STORY-076 | My unattended backlog loop launches every iteration with its governance plugins on macOS | S | P428 | RFC-082 | STORY-MAP-011 |
 | in-progress | STORY-073 | A failed reviewer blocks the guarded edit | S | P469 | RFC-079 | STORY-MAP-008 |
 | in-progress | STORY-074 | Use generated Codex skills after upgrading without repairs | S | P526 | RFC-080 | STORY-MAP-008 |
 | in-progress | STORY-075 | My story map starts from the journey I walk | S | P509 | RFC-081 | STORY-MAP-002 |
@@ -170,6 +169,7 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-076 | My unattended backlog loop launches every iteration with its governance plugins on macOS | 2026-08-30 | P428 |
 | STORY-071 | Review the complete commit message once | 2026-08-29 | P415 |
 | STORY-063 | Check ADR pairing in the checkout being committed | 2026-08-21 | P499 |
 | STORY-042 | Extract quota-pacing into its own plugin | 2026-08-09 | P160, P443 |

@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 story-id: my-unattended-backlog-loop-launches-every-iteration-with-its-governance-plugins-on-macos
 reported: 2026-08-30
 decision-makers: [Tom Howard]
@@ -48,5 +48,5 @@ Keep the change inside the shipped Step 5 command shape and cover the extracted 
 
 ## Related
 
-- [P428](../../problems/known-error/428-work-problems-step5-dispatch-heredoc-unparseable-macos-bash-3-2.md)
+- [P428](../../problems/verifying/428-work-problems-step5-dispatch-heredoc-unparseable-macos-bash-3-2.md)
 - [JTBD-006: Work Backlog AFK](../../jtbd/developer/JTBD-006-work-backlog-afk.proposed.md)

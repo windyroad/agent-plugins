@@ -1,6 +1,6 @@
 # Problem 428: work-problems Step 5 dispatch heredoc-in-command-substitution is unparseable under macOS /bin/bash 3.2
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-06
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3
 **Origin**: inbound-reported (#345)
@@ -64,11 +64,35 @@ The regression test extracts the shipped command prefix, executes it with macOS 
 
 ## Fix Strategy
 
-Use the smallest portable command shape already supported by Bash 3.2: create one prompt temp file, read it with `cat`, collect resolver output in an indexed array with a `while read` loop, and remove both temporary files after the subprocess exits. RFC-082 / STORY-076 is the release vehicle. `.changeset/calm-bats-launch.md` carries the `@windyroad/itil` patch release; the fix remains unreleased in this iteration by user direction.
+Use the smallest portable command shape already supported by Bash 3.2: create one prompt temp file, read it with `cat`, collect resolver output in an indexed array with a `while read` loop, and remove both temporary files after the subprocess exits. RFC-082 / STORY-076 is the release vehicle.
+
+**Release vehicle**: `.changeset/calm-bats-launch.md`
 
 ## Verification Evidence
 
 - `LC_ALL=C bats --recursive packages/itil/skills/work-problems/test ...` plus the resolver, renderer, story-map, story reconciliation, and reverse-reference suites: 556/556 passed on macOS `/bin/bash` 3.2.57.
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-076 | STORY-076: My unattended backlog loop launches every iteration with its governance plugins on macOS | done |
+
+## Fix Released
+
+Released in `@windyroad/itil@2.1.7` through PR #465 (version-packages commit `32ce941681b6530d46aa89052b7c53d4d64af7bf`, merge commit `16bd9f1005f03c2051ecf7bceb5901cd78db42c4`, released 2026-08-30). Release workflow `33305914798` completed successfully at the exact merge commit, and direct npm registry readback returned `2.1.7`.
+
+The released Step 5 dispatch uses a Bash 3.2-compatible prompt file and indexed-array accumulation loop, preserving the complete prompt and every resolver-emitted governance plugin argument.
+
+Awaiting user verification.
+
+## Upstream Lifecycle Updates
+
+- **2026-08-30** - Known Error to Verification Pending (inbound)
+  - **Target**: inbound #345 (own repo `windyroad/agent-plugins`)
+  - **Disclosure path**: gate-blocked
+  - **Gate verdict**: external-comms pass, Very Low (1/25); voice-tone pass
+  - **Blocker**: the Codex compatibility hook did not persist the completed voice-tone review marker, so the public comment remained fail-closed and was not posted.
 
 ## Dependencies
 
@@ -77,10 +101,3 @@ Use the smallest portable command shape already supported by Bash 3.2: create on
 ## Related
 
 - Inbound issue #345.
-
-
-## Stories
-
-| ID | Title | Status |
-|----|-------|--------|
-| STORY-076 | STORY-076: My unattended backlog loop launches every iteration with its governance plugins on macOS | in-progress |
