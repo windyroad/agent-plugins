@@ -5,7 +5,7 @@ reported: 2026-08-30
 decision-makers: [Tom Howard]
 problems: [P512]
 jtbd: [JTBD-001, JTBD-006]
-rfcs: []
+rfcs: [RFC-083]
 story-maps: [STORY-MAP-002]
 estimated-effort: M
 ---
@@ -18,7 +18,7 @@ estimated-effort: M
 **Reported**: 2026-08-30
 **Problems**: P512
 **JTBD**: JTBD-001, JTBD-006
-**RFCs**: (none yet; RFC-083 is added as the release row after capture)
+**RFCs**: RFC-083
 **Story Maps**: STORY-MAP-002
 **Estimated effort**: M
 

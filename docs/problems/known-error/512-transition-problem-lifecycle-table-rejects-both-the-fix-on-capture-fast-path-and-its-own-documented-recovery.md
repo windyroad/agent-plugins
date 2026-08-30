@@ -88,6 +88,10 @@ Caught by the external-comms review of P519's changeset, which spotted that the 
 
 **Still open here**: the fix-on-capture fast path (`Open → verifying`), and this ticket's own investigation task *"Re-check Step 4a's silent-close justification once the route exists: it argues from reversibility, which was not true when written"* — the route now exists, so that re-check is unblocked.
 
+## Fix Strategy
+
+RFC-083, the release row "Captured fixes and reopened problems reach the right lifecycle state" on STORY-MAP-002, carries STORY-077. Reuse the existing transition pre-flights, add the objective `## Fix Released` discriminator to the confirmed ADR-022 folded route, verify run-retro's recovery contract against transition-problem, and exclude post-release reopened tickets after release-vehicle derivation.
+
 
 ## Stories
 
