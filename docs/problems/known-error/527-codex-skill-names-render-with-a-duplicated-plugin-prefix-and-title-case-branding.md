@@ -5,7 +5,7 @@
 **Priority**: 15 (High) — Impact: 3 × Likelihood: 5 — derived at capture. Impact 3: the name Codex shows a user is not a name they can type. `$wr-itil:wr-itil:work-problems` fails as an invocation, and the display form `Wr Itil:wr Itil:work Problems` misspells the product name in the one place an adopter reads it most. This is discovery and invocation friction on the published surface, not data loss — no ticket, decision, or repository state is corrupted by it. Likelihood 5: it is a property of the projection output, not of any particular session, so it holds for every skill in every Codex install of the plugin.
 **Origin**: internal
 **Effort**: S — derived at capture. The generated frontmatter `name:` is one field written by one transform; the fix is to decide the single form Codex should receive (bare `work-problems` so Codex namespaces it once, or a display-cased `WR ITIL: Work Problems`) and stop emitting the other. Add one check that parses every generated frontmatter `name:` and asserts the prefix appears at most once. Sized alongside P526, which touches the same file for the same reason — cf. P526.
-**WSJF**: 15 — (15 × 1.0) / 1
+**WSJF**: 30 — (15 × 2.0) / 1 (corrected 2026-08-30 review: current Known Error multiplier)
 **JTBD**: JTBD-302
 **Persona**: plugin-user
 

@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-30 **P526 verification pending** - the projection repair shipped in `@windyroad/itil@2.1.4`; the published package has valid frontmatter on both skill surfaces and all 29 Codex skills.
+> Last reviewed: 2026-08-30 **post-P509 release review** - `@windyroad/itil@2.1.5` proves P509 symptoms 1 and 3 shipped while the `preRfc` decision remains open; P530 was captured from inbound issue #453; stale ranking metadata was corrected.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -20,6 +20,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
 | 12 | P512 | The transition lifecycle table rejects both the fix-on-capture fast path and its own documented recovery path | 12 (High) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P151) |
 | 12 | P514 | The JTBD gate reviews edits but not recommendations, so option-sets reach the user unvalidated | 12 (High) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P042) |
+| 10 | P530 | Retrospective consumer-repo assumptions remain after shim fix | 10 (High) | Open | S | 2026-08-28 | inbound-reported (#453) |
 | 9 | P425 | wr-architect edit-gate re-litigates its own same-session PASS — [Unratified Dependency] over-fires on agent-prescribed born-proposed ADRs | 9 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#342) |
 | 9 | P428 | work-problems Step 5 dispatch heredoc-in-command-substitution is unparseable under macOS /bin/bash 3.2 | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#345) |
 | 9 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter (consumers pin the cache version and break on bump) | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#325) |
@@ -43,12 +44,12 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3 | P453 | wr-jtbd edit-gate marker invalidated by the reviewer's own required doc-sync edits — PASS self-deletes, forcing an extra re-review round | 6 (Medium) | Open | M | 2026-07-15 | inbound-reported (#340) |
 | 3 | P455 | new evidence on an already-upstream-reported ticket is not routed upstream without a user prompt — no evidence-append mode exists | 6 (Medium) | Open | M | 2026-07-15 | inbound-reported (#348) |
 | | | **Tier 2 — Internal** | | | | | |
+| 30 | P527 | Codex skill names render with a duplicated plugin prefix and title-case branding | 15 (High) | Known Error | S | 2026-08-29 | internal |
 | 16 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole corpus | 8 (Medium) | Known Error | S | 2026-07-04 | internal |
 | 16 | P420 | check-briefing-budgets.sh crashes with `must_split[@]: unbound variable` on empty arrays under macOS default bash 3.2 | 8 (Medium) | Known Error | S | 2026-07-05 | internal |
 | 16 | P471 | run-retro Step 2d ask-hygiene trail path collides across same-day iterations, clobbering prior entries | 8 (Medium) | Known Error | S | 2026-07-26 | internal |
 | 16 | P511 | The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate | 8 (Medium) | Known Error | S | 2026-08-21 | internal |
 | 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Known Error | M | 2026-08-20 | internal |
-| 15 | P527 | Codex skill names render with a duplicated plugin prefix and title-case branding | 15 (High) | Known Error | S | 2026-08-29 | internal |
 | 12 | P148 | Agent defers ticket creation to retro summary instead of immediately capturing it | 12 (High) | Known Error | M | 2026-04-29 | internal |
 | 12 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 (High) | Known Error | M | 2026-06-10 | internal |
 | 12 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Known Error | M | 2026-07-26 | internal |
@@ -68,6 +69,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8 | P516 | `story-map-edit add-card` omits the `ref` back-link, so a card renders with no Traces line | 8 (Medium) | Open | S | 2026-08-21 | internal |
 | 8 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 (Critical) | Open | M | 2026-07-06 | internal |
 | 7.5 | P444 | Agent buries granular design decisions in artefacts — default values, thresholds, and policy choices pass artefact-level ratification unsurfaced, escaping real oversight | 15 (High) | Open | M | 2026-07-08 | internal |
+| 6 | P284 | Release pipeline halts — `changeset publish` E404 on a new version of an existing scoped package (@windyroad/architect@0.8.0) | 3 (Low) | Known Error | S | 2026-05-23 | internal |
 | 6 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 (Med) | Known Error | M | 2026-05-26 | internal |
 | 6 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 6 (Medium) | Known Error | M | 2026-07-03 | internal |
 | 6 | P468 | architect-mark-reviewed misses a genuine PASS whose verdict line is a markdown heading rather than bold | 6 (Medium) | Open | S | 2026-07-26 | internal |
@@ -90,6 +92,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 (Med High) | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 (Medium) | Open | M | 2026-06-17 | internal |
 | 4.5 | P461 | Downstream evidence-scan flags adopter-repo sightings as live regressions without version-gating against the fix release | 9 (Medium) | Open | M | 2026-07-25 | internal |
+| 4.5 | P482 | ADR line-number citations are positional, so they rot silently every time the ADR is amended | 9 (Medium) | Open | M | 2026-08-08 | architect-review |
 | 4.5 | P491 | The retro context trigger's thresholds are prose in five places, and none of them is the decision | 9 (Medium) | Open | M | 2026-08-09 | internal |
 | 4.5 | P501 | Project-specific content leaks into another adopter's generated plugin document | 9 (Medium) | Open | M | 2026-08-18 | corrective-feedback |
 | 4.5 | P517 | An iteration can burn its whole budget in the commit gate and lose everything, because the commit is the last step | 9 (Medium) | Open | M | 2026-08-21 | internal |
@@ -104,7 +107,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4 | P494 | Plugin tests and project-conformance tests are the same suite, so neither can be right | 16 (High) | Open | L | 2026-08-09 | corrective-feedback (user, 2026-08-09) |
 | 3.75 | P443 | Quota-pacing (P160 / RFC-046 / ADR-093) shipped without a grounded JTBD → persona → USM → RFC → story lineage — governance artefacts are wrong, orphaned, or missing | 15 (High) | Open | L | 2026-07-07 | internal |
 | 3.75 | P445 | Agent offers unsolicited off-ramps, hedges, projects onto the user, and narrates its own conduct — "acknowledges-but-recurs" — and needs a PLUGIN-shipped behavioural rule (portable across every project), not a project-local fix | 15 (High) | Open | L | 2026-07-08 | internal |
-| 3 | P284 | Release pipeline halts — `changeset publish` E404 on a new version of an existing scoped package (@windyroad/architect@0.8.0) | 3 (Medium) | Known Error | M | 2026-05-23 | internal |
 | 3 | P248 | Use time and token cost (not t-shirt sizing) for WSJF effort, with retro-driven estimation refinement | 6 (Medium) | Open | M | 2026-05-17 | internal |
 | 3 | P411 | no interactive oversight-drain skill for pending-review risk-register entries | 6 (Medium) | Open | M | 2026-07-03 | internal |
 | 3 | P412 | RFC / Story / Story-map framework tiers are invisible to adopters — no scaffold, no nudge, no discoverable entry point | 6 (Medium) | Open | M | 2026-07-03 | internal |
@@ -112,7 +114,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3 | P418 | Reviewer-agent marker hooks do not fire on SendMessage-resumed agents — ISSUES FOUND cannot be continued to a marker-writing PASS, forcing a full fresh re-review | 6 (Medium) | Open | M | 2026-07-05 | internal |
 | 3 | P421 | Reference-section awk helpers destructively truncate governance files containing invalid UTF-8 | 6 (Medium) | Open | M | 2026-07-05 | internal |
 | 3 | P496 | Nine story maps carry the superseded stacked encoding, and two more use bespoke encodings, all needing migration to the rendered grid | 6 (Low) | Open | M | 2026-08-05 | found while fixing the shipped template (ADR-102) |
-| 3 | P482 | ADR line-number citations are positional, so they rot silently every time the ADR is amended | 6 (Medium) | Open | M | 2026-08-08 | architect-review |
 | 3 | P045 | Auto plugin install on user's machine after governance release | 12 (High) | Open | L | 2026-04-19 | internal |
 | 3 | P460 | Agent surfaces ticket-worthy findings and obvious next-actions as recommendations instead of autonomously capturing or acting | 12 (High) | Open | L | 2026-07-25 | internal |
 | 3 | P473 | Story maps are authored as per-fix 1-card stubs, not user journeys — below the STORY-MAP-003 quality bar | 12 (High) | Open | L | 2026-07-27 | corrective-feedback (user, 2026-07-27) |

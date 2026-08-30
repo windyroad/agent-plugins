@@ -1,11 +1,11 @@
 {
   "$schema": "https://windyroad.github.io/agent-plugins/schemas/upstream-cache.json",
   "$comment": "Cache file for inbound report discovery (P079 / ADR-062). Written by /wr-itil:review-problems Step 8.5 after each discovery pass.",
-  "last_checked": "2026-08-24T00:00:00Z",
-  "$last_pass_note": "/wr-itil:review-problems Step 4.5 discovery pass 2026-08-24 (AFK pre-flight subprocess dispatched by /wr-itil:work-problems; TTL-expiry auto-recheck — cache was 3d stale against ttl_seconds 86400). github-issues polled --state open unfiltered: 86 live, 2 new since the 2026-08-21 pass (#444, #445), 0 closed. Both new issues are authored by the repo maintainer (tompahoward) filing from the adopter repo mountain-pass/addressr, so they are outbound filings rather than third-party inbound reports; the JTBD-301 reporter-acknowledgement contract does not apply and no ack comments were posted (same convention as the 2026-08-21 pass). #444 (story-map.css link underline relies on the UA default) matched P466 defect 4, which was already fixed and released in @windyroad/itil@1.1.2 on 2026-08-21 — no new ticket. #445 (render-story-map emits bare identifiers as link text, SC 2.4.4/2.4.9) found no comparator hit and was verified live in the renderer source; local ticket P518 created. This pass also backfilled report entries for the 15 issues the 2026-08-21 pass recorded in prose notes only (#395-#416), so the reports array now matches the live open set. github-discussions and github-security-advisories were not polled (see cache_audit_note).",
+  "last_checked": "2026-08-30T02:02:26Z",
+  "$last_pass_note": "/wr-itil:review-problems Step 4.5 discovery pass 2026-08-30T02:02:26Z. github-issues polled unfiltered: 87 live, 1 new (#453), 86 unchanged, 0 closed. #453 passed inbound risk and JTBD routing; hang-off verdict PROCEED_NEW; local ticket P530 created with Origin inbound-reported (#453). Reporter acknowledgement was not posted because the required voice-tone compatibility marker could not be persisted in this Codex parent session; the external gate remained fail-closed. github-discussions returned HTTP 410 (P406); github-security-advisories returned 0 reports. Cache and audit log refreshed.",
   "channels": {
     "github-issues:windyroad/agent-plugins": {
-      "fetched_at": "2026-08-24T00:00:00Z",
+      "fetched_at": "2026-08-30T02:02:26Z",
       "filter": "polled --state open UNFILTERED (P373); title_prefix soft signal only",
       "status": "ok",
       "reports": [
@@ -1243,25 +1243,34 @@
           "classification": "safe-and-valid-local-ticket-created",
           "matched_local_ticket": "P518",
           "cache_audit_note": "No semantic-comparator hit against the live or closed corpus. Verified live this pass: render-story-map.mjs:718 and :792 both pass `esc(id)` as the link text through the shared `link()` helper at :561. Local ticket P518 created 2026-08-24. No ack comment: maintainer-filed, so the JTBD-301 reporter-acknowledgement contract does not apply (same convention as the 2026-08-21 pass)."
+        },
+        {
+          "number": 453,
+          "title": "[problem] wr-retrospective: two consumer-repo monorepo assumptions left after the 0.27.3 shim fix",
+          "author": "tompahoward",
+          "created_at": "2026-08-28T15:17:54Z",
+          "body_hash": "540796369",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P530",
+          "cache_audit_note": "Inbound risk PASS (safe-low-fix-risk); JTBD classified aligned-with-new-JTBD-for-existing-persona; hang-off PROCEED_NEW; local ticket P530 created. Reporter acknowledgement not posted: risk review passed, but the required voice-tone compatibility marker could not be persisted in the parent Codex session, so the external action remained fail-closed."
         }
       ]
     },
     "github-discussions:windyroad/agent-plugins": {
-      "fetched_at": "2026-07-15T06:44:11Z",
+      "fetched_at": "2026-08-30T02:02:26Z",
       "status": "skipped-failsoft",
       "skip_reason": "HTTP 410 - Discussions are disabled for this repo (P406); fail-soft skip per Step 4.5 contract",
       "reports": [],
-      "cache_audit_note": "channel skipped: HTTP 410 (P406 known error — Discussions disabled on repo)"
+      "cache_audit_note": "channel polled and skipped: HTTP 410 (P406 known error - Discussions disabled on repo)"
     },
     "github-security-advisories:windyroad/agent-plugins": {
-      "fetched_at": "2026-07-15T06:44:11Z",
-      "status": "skipped-failsoft",
-      "skip_reason": "external-comms gate false-positived on the read-only advisories poll (P405); fail-soft skip per Step 4.5 contract",
+      "fetched_at": "2026-08-30T02:02:26Z",
+      "status": "ok",
       "reports": []
     }
   },
-  "cache_audit_note": "unmatched-maintainer-filed-issues-2026-08-24: #396, #399, #401, #407, #408, #410 remain unmatched, carried forward unchanged from the 2026-08-21 pass. Each is maintainer-authored with no local ticket — either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Disambiguating them needs a read of six issue bodies against the closed corpus and a per-issue back-link-or-capture call; this pass ran AFK and left them flagged rather than guessing. | channels-not-polled-2026-08-24: github-discussions + github-security-advisories skipped again (fail-soft, not attempted — the issues channel carried the whole signal); see P406 for the standing Discussions-disabled question.",
-  "open_issue_numbers_2026_08_24": [
+  "cache_audit_note": "unmatched-maintainer-filed-issues-2026-08-24: #396, #399, #401, #407, #408, #410 remain unmatched, carried forward unchanged from the 2026-08-21 pass. Each is maintainer-authored with no local ticket — either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Disambiguating them needs a read of six issue bodies against the closed corpus and a per-issue back-link-or-capture call; this pass ran AFK and left them flagged rather than guessing. | channels-not-polled-2026-08-24: github-discussions + github-security-advisories skipped again (fail-soft, not attempted — the issues channel carried the whole signal); see P406 for the standing Discussions-disabled question. | 2026-08-30T02:02:26Z: 87 open issues; #453 routed safe-and-valid-local-ticket-created to P530; inbound risk PASS; JTBD new-job elicitation queued; hang-off PROCEED_NEW; acknowledgement held because the voice-tone external-comms gate remained fail-closed after reviewed-child marker isolation; discussions HTTP 410; security advisories 0.",
+  "open_issue_numbers_2026_08_30": [
     137,
     138,
     139,
@@ -1347,6 +1356,7 @@
     414,
     416,
     444,
-    445
+    445,
+    453
   ]
 }

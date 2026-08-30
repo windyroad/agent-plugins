@@ -2,8 +2,10 @@
 
 **Status**: Known Error
 **Reported**: 2026-05-23
-**Priority**: 3 (Medium) — Impact: 3 x Likelihood: 1 (deferred — re-rate at next /wr-itil:review-problems)
-**Effort**: M (deferred — re-rate at next /wr-itil:review-problems)
+**Priority**: 3 (Low) — Impact: 3 × Likelihood: 1. Impact 3: recurrence blocks package publication but does not corrupt source or published versions. Likelihood 1: Trusted Publishing/OIDC removed the expiring-token dependency, and the P509 release completed through that path.
+**Origin**: internal
+**Effort**: S — implementation has shipped; only lifecycle verification remains
+**WSJF**: 6 — (3 × 2.0) / 1 while the ticket remains Known Error pending the dedicated transition flow
 
 ## Stories
 
@@ -14,6 +16,10 @@
 ## Fix Released
 
 The 2026-05-24 incident was resolved by replacing the publish token with one that bypassed 2FA. The same failure class recurred after that replacement token expired, so the token-based fix was not durable.
+
+### Durable release evidence — 2026-08-30
+
+Commit `eac7b20a` replaced token publishing with npm Trusted Publishing/OIDC. The subsequent P509 release completed at merge/tag commit `959f021b`, publishing `@windyroad/itil@2.1.5`. This is direct evidence that the durable publish path works, but `/wr-itil:review-problems` does not own the Known Error → Verification Pending transition, so this ticket remains in its current lifecycle state for the dedicated transition flow.
 
 ## Recurrence — 2026-08-27
 

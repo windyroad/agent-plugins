@@ -316,3 +316,12 @@ Invoked as `/wr-itil:review-problems` Step 4.5 from the `/wr-itil:work-problems`
 - **Unmatched, carried forward** (6): #396, #399, #401, #407, #408, #410 — unchanged from 2026-08-21. Each is maintainer-authored with no local ticket, so each is either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Disambiguating them needs a read of six issue bodies against the closed corpus and a per-issue back-link-or-capture call. This pass ran AFK and left them flagged rather than guessing.
 - **Audit-flagged reporter handles (P123 future consumption)**: none.
 - **Cache refresh**: `docs/problems/.upstream-cache.json` rewritten at `last_checked: 2026-08-24T00:00:00Z`; `open_issue_numbers_2026_08_24` replaces the prior day's snapshot key.
+
+## 2026-08-30T02:02:26Z — Discovery pass
+
+- **Trigger**: `/wr-itil:review-problems` Step 4.5, mechanical AFK preflight after the P509 release. The cache was stale against `ttl_seconds: 86400`.
+- **Channels polled**: all 3 configured channels. GitHub issues returned 87 open reports: 1 new (#453), 86 unchanged, 0 closed. GitHub Discussions returned HTTP 410 and was skipped fail-soft under P406. GitHub security advisories returned 0 reports.
+- **Pipeline outcome**: #453 passed inbound risk (`safe-low-fix-risk`), was classified `aligned-with-new-JTBD-for-existing-persona`, and received a fresh hang-off verdict of `PROCEED_NEW`. Local ticket **P530** was created with `Origin: inbound-reported (#453)`; JTBD/persona elicitation was queued rather than guessed.
+- **Reporter acknowledgement**: not posted. The risk review passed and the revised copy passed voice/tone review, but the required voice-tone compatibility marker could not be persisted into this parent Codex session. The external action remained fail-closed; no gate was bypassed.
+- **Relevance and verification**: 0 clean relevance-close candidates; 61 caveated false-positive candidates remain covered by P463. The verification table contained no newly observed or regression evidence, so no lifecycle transition was performed and no user question interrupted the AFK loop.
+- **Cache refresh**: `.upstream-cache.json` rewritten at `last_checked: 2026-08-30T02:02:26Z` with the 87-issue snapshot and #453 → P530 audit entry.

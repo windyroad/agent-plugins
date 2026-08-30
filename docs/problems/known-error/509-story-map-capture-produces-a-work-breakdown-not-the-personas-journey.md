@@ -9,6 +9,10 @@
 **JTBD**: JTBD-008
 **Persona**: developer
 
+## Partial release evidence — 2026-08-30
+
+`@windyroad/itil@2.1.5` published from merge/tag commit `959f021b` after implementation commit `69071f8a`. Its changelog records persona-journey title/backbone derivation for capture and manage flows, satisfying symptoms 1 and 3. Symptom 2 remains unresolved: the historical `preRfc` set is still closed, and no replacement carrier or superseding decision has been ratified. P509 therefore remains Known Error at its existing severity and score.
+
 ## Description
 
 The story-map capture flow authors the map from **the change being made**, not from **the persona's journey**. The maintainer had to push three separate times, on three separate axes, to get one usable map — reported 2026-08-21:

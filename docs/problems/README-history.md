@@ -1407,6 +1407,8 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 ## 2026-08-30
 
+> Last reviewed: 2026-08-30 **P526 verification pending** - the projection repair shipped in `@windyroad/itil@2.1.4`; the published package has valid frontmatter on both skill surfaces and all 29 Codex skills.
+
 > Last reviewed: 2026-08-30 **P477 closed on evidence** - the installed Codex risk-receipt bridge produced a checkout-bound marker that the governed `9712a054` commit accepted.
 
 > Last reviewed: 2026-08-29 **P368 verification pending** - the exact-session oversight fix shipped in `@windyroad/architect@0.21.6` and `@windyroad/jtbd@0.14.1`; awaiting user verification.
