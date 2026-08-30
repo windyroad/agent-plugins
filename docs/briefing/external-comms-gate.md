@@ -11,4 +11,6 @@ Older entries (git-add-lost-on-gate-block; over-fire on read-only security-advis
 
 ## What Will Surprise You
 
+- **A Codex changeset edit can be keyed to the edit payload instead of the normalized changeset body.** P426's unchanged summary passed both external-communications reviewers, but replacing only `patch` with `minor` stayed denied even after body, patch-command, and replacement-line reviews. The governed recovery was a reducing pipeline assessment followed by `npx changeset add`, then removal of the redundant generated patch changeset. Keep the final tree to one authoritative changeset and re-score the live result. <!-- signal-score: 2 | last-classified: 2026-08-31 | first-written: 2026-08-31 -->
+
 - **On Codex, a matching reviewer key is not enough unless the compatibility hook sees the required dispatch shape.** Start the reviewer prompt with `SURFACE: git-commit-message`, wrap the byte-identical message in `<draft>...</draft>`, wait for PASS, then close the completed reviewer once before retrying the commit. A free-form review can return the same `EXTERNAL_COMMS_RISK_KEY` and still leave the gate unmarked; the P512 story commit reproduced that deny-before-correct-dispatch sequence. <!-- signal-score: 1 | last-classified: 2026-08-30 | first-written: 2026-08-30 -->

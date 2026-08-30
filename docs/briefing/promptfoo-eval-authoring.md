@@ -4,6 +4,10 @@ Cross-session learnings about authoring `promptfooconfig.yaml` SKILL evals — T
 
 ## What You Need to Know
 
+### Bind Promptfoo to the Node ABI used by its installed native dependency (2026-08-31)
+
+`npx promptfoo` can select a different Node runtime from `node` in the same shell. P426 reproduced `better-sqlite3` module 137 versus runtime module 147 even though `node -v` reported Node 24. Invoking `node_modules/promptfoo/dist/src/entrypoint.js` with the explicit Node 24 binary matched the installed ABI and completed the two focused cases: 2 passed, 0 failed, 0 errors. Treat config validation and direct provider runs as useful diagnostics, but retain the full focused Promptfoo result as the semantic gate. <!-- signal-score: 2 | last-classified: 2026-08-31 | first-written: 2026-08-31 -->
+
 ### Bind runtime-specific cases with a per-test provider in mixed Claude/Codex configs (2026-08-29)
 
 A config-level provider still targets the default Claude skill when the normal full suite runs. A Codex-only case that passed under a command-wide `WR_EVAL_RUNTIME=codex` can therefore fail in CI or exercise the wrong contract. Put `provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'` on each Codex-only test; keep `defaultTest.options.provider` for rubric grading. Prove the binding by running the filtered cases without a global runtime override. P528's five Goal lifecycle cases passed 5/5 in that shape. <!-- signal-score: -3 | last-classified: 2026-08-30 | first-written: 2026-08-29 -->
