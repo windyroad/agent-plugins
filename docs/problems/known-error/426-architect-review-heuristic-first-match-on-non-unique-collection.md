@@ -69,3 +69,10 @@ Behavioural coverage per ADR-052/ADR-075 (harness exists, RFC-012/P324): two pai
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-048 | proposed | Add a first-match-on-non-unique-collection review heuristic to the architect review agent |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-078 | STORY-078: A reviewer catches first-match binding when the key is not unique | draft |

@@ -60,4 +60,5 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-052 | STORY-052: Surface still-outstanding family members before a close | draft |
 | STORY-060 | STORY-060: Pick up a captured ticket and know what was observed | draft |
 | STORY-064 | STORY-064: A ticket that only names a decision as background stays open | draft |
+| STORY-078 | STORY-078: A reviewer catches first-match binding when the key is not unique | draft |
 | STORY-062 | STORY-062: Keep problem ranking correct after a status transition | in-progress |
