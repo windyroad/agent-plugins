@@ -1,6 +1,6 @@
 # RFC Backlog
 
-> Last reviewed: 2026-07-26 **index reconciled (P417)** — the 42 RFCs on disk but absent from this index are listed under `### Unranked`; RFC-037 added to the Verification Queue and RFC-025 to Closed; ranked rows re-sorted to the documented ladder; stale bootstrap prose retired; `## RFCs` reverse-trace refreshed on 7 problem tickets. Two `reconcile-rfcs.sh` detector defects recorded on P417.
+> Last reviewed: 2026-08-30 **RFC-046 verifying** — published Cruise 0.4.11, implementation commit 60b252a4, and 79 focused behavioral checks provide the verification evidence.
 > Run `/wr-itil:manage-rfc review` to re-rank, or `wr-itil-reconcile-rfcs docs/rfcs docs/problems` to diagnose index drift.
 
 ## Status
@@ -130,7 +130,6 @@ One row per RFC in `proposed` / `accepted` / `in-progress` status. RFC-level WSJ
 
 | WSJF | ID | Title | Severity | Status | Effort | Reported |
 |------|-----|-------|----------|--------|--------|----------|
-| 10.0 | RFC-046 | Quota-pace throttle — mechanical PreToolUse pacing, extracted into @windyroad/cruise | 20 Critical | in-progress | L | 2026-07-06 |
 | 8.0 | RFC-036 | Plugin-staleness surfacer | 16 High | accepted | L | 2026-07-02 |
 | 8.0 | RFC-050 | Correction-detector provenance guard | 8 Medium | proposed | S | 2026-07-26 |
 | 4.5 | RFC-049 | Make the red-CI gate explain the CI-repair recovery path | 3 Medium | in-progress | S | 2026-07-23 |
@@ -206,6 +205,7 @@ Sorted by `Released date ASC`, mirroring the canonical Verification Queue sort d
 | RFC-006 | Implement ADR-070 + ADR-071 — re-home RFC decisions to ADRs and make RFC-first unconditional | 2026-05-26 | All seven slices shipped (see RFC-006 § Commits). Release marker: `@windyroad/itil@0.35.14` (commit `bf1ebdd`) carrying `wr-itil-adr-070-071-rfc-skills.md` + `wr-itil-rfc-no-rejected-alternatives-lint.md`. User verification gate: the dropped atomic-fix carve-out + the ADR-052 rejected-alternatives lint are observable in published `@windyroad/itil`; the unconditional I13 gate (hook + skill enforcement) ships separately under RFC-005's B2–B10 held-changeset chain. |
 | RFC-007 | P260 — concurrent-session create-gate marker race fix (ADR-050 Option C) | 2026-05-26 | Retro-fit (per ADR-071) of the already-committed Option-C fix; released in `@windyroad/itil@0.35.14` (commit `bf1ebdd`). User verification gate: the concurrent-session create-gate deny no longer fires during `/wr-itil:work-problems` AFK loops (behavioural bats negative-control reproduces the pre-fix deny). Closes with P260. |
 | RFC-037 | Implement ADR-089 (every RFC ≥1 story) + ADR-090 (story-map/story oversight) | 2026-07-02 | Hand-authored as a pre-implementation story map listing STORY-MAP-002's A3 stories (020/021/022/024/025), all five now `done`. User verification gate: the `manage-rfc` proposed→accepted transition refuses an RFC with an empty `stories:` array, and story-map/story oversight markers are demanded at their ratification gates. |
+| RFC-046 | Quota-pace throttle — mechanical PreToolUse pacing, extracted into @windyroad/cruise | 2026-08-30 | Published `@windyroad/cruise@0.4.11`; implementation commit `60b252a4`; 79/79 focused Cruise behavioral checks; STORY-044 is rendered in the existing pacing release row. |
 
 ## Closed
 

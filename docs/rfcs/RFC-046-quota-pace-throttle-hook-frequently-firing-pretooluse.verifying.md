@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: verifying
 rfc-id: quota-pace-throttle-hook-frequently-firing-pretooluse
 reported: 2026-07-06
 human-oversight: confirmed
@@ -14,7 +14,7 @@ story-maps: [STORY-MAP-003]
 
 # RFC-046: Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise`
 
-**Status**: in-progress (2026-07-11)
+**Status**: verifying (2026-08-30)
 **Reported**: 2026-07-06
 **Problems**: P160, P443, P446
 **ADRs**: ADR-093
@@ -53,7 +53,15 @@ The mechanical quota-pace throttle (ADR-093): a matcher-less `PreToolUse` hook t
 
 ## Commits
 
-(maintained automatically — populated by the commit-message RFC trailer hook per ADR-060 Phase 1 item 12)
+- `abbc2717` feat(itil): transition STORY-044 accepted → in-progress — cruise status telemetry — 2026-08-30
+
+## Verification
+
+- **Published release:** `npm view @windyroad/cruise version` returned `0.4.11` on 2026-08-30; the published changelog includes implementation commit `60b252a4` for `/wr-cruise:status`.
+- **Behavioral regression:** the focused Cruise suites (`cruise-status`, producer install, throttle pacing, and Codex quota state) pass 79/79.
+- **Story evidence:** STORY-042 and STORY-043 are done; STORY-044's eight acceptance criteria are checked and its implementation is bound to commit `60b252a4`.
+- **Trace evidence:** STORY-044 is present once in RFC-046's existing `pace` / `r1` row on STORY-MAP-003, with P160 and P446 traces rendered from repository state.
+- **Problem boundary:** this RFC's shipped implementation is verifiable, but P160 remains Known Error until P443's separately owned lineage ticket reaches an honest lifecycle outcome.
 
 ## Related
 
@@ -62,7 +70,6 @@ The mechanical quota-pace throttle (ADR-093): a matcher-less `PreToolUse` hook t
 - **JTBD-010** (Sustain My Token Quota Across the Week and Across Surfaces — the driver, ratified).
 - **JTBD-006** (Progress the Backlog While I'm Away) — the AFK-only job this was originally *mis-anchored* to (P443); related but not the driver, since the throttle fires on interactive work too. JTBD-001 / JTBD-302 — adjacent.
 - `~/.claude/statusline-command.sh` — the diagnostic read surface / cache-writer host (self-installed per STORY-043).
-
 ## Stories
 
 | ID | Title | Status |

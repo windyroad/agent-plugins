@@ -86,15 +86,14 @@ The JTBD + USM discipline (problem → correct JTBD/persona → user-story-map �
 | STORY-042 | STORY-042: Extract quota-pacing into its own plugin | in-progress |
 | STORY-043 | STORY-043: Self-install the quota-state producer | in-progress |
 
-## RFCs
-
-| ID | Title | Status |
-|----|-------|--------|
-| RFC-046 | RFC-046: Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` | in-progress |
-
-
 ## Story Maps
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-MAP-003 | STORY-MAP-003: Sustain my token quota across the week and across surfaces | draft |
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-046 | verifying | Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` |

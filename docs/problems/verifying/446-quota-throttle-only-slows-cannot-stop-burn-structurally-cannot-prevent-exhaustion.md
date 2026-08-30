@@ -93,6 +93,12 @@ The fix shipped through RFC-046's `@windyroad/cruise` vehicle across two patch r
 |----|-------|--------|
 | STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | in-progress |
 
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-046 | verifying | Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` |
+
 ## Fix Released
 
 Released in `@windyroad/cruise` 0.3.4 + 0.3.5 (npm-published; installed plugin cache at 0.3.5 as of 2026-07-15). The strengthened glide is deficit-aware, feedback-driven, and recovers instantly when behind pace. Awaiting user verification — the observable acceptance signal is a heavy session gliding to the window reset at the headroom line (≤95% weekly) with no hard rate-limit stop, and no over-braking while behind pace.
@@ -116,12 +122,6 @@ Exercise evidence from the releasing/verifying sessions (2026-07-15 in-session c
 - **RFC-046** — the shipping RFC; the corrected hook lands in `@windyroad/cruise`.
 - **JTBD-010** — the job this defeats (sustain quota; never hard-stop mid-flight).
 - Verified platform facts: Claude Code hooks docs — PreToolUse fail-open-on-timeout + deny mechanism (2026-07-10).
-## RFCs
-
-| RFC | Status | Title |
-|-----|--------|-------|
-| RFC-046 | in-progress | Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` |
-
 ## Verification-period evidence — 2026-07-15 evening (5h-window session-limit hit with throttle active)
 
 Observed during the 2026-07-15 work-problems loop: a **5-hour-window session limit** was hit at ~20:08 (reset 20:30) WITH the 0.3.5 throttle installed, cache fresh, and braking confirmed active afterwards (25s/call per /wr-cruise:status; 7-day window held exactly on the pace line at 56% vs 57% — the primary job working). Contributing mechanics, in order:
@@ -131,4 +131,3 @@ Observed during the 2026-07-15 work-problems loop: a **5-hour-window session lim
 3. **Documented residual**: sustained multi-session burn is the "no sleep-based throttle can fix it" case recorded at fix time (deny/block declined 2026-07-10).
 
 Impact was the benign case: 22 minutes of stall (one iter died pre-work, $2.44, retried clean), not the lost-week weekly-window case. Disposition: this is verification-period evidence, NOT a regression of the three shipped dimensions (each behaved as designed). The concurrency gap is uncovered scope — route at the next interactive review: absorb into this ticket as a fourth dimension pre-close, or capture as a sibling (the P448/P389/P361-style cluster call).
-

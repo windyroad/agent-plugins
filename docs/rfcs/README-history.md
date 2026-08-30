@@ -32,3 +32,5 @@
 ## 2026-07-26
 
 > Last reviewed: 2026-07-11 **RFC-046 → in-progress** — Release 2 fully built into @windyroad/cruise (self-calibrating throttle per P446 + config file + self-installing producer), all stories in-progress, 19 bats green, changeset queued. Awaiting release → verifying → closed.
+
+> Last reviewed: 2026-07-26 **index reconciled (P417)** — the 42 RFCs on disk but absent from this index are listed under `### Unranked`; RFC-037 added to the Verification Queue and RFC-025 to Closed; ranked rows re-sorted to the documented ladder; stale bootstrap prose retired; `## RFCs` reverse-trace refreshed on 7 problem tickets. Two `reconcile-rfcs.sh` detector defects recorded on P417.

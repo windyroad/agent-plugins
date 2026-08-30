@@ -171,11 +171,6 @@ Verbatim: *"with the pacing, we need to be smart. … we are currently well over
 - The one inherent tension (guaranteed non-exhaustion vs "still make progress"): the CAP bounds per-call latency, so if the user keeps working right at the wire the slowdown is strong (near-CAP per call) but not infinite — progress continues, exhaustion is heavily delayed rather than hard-prevented. This matches the user's explicit "still lets us progress a bit." CAP is tunable (`CAP_SECONDS`, default 60).
 
 Shipped: `packages/shared/hooks/quota-pace-throttle.sh` glide-path rewrite + `packages/shared/test/quota-pace-throttle.bats` 9/9 (added a proportional-ease-back test asserting far-over sleeps strictly longer than mildly-over — the property bang-bang lacked). Synced to all 7 plugins. ADR-093 / RFC-046 (born unconfirmed) to be updated with the glide-path law at their ratification drain.
-## RFCs
-
-| ID | Title | Status |
-|----|-------|--------|
-| RFC-046 | RFC-046: Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` | in-progress |
 ## Story Maps
 
 | ID | Title | Status |
@@ -190,6 +185,12 @@ Shipped: `packages/shared/hooks/quota-pace-throttle.sh` glide-path rewrite + `pa
 | STORY-042 | STORY-042: Extract quota-pacing into its own plugin | done |
 | STORY-043 | STORY-043: Self-install the quota-state producer | done |
 | STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | in-progress |
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-046 | verifying | Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` |
 
 ## Fix Released — code slice (2026-07-06)
 
@@ -232,4 +233,3 @@ After installing Cruise and restarting Codex, an affected Codex profile still ha
 ### Producer constraint (research 2026-07-07 — reshapes the adopter fix)
 
 Authoritative Claude Code v2.1.x finding: **the statusLine is the ONLY surface exposed to `.rate_limits`.** No hook event receives it; there is no `claude usage` CLI / native quota file / env var / API a hook can reach; and **a plugin CANNOT contribute the main `statusLine`** (only the `agent` + `subagentStatusLine` settings keys exist). `.rate_limits` also only appears for Pro/Max subscribers after the first API response. Consequence: the producer (`~/.claude/quota-state.json` writer) is unavoidably **user-owned config the plugin cannot ship**. The "works fully out-of-the-box" goal is therefore **not achievable**; the honest ceiling is *"the one-time statusline setup is surfaced/nudged, never silently inert"* — closed by (a) a **SessionStart absent-cache nudge** + (b) a **ready-made statusline snippet / opt-in installer**. The earlier "plugin-contributed statusLine" option is struck (impossible).
-
