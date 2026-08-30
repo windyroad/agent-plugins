@@ -79,4 +79,4 @@ On 2026-08-31, `packages/architect/agents/agent.md` gained the `[First-Match Foo
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-078 | STORY-078: A reviewer catches first-match binding when the key is not unique | accepted |
+| STORY-078 | STORY-078: A reviewer catches first-match binding when the key is not unique | in-progress |

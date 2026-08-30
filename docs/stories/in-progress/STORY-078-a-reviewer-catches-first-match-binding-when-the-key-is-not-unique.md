@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: a-reviewer-catches-first-match-binding-when-the-key-is-not-unique
 reported: 2026-08-31
 decision-makers: [Tom Howard]
