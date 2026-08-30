@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 2.1.5
+
+### Patch Changes
+
+- 69071f8: Story-map capture now derives its title and ordered backbone from the confirmed persona journey before authoring. Story-map management now applies the same title and backbone checks. The historical `preRfc` exception remains unchanged.
+
 ## 2.1.4
 
 ### Patch Changes
