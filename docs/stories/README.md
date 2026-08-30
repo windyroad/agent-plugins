@@ -142,6 +142,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | in-progress | STORY-074 | Use generated Codex skills after upgrading without repairs | S | P526 | RFC-080 | STORY-MAP-008 |
 | in-progress | STORY-075 | My story map starts from the journey I walk | S | P509 | RFC-081 | STORY-MAP-002 |
 | in-progress | STORY-078 | A reviewer catches first-match binding when the key is not unique | S | P426 | RFC-084 | STORY-MAP-011 |
+| draft | STORY-079 | Review only options consistent with documented desired outcomes | M | P514 | RFC-085 | STORY-MAP-002 |
 | draft | STORY-064 | A ticket that only names a decision as background stays open | M | P463 | RFC-070 | STORY-MAP-011 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |
