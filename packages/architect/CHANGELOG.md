@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 0.22.0
+
+### Minor Changes
+
+- ca248cd: Teach the architecture reviewer to flag first-match identity, authorization, and data-binding decisions when the lookup key is not unique, while allowing unique-by-construction lookups.
+
 ## 0.21.6
 
 ### Patch Changes
