@@ -1,6 +1,6 @@
 # Problem 426: wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun)
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-06
 **Priority**: 12 (High) — Impact: 4 × Likelihood: 3
 **Origin**: inbound-reported (#169)
@@ -54,9 +54,30 @@ Behavioural coverage per ADR-052/ADR-075 (harness exists, RFC-012/P324): two pai
 
 RFC-084, the release row "A reviewer flags first-match selection against a non-unique identity, authorization, or data-binding key" on confirmed STORY-MAP-011, carries STORY-078. The row replaces the unconfirmed legacy RFC-048 document as the current fix vehicle.
 
+**Release vehicle**: `.changeset/cool-deserts-rule.md`
+
 ## Fix Implemented
 
 On 2026-08-31, `packages/architect/agents/agent.md` gained the `[First-Match Footgun]` heuristic and `packages/architect/agents/eval/promptfooconfig.yaml` gained paired behavioural fixtures. The positive runner changed from an unnamed correctness finding to the required issue type; the primary-key lookup remained a PASS with no over-fire.
+
+## Published Artifact Verification
+
+Verified 2026-08-31 from the published npm artefact, isolated from the repository source:
+
+- `npm pack @windyroad/architect@0.22.0` produced `windyroad-architect-0.22.0.tgz` with shasum `15a67d67904c7b9b8152552a119fd44d4bf273f7` and installed the Codex reviewer into an isolated temporary `CODEX_HOME`.
+- The unpacked `package/package.json` reported `@windyroad/architect@0.22.0`; both the unpacked `agents/agent.md` and installed `wr-architect-agent.toml` contained the `[First-Match Footgun]` heuristic.
+- Positive fixture, run with Codex against the unpacked published reviewer contract: the non-unique membership `.find()` returned `Architecture Review: ISSUES FOUND` and `1. **[First-Match Footgun]**`, explaining that collection order could bind `workspace.orgId` to the wrong organisation.
+- Over-fire guard, run with Codex against the same unpacked published reviewer contract: the primary-key `findUnique` returned `Architecture Review: PASS` and stated `No **[First-Match Footgun]** applies` because `organization.id` is schema-guaranteed unique.
+
+The paired installed-artifact observations satisfy the ticket's positive-fire and unique-key over-fire criteria.
+
+## Fix Released
+
+Released in `@windyroad/architect@0.22.0` via `.changeset/cool-deserts-rule.md` (version-packages commit `ea1b707b9a812922dbd48a5d107829430a012375`, merge commit `09ef172d5b18ab7b6a7f89972c2b74c066b1e820`, PR #467, released 2026-08-31).
+
+The published reviewer adds the `[First-Match Footgun]` heuristic for non-unique identity, authorization, and data-binding first-match reads while exempting unique-by-construction lookups.
+
+Installed-artifact verification completed 2026-08-31: the positive non-unique fixture produced the required finding, and the unique-key guard passed without that finding.
 
 ## Dependencies
 

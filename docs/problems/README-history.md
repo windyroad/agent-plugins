@@ -1422,3 +1422,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-30 **P526 known error** - whole-file sanitisation crosses YAML frontmatter, and the copy filter reads absolute path components.
 
 > Last reviewed: 2026-08-30 **P428 verification pending** - the Bash 3.2-compatible AFK dispatch shipped in `@windyroad/itil@2.1.7` through release PR #465 and workflow 33305914798; awaiting user verification.
+
+## 2026-08-31
+
+> Last reviewed: 2026-08-30 **P512 verification pending** - the lifecycle recovery fix shipped in `@windyroad/itil@2.1.8` and `@windyroad/retrospective@0.28.1` through workflow 33313257350 and merge `5f4b69fa`; awaiting post-release invocation evidence.
