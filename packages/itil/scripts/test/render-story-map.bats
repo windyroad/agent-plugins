@@ -414,7 +414,7 @@ JSON
   "storyMapId": "STORY-MAP-946",
   "backbone": [ { "id": "a", "title": "A" } ],
   "releases": [
-    { "id": "shipped", "name": "Shipped",  "badge": "R2", "preRfc": true },
+    { "id": "shipped", "name": "Shipped",  "badge": "R2", "rfc": "RFC-899" },
     { "id": "asked",   "name": "Asked for", "rfc": "RFC-900" },
     { "id": "nobody",  "name": "Nobody asked" }
   ],
@@ -425,12 +425,17 @@ JSON
   } > "$m"
   run node "$RENDER" "$m"
   [ "$status" -eq 0 ]
-  # marked pre-RFC and its only story is done → b-live, DESPITE the authored "R2".
+  # Its only story is done → b-live, DESPITE the authored "R2".
   run domcount "$m" 'class="badge b-live"'
   [ "$output" -ge 1 ]
   # named by an RFC → b-next
   run domcount "$m" 'class="badge b-next"'
   [ "$output" -ge 1 ]
+  # Derived state is text, not only colour and an aria-hidden glyph.
+  run grep -Fq '<span class="badge b-live"><span class="b-glyph" aria-hidden="true">✓</span>Delivered: RFC-899</span>' "$m"
+  [ "$status" -eq 0 ]
+  run grep -Fq '<span class="badge b-next"><span class="b-glyph" aria-hidden="true">→</span>Proposed: RFC-900</span>' "$m"
+  [ "$status" -eq 0 ]
   # nothing has asked for it → a DEFECT, not a third resting state. It used to
   # render b-later/"Speculative", which named the problem comfortably enough
   # that a row could sit there untraced indefinitely.

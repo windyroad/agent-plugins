@@ -542,8 +542,13 @@ function badgeClass(rel) {
  *  "closes P160, P443" — the label and the trace contradicting each other.
  */
 function rowLabel(rel) {
-  if (rel.rfc) return rel.rfc;
-  switch (String(rel.status || '').toLowerCase()) {
+  const status = String(rel.status || '').toLowerCase();
+  if (rel.rfc) {
+    if (status === 'delivered') return `Delivered: ${rel.rfc}`;
+    if (status === 'proposed') return `Proposed: ${rel.rfc}`;
+    return rel.rfc;
+  }
+  switch (status) {
     case 'delivered': return 'Delivered, pre-RFC';
     // No glyph here \u2014 badge() prepends the one for the class, aria-hidden, as
     // the non-colour channel. A second copy in the label put "warning" into the
