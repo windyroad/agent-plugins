@@ -70,3 +70,10 @@ This is the same boundary class P503 records for the edit gates: a gate bound to
 - **P503** — edit gates bound to the Edit/Write matcher miss Bash-routed writes. Same boundary class: a gate tied to a tool surface misses every path to the same outcome that avoids that tool.
 - `packages/jtbd/hooks/` — the `PreToolUse` binding.
 - `packages/jtbd/agents/agent.md` — the reviewer whose contract is diff-shaped.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-079 | STORY-079: Review only options consistent with documented desired outcomes | draft |
