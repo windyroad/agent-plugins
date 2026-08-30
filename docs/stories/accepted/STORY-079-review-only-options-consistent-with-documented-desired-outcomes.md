@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: review-only-options-consistent-with-documented-desired-outcomes
 reported: 2026-08-31
 decision-makers: [Tom Howard]

@@ -61,3 +61,5 @@
 > Last reviewed: 2026-08-30 **STORY-077 done** — all five acceptance criteria passed and RFC-083 shipped in the P512 release.
 
 > Last reviewed: 2026-08-31 **STORY-078 accepted** — I6-I10 and map-derived I12 pass for the P426 first-match review slice.
+
+> Last reviewed: 2026-08-31 **STORY-078 in-progress** — implementation commit ca248cd7 satisfies all four acceptance criteria.

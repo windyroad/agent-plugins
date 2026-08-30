@@ -76,4 +76,4 @@ This is the same boundary class P503 records for the edit gates: a gate bound to
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-079 | STORY-079: Review only options consistent with documented desired outcomes | draft |
+| STORY-079 | STORY-079: Review only options consistent with documented desired outcomes | accepted |
