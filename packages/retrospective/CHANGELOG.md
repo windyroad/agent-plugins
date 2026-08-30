@@ -1,5 +1,11 @@
 # @windyroad/retrospective
 
+## 0.28.1
+
+### Patch Changes
+
+- 570a111: Allow a problem captured with an already released fix to move directly from investigation to awaiting verification after both stages' checks pass. Keep problems reopened after release in the work queue instead of automatically marking them ready for verification, and document the one-command way to undo an evidence-based close.
+
 ## 0.28.0
 
 ### Minor Changes
