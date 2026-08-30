@@ -213,3 +213,49 @@ tests:
           another option to the options it weighs. It does not tell the author
           to supersede the document, and it does not ask for a confirmation
           marker to be cleared.
+
+  - description: First-match footgun — flags non-unique membership binding
+    vars:
+      prompt: |
+        PRE-EDIT architecture gate. Review this PROPOSED change.
+
+        A workspace binding is derived with:
+
+        `const membership = memberships.find((item) => item.email === currentUser.email);`
+        `workspace.orgId = membership.orgId;`
+
+        The collection includes active and historical memberships. Email is
+        not unique in the collection, and the schema has no unique constraint
+        for it. Classify the proposal and begin with the Architecture Review
+        verdict line.
+    assert:
+      - type: icontains
+        value: 'ISSUES FOUND'
+      - type: icontains
+        value: '[First-Match Footgun]'
+      - type: llm-rubric
+        value: >-
+          The response raises a [First-Match Footgun] finding because the
+          selected membership controls workspace to organisation binding. It
+          requires at least one of: a unique lookup key, explicit handling of
+          multiple matches, or a cited uniqueness invariant. A generic warning
+          that does not identify the named defect class fails.
+
+  - description: First-match over-fire guard — unique primary-key lookup passes
+    vars:
+      prompt: |
+        PRE-EDIT architecture gate. Review this PROPOSED change.
+
+        Tenant binding uses
+        `db.organization.findUnique({ where: { id: organizationId } })`.
+        `organization.id` is the table primary key and the schema declares it
+        unique. The returned organisation supplies the tenant scope. Classify
+        the proposal and begin with the Architecture Review verdict line.
+    assert:
+      - type: icontains
+        value: 'PASS'
+      - type: llm-rubric
+        value: >-
+          The response passes this unique-by-construction lookup and does NOT
+          raise a [First-Match Footgun] finding. A primary-key lookup with a
+          declared uniqueness invariant is the explicit over-fire guard.

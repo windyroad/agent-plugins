@@ -6,7 +6,7 @@
 **Origin**: inbound-reported (#169)
 **Effort**: S. WSJF = (12 × 2.0) / 1 = 24.0.
 **WSJF**: 24 — (12 × 2.0) / 1 (added 2026-07-26 review)
-**JTBD**: JTBD-002
+**JTBD**: JTBD-001
 **Persona**: developer
 
 ## Description
@@ -38,8 +38,8 @@ The review agent's checklist (`packages/architect/agents/agent.md` § What You C
 ### Investigation Tasks
 
 - [x] Confirm the gap: no first-match/uniqueness heuristic in `packages/architect/agents/agent.md` § What You Check, and no eval fixture covering the class (2026-07-15, in-session read).
-- [ ] Add the heuristic to the wr-architect agent checklist (cover `.limit(1)`, `[0]`, `.find()`, `.pop()` on non-unique collections backing identity/authz/data-binding); require a disambiguating key or an explicit multi-element error/selection step.
-- [ ] Back it with a behavioural eval per P081 (behavioural over structural).
+- [x] Add the heuristic to the wr-architect agent checklist (cover `.limit(1)`, `[0]`, `.find()`, `.pop()` on non-unique collections backing identity/authz/data-binding); require a disambiguating key or an explicit multi-element error/selection step. Completed 2026-08-31.
+- [x] Back it with a behavioural eval per P081 (behavioural over structural). Completed 2026-08-31 with paired positive and over-fire fixtures.
 
 ## Fix Strategy
 
@@ -50,9 +50,13 @@ Add a standing **First-Match on a Non-Unique Collection** heuristic to `packages
 - **Required remediations** (any one): a disambiguating unique key; explicit handling of the >1-match case (error out or surface a selection step); a cited uniqueness invariant (unique constraint/index) in the change.
 - **Over-fire guard** (inverse-P078/P132, mirroring the [Unratified Dependency] guard): do NOT flag unique-by-construction lookups (primary key / unique index), code that explicitly asserts single-match, or order-insensitive display logic with no identity/authz/data-binding consequence.
 
-Behavioural coverage per ADR-052/ADR-075 (harness exists, RFC-012/P324): two paired promptfoo eval tests in `packages/architect/agents/eval/promptfooconfig.yaml` — (a) **positive-fire**: a proposed change binding a workspace to an org via `.find()` on a memberships collection filtered by a non-unique field → Tier A `icontains: ISSUES FOUND` + Tier B llm-rubric asserting a first-match/non-unique finding is raised; (b) **over-fire guard**: a lookup by primary key with a unique index → Tier A `icontains: PASS` + Tier B llm-rubric asserting no [First-Match Footgun] flag fires. Ship with a patch-bump changeset for the architect package in the same commit.
+Behavioural coverage per ADR-052/ADR-075 (harness exists, RFC-012/P324): two paired promptfoo eval tests in `packages/architect/agents/eval/promptfooconfig.yaml` — (a) **positive-fire**: a proposed change binding a workspace to an org via `.find()` on a memberships collection filtered by a non-unique field → Tier A `icontains: ISSUES FOUND` + Tier B llm-rubric asserting a first-match/non-unique finding is raised; (b) **over-fire guard**: a lookup by primary key with a unique index → Tier A `icontains: PASS` + Tier B llm-rubric asserting no [First-Match Footgun] flag fires. Ship with a minor-bump changeset for the architect package in the same commit because the agent prompt gains a mandatory finding contract.
 
 RFC-084, the release row "A reviewer flags first-match selection against a non-unique identity, authorization, or data-binding key" on confirmed STORY-MAP-011, carries STORY-078. The row replaces the unconfirmed legacy RFC-048 document as the current fix vehicle.
+
+## Fix Implemented
+
+On 2026-08-31, `packages/architect/agents/agent.md` gained the `[First-Match Footgun]` heuristic and `packages/architect/agents/eval/promptfooconfig.yaml` gained paired behavioural fixtures. The positive runner changed from an unnamed correctness finding to the required issue type; the primary-key lookup remained a PASS with no over-fire.
 
 ## Dependencies
 

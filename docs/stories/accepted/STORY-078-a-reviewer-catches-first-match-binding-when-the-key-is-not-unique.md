@@ -25,10 +25,10 @@ In order to trust AI-assisted architecture review to catch silent wrong-entity b
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] A proposed change that selects the first match from a collection on a non-unique key and uses it for identity, authorization, or data binding receives an `ISSUES FOUND` verdict with a `[First-Match Footgun]` finding.
-- [ ] The finding requires a unique key, explicit handling of multiple matches, or a cited uniqueness invariant.
-- [ ] A unique-by-construction lookup used for the same decisions receives `PASS` without a `[First-Match Footgun]` finding.
-- [ ] Paired behavioural evaluator fixtures prove the positive and over-fire cases.
+- [x] A proposed change that selects the first match from a collection on a non-unique key and uses it for identity, authorization, or data binding receives an `ISSUES FOUND` verdict with a `[First-Match Footgun]` finding.
+- [x] The finding requires a unique key, explicit handling of multiple matches, or a cited uniqueness invariant.
+- [x] A unique-by-construction lookup used for the same decisions receives `PASS` without a `[First-Match Footgun]` finding.
+- [x] Paired behavioural evaluator fixtures prove the positive and over-fire cases.
 
 ## Driving problem trace (required — I6 invariant)
 
