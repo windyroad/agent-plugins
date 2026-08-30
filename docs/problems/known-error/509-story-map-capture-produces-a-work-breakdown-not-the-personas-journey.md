@@ -99,3 +99,10 @@ Captured via `/wr-itil:capture-problem`. Hang-off arbitration returned `PROCEED_
 - **P484** (`docs/problems/open/484-…md`) — "persona" is the shared word, but P484's persona concern is the *reader* (artefacts readable from their own bytes). This one's is the *subject* — whose journey the backbone traces.
 - **ADR-103** — makes the map the approval surface, which is why a mis-shaped map is a governance defect rather than a cosmetic one.
 - **ADR-119** — a story's approval is inherited from its map, so a mis-shaped map propagates.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-075 | STORY-075: My story map starts from the journey I walk | draft |
