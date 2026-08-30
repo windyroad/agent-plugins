@@ -71,6 +71,12 @@ Flag when a proposed change represents an undocumented decision:
 - **New script**: Does this introduce a new workflow step?
 - **Structural change**: Does this reorganize code in a way that affects how the team works?
 
+### First-Match on a Non-Unique Collection
+
+Raise **[First-Match Footgun]** when `.limit(1)`, `[0]`, `.find()`, `.first()`, `.pop()`, `.shift()`, `LIMIT 1`, `fetchone()`, or an equivalent first-match read feeds an identity, authorization, or data-binding decision and the lookup key is not guaranteed unique within the collection.
+
+Require one of: a unique lookup key; explicit handling of multiple matches (fail closed or surface a selection step); or a cited uniqueness constraint/index. Do not flag primary-key or unique-index lookups, code that explicitly asserts a single match, or order-insensitive display logic with no identity, authorization, or data-binding consequence.
+
 ### Runtime-Path Performance Review (per ADR-026, specialised by ADR-023)
 
 This review is grounded in ADR-026 (Agent output grounding) — the parent no-ungrounded-claims principle — as specialised by ADR-023 (wr-architect performance review scope) for runtime-path changes. The qualitative-claim ban below is the ADR-026 grounding requirement applied to performance estimates.
@@ -187,6 +193,7 @@ Issue types:
 - **[Amendment To Ratified Decision]**: The change edits the body of a decision that carries `human-oversight: confirmed`, or adds an `### Amendment` section, or adds an `amends:` frontmatter key. A ratified decision is immutable — see below.
 - **[Confirmation Violation]**: New code violates a confirmation criterion of an existing decision
 - **[Unratified Dependency]**: The change/plan explicitly cites or implements an ADR that is **unratified** (its frontmatter lacks `human-oversight: confirmed`, and it is not `*.superseded.md`) — building on it before a human ratifies its substance is the P315 failure mode (ADR-074 (Confirm a decision's substance before building dependent work) enforcement surface 3)
+- **[First-Match Footgun]**: A first-match read from a non-unique collection controls identity, authorization, or data binding without an explicit ambiguity policy
 
 ## Constraints
 
