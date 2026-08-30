@@ -87,3 +87,10 @@ Two of this ticket's missing pairings landed as part of P519, because P519's who
 Caught by the external-comms review of P519's changeset, which spotted that the published entry advertised a recovery command the shipped skill would reject.
 
 **Still open here**: the fix-on-capture fast path (`Open → verifying`), and this ticket's own investigation task *"Re-check Step 4a's silent-close justification once the route exists: it argues from reversibility, which was not true when written"* — the route now exists, so that re-check is unblocked.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-077 | STORY-077: Move a captured fix straight to verification and keep a reopened problem in the work queue | draft |
