@@ -97,4 +97,4 @@ RFC-083, the release row "Captured fixes and reopened problems reach the right l
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-077 | STORY-077: Move a captured fix straight to verification and keep a reopened problem in the work queue | draft |
+| STORY-077 | STORY-077: Move a captured fix straight to verification and keep a reopened problem in the work queue | accepted |

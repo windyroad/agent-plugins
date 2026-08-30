@@ -47,6 +47,7 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-065 | STORY-065: A fix proposal draws a release row, not a document | accepted |
 | STORY-066 | STORY-066: A fix I can prove works gets closed without me | accepted |
 | STORY-072 | STORY-072: Record oversight evidence only for the confirming session | accepted |
+| STORY-077 | STORY-077: Move a captured fix straight to verification and keep a reopened problem in the work queue | accepted |
 | STORY-002 | STORY-002: /wr-itil:capture-story lightweight aside skill | done |
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-006 | STORY-006: /wr-itil:reconcile-stories trio (skill + script + bin shim) | done |
@@ -59,5 +60,4 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-052 | STORY-052: Surface still-outstanding family members before a close | draft |
 | STORY-060 | STORY-060: Pick up a captured ticket and know what was observed | draft |
 | STORY-064 | STORY-064: A ticket that only names a decision as background stays open | draft |
-| STORY-077 | STORY-077: Move a captured fix straight to verification and keep a reopened problem in the work queue | draft |
 | STORY-062 | STORY-062: Keep problem ranking correct after a status transition | in-progress |

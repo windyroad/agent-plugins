@@ -36,6 +36,8 @@
 
 ## 2026-08-30
 
+> Last reviewed: 2026-08-30 **STORY-076 done** — all acceptance criteria passed and RFC-082 shipped in the P428 release.
+
 > Last reviewed: 2026-08-30 **STORY-044 in-progress** — implementation commit 60b252a4 satisfies all acceptance criteria.
 
 > Last reviewed: 2026-08-29 **STORY-072 accepted** — I6-I10 and map-derived I12 passed; all three criteria are backed by the committed P368 evidence.

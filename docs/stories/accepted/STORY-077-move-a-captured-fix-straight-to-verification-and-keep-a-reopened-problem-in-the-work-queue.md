@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: move-a-captured-fix-straight-to-verification-and-keep-a-reopened-problem-in-the-work-queue
 reported: 2026-08-30
 decision-makers: [Tom Howard]
