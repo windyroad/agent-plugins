@@ -51,7 +51,7 @@ teardown() {
 
 # Helper — write a stub derive-release-vehicle command that returns a
 # canned exit code (per ticket-id-to-exit-code map encoded in $STUB_MAP).
-# $STUB_MAP shape: `<NNN>:<exit>:<changeset>;<NNN>:<exit>:<changeset>;...`
+# $STUB_MAP shape: `<NNN>:<exit>:<changeset>:<release-date>:<source>;...`
 # The third field is consumed only when exit=0 (emitted in the RELEASE_VEHICLE
 # block the lib greps for changeset path).
 write_stub_derive() {
@@ -65,7 +65,7 @@ nnn_norm="$(printf '%03d' "$((10#$nnn))")"
 IFS=';' read -ra entries <<< "${STUB_MAP:-}"
 for entry in "${entries[@]}"; do
   [ -z "$entry" ] && continue
-  IFS=':' read -r id ex cs <<< "$entry"
+  IFS=':' read -r id ex cs release_date source <<< "$entry"
   id_norm="$(printf '%03d' "$((10#$id))")"
   if [ "$id_norm" = "$nnn_norm" ]; then
     if [ "$ex" -eq 0 ]; then
@@ -75,7 +75,8 @@ RELEASE_VEHICLE:
   version-packages-commit: deadbeefdeadbeefdeadbeefdeadbeefdeadbeef
   pr: #999
   merge-commit: deadbeefdeadbeefdeadbeefdeadbeefdeadbeef
-  release-date: 2026-06-08
+  release-date: ${release_date:-2026-06-08}
+  source: ${source:-ticket-body}
 EOF
     fi
     exit "$ex"
@@ -85,6 +86,18 @@ done
 exit 1
 STUB
   chmod +x "$stub"
+}
+
+write_reopened_ke_ticket() {
+  local nnn="$1"
+  local reopened_date="$2"
+  write_ke_ticket "$nnn" "reopened-after-release"
+  cat >> "$FIXTURE/docs/problems/known-error/${nnn}-reopened-after-release.md" <<EOF
+
+## Reopened ${reopened_date}
+
+The released fix did not resolve the problem.
+EOF
 }
 
 # Helper — write a known-error ticket fixture (body content is opaque to
@@ -206,4 +219,30 @@ load_lib() {
   [[ "$output" == *"KV_CANDIDATES_SUMMARY: total=0"* ]]
   # Stderr warning is captured into $output when bats merges stderr; the
   # contract here is "skip silently AND don't lose audit signal".
+}
+
+@test "case 9: reopened after the derived release date is not emitted from either derivation source" {
+  load_lib
+  write_stub_derive
+  write_reopened_ke_ticket "512" "2026-06-09"
+  write_reopened_ke_ticket "513" "2026-06-10"
+  PATH="$STUB_DIR:$PATH" \
+    STUB_MAP="512:0:.changeset/body.md:2026-06-08:ticket-body;513:0:.changeset/fallback.md:2026-06-08:p389-co-commit" \
+    run enumerate_postrelease_kv_candidates "$FIXTURE/docs/problems"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"KV_CANDIDATE: P512"* ]]
+  [[ "$output" != *"KV_CANDIDATE: P513"* ]]
+  [[ "$output" == *"KV_CANDIDATES_SUMMARY: total=0"* ]]
+}
+
+@test "case 10: reopened on the release date remains eligible" {
+  load_lib
+  write_stub_derive
+  write_reopened_ke_ticket "514" "2026-06-08"
+  PATH="$STUB_DIR:$PATH" \
+    STUB_MAP="514:0:.changeset/same-day.md:2026-06-08:ticket-body" \
+    run enumerate_postrelease_kv_candidates "$FIXTURE/docs/problems"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"KV_CANDIDATE: P514 | .changeset/same-day.md"* ]]
+  [[ "$output" == *"KV_CANDIDATES_SUMMARY: total=1"* ]]
 }

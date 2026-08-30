@@ -34,6 +34,28 @@ tests:
       - type: not-contains
         value: '2.25'
 
+  - description: P512 — batch preflight distinguishes complete and heading-only Open fast paths
+    vars:
+      prompt: |
+        I am invoking /wr-itil:transition-problems with two Open → verifying
+        pairs. Both tickets satisfy the normal Open → Known Error and Known
+        Error → Verification Pending checks.
+
+        - 401 has `## Fix Released` naming version 2.4.1, commit abc1234, and
+          release date 2026-08-30.
+        - 402 has only an empty `## Fix Released` heading.
+
+        What does the batch do with each pair? Is an intermediate Known Error
+        commit required for 401?
+    assert:
+      - type: llm-rubric
+        value: |
+          The response transitions 401 directly from Open to Verification
+          Pending with no intermediate Known Error commit. It rejects 402 at
+          preflight because a heading alone is not objective release evidence,
+          records the failure, and does not partially mutate 402. It preserves
+          the batch's per-pair preflight and outcome reporting.
+
   # ── P519: batch grain closes exactly the evidenced pairs ──────────────────
   - description: P519 — mixed batch closes the evidenced pair only
     vars:

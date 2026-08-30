@@ -104,6 +104,32 @@ tests:
       - type: regex
         value: '[Ss]tatus\s+[Mm]ultiplier|[Pp]ost-transition\s+status'
 
+  - description: P512 — a released fix can move Open directly to Verification Pending
+    vars:
+      prompt: |
+        I am executing /wr-itil:transition-problem for an Open ticket. Its
+        root cause, investigation, reproduction, workaround, re-rated WSJF,
+        effort, implemented fix, and released fix are all complete. Its
+        `## Fix Released` section names version 2.4.1, commit abc1234, and
+        release date 2026-08-30. No deferral is being lifted.
+
+        May I transition it directly to Verification Pending? State the
+        required preflight and whether an intermediate Known Error commit is
+        needed.
+    assert:
+      - type: llm-rubric
+        value: |
+          The response allows a direct Open → Verification Pending transition
+          only after ALL preflight checks listed for Open → Known Error and
+          Known Error → Verification Pending pass, including an objectively
+          populated `## Fix Released` section that names a version, commit, and
+          release date. It says the ticket is renamed directly from the Open
+          location to the verifying location and its status is updated, with
+          NO intermediate Known Error commit or transition. Do not treat
+          route-specific mechanics outside the listed preflight, such as
+          release-vehicle seeding for a ticket that is already Known Error, as
+          an additional precondition for this folded route.
+
   # ── P519: evidence-backed V→C closure is agent-authorised ─────────────────
   # The reservation these cases replace made the verification queue
   # structurally undrainable: 153 verifying tickets, exactly one carrying a

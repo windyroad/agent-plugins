@@ -1,6 +1,6 @@
 ---
 name: wr-itil:transition-problems
-description: "Batch-advance multiple problem tickets through the lifecycle in one invocation — Open → Known Error, Known Error → Verification Pending, Verification Pending → Closed. Loops the per-ticket /wr-itil:transition-problem mechanic (rename, Status edit, P057 re-stage, P063 external-root-cause detection, P062 README refresh) without paying N× SKILL.md reload latency or violating split-skill execution ownership. Produces ONE shared commit covering all surviving transitions per ADR-014 batch-grain. Use when closing the Verification Queue at the end of a `/wr-retrospective:run-retro` Step 4a pass, batch-closing release-aged verifyings during `/wr-itil:work-problems` AFK orchestration, or confirming multiple Step 9d verifications in `/wr-itil:manage-problem review`. Singular sibling — `/wr-itil:transition-problem` (one ticket per invocation)."
+description: "Batch-advance multiple problem tickets through the lifecycle in one invocation — Open → Known Error, Open or Known Error → Verification Pending, Verification Pending → Closed. Loops the per-ticket /wr-itil:transition-problem mechanic (rename, Status edit, P057 re-stage, P063 external-root-cause detection, P062 README refresh) without paying N× SKILL.md reload latency or violating split-skill execution ownership. Produces ONE shared commit covering all surviving transitions per ADR-014 batch-grain. Use when closing the Verification Queue at the end of a `/wr-retrospective:run-retro` Step 4a pass, batch-closing release-aged verifyings during `/wr-itil:work-problems` AFK orchestration, or confirming multiple Step 9d verifications in `/wr-itil:manage-problem review`. Singular sibling — `/wr-itil:transition-problem` (one ticket per invocation)."
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill, Agent
 ---
 
@@ -98,6 +98,7 @@ If no file is found OR multiple files are found (suffix-exclusive lifecycle viol
 | Current suffix | `<status>` | Valid? |
 |----------------|------------|--------|
 | `.open.md` | `known-error` | yes |
+| `.open.md` | `verifying` | yes — **fix on capture**: ADR-022 folds both forward stages only when the composed pre-flight below passes. |
 | `.known-error.md` | `verifying` | yes |
 | `.verifying.md` | `close` | yes |
 | `.verifying.md` | `known-error` | yes — **flip-back**: the fix recurred or proved incomplete. `review-problems` Bucket 3 already instructs this and had no batch path. |
@@ -110,6 +111,7 @@ Lockstep with `/wr-itil:transition-problem` Step 3 per the drift clause below �
 
 - Open → Known Error (`known-error`): root cause documented; ≥ 1 investigation task ticked; reproduction test or reference; workaround documented; effort bucket re-rated if scope shifted (P047); status multiplier re-rated from Open 1.0 to Known Error 2.0 and WSJF recomputed with the post-transition status and current Effort (P498).
 - Known Error → Verification Pending (`verifying`): fix implemented; release marker available (version, commit SHA, or date) for the `## Fix Released` section.
+- Open → Verification Pending (`verifying`): all Open → Known Error checks and all Known Error → Verification Pending checks above pass inline, including the conditional-deferral check, and the ticket has a populated objective `## Fix Released` section naming a version, commit SHA, or date. The heading alone is insufficient.
 - Verification Pending → Closed (`close`): cited observed evidence or explicit user confirmation authorizes closure. Evidence-backed closure is mechanical and does not require another question. Record the citation and recovery path (`/wr-itil:transition-problem <NNN> known-error`) in each ticket's Status line. A provenance-proven GitHub issue on this project's tracker receives the gated comment and closes; unresolved or non-issue inbound provenance performs no issue mutation. A foreign issue receives the comment but stays open on local evidence alone; that upstream party's confirmation may authorize closure. Pull requests remain comment-only.
 
   **Never close on inference** — absence of evidence is not evidence. A pair whose ticket carries no citation records as `pre-flight-failed` with reason `no-evidence` and stays Verification Pending; age, plausibility, and "the fix is on disk" are not observations. **Do-not-close marker check** — run `wr-itil-is-close-blocked <NNN> docs/problems` per pair before closing. Exit 0 → record the pair as `pre-flight-failed` with reason `close-blocked` plus the matched marker line, and continue to the next pair; do NOT close it whatever the evidence says. Exit 2 (unresolvable ref) is a pre-flight failure, not permission.
@@ -151,6 +153,14 @@ git add docs/problems/known-error/<NNN>-<title>.md
 git mv docs/problems/known-error/<NNN>-<title>.md docs/problems/verifying/<NNN>-<title>.md
 # Edit Status to "Verification Pending" AND add ## Fix Released section
 # (release marker, one-sentence summary, Awaiting user verification)
+git add docs/problems/verifying/<NNN>-<title>.md
+```
+
+```bash
+# Open → Verification Pending (ADR-022 fix-on-capture fold)
+git mv docs/problems/open/<NNN>-<title>.md docs/problems/verifying/<NNN>-<title>.md
+# Edit Status to "Verification Pending" and preserve the populated
+# ## Fix Released section that passed the composed pre-flight.
 git add docs/problems/verifying/<NNN>-<title>.md
 ```
 

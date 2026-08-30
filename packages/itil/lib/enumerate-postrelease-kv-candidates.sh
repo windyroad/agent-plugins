@@ -83,6 +83,18 @@ enumerate_postrelease_kv_candidates() {
 
     case "$derive_exit" in
       0)
+        local reopened_date release_date
+        reopened_date="$(grep -oE '^## Reopened [0-9]{4}-[0-9]{2}-[0-9]{2}$' "$f" \
+          | sed 's/^## Reopened //' \
+          | tail -1)"
+        release_date="$(printf '%s\n' "$derive_out" \
+          | sed -n 's/^[[:space:]]*release-date:[[:space:]]*//p' \
+          | head -1)"
+        if [ -n "$reopened_date" ] && [ -n "$release_date" ] \
+          && [[ "$reopened_date" > "$release_date" ]]; then
+          continue
+        fi
+
         local changeset
         changeset="$(printf '%s\n' "$derive_out" \
           | grep -oE '\.changeset/[a-z0-9._-]+\.md' \

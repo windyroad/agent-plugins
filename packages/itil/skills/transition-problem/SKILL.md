@@ -1,6 +1,6 @@
 ---
 name: wr-itil:transition-problem
-description: Advance a problem ticket's lifecycle status — Open → Known Error, Known Error → Verification Pending (verifying), Verification Pending → Closed. Renames the ticket file, updates the Status field, and refreshes docs/problems/README.md in the same commit. Hosts the transition execution inline (pre-flight checks, P057 staging-trap handling, P063 external-root-cause detection, P062 README refresh, ADR-014 commit) per ADR-010 amended "Split-skill execution ownership". Use when the user asks to "transition", "close", "mark known-error", or "release" a specific ticket.
+description: Advance a problem ticket's lifecycle status — Open → Known Error, Open or Known Error → Verification Pending (verifying), Verification Pending → Closed. Renames the ticket file, updates the Status field, and refreshes docs/problems/README.md in the same commit. Hosts the transition execution inline (pre-flight checks, P057 staging-trap handling, P063 external-root-cause detection, P062 README refresh, ADR-014 commit) per ADR-010 amended "Split-skill execution ownership". Use when the user asks to "transition", "close", "mark known-error", or "release" a specific ticket.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill
 ---
 
@@ -25,7 +25,7 @@ The `<NNN>` and `<status>` tokens are **data parameters**, not word-subcommands.
 ## Scope
 
 **In scope:**
-- Validate that the ticket file exists and the destination status is reachable from the current status (e.g. an `.open.md` file cannot transition directly to Verification Pending — it must go through Known Error first).
+- Validate that the ticket file exists and the destination status is reachable from the current status, including ADR-022's folded Open → Verification Pending route when both stages' checks pass inline.
 - Execute the transition inline: pre-flight checks, P063 external-root-cause detection (for the Open → Known Error destination), `git mv` to the new suffix, Status field edit, `## Fix Released` section write (for the Known Error → Verification Pending destination), P057 staging re-stage, P062 README.md refresh, ADR-014 commit.
 - Report the outcome (new filename, new Status, commit SHA).
 
@@ -66,6 +66,7 @@ Check the current filename suffix and verify the destination status is reachable
 | Current suffix | Destination argument | Valid? |
 |----------------|----------------------|--------|
 | `.open.md` | `known-error` | yes |
+| `.open.md` | `verifying` | yes — **fix on capture**: ADR-022 folds both forward stages only when the composed pre-flight below passes. |
 | `.known-error.md` | `verifying` | yes |
 | `.verifying.md` | `close` | yes |
 | `.verifying.md` | `known-error` | yes — **flip-back**: the fix recurred or proved incomplete. Required by `review-problems` Bucket 3, `manage-problem`, and `run-retro` Step 4a, all of which already instruct it. |
@@ -94,6 +95,8 @@ Destination-specific pre-flight checks gate the transition. If any check fails, 
 - [ ] The fix has been implemented (the transition typically rides with the `fix(<scope>): ... (closes P<NNN>)` commit)
 - [ ] A release marker is available (version, commit SHA, or date) so the `## Fix Released` section can name it
 - [ ] **Conditional-deferral check (P184)** — see the dedicated subsection below; halt the transition if any conditional deferral has lifted with unticked work remaining
+
+**Open → Verification Pending** (`<status>` = `verifying`) requires all **Open → Known Error** checks, all **Known Error → Verification Pending** checks, and a populated objective `## Fix Released` section. This is ADR-022's fix-on-capture fold, not a pre-flight bypass: root cause, investigation, reproduction, workaround, effort/WSJF, implementation, release marker, and conditional-deferral checks all run before the single rename. The `## Fix Released` section must name the released version, commit SHA, or date; the heading alone does not satisfy the route.
 
 #### Conditional-deferral check on K→V (P184) — copy-not-move sibling
 
@@ -221,6 +224,15 @@ git mv docs/problems/known-error/<NNN>-<title>.md docs/problems/verifying/<NNN>-
 # ... use the Edit tool on docs/problems/verifying/<NNN>-<title>.md ...
 
 # Step 4 — single re-stage covers both Edit windows (P057 + P330)
+git add docs/problems/verifying/<NNN>-<title>.md
+```
+
+**Open → Verification Pending** (ADR-022 fix-on-capture fold):
+
+```bash
+git mv docs/problems/open/<NNN>-<title>.md docs/problems/verifying/<NNN>-<title>.md
+# Edit Status to "Verification Pending" and preserve the populated
+# ## Fix Released section that passed the composed pre-flight.
 git add docs/problems/verifying/<NNN>-<title>.md
 ```
 
@@ -357,7 +369,7 @@ Release draining is owned by the caller — `/wr-itil:manage-problem` Step 12 (i
 `transition-problem` owns (for the user-initiated transition path):
 - Argument parsing (`<NNN> <status>`).
 - Ticket-file discovery via the dual-tolerant lookup `ls docs/problems/<NNN>-*.md docs/problems/*/<NNN>-*.md` (RFC-002 transitional shape; both layouts).
-- Destination-reachability validation (Open → Known Error → Verification Pending → Closed, one step at a time).
+- Destination-reachability validation (ordinary one-step transitions plus ADR-022's composed Open → Verification Pending fix-on-capture fold).
 - Pre-flight checks for the supplied destination.
 - P063 external-root-cause detection (Open → Known Error only) — including the AFK fallback that appends the stable `- **Upstream report pending** —` marker.
 - `git mv` rename + Status field edit + (for `verifying`) `## Fix Released` section write + explicit P057 re-stage.

@@ -510,6 +510,21 @@ tests:
           transition-problem owns the rename + commit per ADR-014).
           Saying it does NOT fire AskUserQuestion PASSES.
 
+  - description: P512 — Step 4a names the exact one-command recovery route
+    vars:
+      prompt: |
+        Step 4a closed P211 on evidence, but the evidence was later found to
+        be wrong. What exact recovery command does run-retro report, and how
+        many lifecycle invocations does recovery require?
+    assert:
+      - type: llm-rubric
+        value: |
+          The response gives exactly
+          `/wr-itil:transition-problem 211 known-error` as the documented
+          recovery route and says it reopens the Closed ticket in one skill
+          invocation. It must not substitute a manual rename, direct edit, or
+          an unspecified "equivalent" action.
+
   # --- Step 4b Stage 1 mechanical-auto-ticket ------------------------------
 
   - description: "Step 4b Stage 1 mechanical-auto-ticket — every codify-worthy observation tickets via /wr-itil:capture-problem; only cause: skill_unavailable is valid deferral"
