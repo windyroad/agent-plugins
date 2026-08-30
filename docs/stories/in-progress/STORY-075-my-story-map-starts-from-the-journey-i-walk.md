@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: my-story-map-starts-from-the-journey-i-walk
 reported: 2026-08-30
 decision-makers: [Tom Howard]
