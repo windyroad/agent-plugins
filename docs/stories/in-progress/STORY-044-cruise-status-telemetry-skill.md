@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: cruise-status-telemetry-skill
 reported: 2026-07-11
 decision-makers: [Tom Howard]

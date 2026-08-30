@@ -87,6 +87,12 @@ The fix shipped through RFC-046's `@windyroad/cruise` vehicle across two patch r
 
 **Release vehicle**: .changeset/cruise-instant-recovery.md (drained at the 0.3.5 publish; sibling .changeset/cruise-deficit-aware-throttle.md drained at 0.3.4)
 
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | in-progress |
+
 ## Fix Released
 
 Released in `@windyroad/cruise` 0.3.4 + 0.3.5 (npm-published; installed plugin cache at 0.3.5 as of 2026-07-15). The strengthened glide is deficit-aware, feedback-driven, and recovers instantly when behind pace. Awaiting user verification — the observable acceptance signal is a heavy session gliding to the window reset at the headroom line (≤95% weekly) with no hard rate-limit stop, and no over-braking while behind pace.
@@ -110,14 +116,6 @@ Exercise evidence from the releasing/verifying sessions (2026-07-15 in-session c
 - **RFC-046** — the shipping RFC; the corrected hook lands in `@windyroad/cruise`.
 - **JTBD-010** — the job this defeats (sustain quota; never hard-stop mid-flight).
 - Verified platform facts: Claude Code hooks docs — PreToolUse fail-open-on-timeout + deny mechanism (2026-07-10).
-
-
-## Stories
-
-| ID | Title | Status |
-|----|-------|--------|
-| STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | accepted |
-
 ## RFCs
 
 | RFC | Status | Title |

@@ -45,3 +45,5 @@
 > Last reviewed: 2026-08-30 **STORY-075 accepted** — I7, I8, I10, and map-derived I12 pass for the P509 journey-first capture slice.
 
 > Last reviewed: 2026-08-30 **STORY-074 accepted** — I7, I8, I10, and map-derived I12 pass for the P526 Codex projection repair.
+
+> Last reviewed: 2026-08-30 **STORY-075 in-progress** — implementation commit 69071f8a satisfies all four acceptance criteria.
