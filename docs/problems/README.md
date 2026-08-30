@@ -22,7 +22,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 12 | P514 | The JTBD gate reviews edits but not recommendations, so option-sets reach the user unvalidated | 12 (High) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P042) |
 | 10 | P530 | Retrospective consumer-repo assumptions remain after shim fix | 10 (High) | Open | S | 2026-08-28 | inbound-reported (#453) |
 | 9 | P425 | wr-architect edit-gate re-litigates its own same-session PASS — [Unratified Dependency] over-fires on agent-prescribed born-proposed ADRs | 9 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#342) |
-| 9 | P428 | work-problems Step 5 dispatch heredoc-in-command-substitution is unparseable under macOS /bin/bash 3.2 | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#345) |
+| 18 | P428 | work-problems Step 5 dispatch heredoc-in-command-substitution is unparseable under macOS /bin/bash 3.2 | 9 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#345) |
 | 9 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter (consumers pin the cache version and break on bump) | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#325) |
 | 9 | P454 | wr-risk-scorer restage-commit helper sweeps the whole index/working tree into the commit instead of pathspec-scoping to the supplied paths | 9 (Medium) | Open | S | 2026-07-15 | inbound-reported (#344) |
 | 8 | P513 | The JTBD corpus has no index or persona currency check, unlike the decision corpus | 8 (Medium) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P111) |

@@ -1,11 +1,11 @@
 # Problem 428: work-problems Step 5 dispatch heredoc-in-command-substitution is unparseable under macOS /bin/bash 3.2
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-07-06
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3
 **Origin**: inbound-reported (#345)
 **Effort**: S. WSJF = (9 × 1.0) / 1 = 9.0.
-**WSJF**: 9 — (9 × 1.0) / 1 (added 2026-07-26 review)
+**WSJF**: 18 — (9 × 2.0) / 1 (2026-08-30: Open → Known Error after confirming both Bash 3.2 incompatibilities and a portable workaround)
 **JTBD**: JTBD-006
 **Persona**: plugin-developer
 
@@ -40,6 +40,10 @@ Same skill, same step, same shipped snippet, same bash-3.2 root cause as the her
 - On macOS default bash 3.2, the Step 5 dispatch produces no iter (silent launch failure). Works on bash 5.x, masking the defect during development.
 - `mapfile: command not found` on stderr, followed by a dispatch that runs but carries no `--plugin-dir` arguments, so the iter loses its governance surface (P382 inert).
 
+## Workaround
+
+Run the dispatch with Bash 4 or newer. On macOS Bash 3.2, write the prompt heredoc to a temporary file and accumulate the resolver's newline-delimited arguments with `while IFS= read -r` before invoking `claude -p`.
+
 ## Impact Assessment
 
 - **Who is affected**: macOS adopters running AFK loops on the system bash.
@@ -48,11 +52,23 @@ Same skill, same step, same shipped snippet, same bash-3.2 root cause as the her
 
 ## Root Cause Analysis
 
+The shipped Step 5 command shape assumed two shell capabilities that are not available across the supported macOS runtime: it nested a heredoc inside command substitution, and it used the Bash 4-only `mapfile` builtin. The latter is an executable silent-governance failure: Bash 3.2 continues after `mapfile: command not found`, expands an empty array, and launches `claude -p` without any governance plugin arguments.
+
+The regression test extracts the shipped command prefix, executes it with macOS `/bin/bash` 3.2.57, and inspects the actual subprocess arguments. Before the fix it failed because every `--plugin-dir` argument was absent; after the fix it passes the prompt and both resolver-emitted argument pairs, including a path containing a space.
+
 ### Investigation Tasks
 
-- [ ] Write the iter prompt to a file and pass it via `$(cat "$FILE")` (or `--prompt-file`) rather than a heredoc in command substitution; add a bash-3.2 parse check to CI.
-- [ ] Replace `mapfile -t PLUGIN_DIR_ARGS` with a bash-3.2-compatible `while IFS= read -r` accumulation loop, and have the CI bash-3.2 check cover bash-4-only builtins (`mapfile`, `readarray`, associative arrays) as well as parse failures — a construct that *parses* on 3.2 but does not *exist* on 3.2 fails at runtime, not at `bash -n`.
-- [ ] Sweep the other shipped SKILL dispatch snippets for bash-4-only builtins.
+- [x] Write the iter prompt to a file and pass it via `$(cat "$FILE")` rather than a heredoc in command substitution; cover the shipped command under macOS Bash 3.2.
+- [x] Replace `mapfile -t PLUGIN_DIR_ARGS` with a bash-3.2-compatible `while IFS= read -r` accumulation loop, and exercise the runtime argument handoff rather than relying on `bash -n`.
+- [x] Sweep the other shipped SKILL dispatch snippets for bash-4-only builtins. No other `mapfile`, `readarray`, or associative-array use was found in shipped `packages/*/skills/**/SKILL.md` files.
+
+## Fix Strategy
+
+Use the smallest portable command shape already supported by Bash 3.2: create one prompt temp file, read it with `cat`, collect resolver output in an indexed array with a `while read` loop, and remove both temporary files after the subprocess exits. RFC-082 / STORY-076 is the release vehicle. `.changeset/calm-bats-launch.md` carries the `@windyroad/itil` patch release; the fix remains unreleased in this iteration by user direction.
+
+## Verification Evidence
+
+- `LC_ALL=C bats --recursive packages/itil/skills/work-problems/test ...` plus the resolver, renderer, story-map, story reconciliation, and reverse-reference suites: 556/556 passed on macOS `/bin/bash` 3.2.57.
 
 ## Dependencies
 
@@ -61,3 +77,10 @@ Same skill, same step, same shipped snippet, same bash-3.2 root cause as the her
 ## Related
 
 - Inbound issue #345.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-076 | STORY-076: My unattended backlog loop launches every iteration with its governance plugins on macOS | in-progress |
