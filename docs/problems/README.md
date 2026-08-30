@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-30 **P428 verification pending** - the Bash 3.2-compatible AFK dispatch shipped in `@windyroad/itil@2.1.7` through release PR #465 and workflow 33305914798; awaiting user verification.
+> Last reviewed: 2026-08-30 **P512 verification pending** - the lifecycle recovery fix shipped in `@windyroad/itil@2.1.8` and `@windyroad/retrospective@0.28.1` through workflow 33313257350 and merge `5f4b69fa`; awaiting post-release invocation evidence.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -18,7 +18,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | | | **Tier 1 — Inbound-reported** | | | | | |
 | 24 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | 12 (High) | Known Error | S | 2026-07-06 | inbound-reported (#169) |
 | 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
-| 12 | P512 | The transition lifecycle table rejects both the fix-on-capture fast path and its own documented recovery path | 12 (High) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P151) |
 | 12 | P514 | The JTBD gate reviews edits but not recommendations, so option-sets reach the user unvalidated | 12 (High) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P042) |
 | 10 | P530 | Retrospective consumer-repo assumptions remain after shim fix | 10 (High) | Open | S | 2026-08-28 | inbound-reported (#453) |
 | 9 | P425 | wr-architect edit-gate re-litigates its own same-session PASS — [Unratified Dependency] over-fires on agent-prescribed born-proposed ADRs | 9 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#342) |
@@ -273,6 +272,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P529 | Codex work-problems cannot use refreshed Codex CLI quota | 2026-08-29 (`@windyroad/itil@2.1.1`; merge commit `b45959d436953c4648a53de68b94cefb5bde87e5`, PR #455) | no — not observed |
 | P428 | work-problems Step 5 dispatch heredoc-in-command-substitution is unparseable under macOS /bin/bash 3.2 | 2026-08-30 (`@windyroad/itil@2.1.7`; version-packages commit `32ce941681b6530d46aa89052b7c53d4d64af7bf`, merge commit `16bd9f1005f03c2051ecf7bceb5901cd78db42c4`, PR #465, workflow 33305914798) | no — not observed |
 | P469 | style-guide and voice-tone reviewer agents spawn without Bash, so they cannot write the verdict marker their own gate reads | 2026-08-30 (`@windyroad/style-guide@0.6.1`, `@windyroad/voice-tone@0.8.2`; version-packages commit `5de641525c67cb0558789d5eea206d82dc34ff2d`, merge commit `45f84cf15c26561db6cb080d5faba34fdd1085c6`, PR #459) | no — not observed |
+| P512 | The transition lifecycle table rejects both the fix-on-capture fast path and its own documented recovery path | 2026-08-30 (`@windyroad/itil@2.1.8`, `@windyroad/retrospective@0.28.1`; release workflow `33313257350`, merge `5f4b69fa`) | no — not observed |
 | P526 | Codex projection sanitizer corrupts YAML frontmatter while expanding internal IDs | 2026-08-30 (`@windyroad/itil@2.1.4`; version-packages commit `c717d203`, merge commit `22375d28`, PR #462; published frontmatter PASS across both skill surfaces with all 29 Codex skills) | no — not observed |
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no — not observed |
 | P037 | jtbd-reviewer returns bare verdict without reason | commit 6e7c2e4 | no — not observed |

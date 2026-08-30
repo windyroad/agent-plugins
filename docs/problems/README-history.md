@@ -1420,3 +1420,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-30 **P469 verification pending** - the fail-closed reviewer-verdict fix shipped in `@windyroad/style-guide@0.6.1` and `@windyroad/voice-tone@0.8.2`; awaiting user verification.
 
 > Last reviewed: 2026-08-30 **P526 known error** - whole-file sanitisation crosses YAML frontmatter, and the copy filter reads absolute path components.
+
+> Last reviewed: 2026-08-30 **P428 verification pending** - the Bash 3.2-compatible AFK dispatch shipped in `@windyroad/itil@2.1.7` through release PR #465 and workflow 33305914798; awaiting user verification.

@@ -1,6 +1,6 @@
 # Problem 512: The transition lifecycle table rejects both the fix-on-capture fast path and its own documented recovery path
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-08-21
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture. Impact 3: two legitimate lifecycle moves have no supported route, so tickets either sit in the wrong state or the operator does the rename by hand, which skips the pre-flight checks, the README refresh and the ADR-014 commit the skill exists to guarantee. Likelihood 4: high path-count, no control — the fast path is the common shape for cosmetic and mechanical fixes, and the recovery path is prescribed by another shipped skill that fires on every retro.
 **Origin**: inbound-reported (adopter-repo P151)
@@ -91,6 +91,19 @@ Caught by the external-comms review of P519's changeset, which spotted that the 
 ## Fix Strategy
 
 RFC-083, the release row "Captured fixes and reopened problems reach the right lifecycle state" on STORY-MAP-002, carries STORY-077. Reuse the existing transition pre-flights, add the objective `## Fix Released` discriminator to the confirmed ADR-022 folded route, verify run-retro's recovery contract against transition-problem, and exclude post-release reopened tickets after release-vehicle derivation.
+
+**Release vehicle**: `.changeset/p512-lifecycle-recovery.md`
+
+## Fix Released
+
+Released 2026-08-30 in `@windyroad/itil@2.1.8` and `@windyroad/retrospective@0.28.1`.
+
+- Implementation commit: `570a111a20bd7ed293cacf7494b36a656ac696be`
+- Release workflow: `33313257350` succeeded at merge commit `5f4b69fa97d97b862ed926b6a0607b94ae51e1a5`
+- Registry readback: npm `latest` resolves to `@windyroad/itil@2.1.8` and `@windyroad/retrospective@0.28.1`
+- Delivered behavior: direct Open → Verification Pending after the composed pre-flights and an objective, populated `## Fix Released`; exact one-command recovery from Verification Pending or Closed to Known Error; exclusion of Known Error tickets reopened after their cited release from both post-release candidate derivation paths
+
+Publication establishes the release, not post-release behavioral verification. P512 remains Verification Pending until an installed invocation exercises the released lifecycle paths.
 
 
 ## Stories
