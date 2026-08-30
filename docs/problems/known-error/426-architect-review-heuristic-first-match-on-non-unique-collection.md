@@ -75,4 +75,4 @@ RFC-084, the release row "A reviewer flags first-match selection against a non-u
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-078 | STORY-078: A reviewer catches first-match binding when the key is not unique | draft |
+| STORY-078 | STORY-078: A reviewer catches first-match binding when the key is not unique | accepted |
