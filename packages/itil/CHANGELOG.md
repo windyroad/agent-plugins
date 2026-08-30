@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 2.1.6
+
+### Patch Changes
+
+- e2f7ed7: Expose derived story-map release states as visible badge text so people using assistive technology or unable to rely on color can distinguish proposed and delivered rows.
+
 ## 2.1.5
 
 ### Patch Changes
