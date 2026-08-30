@@ -25,10 +25,10 @@ In order to approve the journey through a fix rather than a breakdown of its imp
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] A capture whose description names a change derives a title that names the persona's journey.
-- [ ] The same capture derives an ordered backbone of actions the persona walks from trigger to outcome, rather than techniques, phases, invariants, or implementation tasks.
-- [ ] The closed `preRfc` rule is unchanged while P509 symptom 2 awaits its governance decision.
-- [ ] The focused behavioural skill evaluation passes.
+- [x] A capture whose description names a change derives a title that names the persona's journey.
+- [x] The same capture derives an ordered backbone of actions the persona walks from trigger to outcome, rather than techniques, phases, invariants, or implementation tasks.
+- [x] The closed `preRfc` rule is unchanged while P509 symptom 2 awaits its governance decision.
+- [x] The focused behavioural skill evaluation passes.
 
 ## Driving problem trace (required — I6 invariant)
 

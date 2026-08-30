@@ -43,7 +43,8 @@ Positional grammar mirrors `/wr-itil:capture-story` shape (footnote per ADR-060 
 | JTBD-trace presence | I4 hard-block — refuse on missing trace; emit deny log + halt | direction-setting |
 | JTBD-trace validation | Mechanical: each `JTBD-<NNN>` resolves to a file in `docs/jtbd/` | silent-mechanical |
 | STORY-MAP ID allocation | Mechanical: `max(local, origin, history) + 1` enumerating `docs/story-maps/*/STORY-MAP-*.html` (ADR-019 inline collision-guard) | silent-mechanical |
-| Title kebab-slug | Mechanical: first 8-10 non-stopword tokens of description | silent-mechanical |
+| Persona journey derivation | Mechanical: read the persona + JTBD and derive the ordered steps they walk before authoring | silent-mechanical |
+| Title kebab-slug | Mechanical: short outcome phrase naming the derived journey, then kebab-case | silent-mechanical |
 | Title prose refinement | Optional taste AskUserQuestion; silent-default to derived form | taste |
 | HTML file write | Mechanical: schema per ADR-060 § Phase 2 encoding amendment 2026-05-12 lines 381-435 | silent-mechanical |
 | Reverse-trace `## Story Maps` refresh | Mechanical: inline on driving problem + JTBD files via Slice 2a/2b helpers | silent-mechanical |
@@ -70,8 +71,6 @@ description="$*"
 
 Validate `$problem_trace` matches `^P[0-9]{3}(,P[0-9]{3})*$`. Validate `$jtbd_trace` matches `^JTBD-[0-9]{3}(,JTBD-[0-9]{3})*$`. If `$description` is empty, halt with empty-arguments directive.
 
-Derive kebab-case title slug from first 8-10 non-stopword tokens of `$description`.
-
 ### 2. Validate problem trace + I3 hard-block
 
 For each `P<NNN>`:
@@ -93,6 +92,12 @@ jtbd_file=$(ls docs/jtbd/*/JTBD-<NNN>-*.md 2>/dev/null | head -1)
 
 **I4 hard-block** (ADR-060, the story-map schema's `jtbd:` field): trace absent / malformed / unresolved → emit deny log + halt. Story-maps without JTBD trace are structurally meaningless per ADR-060 ("a map with no JTBD trace is structurally meaningless"; Patton's central thesis is journey-around-user-value).
 
+### 2.6. Derive the persona journey
+
+Derive the journey before the title or backbone. Read the persona and JTBD, then write the ordered steps the persona walks from trigger to outcome. Derive the map title and backbone from that journey, not from the change description.
+
+Use a short outcome phrase naming that journey for the title, then convert it to a kebab-case slug. Do not reuse the first tokens of `$description`: the description names the work that triggered capture, not the journey the map approves.
+
 ### 3. Compute next STORY-MAP ID
 
 Inline `max(local, origin, history) + 1` per ADR-019 collision-guard (architect Slice 3 design review option a — inline-only path, mirrors capture-rfc + capture-story precedent). Git history keeps deleted IDs retired without adding tombstone files:
@@ -104,9 +109,9 @@ history_max=$(git log --all --name-only --format= -- docs/story-maps/ 2>/dev/nul
 next=$(printf '%03d' $(( 10#$(printf '%s\n' "${local_max:-0}" "${origin_max:-0}" "${history_max:-0}" | sort -n | tail -1) + 1 )))
 ```
 
-### 4. Optional taste prompt for title
+### 4. Optional taste prompt for the derived journey title
 
-Same shape as capture-story Step 4 — silent-default when unavailable.
+Same shape as capture-story Step 4 — offer the journey-derived title, not the change description, and silent-default when unavailable.
 
 ### 5. Write the story-map JSON, then render it
 
@@ -163,7 +168,8 @@ appear here changes what that test asserts, and that binding is deliberate.
 
 **Authoring rules:**
 
-- **The backbone must be a journey, not a list of invariants.** Activities are steps the persona walks through in sequence. "Finish a change → get it assessed → push it → get through CI → release it" is a backbone. "Leave no unscored way out", "score this change not the last one" are invariants, and a column of them is not a map.
+- **The title and backbone name the persona's journey, not the work.** GOOD — developer: "Take a problem from noticed to resolved"; Notice and capture → Find the cause → Decompose the fix → Implement the changes → Land, release and verify. GOOD — plugin user: "Close the loop with someone who reported a problem"; Report it → Hear it landed → Find out what will happen → Get kept posted → Get a real outcome. BAD — "Convert source-inspection pins to behavioural tests" with "Conversion technique — backbone ordered by tractability"; both describe the work, not the persona's journey.
+- **Check the shape before writing.** Re-derive the journey if the title restates `$description`, if the backbone has one column, or if its columns name techniques, phases, invariants, or implementation tasks rather than ordered persona actions. "Finish a change → get it assessed → push it → get through CI → release it" is a backbone. "Leave no unscored way out", "score this change not the last one" are invariants, and a column of them is not a map.
 - At capture a map may legitimately have **columns and rows but empty cells**. That is the honest state of unbuilt work, and the renderer says so in place — a wholly empty band carries its own sentence. Do not add prose at the top explaining it.
 - **Composing a row asks two questions, in order.** A row is a release, so putting two stories in one is a claim that they ship together. Answer both before drawing it.
 

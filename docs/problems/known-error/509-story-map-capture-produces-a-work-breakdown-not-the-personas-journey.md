@@ -75,13 +75,19 @@ The ADR tier solved the same class on the title axis by adding a stated conventi
 ### Investigation Tasks
 
 - [ ] **Adjudicate the `preRfc` conflict first** — it blocks symptom 2. Either the closed-set rule at SKILL line 185 gains an exception for genuinely-pre-existing capability, or already-working work gets a different carrier. Decide, record as an ADR, then implement
-- [ ] Add a journey-derivation step at capture: read the persona, derive the sequence of steps they walk, and author the backbone from that rather than from the change
-- [ ] Decide whether the derivation is agent-silent or surfaces the derived journey for confirmation before the map is written
-- [ ] Change the title derivation so a map's title names the journey, not the change — the current first-8-10-tokens-of-description slug cannot produce one
-- [ ] Add a title-shape advisory mirroring `capture-adr`'s (stated convention + GOOD/BAD examples + a detector), using STORY-MAP-002 and STORY-MAP-004 as the GOOD examples
-- [ ] Add a backbone-shape check — at minimum a detector for the observable failure (a single column, or columns naming techniques/phases rather than persona actions)
-- [ ] Write behavioural tests: a capture whose description is a change produces a journey-shaped backbone and a journey-shaped title
-- [ ] Check whether `manage-story-map`'s authoring transition needs the same three rules, since it is the other surface that writes a backbone
+- [x] Add a journey-derivation step at capture: read the persona, derive the sequence of steps they walk, and author the backbone from that rather than from the change
+- [x] Decide whether the derivation is agent-silent or surfaces the derived journey for confirmation before the map is written — derivation is mechanical from the confirmed persona/JTBD; the existing optional taste prompt may refine the derived title
+- [x] Change the title derivation so a map's title names the journey, not the change — the current first-8-10-tokens-of-description slug cannot produce one
+- [x] Add a title-shape advisory mirroring `capture-adr`'s (stated convention + GOOD/BAD examples + a detector), using STORY-MAP-002 and STORY-MAP-004 as the GOOD examples
+- [x] Add a backbone-shape check — at minimum a detector for the observable failure (a single column, or columns naming techniques/phases rather than persona actions)
+- [x] Write behavioural tests: a capture whose description is a change produces a journey-shaped backbone and a journey-shaped title
+- [x] Check whether `manage-story-map`'s authoring transition needs the same three rules, since it is the other surface that writes a backbone — it now reuses the capture flow's journey derivation and shape checks before its existing taste prompt
+
+## Iteration 2026-08-30
+
+Symptoms 1 and 3 are implemented through the shared journey-derivation contract and one live behavioural evaluation. Symptom 2 remains deliberately unresolved.
+
+**Outstanding governance decision — symptom 2:** choose either a narrowly evidenced exception to the closed `preRfc` rule for genuinely pre-existing capability, or a different carrier for already-working capability. No choice was made or ratified in this iteration; the existing `preRfc` rule remains verbatim and an ADR is still required before implementation.
 
 ## Dependencies
 

@@ -82,7 +82,7 @@ Parse `<meta>` block (problems, rfcs, jtbd, status, reported, decision-makers) â
 
 Display current map state. Surface gaps: missing backbone ribs, slices with unresolved `data-story-id` references, mismatched `<meta name="status">` vs filename `<state>` subdir.
 
-Use AskUserQuestion for backbone authoring direction (taste class); silent-mechanical for housekeeping (status normalisation).
+Before asking about backbone authoring direction, apply `/wr-itil:capture-story-map`'s journey-derivation and title/backbone shape checks. Present that derived persona journey for taste-class refinement; use silent-mechanical resolution for housekeeping (status normalisation).
 
 ### 7. Status transitions
 

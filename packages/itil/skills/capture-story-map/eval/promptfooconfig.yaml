@@ -35,6 +35,24 @@ prompts:
   - '{{prompt}}'
 
 tests:
+  - description: Derives the map title and backbone from the persona journey
+    vars:
+      prompt: |
+        Capture a story map for a developer under JTBD-008. The change
+        description is "Convert source-inspection pins to behavioural tests".
+
+        Before authoring any file, derive the persona's journey. Return only:
+        `Title: <map title>` and `Backbone: <ordered activities>`.
+    assert:
+      - type: not-regex
+        value: '^Title:\s*Convert source-inspection pins to behavioural tests'
+      - type: llm-rubric
+        value: >-
+          The title names the developer journey rather than restating the change,
+          and the ordered backbone names actions the developer takes through that
+          journey rather than techniques, phases, invariants, or implementation
+          tasks. The response derives both from the persona before authoring.
+
   - description: Does not reuse a deleted story-map ID
     vars:
       prompt: |
