@@ -66,7 +66,7 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-065 | STORY-065: A fix proposal draws a release row, not a document | accepted |
 | STORY-066 | STORY-066: A fix I can prove works gets closed without me | accepted |
 | STORY-072 | STORY-072: Record oversight evidence only for the confirming session | accepted |
-| STORY-077 | STORY-077: Move a captured fix straight to verification and keep a reopened problem in the work queue | accepted |
+| STORY-077 | STORY-077: Move a captured fix straight to verification and keep a reopened problem in the work queue | in-progress |
 | STORY-003 | STORY-003: /wr-itil:list-stories read-only display skill | done |
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-018 | STORY-018: Capture the problem in seconds, mid-flow | done |

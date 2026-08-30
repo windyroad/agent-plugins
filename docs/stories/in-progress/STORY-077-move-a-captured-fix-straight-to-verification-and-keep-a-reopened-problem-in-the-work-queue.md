@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: move-a-captured-fix-straight-to-verification-and-keep-a-reopened-problem-in-the-work-queue
 reported: 2026-08-30
 decision-makers: [Tom Howard]
@@ -28,11 +28,11 @@ In order to keep each problem in the state that matches what happened, as a deve
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] Open to Verification Pending is valid only when the existing Open to Known Error checks, the existing release checks, and an objective populated `## Fix Released` section all pass.
-- [ ] The run-retro recovery wording is re-checked against the now-shipped one-command recovery and a focused cross-skill test proves the named recovery is accepted by transition-problem.
-- [ ] A Known Error ticket with a `## Reopened <date>` section later than its derived release date is not emitted by the post-release Known Error to Verification Pending enumerator.
-- [ ] The reopened-ticket guard applies whether the release vehicle came from the ticket body or the co-commit fallback.
-- [ ] The two backward lifecycle pairings shipped through P519 are not reimplemented.
+- [x] Open to Verification Pending is valid only when the existing Open to Known Error checks, the existing release checks, and an objective populated `## Fix Released` section all pass.
+- [x] The run-retro recovery wording is re-checked against the now-shipped one-command recovery and a focused cross-skill test proves the named recovery is accepted by transition-problem.
+- [x] A Known Error ticket with a `## Reopened <date>` section later than its derived release date is not emitted by the post-release Known Error to Verification Pending enumerator.
+- [x] The reopened-ticket guard applies whether the release vehicle came from the ticket body or the co-commit fallback.
+- [x] The two backward lifecycle pairings shipped through P519 are not reimplemented.
 
 ## Driving problem trace (required — I6 invariant)
 
