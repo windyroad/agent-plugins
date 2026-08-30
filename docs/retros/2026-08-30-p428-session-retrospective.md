@@ -3,6 +3,7 @@
 ## Briefing Changes
 
 - Added the macOS Bash 3.2-safe Step 5 dispatch rule to `docs/briefing/afk-subprocess.md` and refreshed its Topic Index summary.
+- Refreshed that rule after publication with the deterministic release-vehicle evidence required for the Known Error to Verification Pending transition.
 - Classified 202 briefing entries across 36 topic and archive files. Nine entries were signal and 193 were noise for this cycle.
 - Kept the 106 entries now scoring at or below -3 in a delete queue because this retrospective runs inside a work-problems iteration. No Critical Points entry was promoted or demoted.
 
@@ -31,7 +32,7 @@ Delete queue: 106 entries at score -3 or below, retained for the iteration fallb
 | README inventory currency | Advisory | 14 packages scanned, 0 drift instances | Clean |
 | Legacy RFC scope queue | Advisory | 8 proposed skeletons scanned, 7 historical under-scoped rows | Existing historical queue; no P428 action |
 
-No verification ticket was closed. P428 is same-session Known Error work and has not been released; no Verification Queue row carried a current `yes — observed:` candidate.
+No verification ticket was closed. P428 moved to Verification Pending after the exact release merge, successful workflow, and npm registry readback were reconciled; it still awaits user observation.
 
 ## Context Usage (Cheap Layer)
 
@@ -53,7 +54,15 @@ Top five by byte-count-on-disk are problems, decisions, skills, memory, and hook
 
 No `request_user_input` calls occurred. Lazy, direction, deviation-approval, override, silent-framework, taste, and correction-followup counts are all 0. The cross-session trend remains 0 to 0.
 
+## Release Reconciliation Follow-up
+
+- `wr-itil-derive-release-vehicle 428` deterministically resolved `.changeset/calm-bats-launch.md`, version-packages commit `32ce9416`, PR #465, release merge `16bd9f10`, and release date 2026-08-30.
+- Workflow `33305914798` succeeded at the exact release merge, and direct npm readback returned `@windyroad/itil@2.1.7`.
+- STORY-076 satisfied all accepted criteria and moved to done; the story-map renderer consequently derived RFC-082 as delivered.
+- The inbound #345 lifecycle comment stayed fail-closed. Exact-body risk and voice reviews both passed, but the installed Codex voice-marker compatibility path did not persist the completed review marker. This matches the existing external-comms gate class, so no duplicate problem was captured.
+- The two pre-existing outbound audit/cache modifications remained unstaged. Lifecycle and retrospective commits used path-scoped staging.
+
 ## No Action Needed
 
-- Architecture, JTBD, accessibility, style, voice, TDD classification, and risk checks already covered the P428 iteration.
+- Architecture, JTBD, accessibility, style, voice, and risk checks covered the P428 implementation and release reconciliation.
 - No new codification candidate was found. The Bash compatibility defect and installed-hook behavior are both captured by existing durable records.
