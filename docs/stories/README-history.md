@@ -40,4 +40,6 @@
 
 > Last reviewed: 2026-08-30 **STORY-073 in-progress** — the P469 reviewer-verdict enforcement slice is implemented with all acceptance criteria passing locally.
 
+> Last reviewed: 2026-08-30 **STORY-074 in-progress** — implementation commit 2f5bc512 satisfies all three acceptance criteria.
+
 > Last reviewed: 2026-08-30 **STORY-074 accepted** — I7, I8, I10, and map-derived I12 pass for the P526 Codex projection repair.

@@ -105,4 +105,4 @@ Captured via `/wr-itil:capture-problem`. Hang-off arbitration returned `PROCEED_
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-075 | STORY-075: My story map starts from the journey I walk | draft |
+| STORY-075 | STORY-075: My story map starts from the journey I walk | accepted |
