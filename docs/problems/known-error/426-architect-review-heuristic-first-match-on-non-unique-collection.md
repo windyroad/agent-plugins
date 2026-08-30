@@ -52,7 +52,7 @@ Add a standing **First-Match on a Non-Unique Collection** heuristic to `packages
 
 Behavioural coverage per ADR-052/ADR-075 (harness exists, RFC-012/P324): two paired promptfoo eval tests in `packages/architect/agents/eval/promptfooconfig.yaml` — (a) **positive-fire**: a proposed change binding a workspace to an org via `.find()` on a memberships collection filtered by a non-unique field → Tier A `icontains: ISSUES FOUND` + Tier B llm-rubric asserting a first-match/non-unique finding is raised; (b) **over-fire guard**: a lookup by primary key with a unique index → Tier A `icontains: PASS` + Tier B llm-rubric asserting no [First-Match Footgun] flag fires. Ship with a patch-bump changeset for the architect package in the same commit.
 
-**Held at gate (2026-07-15 AFK iter)**: architect pre-edit review PASSed the heuristic substance and eval design, but the implementation commit is held — ADR-089/090/096 require the fix to ride a ratified story and story ratification is interactive-only (the P456 composition). Captured this iteration born-unconfirmed: fix-time RFC (I13 auto-create), story map, and story. Implement at the next interactive drain after story ratify → accept.
+RFC-084, the release row "A reviewer flags first-match selection against a non-unique identity, authorization, or data-binding key" on confirmed STORY-MAP-011, carries STORY-078. The row replaces the unconfirmed legacy RFC-048 document as the current fix vehicle.
 
 ## Dependencies
 

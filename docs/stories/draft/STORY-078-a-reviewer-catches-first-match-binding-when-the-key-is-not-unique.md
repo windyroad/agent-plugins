@@ -5,7 +5,7 @@ reported: 2026-08-31
 decision-makers: [Tom Howard]
 problems: [P426]
 jtbd: [JTBD-001]
-rfcs: []
+rfcs: [RFC-084]
 story-maps: [STORY-MAP-011]
 estimated-effort: S
 ---
@@ -15,7 +15,7 @@ estimated-effort: S
 **Reported**: 2026-08-31
 **Problems**: P426
 **JTBD**: JTBD-001 (Enforce Governance Without Slowing Down)
-**RFCs**: (none yet; RFC-084 is added as the release row after capture)
+**RFCs**: RFC-084
 **Story Maps**: STORY-MAP-011 (Trust the AFK loop's autonomous conduct), activity `decide`
 **Estimated effort**: S
 
