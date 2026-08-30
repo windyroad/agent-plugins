@@ -53,3 +53,5 @@
 > Last reviewed: 2026-08-30 **STORY-075 in-progress** — implementation commit 69071f8a satisfies all four acceptance criteria.
 
 > Last reviewed: 2026-08-30 **STORY-077 accepted** — I6-I10 and map-derived I12 pass for the P512 lifecycle recovery slice.
+
+> Last reviewed: 2026-08-30 **STORY-077 in-progress** — implementation commit 570a111a satisfies all five acceptance criteria.

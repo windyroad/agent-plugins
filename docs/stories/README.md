@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-08-30 **STORY-077 in-progress** — implementation commit 570a111a satisfies all five acceptance criteria.
+> Last reviewed: 2026-08-30 **STORY-077 done** — all five acceptance criteria passed and RFC-083 shipped in the P512 release.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -141,7 +141,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | in-progress | STORY-073 | A failed reviewer blocks the guarded edit | S | P469 | RFC-079 | STORY-MAP-008 |
 | in-progress | STORY-074 | Use generated Codex skills after upgrading without repairs | S | P526 | RFC-080 | STORY-MAP-008 |
 | in-progress | STORY-075 | My story map starts from the journey I walk | S | P509 | RFC-081 | STORY-MAP-002 |
-| in-progress | STORY-077 | Move a captured fix straight to verification and keep a reopened problem in the work queue | M | P512 | RFC-083 | STORY-MAP-002 |
 | draft | STORY-064 | A ticket that only names a decision as background stays open | M | P463 | RFC-070 | STORY-MAP-011 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |
@@ -170,6 +169,7 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-077 | Move a captured fix straight to verification and keep a reopened problem in the work queue | 2026-08-30 | P512 |
 | STORY-076 | My unattended backlog loop launches every iteration with its governance plugins on macOS | 2026-08-30 | P428 |
 | STORY-071 | Review the complete commit message once | 2026-08-29 | P415 |
 | STORY-063 | Check ADR pairing in the checkout being committed | 2026-08-21 | P499 |
