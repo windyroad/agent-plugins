@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-31 **P532 captured** - Codex safety-system error interrupted a problem capture and backlog goal; voice-and-tone screenshot evidence added to P402.
+> Last reviewed: 2026-08-31 **P514 Verification Pending** - JTBD 0.14.2 published and tarball checked; installed-session verification remains.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -17,7 +17,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Critical) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported** | | | | | |
 | 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
-| 12 | P514 | The JTBD gate reviews edits but not recommendations, so option-sets reach the user unvalidated | 12 (High) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P042) |
 | 10 | P530 | Retrospective consumer-repo assumptions remain after shim fix | 10 (High) | Open | S | 2026-08-28 | inbound-reported (#453) |
 | 9 | P425 | wr-architect edit-gate re-litigates its own same-session PASS — [Unratified Dependency] over-fires on agent-prescribed born-proposed ADRs | 9 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#342) |
 | 9 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter (consumers pin the cache version and break on bump) | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#325) |
@@ -275,6 +274,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P469 | style-guide and voice-tone reviewer agents spawn without Bash, so they cannot write the verdict marker their own gate reads | 2026-08-30 (`@windyroad/style-guide@0.6.1`, `@windyroad/voice-tone@0.8.2`; version-packages commit `5de641525c67cb0558789d5eea206d82dc34ff2d`, merge commit `45f84cf15c26561db6cb080d5faba34fdd1085c6`, PR #459) | no — not observed |
 | P512 | The transition lifecycle table rejects both the fix-on-capture fast path and its own documented recovery path | 2026-08-30 (`@windyroad/itil@2.1.8`, `@windyroad/retrospective@0.28.1`; release workflow `33313257350`, merge `5f4b69fa`) | no — not observed |
 | P526 | Codex projection sanitizer corrupts YAML frontmatter while expanding internal IDs | 2026-08-30 (`@windyroad/itil@2.1.4`; version-packages commit `c717d203`, merge commit `22375d28`, PR #462; published frontmatter PASS across both skill surfaces with all 29 Codex skills) | no — not observed |
+| P514 | The JTBD gate reviews edits but not recommendations, so option-sets reach the user unvalidated | 2026-08-31 (`@windyroad/jtbd@0.14.2`; merge `fcd1336b960f6ea1d52f6da3af4f6771f5283a75`, PR #469) | no - not observed in an installed session |
 | P035 | manage-problem commit-gate no subagent delegation fallback | pending — fallback path never fired this session | no — not observed |
 | P037 | jtbd-reviewer returns bare verdict without reason | commit 6e7c2e4 | no — not observed |
 | P044 | run-retro does not recommend new skills when it should | @windyroad/retrospective@0.1.6 (commit 6510b29) | no — not observed |

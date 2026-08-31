@@ -1432,3 +1432,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-31 **P426 closed on evidence** - isolated `@windyroad/architect@0.22.0` runs raised `[First-Match Footgun]` for the non-unique fixture and passed the unique-key guard.
 
 > Last reviewed: 2026-08-31 **P531 captured** - ADR compendium regeneration reportedly drops historical Amends relationships (lightweight aside via /wr-itil:capture-problem).
+
+## 2026-08-31
+
+> Last reviewed: 2026-08-31 **P532 captured** - Codex safety-system error interrupted a problem capture and backlog goal; voice-and-tone screenshot evidence added to P402.

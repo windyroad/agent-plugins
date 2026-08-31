@@ -1,6 +1,6 @@
 # Problem 514: The JTBD gate reviews edits but not recommendations, so option-sets reach the user unvalidated
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-08-21
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture. Impact 3: the failure lands on the user directly rather than on an artefact — a recommendation that contradicts a documented desired outcome costs a decision cycle and shifts the JTBD check onto the person the corpus exists to serve. Likelihood 4: no control on the path at all; the gate fires on writes, and a recommendation is not a write.
 **Origin**: inbound-reported (adopter-repo P042)
@@ -71,7 +71,16 @@ RFC-085 / STORY-079 adds recommendation review to the existing JTBD reviewer and
 - **Test quality**: all four changed Bats files were independently classified as behavioural under ADR-052.
 - **Packed source**: local `@windyroad/jtbd@0.14.1` pack produced `windyroad-jtbd-0.14.1.tgz` with the updated agent and hooks; eval/test directories remained excluded. The extracted hooks passed isolated smoke cases for prompt injection, recommendation separation, edit PASS, edit FAIL, malformed PASS, and stale PASS disagreement. This is packed candidate evidence only.
 - **Runtime-loaded packed candidate**: Claude Code 2.1.245 loaded the unpacked candidate through `--plugin-dir`, registered `wr-jtbd:agent`, invoked it with the exact `RECOMMENDATION REVIEW` prefix, received `JTBD Recommendation Review: ISSUES FOUND`, rejected the contradictory option, reported the incomplete set, and wrote no verdict marker. This was an isolated, non-persistent candidate journey, not installed or published proof.
-- **Not yet proved**: no push, publication, installed-plugin refresh, or installed-runtime exercise occurred in this iteration. P514 remains Known Error pending outer-orchestrator delivery and post-release verification.
+- **At the end of that isolated iteration**: no push, publication, installed-plugin refresh, or installed-runtime exercise had occurred. The release evidence below records subsequent delivery; installed-session verification remains outstanding.
+
+## Fix Released
+
+Released 2026-08-31 in `@windyroad/jtbd@0.14.2`: recommendations receive a separate review against documented jobs, while edit approval requires matching current inline and file verdicts.
+
+- Release vehicle: `.changeset/p514-jtbd-recommendation-review.md`; version-packages commit `2fb3c149d50e218df4ecd84c491274b5bd9c7524`, PR #469, merge commit `fcd1336b960f6ea1d52f6da3af4f6771f5283a75`, derived with the installed release-vehicle helper.
+- Source CI `33358866002` at `a18f3c403995827867cf2fabe6996237128c2769` passed: 4,275 hook checks, two existing skips, zero failures, and all 31 actual-agent cases. Stable Release workflow `33359639243` succeeded for the merge commit.
+- Registry `latest` resolves to `0.14.2`. Package, Claude and Codex manifests agree; the registry tarball's reviewer and changed hooks match the tested source byte for byte. All 22 marker tests passed against the extracted published hook, including recommendation/edit separation, malformed verdict rejection, and fixture isolation.
+- Awaiting installed-session verification. No persistent plugin refresh, live hook activation or disabled-hook configuration change was performed. STORY-079 remains in progress. The real Claude candidate journey above and published tarball checks do not establish installed Codex-session behaviour.
 
 ## Dependencies
 
