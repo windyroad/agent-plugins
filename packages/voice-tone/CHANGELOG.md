@@ -1,5 +1,11 @@
 # @windyroad/voice-tone
 
+## 0.8.4
+
+### Patch Changes
+
+- 5fde230: Route literal Bash output redirections and tee targets through the existing edit gates and post-write hooks. Read-only commands remain silent. Dynamic targets, control structures, in-process writes, and unknown output content remain outside this partial fix.
+
 ## 0.8.3
 
 ### Patch Changes
