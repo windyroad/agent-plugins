@@ -23,6 +23,15 @@ Per-surface (each an investigation task):
 3. P186 evidence-cell canonical wire format uses a U+2014 separator across the six itil SKILL render sites keyed by the `LIKELY-VERIFIED-CELL-SHAPE` marker (#186).
 4. `check-upstream-responses` writes a U+2014 into the audit-log heading, tripping the gate every Step-0d pass (#319).
 
+## Additional user report received 2026-08-31
+
+The user supplied `codex-clipboard-47a092a3-bc2f-467c-841e-d8ceeb785bdb.png` and requested problem capture. The screenshot reports that creating an ADR automatically regenerated `docs/decisions/README.md`, that the generator emitted an em dash rejected by the project's own hook, and that the rejection then blocked every subsequent Bash call. It also reports that the README was not directly edited by the agent.
+
+This is reported evidence, not a reproduction in this checkout. The affected project, runtime, installed package version, exact hook rejection, and event date are not established by the screenshot. The report is absorbed into P424 because its existing compendium surface already covers this generated-output conflict; no duplicate problem is created. The claimed Bash-wide blockage extends the recorded impact beyond an Edit/Write rejection and needs verification.
+
+- [ ] Reproduce ADR creation and compendium regeneration with the affected runtime and no-em-dash hook; establish whether subsequent unrelated Bash calls are also denied.
+- [ ] Record the installed package version and exact rejection, then check whether the release cited below actually covers this emitting path before deciding whether to reopen the ticket. Do not infer a verified fix or a post-release regression from the current status alone.
+
 ## Impact Assessment
 
 - **Who is affected**: adopters running a no-em-dash Edit/Write policy; every regen re-introduces the character they must scrub.
