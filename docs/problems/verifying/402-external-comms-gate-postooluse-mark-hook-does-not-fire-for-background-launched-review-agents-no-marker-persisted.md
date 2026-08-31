@@ -8,12 +8,18 @@
 **WSJF**: 12 — (12 × 2.0) / 2 (added 2026-08-21 review)
 **JTBD**: JTBD-001
 **Persona**: developer
-
 ## RFCs
 
-| RFC | Status | Title |
-|-----|--------|-------|
-| RFC-041 | proposed | Dispatch marker-writing review agents synchronously so the mark hook fires before the gated action |
+| ID | Title | Status |
+|----|-------|--------|
+| RFC-041 | RFC-041: Dispatch marker-writing review agents synchronously so the mark hook fires before the gated action | proposed |
+| RFC-086 | Record completed native reviews | proposed |
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-080 | STORY-080: Record a completed native review without manual marker recovery | accepted |
 
 ## Fix Released — SUPERSEDED by the 2026-08-20 reopen, see ## Reopened below
 
@@ -244,3 +250,31 @@ Fresh capture arbitration returned `HANG_OFF: P402`: this adds a voice-and-tone 
 - [ ] Establish affected runtime/version and retrieve the exact review, completion event and gate diagnostic through authorized evidence.
 - [ ] Verify whether the completion hook ran and whether its result was associated with the correct parent session and reviewed content.
 - [ ] Test the supported completion path against the existing verification condition; do not replace missing evidence with manually written approval markers.
+
+### Native Codex ordinary-review transport diagnosis — 2026-08-31
+
+The user intentionally disabled the installed JTBD, style-guide, and voice-tone hooks because they were obstructing work. These settings remain unchanged. Source inspection and packed tests identify a missing completion path for ordinary style-guide and voice-tone reviews; this does not establish the runtime or cause of the earlier screenshot report.
+
+Source inspection isolates the compatibility gap in `scripts/sync-codex-plugin-surfaces.mjs`. Its generated `codex-adapter.sh` normalizes native spawn input into the existing `Agent` payload, but it has no transport for a later native completion. The ordinary `PostToolUse:Agent` writer therefore receives the launch acknowledgement rather than the completed review. P469 already shipped canonical inline verdict parsers in the source packages; changing installed packages or replaying a tool event would not repair the missing completion transport.
+
+RFC-086 and STORY-080 bound the first compatibility slice to ordinary `wr-style-guide:agent` and `wr-voice-tone:agent` reviews. The generated bridge registers the genuine role and target under the parent session and physical checkout, accepts only completed close, completed wait, or a bound `SubagentStop`, atomically claims duplicate delivery, and invokes the existing package marker writer. Spawn acknowledgements, empty waits, interrupted running reviews, narrative summaries, stale or unrelated reviews, parent/check-out mismatches, and writer failure do not approve an edit.
+
+This slice deliberately excludes `wr-voice-tone:external-comms`, whose draft/key/parent binding remains governed separately by ADR-028. It also leaves JTBD completion transport, runtime configuration, installed caches, and Claude hooks unchanged. P402 remains Verification Pending because these ordinary-review cases do not cover every transport path or establish installed-package verification.
+
+Implementation evidence in this checkout:
+
+- RED: `LC_ALL=C bats packages/shared/test/codex-reviewer-completion-transport.bats` failed both cases because the packed completion helper did not exist.
+- GREEN: the same packed-artifact test passed 2/2 after the generator change.
+- Existing generated/packed coverage: `remaining-codex-pack-install.bats` plus `reviewer-verdict-marker-enforcement.bats` exited 0 with 4 planned cases.
+- Existing story-map and style/voice hook coverage: the focused Bats run exited 0 with 171 planned cases.
+- Generated build checks created each affected Codex surface sequentially, passed `node --check` and hook-config assertions, then cleaned the generated directories.
+- The rendered STORY-MAP-002 contains 18 release rows and 30 stories, retains two inert JSON data islands and no inline style or positive `tabindex`, resolves every generated relative link, and remains ratified. The re-render also corrected the stale STORY-079 draft link to its current accepted path.
+- A fresh native `wr-risk-scorer:pipeline` review of the exact eight-path P402 slice completed with `RISK_SCORES: commit=4 push=4 release=4` and the correct physical `RISK_CWD`. The subsequent exact `git commit --only ...` was nevertheless denied with `No commit risk score found`. This is genuine governance review evidence but not a persisted gate marker. No reviewer was redispatched, no completion event was replayed, and no marker was written by hand.
+
+These are source and packed-candidate checks. They do not establish release, installation, or production verification.
+
+### Outer-session correction and verification, 2026-08-31
+
+Independent packed checks found three gaps in the first candidate: the two packages shared a registration filename, full and short task names did not match, and a late PASS could be applied after policy changes. Expiry checks also exposed an ignored `REVIEW_TTL` setting and acceptance of invalid or future-dated registrations.
+
+The correction separates package state, normalizes supported task names, compares the existing policy substance hash, and honors `REVIEW_TTL` while rejecting invalid ages. The expanded packed suite passed 3/3; the existing package and style/voice hook suite passed 106/106. A mechanical review classified all three new test cases as behavioural. These checks do not prove release, installation, or subsequent-runtime verification.
