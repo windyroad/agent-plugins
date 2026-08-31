@@ -65,3 +65,10 @@ Hang-off pre-filter returned 6 candidates, above the 5-candidate cap, so the `wr
 - `docs/problems/verifying/096-pretooluse-posttooluse-hook-injection-volume-unaudited.md`
 
 Also related but not in the prefilter set: `docs/problems/closed/181-architect-mark-reviewed-verdict-grep-fragile-on-issues-found-substring.md` — the same verdict-grep fragility, fixed for the ISSUES FOUND substring case; this is the PASS-side recurrence.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-083 | STORY-083: A canonical architect PASS unlocks the guarded edit | draft |
