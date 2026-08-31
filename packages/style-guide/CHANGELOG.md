@@ -1,5 +1,11 @@
 # @windyroad/style-guide
 
+## 0.6.2
+
+### Patch Changes
+
+- be2b328: Record completed native Codex style-guide reviews through the existing marker writer while preserving the parent session and checkout binding.
+
 ## 0.6.1
 
 ### Patch Changes

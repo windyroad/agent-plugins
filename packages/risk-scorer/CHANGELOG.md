@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.18.20
+
+### Patch Changes
+
+- 6885a11: Make plan reviews use the documented default appetite of 5 when `RISK-POLICY.md` does not specify an appetite, and consistently fail scores above that threshold.
+
 ## 0.18.19
 
 ### Patch Changes
