@@ -11,7 +11,8 @@
 # match fixes the false-positive FAIL → silent marker-drop → edit block.
 
 setup() {
-  HOOKS_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
+  HOOKS_DIR="${ARCHITECT_PACKAGE_ROOT:+$ARCHITECT_PACKAGE_ROOT/hooks}"
+  HOOKS_DIR="${HOOKS_DIR:-$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)}"
   HOOK="$HOOKS_DIR/architect-mark-reviewed.sh"
   TEST_SESSION="bats-arch-verdict-$$-${BATS_TEST_NUMBER}"
   REVIEW_MARKER="/tmp/architect-reviewed-${TEST_SESSION}"
@@ -50,6 +51,18 @@ print(json.dumps({
 No conflicts with existing decisions.")
   echo "$INPUT" | "$HOOK"
   [ -f "$REVIEW_MARKER" ]
+  [ -f "$HASH_MARKER" ]
+  [ -f "$PLAN_MARKER" ]
+}
+
+@test "verdict-grep: marker drops on canonical H2 PASS heading" {
+  INPUT=$(_make_input "## Architecture Review: PASS
+
+No conflicts with existing decisions.")
+  echo "$INPUT" | "$HOOK"
+  [ -f "$REVIEW_MARKER" ]
+  [ -f "$HASH_MARKER" ]
+  [ -f "$PLAN_MARKER" ]
 }
 
 @test "verdict-grep: marker NOT created on canonical ISSUES FOUND heading" {
@@ -58,6 +71,18 @@ No conflicts with existing decisions.")
 1. [Decision Conflict] — ADR-009 violation.")
   echo "$INPUT" | "$HOOK"
   [ ! -f "$REVIEW_MARKER" ]
+  [ ! -f "$HASH_MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
+}
+
+@test "verdict-grep: marker NOT created on canonical H2 ISSUES FOUND heading" {
+  INPUT=$(_make_input "## Architecture Review: ISSUES FOUND
+
+1. ADR-009 conflict.")
+  echo "$INPUT" | "$HOOK"
+  [ ! -f "$REVIEW_MARKER" ]
+  [ ! -f "$HASH_MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
 }
 
 @test "verdict-grep: marker drops on PASS heading with blockquote prefix" {
@@ -97,13 +122,47 @@ A decision must be recorded. This differs from an ISSUES FOUND verdict because t
 }
 
 @test "verdict-grep: marker drops when PASS heading present and body also says 'ISSUES FOUND' inline" {
-  # PASS check runs first and must win even with substring noise downstream.
-  # This works in both old and new code; sanity-anchors the precedence rule.
   INPUT=$(_make_input "**Architecture Review: PASS**
 
 No conflicts. Note: earlier sessions reported ISSUES FOUND on adjacent files but those are out of scope here.")
   echo "$INPUT" | "$HOOK"
   [ -f "$REVIEW_MARKER" ]
+}
+
+@test "verdict-grep: conflicting ISSUES FOUND then PASS headings do not unlock edits" {
+  INPUT=$(_make_input "**Architecture Review: ISSUES FOUND**
+
+**Architecture Review: PASS**")
+  echo "$INPUT" | "$HOOK"
+  [ ! -f "$REVIEW_MARKER" ]
+  [ ! -f "$HASH_MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
+}
+
+@test "verdict-grep: conflicting PASS then ISSUES FOUND headings do not unlock edits" {
+  INPUT=$(_make_input "**Architecture Review: PASS**
+
+**Architecture Review: ISSUES FOUND**")
+  echo "$INPUT" | "$HOOK"
+  [ ! -f "$REVIEW_MARKER" ]
+  [ ! -f "$HASH_MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
+}
+
+@test "verdict-grep: quoted H2 PASS does not unlock edits" {
+  INPUT=$(_make_input 'The reviewer wrote `## Architecture Review: PASS`, but gave no verdict.')
+  echo "$INPUT" | "$HOOK"
+  [ ! -f "$REVIEW_MARKER" ]
+  [ ! -f "$HASH_MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
+}
+
+@test "verdict-grep: malformed H2 PASS does not unlock edits" {
+  INPUT=$(_make_input "## Architecture Review: PASS later")
+  echo "$INPUT" | "$HOOK"
+  [ ! -f "$REVIEW_MARKER" ]
+  [ ! -f "$HASH_MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
 }
 
 @test "verdict-grep: prose-only approval does not unlock edits" {

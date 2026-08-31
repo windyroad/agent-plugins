@@ -29,17 +29,16 @@ case "$SUBAGENT" in
     # Parse verdict from agent output text (no temp file needed).
     # Anchored to the canonical heading shape from
     # packages/architect/agents/agent.md "How to Report"
-    # (`**Architecture Review: PASS**` / `**Architecture Review: ISSUES FOUND**`).
+    # (`**Architecture Review: PASS**` / `## Architecture Review: PASS`, and
+    # their ISSUES FOUND equivalents).
     # Tolerates optional `> ` blockquote prefix + leading whitespace.
-    # Anchored match (not substring) prevents P181 false-positive FAIL when
-    # body prose narratively references the ISSUES FOUND verdict.
+    # Anchored matches prevent P181 narrative false positives. Exactly one
+    # canonical verdict is required so conflicting output fails closed.
     AGENT_OUTPUT=$(_get_tool_output)
-    VERDICT=""
-    if echo "$AGENT_OUTPUT" | grep -qE '^[[:space:]]*>?[[:space:]]*\*\*Architecture Review: PASS\*\*'; then
-      VERDICT="PASS"
-    elif echo "$AGENT_OUTPUT" | grep -qE '^[[:space:]]*>?[[:space:]]*\*\*Architecture Review: ISSUES FOUND\*\*'; then
-      VERDICT="FAIL"
-    fi
+    VERDICT=$(printf '%s\n' "$AGENT_OUTPUT" | sed -nE \
+      -e 's/^[[:space:]]*>?[[:space:]]*\*\*Architecture Review: (PASS|ISSUES FOUND)\*\*[[:space:]]*$/\1/p' \
+      -e 's/^[[:space:]]*>?[[:space:]]*##[[:space:]]+Architecture Review: (PASS|ISSUES FOUND)[[:space:]]*$/\1/p')
+    [ "$VERDICT" = "ISSUES FOUND" ] && VERDICT="FAIL"
 
     # Substance-aware drift hash + atomic verdict-write (ADR-009 amendment
     # 2026-06-06). The marker + hash file are written as an atomic pair via

@@ -80,6 +80,8 @@ teardown() {
   run grep -F '"name": "wr-architect"' "$TMP/package/.claude-plugin/plugin.json"
   [ "$status" -eq 0 ]
 
+  run env ARCHITECT_PACKAGE_ROOT="$(cd "$TMP/package" && pwd -P)" bats "$PACKAGE/hooks/test/architect-mark-reviewed-verdict-grep.bats"
+  [ "$status" -eq 0 ]
   run env ARCHITECT_PACKAGE_ROOT="$(cd "$TMP/package" && pwd -P)" bats "$PACKAGE/hooks/test/architect-hook-dispatch.bats"
   [ "$status" -eq 0 ]
 }
