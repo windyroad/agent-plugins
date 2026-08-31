@@ -58,6 +58,12 @@ The recovered implementation passes 22 focused checks: 16 shared dispatcher case
 
 The wider affected hook suite passed all 696 checks. It ran before the final repeated-echo-option correction; all 22 focused checks were rerun successfully afterward, including that regression. A separate isolated fixture exercised the real architect Bash post dispatcher, hash refresh, compendium rewrite and README staging; only the compendium model response was stubbed. Actual npm-packed candidates for architect, JTBD, style-guide, voice-tone and TDD each contained the canonical helper and hook manifest, excluded package tests, and passed write/read-only smoke checks. None of these checks installed or enabled hooks in the user's runtime.
 
+### Partial publication, 2026-08-31
+
+Implementation `5fde23056a50577d882f4d4431e2361573f87864` passed [source CI](https://github.com/windyroad/agent-plugins/actions/runs/33381930776): 4,291 tests, two skips and 31 actual-agent cases. [PR 470](https://github.com/windyroad/agent-plugins/pull/470) merged as `6977e75fb3935c58df7962bff873a934bc2a26d7`; its [release workflow](https://github.com/windyroad/agent-plugins/actions/runs/33383002410) and [CI](https://github.com/windyroad/agent-plugins/actions/runs/33383002403) succeeded.
+
+Architect 0.22.1, JTBD 0.14.3, style-guide 0.6.3, voice-tone 0.8.4 and TDD 0.6.1 are published. Each npm latest tag and downloaded tarball was verified, including canonical helper content, executable permissions, expected packed hook projection, test exclusion, and direct write/read-only behavior. The remaining acceptance criteria and coverage gaps above are unchanged; this story remains in progress. No installed hooks were updated or enabled.
+
 ## Dependencies
 
 - **Blocks**: (none)

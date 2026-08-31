@@ -56,7 +56,7 @@ The minimal shared fix is one conservative dispatcher that recognizes only expli
 
 The initial behavioral reproduction failed before the shared dispatcher and caller registrations existed. During direct recovery on 2026-08-31, review found false write detection in printed arguments, comments and heredoc bodies, plus content incorrectly borrowed from unrelated commands or overridden input descriptors. The shared classifier was corrected rather than adding exceptions to individual gates. All 22 focused shared/architect dispatcher checks now pass, including comparisons with native Bash. The failed worker's interrupted full suites do not count as passing evidence.
 
-This remains a Known Error. The current repair covers literal simple-command writes only. Dynamic targets, control structures and in-process writes such as Python or `sed -i` remain outside the classifier. Known literal content reaches marker-discipline checks, but unknown runtime-produced content cannot establish protection against every marker introduction. Release and installed-runtime verification are still outstanding.
+This remains a Known Error. The current repair covers literal simple-command writes only. Dynamic targets, control structures and in-process writes such as Python or `sed -i` remain outside the classifier. Known literal content reaches marker-discipline checks, but unknown runtime-produced content cannot establish protection against every marker introduction. The partial repair is published; broader coverage and installed-runtime verification remain outstanding.
 
 Recovery verification: 696 affected hook checks passed, followed by a successful 22-check focused rerun after the final echo-option correction. An isolated real post-dispatch fixture refreshed the decision hash and rewrote/staged the compendium using a stubbed model response. All five actual npm-packed candidates passed helper-content, manifest, test-exclusion and write/read-only smoke checks. These are source/candidate results, not published or installed-runtime proof.
 
@@ -65,11 +65,18 @@ Recovery verification: 696 affected hook checks passed, followed by a successful
 - [x] Choose a conservative detection shape: classify explicit output redirection and `tee` targets, and leave unsupported shell-language write forms unclassified rather than guessing
 - [x] Gate classified targets and keep commands with no classified target silent, so `cat`, `grep`, and other read-only Bash calls do not acquire a denial path
 - [x] Route classified targets through the existing post-write scripts as well as the pre-write gates, covering the architect hash/compendium and both TDD post-write routes
-- [ ] Deliver the canonical dispatcher and byte-identical copies in all five published plugins; source synchronization is implemented, publication remains outstanding
+- [x] Deliver the canonical dispatcher and byte-identical copies in all five published plugins; the partial repair was published and its tarballs verified on 2026-08-31
 - [ ] Raise with the harness owners that bypass-permissions guidance steers writes onto the ungated path
 - [x] Create a RED behavioral reproduction for explicit redirection, read-only silence, multiple `tee` targets, and all five caller registrations
 - [ ] Address or explicitly govern the remaining dynamic-target, control-structure, in-process mutation, and unknown-content coverage gaps before claiming the general Bash-write problem resolved
 - [ ] Verify post-write side effects and an installed-runtime journey without changing the user's disabled-hook configuration
+
+## Partial release evidence, 2026-08-31
+
+- Implementation: `5fde23056a50577d882f4d4431e2361573f87864`. [Source CI](https://github.com/windyroad/agent-plugins/actions/runs/33381930776) passed 4,291 tests with two skips and 31 actual-agent evaluation cases.
+- [Version Packages PR 470](https://github.com/windyroad/agent-plugins/pull/470) merged as `6977e75fb3935c58df7962bff873a934bc2a26d7`. The [release workflow](https://github.com/windyroad/agent-plugins/actions/runs/33383002410) and [release-commit CI](https://github.com/windyroad/agent-plugins/actions/runs/33383002403) succeeded.
+- Published versions: architect **0.22.1**, JTBD **0.14.3**, style-guide **0.6.3**, voice-tone **0.8.4**, and TDD **0.6.1**. Each npm `latest` tag matched. Downloaded tarballs contained the canonical helper, executable permissions, expected Codex-projected hook manifest and no package tests; direct write/read-only smoke checks passed for every package.
+- This is publication evidence for the bounded repair, not installed-runtime or general Bash-mutation verification. The user's hook configuration was not changed. STORY-082 remains in progress.
 
 ## Dependencies
 
