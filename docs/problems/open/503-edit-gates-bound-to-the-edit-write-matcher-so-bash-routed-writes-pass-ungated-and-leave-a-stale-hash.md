@@ -72,3 +72,10 @@ Route every write to a governed path through the Edit or Write tool. Nothing enf
 - **P096** (`docs/problems/verifying/096-pretooluse-posttooluse-hook-injection-volume-unaudited.md`) — its matcher inventory is descriptive context only. P096 concerns stdout bytes injected on pass vs deny; this ticket concerns which tool calls the matchers *select*, which P096's audit takes as given. Cross-reference, not a parent.
 - **P469** (`docs/problems/open/469-style-guide-and-voice-tone-reviewers-spawn-without-bash-so-cannot-write-verdict-markers.md`) — points at Bash from the opposite side: Bash *absent* from a reviewer agent's `tools:` frontmatter so it cannot write its verdict file. Here the main agent *uses* Bash for file writes and thereby escapes the matcher. Different actor, different artefact, different fix locus.
 - **P402** (reopened) and **P502** — the other two live marker-integrity failures surfaced by the same 2026-08-20 transcript sweep.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-082 | STORY-082: Gate Bash writes without blocking read-only commands | draft |

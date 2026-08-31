@@ -83,6 +83,7 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-059 | STORY-059: See why the loop did not work what I expected | draft |
 | STORY-060 | STORY-060: Pick up a captured ticket and know what was observed | draft |
 | STORY-064 | STORY-064: A ticket that only names a decision as background stays open | draft |
+| STORY-082 | STORY-082: Gate Bash writes without blocking read-only commands | draft |
 | STORY-062 | STORY-062: Keep problem ranking correct after a status transition | in-progress |
 | STORY-069 | STORY-069: Drain one Codex ticket through an isolated Codex CLI | in-progress |
 | STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | in-progress |
