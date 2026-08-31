@@ -73,3 +73,5 @@
 > Last reviewed: 2026-08-31 **STORY-079 in progress** - Implementation committed; delivery verification remains.
 
 > Last reviewed: 2026-08-31 **STORY-082 accepted** - I6-I10 and map-derived I12 pass for the P503 Bash-write gate slice.
+
+> Last reviewed: 2026-08-31 **STORY-082 in progress** - The P503 shared Bash-write dispatcher passes focused behavior and packed-candidate checks.

@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: a-canonical-architect-pass-unlocks-the-guarded-edit
 reported: 2026-08-31
 decision-makers: [Tom Howard]
