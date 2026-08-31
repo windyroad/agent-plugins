@@ -1,13 +1,13 @@
 # Problem 468: architect-mark-reviewed misses a genuine PASS whose verdict line is a markdown heading rather than bold
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-07-26
 **Priority**: 6 (Medium) — Impact: 2 × Likelihood: 3 — derived at capture from the description per Step 4a
 **Origin**: internal
 **Effort**: S — derived at capture per Step 4a
-**WSJF**: 6 — (6 × 1.0) / 1 (added 2026-08-21 review)
-**JTBD**: JTBD-101
-**Persona**: plugin-developer
+**WSJF**: 12 — (6 × 2.0) / 1 (Known Error multiplier applied 2026-08-31)
+**JTBD**: JTBD-001
+**Persona**: developer
 
 ## Description
 
@@ -27,7 +27,7 @@ The matcher is brittle against a formatting variation the agent itself controls,
 
 ## Workaround
 
-Assert the marker under **every** recent candidate SID rather than the single newest announce-marker basename — read `/tmp/itil-runtime-sid-*.current` for the runtime values and `touch /tmp/architect-reviewed-<sid>` plus `rm -f` its `.hash` sibling for each. Same candidate-set discipline the create-gate marker already uses per ADR-050 Option C.
+Until the parser repair is released and installed, require the documented bold verdict heading from a fresh architect reviewer and close that same reviewer through the native completion transport. If the reviewer returns an H2, malformed, or conflicting verdict, stop and run a fresh review. Do not create review markers manually.
 
 ## Impact Assessment
 
@@ -38,12 +38,22 @@ Assert the marker under **every** recent candidate SID rather than the single ne
 
 ## Root Cause Analysis
 
+`packages/architect/hooks/architect-mark-reviewed.sh` recognizes only the bold verdict form and searches the complete output for PASS before checking ISSUES FOUND. It therefore rejects a genuine H2 PASS and can approve conflicting output when any later bold PASS exists.
+
+The separate wrong-session symptom is already repaired by the generated Codex completion transport. It records the parent session, checkout, reviewer role, and target at spawn time, then sends the completed reviewer output to the shared marker writer under that parent context. The existing caller-binding tests reject unmatched targets, non-architect targets, and stale target reuse. No identity broadening or gate recovery change is needed for this fix.
+
 ### Investigation Tasks
 
-- [ ] Confirm the matcher in the `architect-mark-reviewed` PostToolUse hook and whether it anchors on the bold form specifically.
-- [ ] Decide the fix locus: loosen the matcher to accept any leading-line form of `Architecture Review: PASS`, or pin the verdict-line format in `packages/architect/agents/agent.md` so the agent cannot vary it — or both.
-- [ ] Correct the recovery directive in `packages/architect/hooks/lib/architect-gate.sh` to name the runtime-SID source, not the announce-marker basename.
-- [ ] Behavioural coverage per ADR-052: a bats fixture feeding the hook a heading-form PASS and asserting the marker is written.
+- [x] Confirm the matcher in the `architect-mark-reviewed` PostToolUse hook and whether it anchors on the bold form specifically. **Confirmed 2026-08-31:** it accepts only the bold form.
+- [x] Decide the fix locus. **Decided 2026-08-31:** strictly parse canonical bold or H2 verdict lines in the shared marker writer and require one unambiguous verdict.
+- [x] Trace the recovery and session-binding path. **Confirmed 2026-08-31:** the generated Codex completion transport already binds a completed reviewer to its parent session; the old candidate-SID marker workaround is obsolete and must not be restored.
+- [x] Behavioural coverage per ADR-052: the focused Bats fixture drives the real hook with canonical H2, conflicting, malformed, quoted, narrative, and caller-bound completion payloads.
+
+## Fix Strategy
+
+RFC-089 and STORY-083 carry the repair. Replace the PASS-first whole-output grep with one strict stdlib parser that accepts the two canonical heading shapes only and writes markers only for one unambiguous PASS. Preserve the current Claude dispatcher, generated Codex completion transport, caller binding, hash pairing, and fail-closed behavior.
+
+Source and extracted packed-candidate tests can establish release readiness, but they do not verify an installed session. P468 remains open as a Known Error until the package is released and the shipped hook is exercised through its supported completion path.
 
 ## Dependencies
 

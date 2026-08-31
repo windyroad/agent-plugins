@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-31 **P502 (The marker shim's 24h candidate-SID window excludes long sessions, so it silently writes no marker) closed as no longer relevant** - exact caller-bound oversight evidence supersedes the aged candidate-SID shim failure; ADR-050 (Capture the runtime stdin session_id via a PreToolUse hook so the create-gate marker binds to the same SID the runtime hook will see) remains bounded.
+> Last reviewed: 2026-08-31 **P468 Known Error** - confirmed the bold-only, PASS-first verdict parser; RFC-089 and STORY-083 carry the strict canonical-heading repair, while release and installed-session verification remain outstanding.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -46,6 +46,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 16 | P471 | run-retro Step 2d ask-hygiene trail path collides across same-day iterations, clobbering prior entries | 8 (Medium) | Known Error | S | 2026-07-26 | internal |
 | 16 | P511 | The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate | 8 (Medium) | Known Error | S | 2026-08-21 | internal |
 | 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Known Error | M | 2026-08-20 | internal |
+| 12 | P468 | architect-mark-reviewed misses a genuine PASS whose verdict line is a markdown heading rather than bold | 6 (Medium) | Known Error | S | 2026-07-26 | internal |
 | 12 | P148 | Agent defers ticket creation to retro summary instead of immediately capturing it | 12 (High) | Known Error | M | 2026-04-29 | internal |
 | 12 | P357 | User direction is not substance ratification — agent must brief-and-ratify AFTER changes are complete (sibling-class to P340 on the user-direction code path) | 12 (High) | Known Error | M | 2026-06-10 | internal |
 | 12 | P462 | Amendment-scoped `human-oversight: unconfirmed` has no detector — unratified amendment substance never reaches the oversight drain | 12 (High) | Known Error | M | 2026-07-26 | internal |
@@ -67,7 +68,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P284 | Release pipeline halts — `changeset publish` E404 on a new version of an existing scoped package (@windyroad/architect@0.8.0) | 3 (Low) | Known Error | S | 2026-05-23 | internal |
 | 6 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 (Med) | Known Error | M | 2026-05-26 | internal |
 | 6 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 6 (Medium) | Known Error | M | 2026-07-03 | internal |
-| 6 | P468 | architect-mark-reviewed misses a genuine PASS whose verdict line is a markdown heading rather than bold | 6 (Medium) | Open | S | 2026-07-26 | internal |
 | 6 | P481 | Two ratified decisions describe a story-map format that no longer exists | 6 (Medium) | Open | S | 2026-08-08 | architect-review |
 | 6 | P504 | No skill surface reopens a closed problem ticket, and closure notes prescribe a command that refuses | 6 (Medium) | Open | S | 2026-08-20 | internal |
 | 6 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 (High) | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |

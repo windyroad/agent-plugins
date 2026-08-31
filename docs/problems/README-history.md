@@ -1440,3 +1440,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-08-31 **P514 Verification Pending** - JTBD 0.14.2 published and tarball checked; installed-session verification remains.
 
 > Last reviewed: 2026-08-31 **P503 Known Error** - Literal Bash-write routing passes focused, affected-hook and packed-candidate checks; broader shell coverage and installed verification remain.
+
+> Last reviewed: 2026-08-31 **P502 (The marker shim's 24h candidate-SID window excludes long sessions, so it silently writes no marker) closed as no longer relevant** - exact caller-bound oversight evidence supersedes the aged candidate-SID shim failure; ADR-050 (Capture the runtime stdin session_id via a PreToolUse hook so the create-gate marker binds to the same SID the runtime hook will see) remains bounded.
