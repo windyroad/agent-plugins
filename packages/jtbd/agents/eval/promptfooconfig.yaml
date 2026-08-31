@@ -33,9 +33,9 @@ description: |
   unratified job citation, and the inverse-P078/P132 over-fire guard
   ([Unratified Dependency] must NOT fire on ambient alignment).
 
-# Serialize the fixtures because the agent may write its subordinate global
-# /tmp/jtbd-verdict hook handoff. Promptfoo grades the authoritative inline
-# verdict instead.
+# Serialize the fixtures because each agent run writes a subordinate verdict
+# handoff. The runner isolates that file per invocation, while Promptfoo grades
+# the authoritative inline verdict.
 evaluateOptions:
   maxConcurrency: 1
 
@@ -89,3 +89,64 @@ tests:
       # Unratified Dependency finding would require ISSUES FOUND instead.
       - type: icontains
         value: 'JTBD Review: PASS'
+
+  - description: Recommendation review rejects an option that contradicts a desired outcome
+    vars:
+      prompt: |
+        RECOMMENDATION REVIEW. Before presenting this user-facing capability
+        option set, review it against confirmed JTBD-001 and the developer
+        persona. Option A removes automatic review and asks the developer to
+        inspect every change manually. Option B keeps automatic review.
+
+        Begin with the `JTBD Recommendation Review:` verdict line. Do not edit
+        files and do not choose among viable aligned options.
+    assert:
+      - type: icontains
+        value: 'JTBD Recommendation Review: ISSUES FOUND'
+      - type: icontains
+        value: 'contradicts'
+
+  - description: Recommendation review rejects an option that does not serve the outcome
+    vars:
+      prompt: |
+        RECOMMENDATION REVIEW. Review this user-facing capability recommendation
+        against confirmed JTBD-001 and the developer persona: add a decorative
+        dashboard theme selector as the proposed answer to the need for automatic
+        governance review.
+
+        Begin with the `JTBD Recommendation Review:` verdict line.
+    assert:
+      - type: icontains
+        value: 'JTBD Recommendation Review: ISSUES FOUND'
+      - type: icontains
+        value: 'does not serve'
+
+  - description: Recommendation review reports an incomplete option set
+    vars:
+      prompt: |
+        RECOMMENDATION REVIEW. Review this option set against confirmed JTBD-001
+        and the developer persona. The only option is a manual review checklist;
+        no option preserves automatic review before edits.
+
+        Begin with the `JTBD Recommendation Review:` verdict line.
+    assert:
+      - type: icontains
+        value: 'JTBD Recommendation Review: ISSUES FOUND'
+      - type: icontains
+        value: 'incomplete'
+
+  - description: Recommendation review passes aligned options without choosing for the user
+    vars:
+      prompt: |
+        RECOMMENDATION REVIEW. Review these options against confirmed JTBD-001
+        and the developer persona. Option A runs the existing automatic reviewer
+        before edits. Option B runs that reviewer before edits and before
+        user-facing capability recommendations. Both keep review automatic.
+
+        Begin with the `JTBD Recommendation Review:` verdict line. Do not choose
+        between viable aligned options.
+    assert:
+      - type: icontains
+        value: 'JTBD Recommendation Review: PASS'
+      - type: not-icontains
+        value: 'I recommend Option'

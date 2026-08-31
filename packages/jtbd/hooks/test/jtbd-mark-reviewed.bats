@@ -12,16 +12,21 @@
 
 setup() {
   SCRIPT_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
-  HOOK="$SCRIPT_DIR/jtbd-mark-reviewed.sh"
   ORIG_DIR="$PWD"
   TEST_DIR=$(mktemp -d)
+  HOOK_DIR="$TEST_DIR/hook"
+  mkdir -p "$HOOK_DIR"
+  ln -s "$SCRIPT_DIR/lib" "$HOOK_DIR/lib"
+  VERDICT_FILE="$TEST_DIR/jtbd-verdict"
+  sed "s|VERDICT_FILE=\"/tmp/jtbd-verdict\"|VERDICT_FILE=\"$VERDICT_FILE\"|" \
+    "$SCRIPT_DIR/jtbd-mark-reviewed.sh" > "$HOOK_DIR/jtbd-mark-reviewed.sh"
+  HOOK="$HOOK_DIR/jtbd-mark-reviewed.sh"
   cd "$TEST_DIR"
   SESSION_ID="test-session-$$"
   MARKER="/tmp/jtbd-reviewed-${SESSION_ID}"
   PLAN_MARKER="/tmp/jtbd-plan-reviewed-${SESSION_ID}"
   HASH_FILE="/tmp/jtbd-reviewed-${SESSION_ID}.hash"
-  VERDICT_FILE="/tmp/jtbd-verdict"
-  rm -f "$MARKER" "$PLAN_MARKER" "$HASH_FILE" "$VERDICT_FILE"
+  rm -f "$MARKER" "$PLAN_MARKER" "$HASH_FILE"
 }
 
 teardown() {
@@ -30,11 +35,23 @@ teardown() {
   rm -f "$MARKER" "$PLAN_MARKER" "$HASH_FILE" "$VERDICT_FILE"
 }
 
-# Helper: pipe a PostToolUse:Agent JSON to the hook for the given subagent.
+# Helper: pipe a realistic PostToolUse:Agent JSON to the hook.
 run_hook() {
   local subagent="$1"
-  local json="{\"tool_input\":{\"subagent_type\":\"${subagent}\"},\"session_id\":\"${SESSION_ID}\"}"
-  echo "$json" | bash "$HOOK"
+  local prompt="${2:-}"
+  local response="${3:-}"
+  python3 - "$subagent" "$prompt" "$response" "$SESSION_ID" <<'PY' | bash "$HOOK"
+import json
+import sys
+
+subagent, prompt, response, session_id = sys.argv[1:]
+print(json.dumps({
+    "session_id": session_id,
+    "tool_name": "Agent",
+    "tool_input": {"subagent_type": subagent, "prompt": prompt},
+    "tool_response": {"content": [{"type": "text", "text": response}]},
+}))
+PY
 }
 
 # --- Path support: docs/jtbd directory (preferred) ---
@@ -45,7 +62,7 @@ run_hook() {
   echo "# Index" > docs/jtbd/README.md
   echo "PASS" > "$VERDICT_FILE"
 
-  run_hook "wr-jtbd:agent"
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." $'**JTBD Review: PASS**\n\nAligned.'
 
   [ -f "$MARKER" ]
   [ -f "$HASH_FILE" ]
@@ -57,13 +74,13 @@ run_hook() {
   mkdir -p docs/jtbd
   echo "# Index" > docs/jtbd/README.md
   echo "PASS" > "$VERDICT_FILE"
-  run_hook "wr-jtbd:agent"
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." $'**JTBD Review: PASS**\n\nAligned.'
   HASH_README_ONLY="$(cat "$HASH_FILE")"
 
   rm -f "$HASH_FILE" "$MARKER"
   echo "different content" >> docs/jtbd/README.md
   echo "PASS" > "$VERDICT_FILE"
-  run_hook "wr-jtbd:agent"
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." $'**JTBD Review: PASS**\n\nAligned.'
   HASH_README_CHANGED="$(cat "$HASH_FILE")"
 
   # Changing README.md alone must not change the hash — README is excluded.
@@ -80,7 +97,7 @@ run_hook() {
   echo "# Jobs" > docs/JOBS_TO_BE_DONE.md
   echo "PASS" > "$VERDICT_FILE"
 
-  run_hook "wr-jtbd:agent"
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." $'**JTBD Review: PASS**\n\nAligned.'
 
   # No marker, no hash file — the gate is inactive on legacy-layout projects.
   [ ! -f "$MARKER" ]
@@ -93,7 +110,7 @@ run_hook() {
   echo "# legacy jobs" > docs/JOBS_TO_BE_DONE.md
   echo "PASS" > "$VERDICT_FILE"
 
-  run_hook "wr-jtbd:agent"
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." $'**JTBD Review: PASS**\n\nAligned.'
 
   # The directory-derived hash must NOT equal the standalone-file hash —
   # proves the hook did not consult the legacy file.
@@ -106,24 +123,25 @@ run_hook() {
 
 # --- Verdict handling ---
 
-@test "FAIL verdict does NOT create review marker (but plan marker still set)" {
+@test "FAIL verdict does not authorise edits or plans" {
   mkdir -p docs/jtbd
   echo "# job" > docs/jtbd/job.md
   echo "FAIL" > "$VERDICT_FILE"
 
-  run_hook "wr-jtbd:agent"
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." $'**JTBD Review: PASS**\n\nAligned.'
 
   [ ! -f "$MARKER" ]
-  [ -f "$PLAN_MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
 }
 
-@test "missing verdict file allows marker (backward compat)" {
+@test "missing verdict file fails closed" {
   mkdir -p docs/jtbd
   echo "# job" > docs/jtbd/job.md
 
-  run_hook "wr-jtbd:agent"
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." $'**JTBD Review: PASS**\n\nAligned.'
 
-  [ -f "$MARKER" ]
+  [ ! -f "$MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
 }
 
 @test "verdict file is consumed (removed) after hook runs" {
@@ -134,6 +152,138 @@ run_hook() {
   run_hook "wr-jtbd:agent"
 
   [ ! -f "$VERDICT_FILE" ]
+}
+
+@test "marked recommendation output does not consume an edit verdict or authorise markers" {
+  mkdir -p docs/jtbd
+  echo "# job" > docs/jtbd/job.md
+  echo "PASS" > "$VERDICT_FILE"
+
+  run_hook "wr-jtbd:agent" $'RECOMMENDATION REVIEW\nReview these options.' "malformed output"
+
+  [ -f "$VERDICT_FILE" ]
+  [ ! -f "$MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
+  [ ! -f "$HASH_FILE" ]
+}
+
+@test "inline recommendation heading binds an unmarked completion to recommendation mode" {
+  mkdir -p docs/jtbd
+  echo "# job" > docs/jtbd/job.md
+  echo "PASS" > "$VERDICT_FILE"
+
+  run_hook "wr-jtbd:agent" "Review these options." $'**JTBD Recommendation Review: PASS**\n\nAligned.'
+
+  [ -f "$VERDICT_FILE" ]
+  [ ! -f "$MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
+  [ ! -f "$HASH_FILE" ]
+}
+
+@test "stale edit verdict is consumed only by a later edit review completion" {
+  mkdir -p docs/jtbd
+  echo "# job" > docs/jtbd/job.md
+  echo "PASS" > "$VERDICT_FILE"
+
+  run_hook "wr-jtbd:agent" $'RECOMMENDATION REVIEW\nReview these options.' "JTBD Recommendation Review: PASS"
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." "**JTBD Review: PASS**"
+
+  [ ! -f "$VERDICT_FILE" ]
+  [ -f "$MARKER" ]
+  [ -f "$PLAN_MARKER" ]
+  [ -f "$HASH_FILE" ]
+}
+
+@test "later-line recommendation text does not misclassify an edit review" {
+  mkdir -p docs/jtbd
+  echo "# job" > docs/jtbd/job.md
+  echo "PASS" > "$VERDICT_FILE"
+
+  run_hook "wr-jtbd:agent" $'PRE-EDIT review.\nRECOMMENDATION REVIEW is quoted context.' $'**JTBD Review: PASS**\n**JTBD Recommendation Review: PASS** was quoted.'
+
+  [ ! -f "$VERDICT_FILE" ]
+  [ -f "$MARKER" ]
+  [ -f "$PLAN_MARKER" ]
+}
+
+@test "stale PASS with malformed current edit output fails closed" {
+  mkdir -p docs/jtbd
+  echo "# job" > docs/jtbd/job.md
+  echo "PASS" > "$VERDICT_FILE"
+
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." "malformed output"
+
+  [ ! -f "$VERDICT_FILE" ]
+  [ ! -f "$MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
+}
+
+@test "stale PASS with current ISSUES FOUND output fails closed" {
+  mkdir -p docs/jtbd
+  echo "# job" > docs/jtbd/job.md
+  echo "PASS" > "$VERDICT_FILE"
+
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." $'**JTBD Review: ISSUES FOUND**\n\nMisaligned.'
+
+  [ ! -f "$VERDICT_FILE" ]
+  [ ! -f "$MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
+}
+
+@test "inline PASS with file FAIL fails closed" {
+  mkdir -p docs/jtbd
+  echo "# job" > docs/jtbd/job.md
+  echo "FAIL" > "$VERDICT_FILE"
+
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." $'**JTBD Review: PASS**\n\nAligned.'
+
+  [ ! -f "$VERDICT_FILE" ]
+  [ ! -f "$MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
+}
+
+@test "PASS prefix does not authorise edits or plans" {
+  mkdir -p docs/jtbd
+  echo "# job" > docs/jtbd/job.md
+  echo "PASS" > "$VERDICT_FILE"
+
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." "**JTBD Review: PASSING**"
+
+  [ ! -f "$MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
+}
+
+@test "PASS heading with suffix text does not authorise edits or plans" {
+  mkdir -p docs/jtbd
+  echo "# job" > docs/jtbd/job.md
+  echo "PASS" > "$VERDICT_FILE"
+
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." "**JTBD Review: PASS** extra"
+
+  [ ! -f "$MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
+}
+
+@test "unbolded PASS does not authorise edits or plans" {
+  mkdir -p docs/jtbd
+  echo "# job" > docs/jtbd/job.md
+  echo "PASS" > "$VERDICT_FILE"
+
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." "JTBD Review: PASS"
+
+  [ ! -f "$MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
+}
+
+@test "unterminated PASS heading does not authorise edits or plans" {
+  mkdir -p docs/jtbd
+  echo "# job" > docs/jtbd/job.md
+  echo "PASS" > "$VERDICT_FILE"
+
+  run_hook "wr-jtbd:agent" "PRE-EDIT review." "**JTBD Review: PASS"
+
+  [ ! -f "$MARKER" ]
+  [ ! -f "$PLAN_MARKER" ]
 }
 
 # --- Subagent routing ---
@@ -154,7 +304,7 @@ run_hook() {
   echo "# job" > docs/jtbd/job.md
   echo "PASS" > "$VERDICT_FILE"
 
-  run_hook "jtbd-lead"
+  run_hook "jtbd-lead" "PRE-EDIT review." $'**JTBD Review: PASS**\n\nAligned.'
 
   [ -f "$MARKER" ]
 }

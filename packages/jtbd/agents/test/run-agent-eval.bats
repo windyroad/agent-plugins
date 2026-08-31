@@ -5,8 +5,11 @@
 
 setup() {
   DRIVER="${BATS_TEST_DIRNAME}/../eval/run-agent-eval.sh"
-  VERDICT_FILE="/tmp/jtbd-verdict"
-  [ ! -e "$VERDICT_FILE" ]
+  GLOBAL_VERDICT_FILE="/tmp/jtbd-verdict"
+  GLOBAL_VERDICT_BEFORE="missing"
+  if [ -e "$GLOBAL_VERDICT_FILE" ]; then
+    GLOBAL_VERDICT_BEFORE="$(shasum -a 256 "$GLOBAL_VERDICT_FILE")"
+  fi
 
   TMP="$(mktemp -d)"
   BIN="$TMP/bin"
@@ -14,6 +17,7 @@ setup() {
   export PATH="$BIN:$PATH"
   export FAKE_CLAUDE_MODE=success
   export CLAUDE_CALLED="$TMP/claude-called"
+  export EVAL_VERDICT_PATH_FILE="$TMP/eval-verdict-path"
   export EXPECTED_REPO_ROOT="$(cd "${BATS_TEST_DIRNAME}/../../../.." && pwd -P)"
 
   cat > "$BIN/claude" <<'MOCK'
@@ -41,7 +45,11 @@ assert sandbox["enabled"] is True
 assert sandbox["failIfUnavailable"] is True
 assert sandbox["autoAllowBashIfSandboxed"] is True
 assert sandbox["allowUnsandboxedCommands"] is False
-assert sandbox["filesystem"]["allowWrite"] == ["//tmp/jtbd-verdict"]
+verdict_file = os.environ["JTBD_VERDICT_FILE"]
+assert verdict_file != "/tmp/jtbd-verdict"
+assert sandbox["filesystem"]["allowWrite"] == [
+    "//" + os.path.realpath(verdict_file).lstrip("/")
+]
 assert sandbox["filesystem"]["denyWrite"] == [
     "//" + os.path.realpath(repo_root).lstrip("/")
 ]
@@ -62,15 +70,16 @@ assert not any(
     for argument in args
 )
 PY
+printf '%s' "$JTBD_VERDICT_FILE" > "$EVAL_VERDICT_PATH_FILE"
 case "$FAKE_CLAUDE_MODE" in
   nonzero)
     printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"text","text":"JTBD Review: PASS"}]},"parent_tool_use_id":null}'
-    printf 'PASS' > /tmp/jtbd-verdict
+    printf 'PASS' > "$JTBD_VERDICT_FILE"
     exit 7
     ;;
   malformed)
     printf '%s\n' 'not-json'
-    printf 'PASS' > /tmp/jtbd-verdict
+    printf 'PASS' > "$JTBD_VERDICT_FILE"
     ;;
   missing-marker)
     printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"text","text":"JTBD Review: PASS"}]},"parent_tool_use_id":null}'
@@ -82,7 +91,7 @@ case "$FAKE_CLAUDE_MODE" in
       '{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"tool-1","content":"ok"}]},"parent_tool_use_id":null}' \
       '{"type":"assistant","message":{"content":[{"type":"text","text":"Marker written."}]},"parent_tool_use_id":null}' \
       '{"type":"result","subtype":"success","result":"Marker written."}'
-    printf 'PASS' > /tmp/jtbd-verdict
+    printf 'PASS' > "$JTBD_VERDICT_FILE"
     ;;
 esac
 MOCK
@@ -90,8 +99,17 @@ MOCK
 }
 
 teardown() {
-  rm -f "$VERDICT_FILE"
   rm -rf "$TMP"
+}
+
+assert_eval_state_cleaned() {
+  [ -s "$EVAL_VERDICT_PATH_FILE" ]
+  [ ! -e "$(cat "$EVAL_VERDICT_PATH_FILE")" ]
+  if [ "$GLOBAL_VERDICT_BEFORE" = "missing" ]; then
+    [ ! -e "$GLOBAL_VERDICT_FILE" ]
+  else
+    [ "$(shasum -a 256 "$GLOBAL_VERDICT_FILE")" = "$GLOBAL_VERDICT_BEFORE" ]
+  fi
 }
 
 @test "preserves an inline verdict from an earlier assistant turn" {
@@ -99,7 +117,7 @@ teardown() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"JTBD Review: PASS"* ]]
   [[ "$output" == *"Marker written."* ]]
-  [ ! -e "$VERDICT_FILE" ]
+  assert_eval_state_cleaned
 }
 
 @test "accepts the authoritative inline verdict when no subordinate marker is written" {
@@ -107,22 +125,21 @@ teardown() {
   run bash "$DRIVER" "review fixture"
   [ "$status" -eq 0 ]
   [[ "$output" == *"JTBD Review: PASS"* ]]
-  [ ! -e "$VERDICT_FILE" ]
+  assert_eval_state_cleaned
 }
 
-@test "refuses a pre-existing marker without overwriting it" {
-  printf 'KEEP' > "$VERDICT_FILE"
+@test "uses an isolated verdict file without touching global hook state" {
   run bash "$DRIVER" "review fixture"
-  [ "$status" -ne 0 ]
-  [ "$(cat "$VERDICT_FILE")" = "KEEP" ]
-  [ ! -e "$CLAUDE_CALLED" ]
+  [ "$status" -eq 0 ]
+  [ -e "$CLAUDE_CALLED" ]
+  assert_eval_state_cleaned
 }
 
 @test "preserves Claude's non-zero status and cleans its marker" {
   export FAKE_CLAUDE_MODE=nonzero
   run bash "$DRIVER" "review fixture"
   [ "$status" -eq 7 ]
-  [ ! -e "$VERDICT_FILE" ]
+  assert_eval_state_cleaned
 }
 
 @test "fails on malformed stream JSON and cleans its marker" {
@@ -130,5 +147,5 @@ teardown() {
   run bash "$DRIVER" "review fixture"
   [ "$status" -ne 0 ]
   [[ "$output" == *"malformed stream JSON"* ]]
-  [ ! -e "$VERDICT_FILE" ]
+  assert_eval_state_cleaned
 }

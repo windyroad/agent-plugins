@@ -19,6 +19,8 @@
 # Subscription auth via the developer's logged-in claude session — no
 # ANTHROPIC_API_KEY, no CLAUDE_CODE_OAUTH_TOKEN (CI/release-only per
 # ADR-075 §6). Mirrors run-skill-eval.sh's auth posture.
+# Each invocation owns a unique verdict file so evals never consume, replace,
+# or delete the live review hook's global /tmp handoff.
 #
 # @adr ADR-075 (per-package agent eval; --system-prompt for agent surface)
 # @adr ADR-052 (behavioural-tests-default)
@@ -30,15 +32,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 AGENT_MD="${SCRIPT_DIR}/../agent.md"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd -P)"
-VERDICT_FILE="/tmp/jtbd-verdict"
+VERDICT_FILE="$(mktemp "${TMPDIR:-/tmp}/jtbd-verdict.eval.XXXXXX")"
 STREAM_FILE="$(mktemp "${TMPDIR:-/tmp}/jtbd-agent-eval.XXXXXX")"
-MARKER_CREATED=0
+export JTBD_VERDICT_FILE="$VERDICT_FILE"
 
 cleanup() {
   rm -f "$STREAM_FILE"
-  if [[ "$MARKER_CREATED" -eq 1 ]]; then
-    rm -f "$VERDICT_FILE"
-  fi
+  rm -f "$VERDICT_FILE"
 }
 trap cleanup EXIT
 trap 'exit 130' INT
@@ -49,17 +49,7 @@ if [[ ! -f "$AGENT_MD" ]]; then
   exit 2
 fi
 
-if [[ -e "$VERDICT_FILE" ]]; then
-  echo "run-agent-eval.sh: refusing to overwrite existing $VERDICT_FILE" >&2
-  exit 2
-fi
-
 umask 077
-if ! (set -o noclobber; : > "$VERDICT_FILE") 2>/dev/null; then
-  echo "run-agent-eval.sh: could not create $VERDICT_FILE" >&2
-  exit 2
-fi
-MARKER_CREATED=1
 
 SANDBOX_SETTINGS="$(python3 - "$REPO_ROOT" <<'PY'
 import json
@@ -74,7 +64,7 @@ print(json.dumps({
         "autoAllowBashIfSandboxed": True,
         "allowUnsandboxedCommands": False,
         "filesystem": {
-            "allowWrite": ["//tmp/jtbd-verdict"],
+            "allowWrite": ["//" + os.path.realpath(os.environ["JTBD_VERDICT_FILE"]).lstrip("/")],
             "denyWrite": ["//" + repo_root.lstrip("/")],
         },
     },
@@ -86,7 +76,7 @@ PY
 cd "$REPO_ROOT"
 
 set +e
-claude -p \
+JTBD_VERDICT_FILE="$VERDICT_FILE" claude -p \
   --output-format stream-json \
   --verbose \
   --setting-sources "" \

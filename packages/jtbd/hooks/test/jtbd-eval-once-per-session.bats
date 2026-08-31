@@ -50,6 +50,15 @@ run_hook() {
   [[ "$output" != *"Does NOT apply to"* ]]
 }
 
+@test "jtbd-eval: terse reminder covers edits and recommendations within 150 bytes" {
+  run_hook "$SID" >/dev/null
+  run run_hook "$SID"
+  [ "$status" -eq 0 ]
+  [ "$(printf '%s' "$output" | wc -c | tr -d ' ')" -le 150 ]
+  [[ "$output" == *"edits"* ]]
+  [[ "$output" == *"RECOMMENDATION REVIEW"* ]]
+}
+
 @test "jtbd-eval: terse reminder preserves the MANDATORY signal word" {
   run_hook "$SID" >/dev/null
   run run_hook "$SID"

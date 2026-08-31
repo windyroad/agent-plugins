@@ -52,11 +52,26 @@ This is the same boundary class P503 records for the edit gates: a gate bound to
 
 ### Investigation Tasks
 
-- [ ] Decide the trigger: a `UserPromptSubmit` injection when the turn is heading for a recommendation, a self-check the assistant runs before emitting an option-set, or a check inside `AskUserQuestion` authoring
-- [ ] Decide whether this is enforcement or discipline — a hook cannot see a recommendation forming, so the honest options may be prose-plus-a-retro-metric rather than a gate
-- [ ] Give the reviewer a verdict shape for option-sets: contradicts / does not serve / incomplete against the outcomes, rather than diff alignment
-- [ ] Check the sibling gates for the same hole — the architect gate reviews decision *files*, not decisions argued in prose, which is the same shape
-- [ ] Behavioural test: an option-set contradicting a documented desired outcome is caught before it reaches the user
+- [x] Use the existing `UserPromptSubmit` progressive-disclosure instruction to require a recommendation review before a user-facing capability option set is presented.
+- [x] Treat this as instruction-backed reviewer discipline rather than claiming a hook can observe prose forming.
+- [x] Give recommendation review its own `contradicts` / `does not serve` / `incomplete` verdict shape, separate from edit alignment.
+- [x] Check the sibling gate shape. The architect reviewer remains edit/decision-file shaped; extending it is outside RFC-085 and is not claimed by this fix.
+- [x] Behavioural proof covers contradictory, non-serving, incomplete, and aligned option sets before presentation.
+
+## Fix Strategy
+
+RFC-085 / STORY-079 adds recommendation review to the existing JTBD reviewer and `UserPromptSubmit` instruction. Recommendation completions use a distinct inline heading and never create edit or plan authority. Edit review remains fail-closed on an exact canonical inline heading plus the matching subordinate verdict.
+
+**Release vehicle**: `.changeset/p514-jtbd-recommendation-review.md`
+
+## Implementation Evidence
+
+- **Source tests**: 48 focused Bats checks passed, including exact verdict parsing, recommendation/edit authority separation, once-per-session instruction output, isolated eval state, and the existing agent verdict contract.
+- **Actual agent eval**: Promptfoo `eval-Snt-2026-08-31T04:08:53` passed 6/6 with Node 24, covering both edit regressions and all four recommendation outcomes. The live global `/tmp/jtbd-verdict` remained unchanged.
+- **Test quality**: all four changed Bats files were independently classified as behavioural under ADR-052.
+- **Packed source**: local `@windyroad/jtbd@0.14.1` pack produced `windyroad-jtbd-0.14.1.tgz` with the updated agent and hooks; eval/test directories remained excluded. The extracted hooks passed isolated smoke cases for prompt injection, recommendation separation, edit PASS, edit FAIL, malformed PASS, and stale PASS disagreement. This is packed candidate evidence only.
+- **Runtime-loaded packed candidate**: Claude Code 2.1.245 loaded the unpacked candidate through `--plugin-dir`, registered `wr-jtbd:agent`, invoked it with the exact `RECOMMENDATION REVIEW` prefix, received `JTBD Recommendation Review: ISSUES FOUND`, rejected the contradictory option, reported the incomplete set, and wrote no verdict marker. This was an isolated, non-persistent candidate journey, not installed or published proof.
+- **Not yet proved**: no push, publication, installed-plugin refresh, or installed-runtime exercise occurred in this iteration. P514 remains Known Error pending outer-orchestrator delivery and post-release verification.
 
 ## Dependencies
 
@@ -70,6 +85,7 @@ This is the same boundary class P503 records for the edit gates: a gate bound to
 - **P503** — edit gates bound to the Edit/Write matcher miss Bash-routed writes. Same boundary class: a gate tied to a tool surface misses every path to the same outcome that avoids that tool.
 - `packages/jtbd/hooks/` — the `PreToolUse` binding.
 - `packages/jtbd/agents/agent.md` — the reviewer whose contract is diff-shaped.
+- `.changeset/p514-jtbd-recommendation-review.md` — patch release note for the bounded fix.
 
 
 ## Stories

@@ -25,10 +25,10 @@ In order to avoid reviewing options that already conflict with my documented des
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] Before presenting a user-facing capability recommendation or option set, the assistant invokes the JTBD reviewer.
-- [ ] An option that contradicts or does not serve a documented desired outcome is withheld before the user sees it.
-- [ ] An option set that is incomplete against documented desired outcomes is reported as incomplete before the user sees it.
-- [ ] A recommendation aligned with the documented desired outcomes receives a pass without authorising an unrelated file edit.
+- [x] Before presenting a user-facing capability recommendation or option set, the assistant invokes the JTBD reviewer.
+- [x] An option that contradicts or does not serve a documented desired outcome is withheld before the user sees it.
+- [x] An option set that is incomplete against documented desired outcomes is reported as incomplete before the user sees it.
+- [x] A recommendation aligned with the documented desired outcomes receives a pass without authorising an unrelated file edit.
 
 ## Driving problem trace (required — I6 invariant)
 

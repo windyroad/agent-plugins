@@ -17,6 +17,11 @@ INPUT=$(cat)
 
 SUBAGENT=$(echo "$INPUT" | jq -r '.tool_input.subagent_type // empty') || true
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty') || true
+REVIEW_PROMPT=$(echo "$INPUT" | jq -r '.tool_input.prompt // empty') || true
+_HOOK_INPUT="$INPUT"
+AGENT_OUTPUT=$(_get_tool_output)
+PROMPT_FIRST=$(printf '%s\n' "$REVIEW_PROMPT" | awk 'NF { sub(/^[[:space:]]+/, ""); print; exit }')
+OUTPUT_FIRST=$(printf '%s\n' "$AGENT_OUTPUT" | awk 'NF { sub(/^[[:space:]]+/, ""); print; exit }')
 
 if [ -z "$SESSION_ID" ]; then
   exit 0
@@ -32,7 +37,24 @@ JTBD_PATH="$PROJECT_DIR/docs/jtbd"
 
 case "$SUBAGENT" in
   *jtbd-lead*|*wr-jtbd*)
-    # Check for edit review verdict
+    # Recommendation mode is bound to this Agent completion, not shared
+    # /tmp state. It never authorises a later file edit or plan.
+    if printf '%s\n' "$PROMPT_FIRST" | grep -qE '^RECOMMENDATION REVIEW' || \
+       printf '%s\n' "$OUTPUT_FIRST" | grep -qE '^>?[[:space:]]*(\*\*)?JTBD Recommendation Review:'; then
+      exit 0
+    fi
+
+    # Edit reviews require the current inline heading and the subordinate
+    # file verdict to agree. Shared /tmp state alone never authorises work.
+    HEADING=$(printf '%s\n' "$OUTPUT_FIRST" \
+      | sed -nE 's/^[[:space:]]*>?[[:space:]]*\*\*(JTBD Review: (PASS|ISSUES FOUND|JOB UPDATE NEEDED|PERSONA UPDATE NEEDED))\*\*[[:space:]]*$/\1/p' \
+      | head -n 1)
+    case "$HEADING" in
+      "JTBD Review: PASS") INLINE_VERDICT="PASS" ;;
+      "JTBD Review: ISSUES FOUND"|"JTBD Review: JOB UPDATE NEEDED"|"JTBD Review: PERSONA UPDATE NEEDED") INLINE_VERDICT="FAIL" ;;
+      *) INLINE_VERDICT="" ;;
+    esac
+
     VERDICT_FILE="/tmp/jtbd-verdict"
     VERDICT=""
     if [ -f "$VERDICT_FILE" ]; then
@@ -40,23 +62,17 @@ case "$SUBAGENT" in
       rm -f "$VERDICT_FILE"
     fi
 
-    case "$VERDICT" in
-      PASS)
+    case "${INLINE_VERDICT}:${VERDICT}" in
+      PASS:PASS)
         touch "/tmp/jtbd-reviewed-${SESSION_ID}"
         store_review_hash "$SESSION_ID" "jtbd" "$JTBD_PATH"
-        ;;
-      FAIL)
-        # Do NOT create marker — review found issues
+        touch "/tmp/jtbd-plan-reviewed-${SESSION_ID}"
         ;;
       *)
-        # No verdict file — backward compat, allow with marker
-        touch "/tmp/jtbd-reviewed-${SESSION_ID}"
-        store_review_hash "$SESSION_ID" "jtbd" "$JTBD_PATH"
+        # Fail closed: issues, missing verdicts, and unparseable verdicts do
+        # not authorise edits or plans, nor do mismatched verdict channels.
         ;;
     esac
-
-    # Plan review: agent completion = reviewed.
-    touch "/tmp/jtbd-plan-reviewed-${SESSION_ID}"
     ;;
 esac
 

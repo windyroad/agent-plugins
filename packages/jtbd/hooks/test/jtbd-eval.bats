@@ -40,6 +40,16 @@ teardown() {
   [[ "$output" == *"MANDATORY JTBD CHECK"* ]]
 }
 
+@test "eval: requires review before user-facing capability recommendations" {
+  mkdir -p docs/jtbd
+  echo "# Index" > docs/jtbd/README.md
+  run bash "$HOOK" </dev/null
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"user-facing capability recommendations or option sets"* ]]
+  [[ "$output" == *"MUST begin exactly"*"RECOMMENDATION REVIEW"* ]]
+  [[ "$output" == *"wr-jtbd:agent"* ]]
+}
+
 @test "eval: does NOT consult legacy docs/JOBS_TO_BE_DONE.md (ADR-008 Option 3, P019)" {
   # Legacy single-file layout — gate must NOT inject the enforcement
   # instruction; instead it should suggest update-guide so the project

@@ -17,7 +17,7 @@ SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null || echo ""
 if [ -f "docs/jtbd/README.md" ]; then
   if has_announced "jtbd" "$SESSION_ID"; then
     cat <<'HOOK_OUTPUT'
-MANDATORY JTBD gate active (docs/jtbd/ present). Delegate to wr-jtbd:agent before editing project files. See turn-1 instructions for full scope and exclusions.
+MANDATORY JTBD (docs/jtbd): ask wr-jtbd:agent before edits/options; start recommendation prompts RECOMMENDATION REVIEW. See turn 1.
 HOOK_OUTPUT
   else
     cat <<'HOOK_OUTPUT'
@@ -30,11 +30,17 @@ user to ask.
 
 REQUIRED ACTIONS:
 1. Use the Agent tool to delegate to wr-jtbd:agent
-   (subagent_type: "wr-jtbd:agent")
-2. The jtbd-lead will review proposed changes against docs/jtbd/ persona
-   and job definitions
-3. Do NOT write or edit project files without jtbd-lead review FIRST
-4. Do NOT skip this step even if you think you can handle it yourself
+   (subagent_type: "wr-jtbd:agent") before editing project files OR
+   presenting user-facing capability recommendations or option sets
+2. Every recommendation-review Agent prompt MUST begin exactly
+   `RECOMMENDATION REVIEW` so its verdict cannot authorise a file edit
+3. The jtbd-lead will review proposed changes or recommendations against
+   docs/jtbd/ persona and job definitions
+4. For recommendations, withhold options that contradict or do not serve a
+   documented desired outcome, and report an incomplete set before the user
+   sees it. Do not choose among the remaining viable options.
+5. Do NOT write, edit, or present the recommendation without review FIRST
+6. Do NOT skip this step even if you think you can handle it yourself
 
 SCOPE: All project files.
 Does NOT apply to: CSS, images, fonts, lockfiles, changesets, memory files,
