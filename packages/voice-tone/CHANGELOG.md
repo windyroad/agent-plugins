@@ -1,5 +1,11 @@
 # @windyroad/voice-tone
 
+## 0.8.3
+
+### Patch Changes
+
+- be2b328: Record completed ordinary native Codex voice-tone reviews through the existing marker writer while leaving keyed external-communications reviews unchanged.
+
 ## 0.8.2
 
 ### Patch Changes
