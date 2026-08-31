@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-08-31 **STORY-083 accepted** - I6-I10 and map-derived I12 pass for the P468 architect-verdict parser repair.
+> Last reviewed: 2026-08-31 **STORY-083 in progress** - implementation commit a02e8d0d satisfies all three acceptance criteria; release remains outstanding.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -145,7 +145,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | in-progress | STORY-079 | Review only options consistent with documented desired outcomes | M | P514 | RFC-085 | STORY-MAP-002 |
 | accepted | STORY-080 | Record a completed native review without manual marker recovery | M | P402 | RFC-086 | STORY-MAP-002 |
 | accepted | STORY-081 | Trust plan reviews when no risk policy is present | S | P459 | RFC-087 | STORY-MAP-002 |
-| accepted | STORY-083 | A canonical architect PASS unlocks the guarded edit | S | P468 | RFC-089 | STORY-MAP-002 |
+| in-progress | STORY-083 | A canonical architect PASS unlocks the guarded edit | S | P468 | RFC-089 | STORY-MAP-002 |
 | in-progress | STORY-082 | Gate Bash writes without blocking read-only commands | L | P503 | RFC-088 | STORY-MAP-002 |
 | draft | STORY-064 | A ticket that only names a decision as background stays open | M | P463 | RFC-070 | STORY-MAP-011 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |

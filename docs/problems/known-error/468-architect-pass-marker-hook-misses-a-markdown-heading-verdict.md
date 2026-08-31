@@ -81,4 +81,4 @@ Also related but not in the prefilter set: `docs/problems/closed/181-architect-m
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-083 | STORY-083: A canonical architect PASS unlocks the guarded edit | accepted |
+| STORY-083 | STORY-083: A canonical architect PASS unlocks the guarded edit | in-progress |

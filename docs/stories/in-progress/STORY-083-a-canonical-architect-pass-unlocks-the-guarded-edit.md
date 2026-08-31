@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: a-canonical-architect-pass-unlocks-the-guarded-edit
 reported: 2026-08-31
 decision-makers: [Tom Howard]
@@ -25,9 +25,9 @@ In order to continue a governed change without manual marker recovery, as a deve
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] Canonical bold and H2 PASS verdicts create review, hash, and plan markers.
-- [ ] ISSUES FOUND, malformed, quoted, narrative, NEEDS DIRECTION, and conflicting verdict output create no review, hash, or plan markers.
-- [ ] The existing generated transport binds each Codex-native completion to its parent session.
+- [x] Canonical bold and H2 PASS verdicts create review, hash, and plan markers.
+- [x] ISSUES FOUND, malformed, quoted, narrative, NEEDS DIRECTION, and conflicting verdict output create no review, hash, or plan markers.
+- [x] The existing generated transport binds each Codex-native completion to its parent session.
 
 ## Driving problem trace (required — I6 invariant)
 
