@@ -6,7 +6,7 @@ Cross-session learnings about authoring `promptfooconfig.yaml` SKILL evals — T
 
 ### Bind Promptfoo to the Node ABI used by its installed native dependency (2026-08-31)
 
-`npx promptfoo` can select a different Node runtime from `node` in the same shell. P426 reproduced `better-sqlite3` module 137 versus runtime module 147 even though `node -v` reported Node 24. Invoking `node_modules/promptfoo/dist/src/entrypoint.js` with the explicit Node 24 binary matched the installed ABI and completed the two focused cases: 2 passed, 0 failed, 0 errors. Treat config validation and direct provider runs as useful diagnostics, but retain the full focused Promptfoo result as the semantic gate. <!-- signal-score: 2 | last-classified: 2026-08-31 | first-written: 2026-08-31 -->
+`npx promptfoo` can select a different Node runtime from `node` in the same shell. P426 reproduced `better-sqlite3` module 137 versus runtime module 147 even though `node -v` reported Node 24. P459 independently hit the same ABI boundary with Node 26 against a Node 24-built dependency; prefixing the unchanged `npx promptfoo` command with the Node 24 `PATH` let both focused boundary cases run and pass. Invoking `node_modules/promptfoo/dist/src/entrypoint.js` with the explicit matching binary is the equivalent direct form. Treat config validation and direct provider runs as useful diagnostics, but retain the full focused Promptfoo result as the semantic gate. <!-- signal-score: 3 | last-classified: 2026-08-31 | first-written: 2026-08-31 -->
 
 ### Bind runtime-specific cases with a per-test provider in mixed Claude/Codex configs (2026-08-29)
 
