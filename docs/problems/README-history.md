@@ -1436,3 +1436,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-08-31
 
 > Last reviewed: 2026-08-31 **P532 captured** - Codex safety-system error interrupted a problem capture and backlog goal; voice-and-tone screenshot evidence added to P402.
+
+> Last reviewed: 2026-08-31 **P514 Verification Pending** - JTBD 0.14.2 published and tarball checked; installed-session verification remains.

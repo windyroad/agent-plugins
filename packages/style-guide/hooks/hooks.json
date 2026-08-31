@@ -5,7 +5,8 @@
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/staleness-check.sh" }] }
     ],
     "PreToolUse": [
-      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/style-guide-enforce-edit.sh" }] }
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/style-guide-enforce-edit.sh" }] },
+      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/bash-write-dispatch.sh\" \"${CLAUDE_PLUGIN_ROOT}/hooks/style-guide-enforce-edit.sh\"" }] }
     ],
     "PostToolUse": [
       { "matcher": "Agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/style-guide-mark-reviewed.sh" }] },

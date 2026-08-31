@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-31 **P514 Verification Pending** - JTBD 0.14.2 published and tarball checked; installed-session verification remains.
+> Last reviewed: 2026-08-31 **P503 Known Error** - Literal Bash-write routing passes focused, affected-hook and packed-candidate checks; broader shell coverage and installed verification remain.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -23,7 +23,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 9 | P454 | wr-risk-scorer restage-commit helper sweeps the whole index/working tree into the commit instead of pathspec-scoping to the supplied paths | 9 (Medium) | Open | S | 2026-07-15 | inbound-reported (#344) |
 | 8 | P513 | The JTBD corpus has no index or persona currency check, unlike the decision corpus | 8 (Medium) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P111) |
 | 8 | P518 | `render-story-map` emits bare identifiers as link text, so every reference link announces as "P033" | 8 (Medium) | Open | S | 2026-08-24 | inbound-reported (#445) |
-| 8 | P503 | Edit gates are bound to the Edit|Write matcher, so Bash-routed writes pass ungated and leave a stale hash | 16 (High) | Open | M | 2026-08-20 | inbound-reported (#412) |
+| 8 | P503 | Edit gates are bound to the Edit|Write matcher, so Bash-routed writes pass ungated and leave a stale hash | 16 (High) | Known Error | M | 2026-08-20 | inbound-reported (#412) |
 | 6 | P450 | Verification Queue evidence cells are never populated from subsequent-session exercises, so the run-retro Step 4a auto-drain never fires | 12 (High) | Known Error | L | 2026-07-15 | inbound-reported (#323) |
 | 6 | P436 | Issue templates declare labels ('problem', 'needs-triage') that don't exist; scaffold-intake should provision declared labels | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#170) |
 | 6 | P486 | The policy validator checks a policy's shape, never whether it contradicts itself | 12 (High) | Open | M | 2026-08-09 | inbound-reported |

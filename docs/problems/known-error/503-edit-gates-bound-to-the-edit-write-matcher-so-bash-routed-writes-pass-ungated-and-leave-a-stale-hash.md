@@ -1,6 +1,6 @@
 # Problem 503: Edit gates are bound to the Edit|Write matcher, so Bash-routed writes pass ungated and leave a stale hash
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-08-20
 **Priority**: 16 (High) — Impact: 4 × Likelihood: 4 — derived at capture. Impact 4: the load-bearing governance control is simply absent on one of the two ordinary write paths, so unreviewed edits enter the governed record, and the same gap corrupts the drift hash so honest writes are later denied for a cause the agent cannot attribute. Ships to adopters in five plugins. Likelihood 4: 187 occurrences in one transcript sweep, 166 of them in a single month, and it is the *default* write path in bypass-permissions sessions.
 **Origin**: inbound-reported (#412) — stamped 2026-08-21 review from the upstream poll; upstream filing `wr-architect: edit gate binds to the Edit/Write tool, so Bash-routed edits of governed files bypass it`
@@ -48,14 +48,28 @@ Route every write to a governed path through the Edit or Write tool. Nothing enf
 
 **Grounding note from hang-off arbitration:** the architect plugin **already** registers `Bash` at the `hooks.json` level (`"matcher": "Bash|Edit|Write|ExitPlanMode"`, line 12). For that plugin the gap is purely the inner `case` statement in `architect-dispatch.sh` — and the two halves of the fix sit four lines apart, at lines 63 (pre-tool gating) and 84 (post-tool refresh). The architect-side fix is therefore materially cheaper than the sibling plugins', which need matcher registration as well.
 
+### Confirmed Root Cause
+
+The five plugins bind mutation policy to tool identity instead of mutation intent. Architect's outer matcher sees Bash, but its dispatcher sends Bash only to README pairing before the call and marker sliding afterward. JTBD, style-guide, voice-tone, and TDD do not register Bash for their edit gates at all; TDD and architect likewise omit Bash from their post-write bookkeeping routes. The existing gate scripts already share the correct path exclusions and authorization policy, so duplicating that policy in a shell-command parser would create a second authority.
+
+The minimal shared fix is one conservative dispatcher that recognizes only explicit supported Bash write forms, emits an equivalent Write-shaped event for each concrete target, and invokes the existing gate or post-write scripts. Commands with no classified target remain silent. This intentionally accepts false negatives for unsupported shell-language mutation shapes rather than creating false-positive denials for read-only commands.
+
+The initial behavioral reproduction failed before the shared dispatcher and caller registrations existed. During direct recovery on 2026-08-31, review found false write detection in printed arguments, comments and heredoc bodies, plus content incorrectly borrowed from unrelated commands or overridden input descriptors. The shared classifier was corrected rather than adding exceptions to individual gates. All 22 focused shared/architect dispatcher checks now pass, including comparisons with native Bash. The failed worker's interrupted full suites do not count as passing evidence.
+
+This remains a Known Error. The current repair covers literal simple-command writes only. Dynamic targets, control structures and in-process writes such as Python or `sed -i` remain outside the classifier. Known literal content reaches marker-discipline checks, but unknown runtime-produced content cannot establish protection against every marker introduction. Release and installed-runtime verification are still outstanding.
+
+Recovery verification: 696 affected hook checks passed, followed by a successful 22-check focused rerun after the final echo-option correction. An isolated real post-dispatch fixture refreshed the decision hash and rewrote/staged the compendium using a stubbed model response. All five actual npm-packed candidates passed helper-content, manifest, test-exclusion and write/read-only smoke checks. These are source/candidate results, not published or installed-runtime proof.
+
 ### Investigation Tasks
 
-- [ ] Decide the detection shape for a Bash write: parse redirection and known in-place editors (`>`, `>>`, `tee`, `sed -i`, heredoc targets, `python -c`/`node -e` file opens), or conservatively deny any Bash command whose text names a governed path — and pick which errs safe
-- [ ] Weigh gating vs. advising on the Bash path: a false-positive deny on a read-only `grep docs/decisions/…` is a new friction class, so the false-positive rate drives whether this is `deny` or `ask`/warn
-- [ ] Extend the PostToolUse side symmetrically — a Bash-routed edit must refresh the architect hash and the compendium, or the ungated-write fix alone leaves the stale-hash half open
-- [ ] Land the architect half first (the inner `case` at lines 63 and 84); it needs no matcher change and validates the shape before the four sibling plugins pay for it
+- [x] Choose a conservative detection shape: classify explicit output redirection and `tee` targets, and leave unsupported shell-language write forms unclassified rather than guessing
+- [x] Gate classified targets and keep commands with no classified target silent, so `cat`, `grep`, and other read-only Bash calls do not acquire a denial path
+- [x] Route classified targets through the existing post-write scripts as well as the pre-write gates, covering the architect hash/compendium and both TDD post-write routes
+- [ ] Deliver the canonical dispatcher and byte-identical copies in all five published plugins; source synchronization is implemented, publication remains outstanding
 - [ ] Raise with the harness owners that bypass-permissions guidance steers writes onto the ungated path
-- [ ] Create a reproduction test: a `cat >` into `docs/decisions/` must be denied without a marker, and must refresh the hash with one
+- [x] Create a RED behavioral reproduction for explicit redirection, read-only silence, multiple `tee` targets, and all five caller registrations
+- [ ] Address or explicitly govern the remaining dynamic-target, control-structure, in-process mutation, and unknown-content coverage gaps before claiming the general Bash-write problem resolved
+- [ ] Verify post-write side effects and an installed-runtime journey without changing the user's disabled-hook configuration
 
 ## Dependencies
 
@@ -78,4 +92,4 @@ Route every write to a governed path through the Edit or Write tool. Nothing enf
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-082 | STORY-082: Gate Bash writes without blocking read-only commands | accepted |
+| STORY-082 | STORY-082: Gate Bash writes without blocking read-only commands | in-progress |

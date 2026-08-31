@@ -13,7 +13,9 @@ tool_name() {
 
 run_gate() {
   local output status
-  output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/$1")"
+  local child="$1"
+  shift
+  output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/$child" "$@")"
   status=$?
   [ -z "$output" ] || printf '%s\n' "$output"
   [ "$status" -eq 0 ] || exit "$status"
@@ -22,7 +24,9 @@ run_gate() {
 
 run_side_effect() {
   local output status
-  output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/$1")"
+  local child="$1"
+  shift
+  output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/$child" "$@")"
   status=$?
   [ -z "$output" ] || printf '%s\n' "$output"
   return "$status"
@@ -69,6 +73,9 @@ if messages:
         ;;
       Bash)
         run_gate architect-readme-pairing-check.sh
+        run_gate bash-write-dispatch.sh \
+          "$SCRIPT_DIR/architect-enforce-edit.sh" \
+          "$SCRIPT_DIR/architect-oversight-marker-discipline.sh"
         ;;
     esac
     ;;
@@ -85,7 +92,13 @@ if messages:
         run_side_effect architect-refresh-hash.sh || true
         run_side_effect architect-compendium-update-entry.sh || true
         ;;
-      Bash|Skill)
+      Bash)
+        run_side_effect architect-slide-marker.sh || true
+        run_side_effect bash-write-dispatch.sh --all \
+          "$SCRIPT_DIR/architect-refresh-hash.sh" \
+          "$SCRIPT_DIR/architect-compendium-update-entry.sh" || true
+        ;;
+      Skill)
         run_side_effect architect-slide-marker.sh || true
         ;;
     esac

@@ -10,6 +10,8 @@ make_fake_dispatcher() {
   TRACE="$FAKE_ROOT/trace"
   mkdir -p "$FAKE_ROOT/hooks" "$FAKE_ROOT/scripts"
   cp "$HOOKS/architect-dispatch.sh" "$FAKE_ROOT/hooks/architect-dispatch.sh"
+  cp "$HOOKS/bash-write-dispatch.sh" "$FAKE_ROOT/hooks/bash-write-dispatch.sh"
+  chmod +x "$FAKE_ROOT/hooks/bash-write-dispatch.sh"
   local child
   for child in \
     architect-oversight-nudge.sh architect-detect.sh staleness-check.sh \

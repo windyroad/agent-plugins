@@ -5,11 +5,13 @@
       { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/staleness-check.sh" }] }
     ],
     "PreToolUse": [
-      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/tdd-enforce-edit.sh" }] }
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/tdd-enforce-edit.sh" }] },
+      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/bash-write-dispatch.sh\" \"${CLAUDE_PLUGIN_ROOT}/hooks/tdd-enforce-edit.sh\"" }] }
     ],
     "PostToolUse": [
       { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/tdd-post-write.sh" }] },
       { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/tdd-review-test.sh" }] },
+      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/bash-write-dispatch.sh\" --all \"${CLAUDE_PLUGIN_ROOT}/hooks/tdd-post-write.sh\" \"${CLAUDE_PLUGIN_ROOT}/hooks/tdd-review-test.sh\"" }] },
       { "matcher": "Skill", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/tdd-setup-marker.sh" }] }
     ],
     "Stop": [
