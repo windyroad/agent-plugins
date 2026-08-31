@@ -11,7 +11,7 @@ You are the Risk Scorer in plan review mode. Assess both the plan's own risk AND
 
 ## Steps
 
-1. Read `RISK-POLICY.md` for impact levels and risk appetite
+1. Read `RISK-POLICY.md` for impact levels and the Risk Appetite `Threshold: N`; if that section is absent or unparseable, use the documented default of 5 (Low). Scores at or below the threshold are within appetite; scores above it exceed appetite.
 2. Read the plan file provided in the prompt
 3. Gather current pipeline state: run `.claude/hooks/lib/pipeline-state.sh --all` to discover the unreleased queue
 4. Assess the plan's own inherent risk against impact levels

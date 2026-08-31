@@ -143,3 +143,33 @@ not precise enough there either.
 per the inflow-discipline rule — same eval config, same CI job, same observable
 symptom (a red that greens on re-run), and the same remedy surface. A separate
 ticket would split one flake-class investigation across two files.
+
+## Release-gate recurrence and scoped correction — 2026-08-31
+
+CI run `33350385888` passed Quality Gates in 9m23s: architect agent 6/6 and JTBD agent 2/2 passed. Risk-scorer passed 11 of 12 cases with 0 errors; the named failure was `Plan boundary — score 6 exceeds the default appetite`. The CI console did not retain the full agent response, so this evidence does not establish what incorrect output, if any, the agent produced.
+
+The release candidate commit was unrelated to this surface: `git diff 9505c0a2..be2b3283 -- packages/risk-scorer/agents scripts/run-agent-evals-ci.sh` was empty. An unchanged local rerun of the single case passed 1/1 in 21 seconds with 0 failures and 0 errors. Its `--no-write` result contained counts but no full response, so it neither reproduced the CI failure nor established that the case had stopped flaking.
+
+The concrete source gap is narrower than the earlier harness-level options. `packages/risk-scorer/agents/plan.md` required reading appetite but did not define the documented default of 5 when the Risk Appetite section was absent or unparseable. The sibling `wip.md` and `pipeline.md` agents already defined that fallback. The existing fixture supplies plan risk 5 and projected release risk 6 as authoritative, so the minimum correction aligns the plan agent with ADR-086 and states the strict boundary: scores at or below the threshold are within appetite; scores above it fail.
+
+### Fix implementation
+
+- [x] Add the documented default appetite of 5 and strict comparison to the plan agent.
+- [x] Retain the existing actual-agent boundary fixtures unchanged: score 5 PASS and score 6 FAIL when no Risk Appetite section is available.
+- [x] Regenerate the native Codex agent through `npm run sync:codex-agents`; do not hand-edit `.codex/agents/wr-risk-scorer-plan.toml`.
+- [x] Add a patch changeset for `@windyroad/risk-scorer` without changing the queued P402 changesets.
+- [x] Run both unchanged actual-agent boundary cases locally with cache and writes disabled: 2 passed, 0 failed, 0 errors in 24 seconds. The installed native dependency required the repository's matching Node 24 runtime; an initial Node 26 invocation stopped before any agent case ran because of an ABI mismatch.
+- [x] Confirm source/generated parity with `npm run check:codex-agents`; a dry-run package manifest includes `agents/plan.md`. Architecture, JTBD, voice, and TDD reviewers passed the scoped change; the TDD reviewer classified the unchanged Promptfoo cases as behavioural.
+- [x] Verify the generated story-map row in headless Chromium: its labelled region receives focus, the descriptive STORY-081 link is visible, and the five column headers and RFC-087 row are present. Headless Chromium did not move the horizontally overflowing region for the tested key combinations; because this interaction is unchanged, that is a limitation of this evidence rather than proof of a regression. The row also inherits the bare-ID trace-link limitation already tracked by P518.
+- [ ] Verify the correction in CI and a published package. This iteration does not push, merge, or release.
+
+### Limitations
+
+This correction addresses the documented default-appetite source gap and the named plan boundary case only. It does not claim to resolve the separate token-omission mechanism or the Phase 2 emitting-versus-naming assertion defect already recorded above. P459 remains Known Error until release and subsequent evidence exercise the corrected agent.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-081 | STORY-081: Trust plan reviews when no risk policy is present | accepted |

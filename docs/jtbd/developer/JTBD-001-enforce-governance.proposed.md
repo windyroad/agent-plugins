@@ -49,6 +49,7 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-072 | STORY-072: Record oversight evidence only for the confirming session | accepted |
 | STORY-079 | STORY-079: Review only options consistent with documented desired outcomes | accepted |
 | STORY-080 | STORY-080: Record a completed native review without manual marker recovery | accepted |
+| STORY-081 | STORY-081: Trust plan reviews when no risk policy is present | accepted |
 | STORY-002 | STORY-002: /wr-itil:capture-story lightweight aside skill | done |
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-006 | STORY-006: /wr-itil:reconcile-stories trio (skill + script + bin shim) | done |
