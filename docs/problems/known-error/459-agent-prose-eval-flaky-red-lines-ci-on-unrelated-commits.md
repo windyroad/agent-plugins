@@ -161,11 +161,20 @@ The concrete source gap is narrower than the earlier harness-level options. `pac
 - [x] Run both unchanged actual-agent boundary cases locally with cache and writes disabled: 2 passed, 0 failed, 0 errors in 24 seconds. The installed native dependency required the repository's matching Node 24 runtime; an initial Node 26 invocation stopped before any agent case ran because of an ABI mismatch.
 - [x] Confirm source/generated parity with `npm run check:codex-agents`; a dry-run package manifest includes `agents/plan.md`. Architecture, JTBD, voice, and TDD reviewers passed the scoped change; the TDD reviewer classified the unchanged Promptfoo cases as behavioural.
 - [x] Verify the generated story-map row in headless Chromium: its labelled region receives focus, the descriptive STORY-081 link is visible, and the five column headers and RFC-087 row are present. Headless Chromium did not move the horizontally overflowing region for the tested key combinations; because this interaction is unchanged, that is a limitation of this evidence rather than proof of a regression. The row also inherits the bare-ID trace-link limitation already tracked by P518.
-- [ ] Verify the correction in CI and a published package. This iteration does not push, merge, or release.
+- [x] Verify the correction in CI and a published package. The outer session completed delivery; exact evidence is recorded below.
 
 ### Limitations
 
 This correction addresses the documented default-appetite source gap and the named plan boundary case only. It does not claim to resolve the separate token-omission mechanism or the Phase 2 emitting-versus-naming assertion defect already recorded above. P459 remains Known Error until release and subsequent evidence exercise the corrected agent.
+
+### Stable release evidence, 2026-08-31
+
+- Source correction `6885a11a263e07645a94f123f845603aa2cf7750` and retrospective `fb12850546e6f6e01e2bb5355188b41ae988e1f2` were pushed through the existing CI-recovery review path. An independent risk review classified the correction as net risk-reducing; no marker was fabricated, no assertion was weakened, and stable publication waited for green source CI.
+- [CI run 33354074557](https://github.com/windyroad/agent-plugins/actions/runs/33354074557) passed at `fb12850546e6f6e01e2bb5355188b41ae988e1f2`. All 12 risk-agent cases passed, including both unchanged plan-boundary cases. Across the run, 4,260 hook checks passed, two skipped, none failed, and all 27 actual-agent cases passed.
+- [Release PR 468](https://github.com/windyroad/agent-plugins/pull/468) merged as `4b496b6310a592c62cb4fc5f3c1dadfb66a4c98d`; [Release run 33354699518](https://github.com/windyroad/agent-plugins/actions/runs/33354699518) succeeded at that revision. npm `latest` resolves to risk-scorer `0.18.20`. The downloaded stable package's three manifests agree, and `agents/plan.md` is byte-identical to the tested source.
+- [Merge CI 33354699544](https://github.com/windyroad/agent-plugins/actions/runs/33354699544) subsequently passed on that exact release revision: 4,260 hook checks passed, two skipped, none failed; all 27 actual-agent cases passed, including the 12 risk-agent cases.
+
+The failed first run's full response remains unavailable. The broader flake class is not closed by this successful delivery. A direct check of the existing absent-root negative assertion found that its parsed double-escaped whitespace pattern does not match an actual emitted `RISK_SCORES: commit=4 push=4 release=4` line. That assertion receives no control credit; its correction remains part of the existing Phase 2 work. No installed plugin or disabled hook setting was changed.
 
 
 ## Stories

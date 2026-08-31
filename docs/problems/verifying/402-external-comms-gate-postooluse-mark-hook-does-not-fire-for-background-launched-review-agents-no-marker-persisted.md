@@ -278,3 +278,13 @@ These are source and packed-candidate checks. They do not establish release, ins
 Independent packed checks found three gaps in the first candidate: the two packages shared a registration filename, full and short task names did not match, and a late PASS could be applied after policy changes. Expiry checks also exposed an ignored `REVIEW_TTL` setting and acceptance of invalid or future-dated registrations.
 
 The correction separates package state, normalizes supported task names, compares the existing policy substance hash, and honors `REVIEW_TTL` while rejecting invalid ages. The expanded packed suite passed 3/3; the existing package and style/voice hook suite passed 106/106. A mechanical review classified all three new test cases as behavioural. These checks do not prove release, installation, or subsequent-runtime verification.
+
+### Stable release evidence, 2026-08-31
+
+- Implementation commit: `be2b3283a1456e6c3314155bd3c66fe3a0acc149`. The first source CI run failed an unrelated plan-appetite case; P459 records the correction rather than treating red CI as a goal blocker.
+- [Source CI 33354074557](https://github.com/windyroad/agent-plugins/actions/runs/33354074557) passed at `fb12850546e6f6e01e2bb5355188b41ae988e1f2`: 4,260 hook checks passed, two skipped, none failed; all 27 actual-agent evaluation cases passed.
+- [Release PR 468](https://github.com/windyroad/agent-plugins/pull/468) merged as `4b496b6310a592c62cb4fc5f3c1dadfb66a4c98d`. [Release run 33354699518](https://github.com/windyroad/agent-plugins/actions/runs/33354699518) succeeded on that exact merge revision. npm `latest` resolves to style-guide `0.6.2` and voice-tone `0.8.3`.
+- Downloaded stable npm tarballs have matching package, Claude, and Codex manifest versions. The same three completion tests passed against those extracted packages, including configured handlers, package and parent binding, policy drift, expiry, and rejected verdicts.
+- [Merge CI 33354699544](https://github.com/windyroad/agent-plugins/actions/runs/33354699544) subsequently passed on that exact release revision: 4,260 hook checks passed, two skipped, none failed; all 27 actual-agent cases passed.
+
+No package was installed into the user's runtime and no disabled hook setting was changed. Published-package behaviour is verified; installed-session hook firing remains unproven. P402 remains Verification Pending.
