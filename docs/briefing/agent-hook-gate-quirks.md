@@ -2,7 +2,7 @@
 
 Cross-session learnings about shell/filesystem traps that make gate helpers fail silently, and about the outstanding-questions queue's missing drain. Sibling to `agent-interaction-patterns.md` (broader interaction-discipline surface). Split out 2026-05-03 per P145 MUST_SPLIT contract for Tier 3 budget compliance.
 
-> The architect PostToolUse marker mechanics — when the marker is and is not written, the literal verdict-heading grep, and the sanctioned manual-assertion recovery — moved to [`architect-gate-marker-mechanics.md`](./architect-gate-marker-mechanics.md) on 2026-07-26 per the P099 Tier 3 budget rotation. Load it alongside this file when working an architect-gated edit.
+> The architect marker mechanics moved to [`architect-gate-marker-mechanics.md`](./architect-gate-marker-mechanics.md) on 2026-07-26 per the P099 Tier 3 budget rotation. It now records caller-bound completion, strict canonical bold/H2 verdict parsing, and fail-closed recovery without manufactured markers. Load it alongside this file when working an architect-gated edit.
 
 > Older entries rotated to [`agent-hook-gate-quirks-archive.md`](./agent-hook-gate-quirks-archive.md) per the P099 Tier 3 budget: the 2026-04-25 → 2026-05-03 cohort on 2026-06-17 (duplicate-bypass warning, persona-vs-runtime-mode rule, runtime-SID instrumentation, architect-agent re-invoke pattern), then the 2026-06-17 cohort on 2026-07-26 (the macOS `find /tmp` symlink trap, the `grep` binary-classification trap on em-dashed markdown, and the outstanding-questions queue's missing drain). Load alongside this file for full historical context.
 
