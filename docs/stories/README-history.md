@@ -69,3 +69,5 @@
 ## 2026-08-31
 
 > Last reviewed: 2026-08-31 **STORY-081 accepted** — I6-I10 and map-derived I12 pass for the P459 plan-boundary correction.
+
+> Last reviewed: 2026-08-31 **STORY-079 in progress** - Implementation committed; delivery verification remains.

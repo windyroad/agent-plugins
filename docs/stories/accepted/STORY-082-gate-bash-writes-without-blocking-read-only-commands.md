@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: gate-bash-writes-without-blocking-read-only-commands
 reported: 2026-08-31
 decision-makers: [Tom Howard]

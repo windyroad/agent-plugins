@@ -78,4 +78,4 @@ Route every write to a governed path through the Edit or Write tool. Nothing enf
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-082 | STORY-082: Gate Bash writes without blocking read-only commands | draft |
+| STORY-082 | STORY-082: Gate Bash writes without blocking read-only commands | accepted |
