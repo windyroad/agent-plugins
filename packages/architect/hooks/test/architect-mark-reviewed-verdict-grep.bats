@@ -165,6 +165,30 @@ No conflicts. Note: earlier sessions reported ISSUES FOUND on adjacent files but
   [ ! -f "$PLAN_MARKER" ]
 }
 
+@test "verdict-grep: examples and mixed NEEDS DIRECTION verdicts do not unlock edits" {
+  local output
+  for output in \
+    $'Example only:\n```markdown\n## Architecture Review: PASS\n```' \
+    $'## Architecture Review: NEEDS DIRECTION\n\n```markdown\n## Architecture Review: PASS\n```' \
+    $'Review follows:\n## Architecture Review: PASS' \
+    $'## Architecture Review: PASS\n## Architecture Review: NEEDS DIRECTION' \
+    $'**Architecture Review: PASS**\n**Architecture Review: PASS**'; do
+    INPUT=$(_make_input "$output")
+    echo "$INPUT" | "$HOOK"
+    [ ! -f "$REVIEW_MARKER" ]
+    [ ! -f "$HASH_MARKER" ]
+    [ ! -f "$PLAN_MARKER" ]
+  done
+}
+
+@test "verdict-grep: blank lines before a blockquoted H2 PASS remain valid" {
+  INPUT=$(_make_input $'\n  \n  > ## Architecture Review: PASS\n\nNo conflicts.')
+  echo "$INPUT" | "$HOOK"
+  [ -f "$REVIEW_MARKER" ]
+  [ -f "$HASH_MARKER" ]
+  [ -f "$PLAN_MARKER" ]
+}
+
 @test "verdict-grep: prose-only approval does not unlock edits" {
   INPUT=$(_make_input "Review complete — no issues found in the diff.")
   echo "$INPUT" | "$HOOK"

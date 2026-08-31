@@ -30,14 +30,20 @@ case "$SUBAGENT" in
     # Anchored to the canonical heading shape from
     # packages/architect/agents/agent.md "How to Report"
     # (`**Architecture Review: PASS**` / `## Architecture Review: PASS`, and
-    # their ISSUES FOUND equivalents).
+    # their ISSUES FOUND / NEEDS DIRECTION equivalents).
     # Tolerates optional `> ` blockquote prefix + leading whitespace.
     # Anchored matches prevent P181 narrative false positives. Exactly one
-    # canonical verdict is required so conflicting output fails closed.
+    # canonical verdict on the first nonblank line is required so examples
+    # and conflicting output fail closed.
     AGENT_OUTPUT=$(_get_tool_output)
-    VERDICT=$(printf '%s\n' "$AGENT_OUTPUT" | sed -nE \
-      -e 's/^[[:space:]]*>?[[:space:]]*\*\*Architecture Review: (PASS|ISSUES FOUND)\*\*[[:space:]]*$/\1/p' \
-      -e 's/^[[:space:]]*>?[[:space:]]*##[[:space:]]+Architecture Review: (PASS|ISSUES FOUND)[[:space:]]*$/\1/p')
+    _architect_verdicts() {
+      sed -nE \
+        -e 's/^[[:space:]]*>?[[:space:]]*\*\*Architecture Review: (PASS|ISSUES FOUND|NEEDS DIRECTION)\*\*[[:space:]]*$/\1/p' \
+        -e 's/^[[:space:]]*>?[[:space:]]*##[[:space:]]+Architecture Review: (PASS|ISSUES FOUND|NEEDS DIRECTION)[[:space:]]*$/\1/p'
+    }
+    VERDICT=$(printf '%s\n' "$AGENT_OUTPUT" | _architect_verdicts)
+    FIRST_VERDICT=$(printf '%s\n' "$AGENT_OUTPUT" | awk 'NF { print; exit }' | _architect_verdicts)
+    [ "$FIRST_VERDICT" = "$VERDICT" ] || VERDICT=""
     [ "$VERDICT" = "ISSUES FOUND" ] && VERDICT="FAIL"
 
     # Substance-aware drift hash + atomic verdict-write (ADR-009 amendment
