@@ -1,6 +1,6 @@
 # Problem 502: The marker shim's 24h candidate-SID window excludes long sessions, so it silently writes no marker
 
-**Status**: Open
+**Status**: Closed
 **Reported**: 2026-08-20
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3 — derived at capture. Impact 3: the caller cannot land the `human-oversight: confirmed` edit the shim exists to permit, and the deny message points back at the shim that just "succeeded" — a recoverable dead-end with a documented env-var workaround, not data loss. Likelihood 3: fires only on sessions older than 24h, which is a minority of sessions but the normal shape of an AFK `/wr-itil:work-problems` loop and of multi-day interactive sessions; observed once in the 2026-08-20 transcript sweep.
 **Origin**: internal
@@ -8,6 +8,17 @@
 **WSJF**: 9 — (9 × 1.0) / 1 (added 2026-08-21 review)
 **JTBD**: JTBD-001
 **Persona**: developer
+
+## Closed as no longer relevant
+
+- **Evidence shape**: current source and focused behavioural checks, plus direct exercise of the published packages.
+- **Closed on**: 2026-08-31.
+- **Current-source evidence**: commit `c5a0cb23` removed candidate-SID enumeration from the architect and JTBD oversight helpers. Each helper now validates one standalone command; its `PostToolUse:Bash` hook writes one artefact-and-session marker from the exact successful command event's injected `session_id`.
+- **Published evidence**: registry packages `@windyroad/architect@0.22.1` and `@windyroad/jtbd@0.14.3` match that caller-bound implementation. In isolated packed-package fixtures with an aged announce marker present, the architect and JTBD hooks wrote two markers total, both for the fixture caller, and none for the aged unrelated session. Published `@windyroad/itil@2.1.8` retained the deliberate 1440-minute ADR-050 (Capture the runtime stdin session_id via a PreToolUse hook so the create-gate marker binds to the same SID the runtime hook will see) fanout bound, returned the fixture caller from the runtime-SID path, and returned exit 1 when no candidate existed.
+- **Behavioural evidence**: `npx bats packages/architect/hooks/test/architect-oversight-marker-discipline.bats packages/jtbd/hooks/test/jtbd-oversight-marker-discipline.bats packages/itil/hooks/test/session-id.bats packages/itil/hooks/test/manage-problem-enforce-create.bats` passed 78/78. This covers exact caller binding without announce markers, rejection of unrelated or non-exact events, runtime-SID precedence, bounded candidate enumeration, empty-candidate output, and create-gate enforcement.
+- **Architecture and JTBD review**: fresh `wr-architect:agent` and `wr-jtbd:agent` reviews passed. The closure preserves ADR-002 (Monorepo with Independently Installable Per-Plugin Packages), ADR-038 (Progressive disclosure + once-per-session budget for UserPromptSubmit governance prose), ADR-050, ADR-110 (A ratification marker can only be written when someone actually ratified), ADR-116 (Ratified decisions change only by supersession), JTBD-001 (Enforce Governance Without Slowing Down), and JTBD-006 (Progress the Backlog While I'm Away); no fix row, new decision, job, map, story, or implementation is required.
+- **Residual boundary**: this closure does not claim that ADR-050 guarantees the caller in every compound same-project concurrency case. If a caller's announce marker is older than 1440 minutes while the shared runtime marker holds a concurrent sibling SID, the subsequent create gate may still deny. ADR-050 accepts that recoverable fail-closed tradeoff. It is not the former oversight-shim silent-zero-write or cross-session authority-grant defect.
+- **Recovery**: rerun `/wr-itil:transition-problem 502 known-error` to reopen if the caller-bound oversight path regresses or new evidence shows the reported defect remains.
 
 ## Description
 
@@ -70,11 +81,11 @@ Candidate enumeration bounds recency by marker **mtime**, but an announce marker
 
 ### Investigation Tasks
 
-- [ ] Confirm whether announce markers are ever re-touched during a session, or written once at SessionStart
-- [ ] Weigh the candidate fixes against P124's accumulation pathology: (a) slide announce-marker mtime on activity so the existing 1440 bound tracks liveness; (b) empty-result fallback to the newest announce marker regardless of age; (c) raise the default window; (d) make the shim exit non-zero on the cold path so callers cannot read the no-op as success
-- [ ] Decide whether the cold-path `exit 0` contract should change — it is load-bearing for "do not crash SKILL flows before any announce marker has fired", so a non-zero exit needs its own guard
-- [ ] De-duplicate the 1440 literal across the three sites (or justify the duplication — the architect and jtbd copies are inlined deliberately per ADR-002 no-cross-plugin-lib-source)
-- [ ] Create a reproduction test — `packages/itil/hooks/test/session-id.bats` lines 273 and 332 already carry window-override coverage and are the RED-test entry point
+- [x] Confirm whether announce markers are ever re-touched during a session, or written once at SessionStart: ADR-038 confirms write-once, with no touch refresh.
+- [x] Weigh the candidate fixes against P124's accumulation pathology: P368 (The oversight-marker helper writes markers for the wrong sessions and exits silently) removed announce-marker discovery from oversight confirmation instead of weakening ADR-050's bounded create-gate fanout.
+- [x] Decide whether the cold-path `exit 0` contract should change: the oversight helper is now a validator whose exact PostToolUse event writes evidence; the separate ITIL create-gate wrapper returns nonzero when its candidate stream is empty.
+- [x] De-duplicate the 1440 literal across the three sites: the architect and JTBD copies no longer exist; the ITIL constant remains local under ADR-002 and deliberate under ADR-050.
+- [x] Create a reproduction test: focused source suites pass 78/78, and isolated published-package fixtures exercise aged announce markers, exact caller binding, runtime-SID selection, and the no-candidate exit.
 
 ## Dependencies
 

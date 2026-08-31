@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-31 **P503 Known Error** - Literal Bash-write routing passes focused, affected-hook and packed-candidate checks; broader shell coverage and installed verification remain.
+> Last reviewed: 2026-08-31 **P502 (The marker shim's 24h candidate-SID window excludes long sessions, so it silently writes no marker) closed as no longer relevant** - exact caller-bound oversight evidence supersedes the aged candidate-SID shim failure; ADR-050 (Capture the runtime stdin session_id via a PreToolUse hook so the create-gate marker binds to the same SID the runtime hook will see) remains bounded.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -56,7 +56,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 9 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue | 9 (Medium) | Known Error | M | 2026-06-11 | internal |
 | 9 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight contexts — strands dispatchable lifecycle/ack/upstream-report obligations the framework authorises to proceed | 9 (Medium) | Open | S | 2026-07-26 | corrective-feedback (user, 2026-07-26 |
 | 9 | P484 | The reading-context persona constraint is load-bearing in two ratified decisions but documented nowhere | 9 (Medium) | Open | S | 2026-08-08 | internal |
-| 9 | P502 | The marker shim's 24h candidate-SID window excludes long sessions, so it silently writes no marker | 9 (Medium) | Open | S | 2026-08-20 | internal |
 | 8 | P419 | capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the JTBD edit gate mid-session | 8 (Medium) | Known Error | M | 2026-07-05 | internal |
 | 8 | P459 | Agent-Prose Behavioural Eval Flaky — Red-Lines CI on Unrelated Commits | 8 (Medium) | Known Error | M | 2026-07-24 | internal |
 | 8 | P508 | The fix proposal still instantiates a standalone RFC document, after ADR-103 made it a release row | 16 (High) | Known Error | L | 2026-08-20 | internal |
