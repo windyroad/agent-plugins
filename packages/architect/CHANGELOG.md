@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 0.22.2
+
+### Patch Changes
+
+- a02e8d0: The architect hook now recognizes canonical bold and H2 PASS verdict headings and fails closed on ambiguous or conflicting reviewer output.
+
 ## 0.22.1
 
 ### Patch Changes
