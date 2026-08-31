@@ -182,3 +182,11 @@ The failed first run's full response remains unavailable. The broader flake clas
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-081 | STORY-081: Trust plan reviews when no risk policy is present | accepted |
+
+## JTBD recommendation-case recurrence, 2026-08-31
+
+[CI run 33384315308](https://github.com/windyroad/agent-plugins/actions/runs/33384315308), on the P503 evidence-only commit `922bdd5988b8b142efd1f46ad4fe128ecc543416`, passed 4,291 hook checks with two skips and no failures. The agent-prose job passed all six architect cases, then passed five of six JTBD cases. It failed `Recommendation review reports an incomplete option set`: the visible response returned `JTBD Recommendation Review: ISSUES FOUND`, but the assertion requiring the word `incomplete` failed. The console table truncated the full response; later package suites did not run. This is not evidence that all 31 agent cases ran.
+
+An unchanged direct invocation of `packages/jtbd/agents/eval/run-agent-eval.sh` with the same fixture prompt exited 0 locally and explicitly reported all three classifications, including `Incomplete option set`. The local pass does not reproduce the CI failure or establish whether the original failure omitted a required classification or expressed it without the asserted word. No assertion or agent behavior was changed. At capture time, one unchanged rerun of the failed CI job was in progress.
+
+P459 remains Known Error. The full failing response and a measured reproduction cohort are still needed before claiming a root cause or correction. No installed plugin or live hook setting was changed.
