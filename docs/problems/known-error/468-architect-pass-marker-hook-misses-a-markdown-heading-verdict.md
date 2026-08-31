@@ -64,6 +64,13 @@ Source and extracted packed-candidate tests can establish release readiness, but
 - The separate PR-triggered CI [33398364163](https://github.com/windyroad/agent-plugins/actions/runs/33398364163) failed before starting any jobs. GitHub CLI reported a likely workflow-file issue; the cause is not established. This is not passing test evidence. Merge CI [33399599748](https://github.com/windyroad/agent-plugins/actions/runs/33399599748) is tracked separately.
 - User-disabled hooks and live runtime configuration remain unchanged. No installed-session completion journey is verified; P468 remains Known Error and STORY-083 remains in progress. No further backlog iteration is started, as requested.
 
+## Installed-session verification, 2026-09-01
+
+- `@windyroad/architect@0.22.2` was installed at user scope and reported enabled from `/Users/tomhoward/.codex/plugins/cache/windyroad-architect-local/wr-architect/0.22.2`. Architect hook entries were enabled only as command-line overrides for isolated `codex exec --ephemeral` journeys; the user's persistent hook configuration was not changed.
+- A negative Bash-write control without an architect review was denied and wrote no file, confirming that the installed PreToolUse gate was active on that supported path.
+- In the positive journey, a fresh native `wr-architect:agent` completed with canonical `## Architecture Review: PASS`. The completion hook then logged that it could not resolve the parent transcript because no rollout existed for the parent thread. No parent review marker was written, the subsequent Bash write was denied, and `proof.txt` remained absent. The shipped completion journey therefore failed installed verification; P468 remains Known Error.
+- A separate negative `apply_patch` control was allowed without any architect review, even with the architect hook entries enabled for the isolated invocation. This establishes an additional uncovered Codex edit path; the Bash denial result must not be generalized to all edit tools.
+
 ## Dependencies
 
 - **Blocks**: (none)

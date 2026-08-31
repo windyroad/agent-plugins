@@ -41,6 +41,12 @@ The user requested a successor to inspect the transcript and resume the same obj
 
 Unknown. Keep the safety-system interruption separate from the review-marker handoff failure being reported when the turn stopped.
 
+### Recovery-process recurrence, 2026-09-01
+
+During the recovered P468 delivery, the assistant reported that installed-session verification remained and then answered the user's request for what they needed to do by asking them to issue another instruction to upgrade the plugin. The plugin upgrade and isolated Codex CLI verification were agent-operable and required no user decision. The user had to correct the assistant before those actions ran.
+
+This is evidence of an inaction failure during recovery, not evidence that the safety-system error recurred or shares a cause. The immediate mechanism was a failure to distinguish an agent-operable next step from an irreducible user action. The shared Claude/Codex governance instructions now require agents to execute agent-operable verification and delivery steps before asking, reserving user action for steps unavailable to tools, such as a runtime restart or sensitive identity or credential entry. `scripts/check-agent-instructions.mjs` keeps that rule present across all three instruction surfaces.
+
 ### Investigation Tasks
 
 - [ ] Establish the exact runtime/version and supported diagnostic evidence for the failed turn.

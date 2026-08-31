@@ -22,13 +22,16 @@ const contents = Object.fromEntries(
 
 const checks = [
   ["shared", "act on obvious"],
+  ["shared", "agent-operable"],
   ["shared", "capture on correction"],
   ["shared", "project-generated artefacts"],
   ["shared", "mechanical"],
   ["shared", "substance ratification"],
   ["claude", "AskUserQuestion"],
+  ["claude", "agent-operable"],
   ["claude", ".claude/"],
   ["codex", "request_user_input"],
+  ["codex", "agent-operable"],
   ["codex", "Plan Mode"],
   ["codex", ".codex/"],
 ];
