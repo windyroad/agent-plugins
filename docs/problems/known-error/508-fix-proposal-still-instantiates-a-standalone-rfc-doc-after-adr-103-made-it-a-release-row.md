@@ -137,6 +137,13 @@ The slice is deliberately the **reader** half. ADR-119's sequencing rule is that
 
 Recorded here rather than as an amendment to ADR-119, which is ratified and changes only by supersession.
 
+
+### Recovery observation, 2026-08-31
+
+The installed ITIL 2.1.2 `manage-story` skill still requires an accepted or in-progress RFC before a story can enter in-progress. RFC-085 demonstrated the mismatch: its ratified map approved STORY-079, but the row correctly remained `proposed` after implementing commit `d0f52aa2`. ADR-103 derives row status from stories and does not support authored acceptance or closure states. The architecture review confirmed the map approval predicate passed; recovery advanced the story mechanically without changing map approval or inventing a row state.
+
+- [ ] Update story lifecycle readers and skill prerequisites to distinguish legacy RFC documents from release rows. Verify that an implemented, approved story under a proposed row can progress without a new approval request, while an unratified map remains blocked.
+
 ### Remaining — the writers, and the corpus
 
 - [ ] **Repoint what `/wr-itil:capture-rfc` writes** — document → release row. Its name, entry point, problem-trace contract and (as of this slice) its identity rule are already correct; what it writes is not. This is the writer stop, and the reader is now ahead of it.

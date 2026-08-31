@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-08-31 **STORY-081 accepted** — I6-I10 and map-derived I12 pass for the P459 plan-boundary correction.
+> Last reviewed: 2026-08-31 **STORY-079 in progress** - Implementation committed; delivery verification remains.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -142,7 +142,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | in-progress | STORY-074 | Use generated Codex skills after upgrading without repairs | S | P526 | RFC-080 | STORY-MAP-008 |
 | in-progress | STORY-075 | My story map starts from the journey I walk | S | P509 | RFC-081 | STORY-MAP-002 |
 | in-progress | STORY-078 | A reviewer catches first-match binding when the key is not unique | S | P426 | RFC-084 | STORY-MAP-011 |
-| accepted | STORY-079 | Review only options consistent with documented desired outcomes | M | P514 | RFC-085 | STORY-MAP-002 |
+| in-progress | STORY-079 | Review only options consistent with documented desired outcomes | M | P514 | RFC-085 | STORY-MAP-002 |
 | accepted | STORY-080 | Record a completed native review without manual marker recovery | M | P402 | RFC-086 | STORY-MAP-002 |
 | accepted | STORY-081 | Trust plan reviews when no risk policy is present | S | P459 | RFC-087 | STORY-MAP-002 |
 | draft | STORY-064 | A ticket that only names a decision as background stays open | M | P463 | RFC-070 | STORY-MAP-011 |

@@ -65,3 +65,7 @@
 > Last reviewed: 2026-08-31 **STORY-078 accepted** — I6-I10 and map-derived I12 pass for the P426 first-match review slice.
 
 > Last reviewed: 2026-08-31 **STORY-078 in-progress** — implementation commit ca248cd7 satisfies all four acceptance criteria.
+
+## 2026-08-31
+
+> Last reviewed: 2026-08-31 **STORY-081 accepted** — I6-I10 and map-derived I12 pass for the P459 plan-boundary correction.

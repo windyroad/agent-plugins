@@ -18,15 +18,48 @@ setup() {
   mkdir -p "$HOOK_DIR"
   ln -s "$SCRIPT_DIR/lib" "$HOOK_DIR/lib"
   VERDICT_FILE="$TEST_DIR/jtbd-verdict"
-  sed "s|VERDICT_FILE=\"/tmp/jtbd-verdict\"|VERDICT_FILE=\"$VERDICT_FILE\"|" \
-    "$SCRIPT_DIR/jtbd-mark-reviewed.sh" > "$HOOK_DIR/jtbd-mark-reviewed.sh"
   HOOK="$HOOK_DIR/jtbd-mark-reviewed.sh"
+  copy_hook "$SCRIPT_DIR/jtbd-mark-reviewed.sh" "$HOOK" "$VERDICT_FILE"
   cd "$TEST_DIR"
   SESSION_ID="test-session-$$"
   MARKER="/tmp/jtbd-reviewed-${SESSION_ID}"
   PLAN_MARKER="/tmp/jtbd-plan-reviewed-${SESSION_ID}"
   HASH_FILE="/tmp/jtbd-reviewed-${SESSION_ID}.hash"
   rm -f "$MARKER" "$PLAN_MARKER" "$HASH_FILE"
+}
+
+copy_hook() {
+  python3 - "$@" <<'PY'
+from pathlib import Path
+import shlex
+import sys
+
+source, destination, verdict = sys.argv[1:]
+text = Path(source).read_text()
+needle = 'VERDICT_FILE="/tmp/jtbd-verdict"'
+if text.count(needle) != 1:
+    sys.exit("Cannot isolate hook verdict: expected exactly one assignment")
+Path(destination).write_text(text.replace(needle, "VERDICT_FILE=" + shlex.quote(verdict)))
+PY
+}
+
+@test "fixture refuses missing or duplicate verdict assignments before writing a hook" {
+  for content in 'VERDICT_FILE=/tmp/jtbd-verdict' $'VERDICT_FILE="/tmp/jtbd-verdict"\nVERDICT_FILE="/tmp/jtbd-verdict"'; do
+    printf '%s\n' "$content" > "$TEST_DIR/source"
+    run copy_hook "$TEST_DIR/source" "$TEST_DIR/copy" "$VERDICT_FILE"
+    [ "$status" -ne 0 ]
+    [ ! -e "$TEST_DIR/copy" ]
+  done
+}
+
+@test "fixture preserves verdict paths containing shell metacharacters" {
+  printf '%s\n' 'VERDICT_FILE="/tmp/jtbd-verdict"' 'printf "%s" "$VERDICT_FILE"' > "$TEST_DIR/source"
+  local path="$TEST_DIR/quote' and \$(touch injected) & |"
+  copy_hook "$TEST_DIR/source" "$TEST_DIR/copy" "$path"
+  run bash "$TEST_DIR/copy"
+  [ "$status" -eq 0 ]
+  [ "$output" = "$path" ]
+  [ ! -e injected ]
 }
 
 teardown() {

@@ -92,4 +92,4 @@ RFC-085 / STORY-079 adds recommendation review to the existing JTBD reviewer and
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-079 | STORY-079: Review only options consistent with documented desired outcomes | accepted |
+| STORY-079 | STORY-079: Review only options consistent with documented desired outcomes | in-progress |
