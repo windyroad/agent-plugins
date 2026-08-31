@@ -55,6 +55,15 @@ RFC-089 and STORY-083 carry the repair. Replace the PASS-first whole-output grep
 
 Source and extracted packed-candidate tests can establish release readiness, but they do not verify an installed session. P468 remains open as a Known Error until the package is released and the shipped hook is exercised through its supported completion path.
 
+## Release evidence, 2026-08-31
+
+- Parent correction `27c772111cba389e9af219fcebb90a1dadf68cb1` reproduced a fenced PASS example granting markers, then required one canonical verdict on the first nonblank line. Whole-output uniqueness includes NEEDS DIRECTION. The regression failed before the correction; 32 selected source checks and 16 extracted-candidate parser checks passed afterwards.
+- Source CI [33398261385](https://github.com/windyroad/agent-plugins/actions/runs/33398261385) passed: 4,299 hook tests passed, two skipped, and all 31 agent-prose evaluations passed.
+- Release PR [471](https://github.com/windyroad/agent-plugins/pull/471) merged as `f556363148d841074f2101f161519c4e833c7627`. Release workflow [33399599819](https://github.com/windyroad/agent-plugins/actions/runs/33399599819) succeeded; npm publishes `@windyroad/architect@0.22.2` as `latest`.
+- The published tarball's parser and gate-helper bytes match the release checkout. All 22 parser and dispatcher checks passed against that tarball using the existing fixture's canonical package path and isolated environment. An initial dispatcher assertion failed when the temporary package path used macOS's `/var` alias; resolving that path restored the expected Node entrypoint behavior without changing package code.
+- The separate PR-triggered CI [33398364163](https://github.com/windyroad/agent-plugins/actions/runs/33398364163) failed before starting any jobs. GitHub CLI reported a likely workflow-file issue; the cause is not established. This is not passing test evidence. Merge CI [33399599748](https://github.com/windyroad/agent-plugins/actions/runs/33399599748) is tracked separately.
+- User-disabled hooks and live runtime configuration remain unchanged. No installed-session completion journey is verified; P468 remains Known Error and STORY-083 remains in progress. No further backlog iteration is started, as requested.
+
 ## Dependencies
 
 - **Blocks**: (none)
