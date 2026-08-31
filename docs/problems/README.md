@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-31 **P426 closed on evidence** - isolated `@windyroad/architect@0.22.0` runs raised `[First-Match Footgun]` for the non-unique fixture and passed the unique-key guard.
+> Last reviewed: 2026-08-31 **P532 captured** - Codex safety-system error interrupted a problem capture and backlog goal; voice-and-tone screenshot evidence added to P402.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -85,6 +85,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P490 | The agent sends status reports into a window that can only hold one actionable thing | 12 (High) | Open | M | 2026-08-09 | corrective-feedback (user, 2026-08-08 and again 2026-08-09) |
 | 6 | P492 | Nothing nudges when unpushed work piles up, so batches grow until someone notices | 12 (High) | Open | M | 2026-08-09 | corrective-feedback (user, 2026-08-09) |
 | 6 | P524 | External adopter handles are public across the committed ticket corpus | 12 (High) | Open | M | 2026-08-25 | internal |
+| 6 | P531 | ADR compendium regeneration drops Amends relationships from summaries | 12 (High) | Open | M | 2026-08-31 | internal (user-supplied screenshot) |
 | 5 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 (Low) | Open | S | 2026-07-02 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 (Med High) | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 (Medium) | Open | M | 2026-06-17 | internal |
@@ -95,6 +96,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4.5 | P517 | An iteration can burn its whole budget in the commit gate and lose everything, because the commit is the last step | 9 (Medium) | Open | M | 2026-08-21 | internal |
 | 4.5 | P520 | Direct evidence-close paths skip reporter lifecycle updates | 9 (Medium) | Open | M | 2026-08-24 | internal |
 | 4.5 | P523 | Skill eval suites are red on main, so a green run cannot discharge the prose-surface floor | 9 (Medium) | Open | M | 2026-08-25 | internal |
+| 4.5 | P532 | Codex safety-system error interrupts problem capture and backlog goal | 9 (Medium) | Open | M | 2026-08-31 | internal (user-reported interruption) |
 | 4 | P410 | install-updates leaves stale cached plugin versions on disk — no prune step | 8 (Medium) | Open | M | 2026-07-03 | internal |
 | 4 | P442 | WSJF Rankings render convention differentiates tiers only by ordering + the Origin column — no visual tier separator, so inbound-reported priority is not legible | 8 (Medium) | Open | M | 2026-07-06 | corrective-feedback (user, 2026-07-06 |
 | 4 | P467 | work-problems should surface decisions/ratifications continuously (non-blocking), not only batched at loop-end | 8 (Medium) | Open | M | 2026-07-26 | corrective-feedback (user, 2026-07-26) |

@@ -232,3 +232,15 @@ A Codex session (`019f7561`, recurring 2026-07-18 to 2026-08-17) hitting the sib
 - **P502** — the marker shim's 24h candidate-SID window excludes long sessions, so it silently writes nothing.
 - **P503** — edit gates bound to the `Edit|Write` matcher, so Bash-routed writes pass ungated and leave a stale hash.
 - **P468**, **P418**, **P477** — the other three live paths by which a genuine PASS fails to produce a marker.
+
+### Reported recurrence: voice-and-tone completion, 2026-08-31
+
+The user requested capture of attachment `codex-clipboard-542cfb5d-d0c1-4476-b950-0e26cf60978b.png`. The screenshot reports that the required voice-and-tone review passed, but its completion hook failed to record that result, leaving deployment blocked. It also reports that nothing was pushed and that all 116 tests and typecheck passed.
+
+These are screenshot claims, not results independently verified in this checkout. The affected project, runtime, installed plugin version, event date, exact verdict and gate diagnostic are not established by the attachment. Receipt date is not proof that the failure occurred after the current fix. P402 remains Verification Pending; this capture does not prove a regression or a shared root cause.
+
+Fresh capture arbitration returned `HANG_OFF: P402`: this adds a voice-and-tone instance of the existing passed-review/missing-registration symptom. The task that was capturing it subsequently ended with a separate safety-system error, recorded in P532; that termination does not establish the cause of the screenshot report.
+
+- [ ] Establish affected runtime/version and retrieve the exact review, completion event and gate diagnostic through authorized evidence.
+- [ ] Verify whether the completion hook ran and whether its result was associated with the correct parent session and reviewed content.
+- [ ] Test the supported completion path against the existing verification condition; do not replace missing evidence with manually written approval markers.
