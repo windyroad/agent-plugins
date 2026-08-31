@@ -1,5 +1,11 @@
 # @windyroad/jtbd
 
+## 0.14.2
+
+### Patch Changes
+
+- d0f52aa: Review user-facing capability recommendations against documented jobs before presentation, while keeping recommendation verdicts separate from file-edit authority.
+
 ## 0.14.1
 
 ### Patch Changes
