@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-03 **P533 captured** — duplicate ticket IDs are silently swallowed by the README reconciler, so its drift rows blame the wrong cause (lightweight aside via /wr-itil:capture-problem)
+> Last reviewed: 2026-09-03 **P468 amended** — a third verdict-format facet: the parser is title-case-anchored, so an all-caps PASS heading is discarded silently and the gated edit re-blocks as if no review happened (observed six consecutive spawns)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 

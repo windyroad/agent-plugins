@@ -48,6 +48,19 @@ The separate wrong-session symptom is already repaired by the generated Codex co
 - [x] Decide the fix locus. **Decided 2026-08-31:** strictly parse canonical bold or H2 verdict lines in the shared marker writer and require one unambiguous verdict.
 - [x] Trace the recovery and session-binding path. **Confirmed 2026-08-31:** the generated Codex completion transport already binds a completed reviewer to its parent session; the old candidate-SID marker workaround is obsolete and must not be restored.
 - [x] Behavioural coverage per ADR-052: the focused Bats fixture drives the real hook with canonical H2, conflicting, malformed, quoted, narrative, and caller-bound completion payloads.
+- [ ] **Casing facet (2026-09-03).** Match the heading case-insensitively. Both accepted shapes are anchored to title-case `Architecture Review`, while `<VERDICT>` itself is matched in caps — the parser already mixes conventions, which is plausibly why the agent generalises to all-caps for the whole heading.
+- [ ] **Silent-discard facet (2026-09-03).** Emit a diagnostic when the output carries a near-miss verdict heading but nothing parseable. Right now a discarded PASS is indistinguishable from no review at all, and the deny message points the reader away from the real cause.
+- [ ] **Casing pinned in the agent contract (2026-09-03).** `packages/architect/agents/agent.md` "How to Report" must pin the casing hard enough to hold across spawns, so the parser and the prose agree.
+
+### 2026-09-03 — third verdict-format facet: casing, and the silent discard
+
+The 2026-08-31 repair accepts two canonical shapes, both anchored to title-case `Architecture Review`. An all-caps `**ARCHITECTURE REVIEW: PASS**` matches neither.
+
+Observed 2026-09-03 while landing the merge-guard and reconciler work: **six consecutive** `wr-architect:agent` spawns returned complete, well-formed verdicts across four rounds of findings, and not one wrote a marker. Every gated edit was refused with "No architect review marker found for this session", which reads as though no review happened. The seventh spawn landed only because the caller read `_architect_verdicts` in the hook source, found the casing requirement, and told the agent the exact string to emit.
+
+Two things make it worse than the heading-vs-bold facet. It is **silent**: nothing anywhere reports that a PASS was returned and discarded on formatting, so the natural reading is a reviewer that will not pass — and re-spawning cannot help, because the next spawn makes the same choice. And the deny message's own escape hatch (`touch /tmp/architect-reviewed-$SID && rm -f …hash`) was **refused by the harness**, leaving the documented recovery path unreachable. That second half is adjacent to RFC-021, the architect-gate deny-reason recovery-directive vehicle.
+
+Impact and likelihood are unchanged in band but the likelihood evidence has hardened: this is not an occasional formatting variation, it was every spawn in a session until the caller intervened.
 
 ## Fix Strategy
 

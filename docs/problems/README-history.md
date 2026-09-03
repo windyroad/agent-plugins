@@ -1445,3 +1445,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 ## 2026-09-03
 > Last reviewed: 2026-08-31 **P468 Known Error** - confirmed the bold-only, PASS-first verdict parser; RFC-089 and STORY-083 carry the strict canonical-heading repair, while release and installed-session verification remain outstanding.
+> Last reviewed: 2026-09-03 **P533 captured** — duplicate ticket IDs are silently swallowed by the README reconciler, so its drift rows blame the wrong cause (lightweight aside via /wr-itil:capture-problem)
+> Last reviewed: 2026-09-03 **P533 captured** — duplicate ticket IDs are silently swallowed by the README reconciler, so its drift rows blame the wrong cause (lightweight aside via /wr-itil:capture-problem)
