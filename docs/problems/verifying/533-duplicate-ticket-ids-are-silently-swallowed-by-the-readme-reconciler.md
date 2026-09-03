@@ -1,6 +1,6 @@
 # Problem 533: Duplicate ticket IDs are silently swallowed by the README reconciler
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-09-03
 **Priority**: 8 (Medium) — Impact: 2 × Likelihood: 4 — derived at capture from the description per Step 4a
 **Origin**: internal
@@ -44,6 +44,14 @@ Renumber one of the clashing tickets by hand: pick the later claimant, `git mv` 
 - [x] Resolve creation order from main's git history (first-add commit time), falling back to mtime outside a repo.
 - [x] Rewrite every resolvable reference to the renumbered ticket across the docs corpus; report the genuinely ambiguous ones (user direction 2026-09-03).
 - [x] Wire the flag into the `/wr-itil:reconcile-readme` skill so the fix is reached automatically when the drift it explains is detected.
+
+## Fix Released
+
+**Release vehicle**: `@windyroad/itil@2.2.0`, published 2026-09-03 (commit `622c7330`, merged as `ab8da4a0e`).
+
+The reconciler emits a `CLASH` row naming both claimants; `classify-readme-drift` short-circuits on it so no working-tree rename can make a clash look deferrable; `--fix-clashes` renumbers the later claimant, resolving who claimed first from the first-add commit on the resolved base ref and allocating `max(local, origin) + 1`; and `/wr-itil:reconcile-readme` Step 1a reaches for the flag when a clash is present. Covered by 33 reconciler bats, 19 classifier bats, 21 skill-contract bats, and a promptfoo SKILL-prose eval observed 3/3.
+
+**Likely verified?** no — not observed. No clash exists in the corpus right now (the reported pair was resolved before this ticket was captured), so the repair path has not run against real data. Verification is the next clash the reconciler meets, or a deliberate reproduction.
 
 ## Stories
 
