@@ -390,3 +390,32 @@ EOF
   cd /
   rm -rf "$NON_GIT"
 }
+
+# ── Clash rows are never deferrable ─────────────────────────────────────────
+#
+# Two tickets holding one number is a structural defect. No working-tree
+# rename repairs it, and the drift rows it causes describe the wrong file,
+# so classifying it as inline-deferrable makes the clash vanish exactly as
+# it does today (P533).
+
+@test "classify: a CLASH row halts and reports the clash count" {
+  cat > drift.txt <<'EOF'
+CLASH    P238 open/238-first-claim.md  verifying/238-second-claim.md
+EOF
+  run "$SCRIPT" drift.txt docs/problems
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"HALT_ROUTE_RECONCILE"* ]]
+  [[ "$output" == *"clash=1"* ]]
+  [[ "$output" != *"uncovered="* ]]
+}
+
+@test "classify: a CLASH halts even alongside rename-covered ordinary drift" {
+  cat > drift.txt <<'EOF'
+DRIFT    P100 wsjf-rankings: claims=open actual=closed
+CLASH    P238 open/238-first-claim.md  verifying/238-second-claim.md
+EOF
+  run "$SCRIPT" drift.txt docs/problems
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"clash=1"* ]]
+  [[ "$output" != *"INLINE_REFRESH"* ]]
+}

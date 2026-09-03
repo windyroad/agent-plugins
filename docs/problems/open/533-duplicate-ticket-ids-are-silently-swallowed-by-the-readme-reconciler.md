@@ -43,7 +43,13 @@ Renumber one of the clashing tickets by hand: pick the later claimant, `git mv` 
 - [x] Renumber the later claimant under an opt-in `--fix-clashes` flag, allocating the next free ID via the ADR-019 `max(local, origin) + 1` rule.
 - [x] Resolve creation order from main's git history (first-add commit time), falling back to mtime outside a repo.
 - [x] Rewrite every resolvable reference to the renumbered ticket across the docs corpus; report the genuinely ambiguous ones (user direction 2026-09-03).
-- [ ] Wire the flag into the `/wr-itil:reconcile-readme` skill so the fix is reached automatically when the drift it explains is detected.
+- [x] Wire the flag into the `/wr-itil:reconcile-readme` skill so the fix is reached automatically when the drift it explains is detected.
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-085 | STORY-085: See the ID clash instead of the drift it causes | accepted |
 
 ## Dependencies
 
@@ -54,5 +60,7 @@ Renumber one of the clashing tickets by hand: pick the later claimant, `git mv` 
 ## Related
 
 Captured via `/wr-itil:capture-problem`. The hang-off check surfaced P136, P151 and P152 as candidates — all three mention `reconcile-readme.sh` only incidentally (as an audit inventory item, as a path-resolution example, and as prior art respectively), none is about the reconciler's ID-keyed truth model, so this was captured as a sibling rather than absorbed. Its natural composes-with edges are the reconciler script itself and the next-ID allocation surface; `/wr-itil:review-problems` can cluster it later if a common parent emerges.
+
+Follow-up, not in this fix: `max(local, origin) + 1` cannot land on a number that exists locally or on the remote, but it can reuse one that was deleted from both. ADR-115 solved that same reuse hazard for story-map IDs by taking the maximum over git history as well. Problem-ticket allocation stays on the local-plus-origin rule for now, because STORY-085 pins it; worth revisiting together with the note below.
 
 ADR-019 owns the next-ID allocation rule this ticket's renumber must obey. ADR-019 predates both the per-state subdirectory layout and the same-working-tree concurrency vector that produces this clash — its guard is origin-facing only — so it is worth reassessing alongside the fix.

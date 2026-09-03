@@ -12,7 +12,7 @@
 #
 # <drift-stdout-file>: path to a file containing the captured stdout of
 # `reconcile-readme.sh` (one structured drift line per row — `DRIFT`,
-# `MISSING`, `STALE`, or `MISMATCH`).
+# `MISSING`, `STALE`, `MISMATCH`, or `CLASH`).
 #
 # <problems-dir>: defaults to ./docs/problems. Used by `git status
 # --porcelain` to scope the staged-rename probe.
@@ -27,6 +27,14 @@
 #                                            committed cross-session drift OR
 #                                            mixed; route to
 #                                            /wr-itil:reconcile-readme.
+#   HALT_ROUTE_RECONCILE clash=<N>        — <N> IDs are each claimed by more
+#                                            than one ticket file. Never
+#                                            deferrable: no working-tree
+#                                            rename can repair a clash, and
+#                                            the drift rows it causes describe
+#                                            the wrong file. Route to
+#                                            /wr-itil:reconcile-readme, whose
+#                                            --fix-clashes repairs it (P533).
 #
 # Exit codes:
 #   0 = INLINE_REFRESH
@@ -68,6 +76,19 @@ fi
 #   MISSING  P<NNN> verification-queue: ...
 #   STALE    P<NNN> verification-queue: ...
 #   MISMATCH P<NNN> closed: ...
+#   CLASH    P<NNN> <state>/<basename>  <state>/<basename>
+#
+# A CLASH short-circuits ahead of the rename-coverage probe below. It is a
+# structural defect — two tickets holding one number — and no rename in the
+# working tree can cover it. Left to the probe, a clashing ID that happened
+# to be a rename destination would classify as INLINE_REFRESH and the clash
+# would vanish exactly as it does today (P533).
+CLASH_COUNT="$(grep -cE '^CLASH' "$DRIFT_FILE" 2>/dev/null || true)"
+if [ "${CLASH_COUNT:-0}" -gt 0 ]; then
+  echo "HALT_ROUTE_RECONCILE clash=${CLASH_COUNT}"
+  exit 1
+fi
+
 DRIFT_IDS="$(grep -oE 'P[0-9]{3}' "$DRIFT_FILE" 2>/dev/null | sort -u)"
 
 if [ -z "$DRIFT_IDS" ]; then

@@ -87,3 +87,4 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-069 | STORY-069: Drain one Codex ticket through an isolated Codex CLI | in-progress |
 | STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | in-progress |
 | STORY-082 | STORY-082: Gate Bash writes without blocking read-only commands | in-progress |
+| STORY-085 | STORY-085: See the ID clash instead of the drift it causes | accepted |

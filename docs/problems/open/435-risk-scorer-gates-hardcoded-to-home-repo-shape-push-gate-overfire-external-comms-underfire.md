@@ -53,3 +53,4 @@ Two faces of one class — `wr-risk-scorer` gate scope is hardcoded to the home-
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-056 | STORY-056: Clear a block with a command my repository actually has | draft |
+| STORY-084 | STORY-084: Land an ordinary pull request without running a release | accepted |

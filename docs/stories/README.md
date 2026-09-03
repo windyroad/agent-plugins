@@ -167,6 +167,8 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-038 | Fix-titled commits surface a lifecycle-drift advisory | deferred | P345 | RFC-044 | — |
 | draft | STORY-040 | AFK loop anchored with the native `/goal` external evaluator | M | P390 | RFC-047 | STORY-MAP-002 |
 | in-progress | STORY-046 | Red-CI denial explains the recovery path | S | P208 | RFC-049 | STORY-MAP-002 |
+| accepted | STORY-084 | Land an ordinary pull request without running a release | S | P435 | RFC-062 | STORY-MAP-008 |
+| accepted | STORY-085 | See the ID clash instead of the drift it causes | M | P533 | RFC-090 | STORY-MAP-002 |
 
 
 ## Done

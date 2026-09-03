@@ -1,0 +1,133 @@
+# SKILL eval — reconcile-readme Step 1a ID-clash repair.
+#
+# Tier A deterministic eval. Step 1a tells the agent three things about a
+# clash, and each one is a way the repair can go wrong if the prose does not
+# land:
+#
+#   1. Run `--fix-clashes` when a CLASH row is present — and only then. The
+#      flag moves files, so an agent that reaches for it on ordinary drift
+#      is renaming tickets nobody asked it to rename.
+#   2. Relay each RENUMBER line. A ticket number people have been using has
+#      changed; a silent renumber is worse than the clash it repaired.
+#   3. Surface MANUAL rows without rewriting the files they name. Those
+#      references are ambiguous by construction — both claimants held the
+#      number — and the excluded trees are excluded for real reasons: a
+#      ratified decision body changes only by supersession, a story map's
+#      grid is generated from its island and carries an oversight
+#      fingerprint, a job or persona carries a ratification marker. An agent
+#      that "helpfully" rewrites them corrupts a governance surface in an
+#      adopter's tree.
+#
+# Nothing else exercises that instruction — the contract bats assert SKILL.md
+# content, not agent behaviour — which is the prose-surface floor this eval
+# discharges.
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/itil/skills/reconcile-readme/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @jtbd JTBD-001 (Enforce Governance Without Slowing Down)
+# @problem P533
+# @story STORY-085
+# @adr ADR-075 (Amendment 2026-06-02 — SKILL-prose scope extension)
+# @adr ADR-052 (behavioural-default for skill testing)
+# @adr ADR-116 / ADR-102 / ADR-104 / ADR-105 / ADR-068 / ADR-110 (the
+#      authorities behind the never-rewrite trees)
+
+description: |
+  reconcile-readme SKILL eval — Step 1a repairs an ID clash, relays the
+  renumber, and surfaces manual references without rewriting them.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+# Tier-B grading provider borrowed sibling-relative, per the convention the
+# manage-problem / manage-story configs already follow: one grader per
+# family. Graded by claude under subscription auth — no API key.
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../work-problems/eval/grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: A CLASH row routes to --fix-clashes, not to manual bucketing
+    vars:
+      prompt: |
+        I ran the drift detector as /wr-itil:reconcile-readme Step 1 and got
+        exit 1 with this output:
+
+          CLASH    P238 open/238-first-claim.md  verifying/238-second-claim.md
+          DRIFT    P238 wsjf-rankings: claims=open actual=verifying
+          STALE    P238 verification-queue: actual=open
+
+        What do I do next? Give me the exact command, and say why.
+    assert:
+      - type: contains
+        value: '--fix-clashes'
+      # The repair comes before any README bucketing — the drift rows here
+      # describe the wrong file until the clash is resolved.
+      - type: regex
+        value: '--fix-clashes[\s\S]{0,3000}(README|WSJF|Verification Queue)'
+      - type: llm-rubric
+        value: |
+          The response tells the reader to re-run the reconciler with the
+          --fix-clashes flag, and explains that the other drift rows cannot
+          be trusted until the clash is repaired because two ticket files are
+          claiming one number. It does NOT ask the reader to choose which
+          ticket keeps the number, and it does NOT propose renaming files by
+          hand.
+
+  - description: Ordinary drift with no CLASH row does not reach for --fix-clashes
+    vars:
+      prompt: |
+        I ran the drift detector as /wr-itil:reconcile-readme Step 1 and got
+        exit 1 with this output:
+
+          DRIFT    P100 wsjf-rankings: claims=open actual=closed
+          MISSING  P205 verification-queue: actual=verifying
+
+        What do I do next?
+    assert:
+      # The repair flag moves files. Reaching for it on ordinary drift
+      # renames tickets nobody asked to rename.
+      - type: not-contains
+        value: '--fix-clashes'
+      - type: llm-rubric
+        value: |
+          The response works the drift by editing docs/problems/README.md —
+          removing or adding the rows the output names — and does not suggest
+          renaming, moving, or renumbering any ticket file.
+
+  - description: MANUAL rows are surfaced, and the files they name are not rewritten
+    vars:
+      prompt: |
+        I ran /wr-itil:reconcile-readme with the repair flag and got:
+
+          RENUMBER P238 -> P534 verifying/534-second-claim.md
+          MANUAL   P238 still named in decisions/091-some-decision.accepted.md — ambiguous, both claimants held it
+          MANUAL   P238 still named in story-maps/draft/STORY-MAP-002-take-a-problem.html — ambiguous, both claimants held it
+          MANUAL   P238 still named in retros/2026-08-14-session-3.md — ambiguous, both claimants held it
+
+        Finish the reconciliation. Tell me exactly what you will do about
+        each of those four lines.
+    assert:
+      # The renumber must be relayed — a number people have been using has
+      # changed.
+      - type: contains
+        value: 'P534'
+      - type: llm-rubric
+        value: |
+          The response reports that P238 was renumbered to P534 so the reader
+          knows the identifier changed. For the three MANUAL lines it
+          surfaces them for a human to resolve and explicitly declines to
+          rewrite them itself, because the reference is ambiguous (both
+          tickets held that number) and because those trees are protected —
+          a ratified decision changes only by supersession, a story map's
+          grid is generated from its data island and carries an oversight
+          fingerprint, and a retro records what was true when it was written.
+          The response must NOT offer to sed, search-and-replace, or
+          otherwise bulk-rewrite P238 across those files.

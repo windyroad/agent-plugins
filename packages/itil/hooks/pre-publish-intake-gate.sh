@@ -23,9 +23,17 @@
 #
 # This hook composes with risk-scorer's git-push-gate.sh: both fire on
 # Bash with `gh pr merge` matchers, and either may deny independently.
-# In practice git-push-gate denies all `gh pr merge` and routes to
-# `npm run release:watch` which subsequently runs `npm publish` — at
-# which point this hook fires.
+# In practice git-push-gate denies `gh pr merge` of the changeset release
+# PR and routes to `npm run release:watch`, which subsequently runs
+# `npm publish` — at which point this hook fires. An ordinary
+# feature-branch merge is denied by neither gate.
+#
+# The two hooks identify the release PR differently: this one greps the
+# command text for `changeset-release/`, while git-push-gate resolves the
+# PR's head branch through `gh pr view`. So a `gh pr merge <number>` or a
+# bare `gh pr merge` against the release PR is caught there and not here,
+# because the command text names no branch. No gap opens today — the
+# push gate denies first — but the divergence is worth knowing.
 
 set -euo pipefail
 

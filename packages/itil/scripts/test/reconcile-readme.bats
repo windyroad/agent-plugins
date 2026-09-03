@@ -1005,3 +1005,134 @@ EOF
   [ "$status" -eq 1 ]
   echo "$output" | grep -q "P056"
 }
+
+# ── ID clashes ──────────────────────────────────────────────────────────────
+#
+# Two sessions can independently claim the same ticket number, leaving
+# the same ID on two files in different states. The filesystem-truth map
+# is keyed by ID, so one of them was silently overwritten and the README
+# tripped on the survivor with no explanation of why. Detect the clash,
+# and renumber the later-created ticket on request.
+
+@test "reconcile-readme: reports a CLASH when one ID is claimed by two tickets" {
+  mkdir -p "$FIXTURE_DIR/open" "$FIXTURE_DIR/verifying"
+  cat > "$FIXTURE_DIR/open/238-first-claim.md" <<'EOF'
+# Problem 238: First claim
+**Status**: Open
+EOF
+  cat > "$FIXTURE_DIR/verifying/238-second-claim.md" <<'EOF'
+# Problem 238: Second claim
+**Status**: Verification Pending
+EOF
+  cat > "$FIXTURE_DIR/README.md" <<'EOF'
+# Problem Backlog
+
+## WSJF Rankings
+
+| WSJF | ID | Title | Severity | Status | Effort |
+|------|-----|-------|----------|--------|--------|
+| 5.0 | P238 | First claim | 12 High | Open | M |
+
+## Verification Queue
+
+| ID | Title | Released | Likely verified? |
+|----|-------|----------|------------------|
+| P238 | Second claim | 0.1.0 | yes |
+
+## Closed
+
+| ID | Title | Closed via |
+|----|-------|-----------|
+EOF
+  run "$SCRIPT" "$FIXTURE_DIR"
+  [ "$status" -eq 1 ]
+  echo "$output" | grep -q "^CLASH"
+  echo "$output" | grep -q "P238"
+}
+
+@test "reconcile-readme: --fix-clashes renumbers the later ticket to a free ID" {
+  mkdir -p "$FIXTURE_DIR/open" "$FIXTURE_DIR/verifying"
+  cat > "$FIXTURE_DIR/open/238-first-claim.md" <<'EOF'
+# Problem 238: First claim
+**Status**: Open
+EOF
+  # A higher ID exists, so the next free ID is 401 — not 239.
+  cat > "$FIXTURE_DIR/open/400-unrelated.md" <<'EOF'
+# Problem 400: Unrelated
+**Status**: Open
+EOF
+  sleep 1
+  cat > "$FIXTURE_DIR/verifying/238-second-claim.md" <<'EOF'
+# Problem 238: Second claim
+**Status**: Verification Pending
+Tracked as P238. Related to P400.
+EOF
+  cat > "$FIXTURE_DIR/README.md" <<'EOF'
+# Problem Backlog
+
+## WSJF Rankings
+
+| WSJF | ID | Title | Severity | Status | Effort |
+|------|-----|-------|----------|--------|--------|
+| 5.0 | P238 | First claim | 12 High | Open | M |
+| 4.0 | P400 | Unrelated | 12 High | Open | M |
+
+## Verification Queue
+
+| ID | Title | Released | Likely verified? |
+|----|-------|----------|------------------|
+| P238 | Second claim | 0.1.0 | yes |
+
+## Closed
+
+| ID | Title | Closed via |
+|----|-------|-----------|
+EOF
+  run "$SCRIPT" --fix-clashes "$FIXTURE_DIR"
+
+  # The earlier claimant keeps the number.
+  [ -f "$FIXTURE_DIR/open/238-first-claim.md" ]
+  # The later one is renumbered to the next free ID, not 239.
+  [ -f "$FIXTURE_DIR/verifying/401-second-claim.md" ]
+  [ ! -f "$FIXTURE_DIR/verifying/238-second-claim.md" ]
+
+  # Self-references inside the renumbered ticket follow it; references
+  # to other tickets do not.
+  grep -q "Problem 401" "$FIXTURE_DIR/verifying/401-second-claim.md"
+  grep -q "Tracked as P401" "$FIXTURE_DIR/verifying/401-second-claim.md"
+  grep -q "Related to P400" "$FIXTURE_DIR/verifying/401-second-claim.md"
+
+  # And it says what it did.
+  echo "$output" | grep -q "RENUMBER"
+  echo "$output" | grep -q "P401"
+}
+
+@test "reconcile-readme: --fix-clashes is a no-op when there is no clash" {
+  cat > "$FIXTURE_DIR/100-foo.open.md" <<'EOF'
+# Problem 100: Foo
+**Status**: Open
+EOF
+  cat > "$FIXTURE_DIR/README.md" <<'EOF'
+# Problem Backlog
+
+## WSJF Rankings
+
+| WSJF | ID | Title | Severity | Status | Effort |
+|------|-----|-------|----------|--------|--------|
+| 5.0 | P100 | Foo | 12 High | Open | M |
+
+## Verification Queue
+
+| ID | Title | Released | Likely verified? |
+|----|-------|----------|------------------|
+
+## Closed
+
+| ID | Title | Closed via |
+|----|-------|-----------|
+EOF
+  run "$SCRIPT" --fix-clashes "$FIXTURE_DIR"
+  [ "$status" -eq 0 ]
+  [ -f "$FIXTURE_DIR/100-foo.open.md" ]
+  echo "$output" | grep -qv "RENUMBER" || true
+}

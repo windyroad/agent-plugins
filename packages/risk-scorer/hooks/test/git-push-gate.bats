@@ -80,3 +80,104 @@ PKG
 
   rm -rf "$empty_dir"
 }
+
+# ── gh pr merge: release-PR-scoped deny ─────────────────────────────────────
+#
+# The deny exists to protect the changesets release PR, whose merge flips
+# the publish boundary and must be watched by `npm run release:watch`. An
+# ordinary feature/worktree branch PR merging into main is not that, and
+# blocking it left sessions with a green PR and no way to land it.
+#
+# Head branch is resolved with `gh pr view --json headRefName`; a lookup
+# that fails for any reason (no gh, no auth, no repo, timeout) falls
+# through to the existing deny — fail closed.
+
+# Put a fake `gh` on PATH that reports a given head branch.
+stub_gh() {
+  local head_ref="$1" exit_code="${2:-0}"
+  mkdir -p "$TEST_PROJECT_DIR/bin"
+  cat > "$TEST_PROJECT_DIR/bin/gh" <<STUB
+#!/usr/bin/env bash
+echo "$head_ref"
+exit $exit_code
+STUB
+  chmod +x "$TEST_PROJECT_DIR/bin/gh"
+}
+
+pkg_with_release_watch() {
+  cat > "$TEST_PROJECT_DIR/package.json" <<'PKG'
+{ "scripts": { "release:watch": "bash scripts/release-watch.sh" } }
+PKG
+}
+
+@test "gh pr merge of the changeset release PR is still denied" {
+  pkg_with_release_watch
+  stub_gh "changeset-release/main"
+
+  INPUT=$(build_input "gh pr merge 471 --squash")
+  run bash -c "cd '$TEST_PROJECT_DIR' && PATH='$TEST_PROJECT_DIR/bin:$PATH' && echo '$INPUT' | '$HOOK'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"release:watch"* ]]
+}
+
+@test "gh pr merge of a feature branch PR is allowed" {
+  pkg_with_release_watch
+  stub_gh "fix/stripe-customer-email"
+
+  INPUT=$(build_input "gh pr merge 437 --squash")
+  run bash -c "cd '$TEST_PROJECT_DIR' && PATH='$TEST_PROJECT_DIR/bin:$PATH' && echo '$INPUT' | '$HOOK'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"deny"* ]]
+}
+
+@test "gh pr merge with no PR argument resolves the current branch and is allowed" {
+  pkg_with_release_watch
+  stub_gh "worktree/sad-ramanujan"
+
+  INPUT=$(build_input "gh pr merge --squash --delete-branch")
+  run bash -c "cd '$TEST_PROJECT_DIR' && PATH='$TEST_PROJECT_DIR/bin:$PATH' && echo '$INPUT' | '$HOOK'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"deny"* ]]
+}
+
+@test "gh pr merge is denied when the head branch lookup fails" {
+  pkg_with_release_watch
+  stub_gh "" 1
+
+  INPUT=$(build_input "gh pr merge 437 --squash")
+  run bash -c "cd '$TEST_PROJECT_DIR' && PATH='$TEST_PROJECT_DIR/bin:$PATH' && echo '$INPUT' | '$HOOK'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+}
+
+@test "a branch merely prefixed like the release branch is not swept into the deny" {
+  pkg_with_release_watch
+  stub_gh "wip-changeset-release/experiment"
+
+  INPUT=$(build_input "gh pr merge 500 --squash")
+  run bash -c "cd '$TEST_PROJECT_DIR' && PATH='$TEST_PROJECT_DIR/bin:$PATH' && echo '$INPUT' | '$HOOK'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"deny"* ]]
+}
+
+@test "the release branch prefix is overridable for a non-default changesets setup" {
+  pkg_with_release_watch
+  stub_gh "releases/v2"
+
+  INPUT=$(build_input "gh pr merge 512 --squash")
+  run bash -c "cd '$TEST_PROJECT_DIR' && PATH='$TEST_PROJECT_DIR/bin:$PATH' && WR_RELEASE_BRANCH_PREFIX=releases/ && export WR_RELEASE_BRANCH_PREFIX && echo '$INPUT' | '$HOOK'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"release:watch"* ]]
+}
+
+@test "the default release prefix still applies when the override is unset" {
+  pkg_with_release_watch
+  stub_gh "releases/v2"
+
+  INPUT=$(build_input "gh pr merge 512 --squash")
+  run bash -c "cd '$TEST_PROJECT_DIR' && PATH='$TEST_PROJECT_DIR/bin:$PATH' && echo '$INPUT' | '$HOOK'"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"deny"* ]]
+}

@@ -4,7 +4,8 @@
 # - Gates `npm run push:watch` on push risk score (TTL + drift + threshold).
 # - Gates `npx changeset` / `npm run changeset` on release + push risk (back-pressure).
 # - Gates `npm run release:watch` on release risk score (TTL + drift + threshold).
-# - Blocks `gh pr merge` and directs to npm run release:watch.
+# - Blocks `gh pr merge` of the changeset release PR and directs to
+#   npm run release:watch. Ordinary feature-branch PRs merge normally.
 
 set -euo pipefail
 
@@ -160,8 +161,57 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run release:watch(\s|$)'; the
     exit 0
 fi
 
-# Match gh pr merge. Should go via npm run release:watch instead.
+# Match gh pr merge. The changeset release PR should go via
+# npm run release:watch instead -- merging it flips the publish boundary,
+# and release:watch is what watches the pipeline afterwards. An ordinary
+# feature or worktree branch PR merging into main is not that, so it
+# merges normally.
+#
+# The head branch decides which one this is. Resolving it needs the
+# network, so the lookup is bounded and fails closed: any failure (no gh,
+# no auth, no repo, timeout, unexpected output) falls through to the
+# release-PR deny rather than waving a merge through unchecked.
 if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*gh pr merge(\s|$)'; then
+    # `gh pr merge` takes a number, URL, or branch -- or nothing at all,
+    # in which case it resolves the current branch's PR. Flags can come
+    # in any order, so the selector is the first non-flag token after
+    # `merge`, and no selector is a valid (and common) shape.
+    PR_SELECTOR=$(echo "$COMMAND" \
+        | sed -E 's/.*gh pr merge//' \
+        | tr ' ' '\n' \
+        | grep -vE '^(-.*)?$' \
+        | head -1) || true
+
+    # The exit status is captured so a failure lands on the fail-closed
+    # branch below rather than on errexit / the err trap -- same shape as
+    # check_ci_status in lib/risk-gate.sh. The bound is not: stock macOS
+    # ships no GNU `timeout`, and that is the common adopter path, so an
+    # unreachable network would stall the merge indefinitely there.
+    # perl's alarm is the portable fallback -- perl ships with git.
+    HEAD_REF=""
+    GH_EXIT=0
+    if command -v timeout >/dev/null 2>&1; then
+        HEAD_REF=$(timeout 10s gh pr view ${PR_SELECTOR:+"$PR_SELECTOR"} \
+            --json headRefName -q .headRefName 2>/dev/null) || GH_EXIT=$?
+    elif command -v perl >/dev/null 2>&1; then
+        HEAD_REF=$(perl -e 'alarm 10; exec @ARGV' \
+            gh pr view ${PR_SELECTOR:+"$PR_SELECTOR"} \
+            --json headRefName -q .headRefName 2>/dev/null) || GH_EXIT=$?
+    else
+        HEAD_REF=$(gh pr view ${PR_SELECTOR:+"$PR_SELECTOR"} \
+            --json headRefName -q .headRefName 2>/dev/null) || GH_EXIT=$?
+    fi
+
+    # The changesets action lets adopters name the release branch, so the
+    # prefix is overridable rather than assumed. Prefix-anchored, so a
+    # branch merely named like it (wip-changeset-release/x) is not swept
+    # into the deny.
+    RELEASE_BRANCH_PREFIX="${WR_RELEASE_BRANCH_PREFIX:-changeset-release/}"
+    if [ "$GH_EXIT" = "0" ] && [ -n "$HEAD_REF" ] \
+       && [ "${HEAD_REF#"$RELEASE_BRANCH_PREFIX"}" = "$HEAD_REF" ]; then
+        exit 0
+    fi
+
     # Check if the project has a release:watch script
     if [ -f "package.json" ] && python3 -c "
 import json, sys

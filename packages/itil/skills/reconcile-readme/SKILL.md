@@ -51,9 +51,34 @@ Exit codes:
 - `1` — drift detected. The script prints one structured row per drift entry to stdout (each ≤ 150 bytes per ADR-038 progressive-disclosure budget). Continue to Step 2.
 - `2` — parse error. README is missing, malformed, or section headers are absent. Halt with the parse-error message; this is a deeper repair that needs investigation, not mechanical reconciliation. In AFK mode (ADR-013 Rule 6), halt-with-report; do not attempt edits.
 
+### Step 1a. Repair any ID clash before reading the rest of the drift
+
+If the output carries one or more `CLASH` rows, two tickets are claiming one number. Nothing below can be trusted until that is repaired: the filesystem-truth map is keyed by ID, so one claimant was dropped and the `DRIFT` / `STALE` / `MISSING` rows alongside it describe the wrong file.
+
+This is mechanical — the framework has already decided who keeps the number (the earlier claimant, by first-add commit on the base ref) and what the other becomes (`max(local, origin) + 1`). Do NOT ask. Re-run with the repair flag:
+
+```bash
+wr-itil-reconcile-readme --fix-clashes docs/problems
+```
+
+The renumber moves the later claimant, rewrites its own references, and follows the two-way link to any story it names. It then re-runs detection, so its exit code and remaining rows describe what actually survives — continue from there.
+
+Two kinds of line come back alongside the drift:
+
+- `RENUMBER P<old> -> P<new> <path>` — what moved. Relay it; the number people have been using has changed.
+- `MANUAL P<old> still named in <path>` — a reference the repair would have had to guess at, since both claimants held that number. Surface every one of them for a person to resolve. Do NOT rewrite them, do NOT offer to rewrite them, and do NOT bulk search-and-replace the old ID anywhere. Say why, in plain words, for whichever trees the rows name:
+
+| Where the reference lives | Why it is left alone |
+|---|---|
+| `docs/decisions/` | A ratified decision changes only by supersession. Its body records what was decided; a script editing it in place is the one edit that rule forbids. |
+| `docs/story-maps/` | The grid is generated from the map's own data island and carries an oversight fingerprint. Rewriting the rendered HTML desynchronises the two and leaves the map reading as ratified against content nobody re-confirmed. Change it through `story-map-edit` and re-render. |
+| `docs/jtbd/` | Jobs and personas carry a ratification marker whose integrity depends on edits being human-confirmed. A script rewrite moves content underneath a marker nobody re-confirmed. |
+| `docs/retros/`, `docs/incidents/`, `docs/audits/`, `docs/briefing/` | Each entry records what was true when it was written. Re-pointing its identifiers rewrites history rather than repairing it. |
+| `docs/risks/`, `docs/plans/`, `docs/rfcs/` | Live surfaces, but out of scope for this repair. Widening it to them is a separate decision, not a call to make here. |
+
 ### Step 2. Bucket the drift entries by section
 
-Each drift line is one of four shapes:
+Each drift line is one of five shapes (`CLASH` is handled at Step 1a, before this bucketing):
 
 | Marker | Meaning | Required edit |
 |--------|---------|---------------|
@@ -143,7 +168,7 @@ The ADR-013 Rule 6 fail-safe is **risk-gated** (above-appetite + `AskUserQuestio
 ## Confirmation
 
 This skill's contract holds when:
-1. The script `packages/itil/scripts/reconcile-readme.sh` is read-only — no live README mutation in the script layer (mutation only in this skill's Step 4, via the Edit tool).
+1. The script `packages/itil/scripts/reconcile-readme.sh` never mutates the README — that happens only in this skill's Step 4, via the Edit tool. Its one write path is `--fix-clashes`, which moves a clashing ticket file and rewrites references to it, and touches no README.
 2. Each agent-applied edit preserves the README's narrative content (prose paragraph at top, Closed section free text).
 3. After Step 4 + Step 5, a re-run of the script reports exit 0 (clean).
 4. The reconciled README rides a single commit (Step 6 single-purpose commit) regardless of invocation mode — interactive and AFK behave identically per ADR-014 governance-skill commit contract (P172).

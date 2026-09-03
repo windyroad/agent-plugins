@@ -1,9 +1,9 @@
 {
-  "last_checked": "2026-08-29T23:35:37Z",
+  "last_checked": "2026-08-30T11:00:39Z",
   "tickets": {
     "P113": {
       "upstream_url": "https://github.com/anthropics/claude-code/issues/52831",
-      "last_checked_at": "2026-08-29T23:35:35Z",
+      "last_checked_at": "2026-08-30T11:00:38Z",
       "last_seen_state": "CLOSED",
       "last_seen_response_count": 4,
       "last_seen_labels": [

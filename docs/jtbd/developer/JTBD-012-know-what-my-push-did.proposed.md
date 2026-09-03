@@ -63,3 +63,4 @@ Whether the tooling serving this job belongs in `@windyroad/risk-scorer` (where 
 
 | ID | Title | Status |
 |----|-------|--------|
+| STORY-084 | STORY-084: Land an ordinary pull request without running a release | accepted |
