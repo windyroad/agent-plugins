@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-03 **P468 amended** — a third verdict-format facet: the parser is title-case-anchored, so an all-caps PASS heading is discarded silently and the gated edit re-blocks as if no review happened (observed six consecutive spawns)
+> Last reviewed: 2026-09-04 **session retro** — captured two findings: CI's npm-ci fallback silently absorbs lockfile drift until an unrelated job fails, and the session-start Critical Points roll-up is 5.5x its byte budget so the hook truncates it
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -53,6 +53,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 12 | P510 | A retraction is applied where the claim was authored, not where it was propagated | 12 (High) | Known Error | M | 2026-08-21 | internal |
 | 12 | P495 | The release queue can be consumed in a working copy and nothing says so | 12 (High) | Open | S | 2026-08-09 | internal |
 | 12 | P522 | The pipeline scorer's caller contract is unenforced, so a direct dispatch fails silently and misdirects the blame | 12 (High) | Open | S | 2026-08-25 | internal |
+| 12 | P534 | The `npm ci || npm install` fallback hides lockfile drift until an unrelated job fails | 12 (High) | Open | S | 2026-09-04 | internal |
 | 10 | P515 | `drain-register-queue.sh` appends index rows past the end of the register table, so auto-scaffolded risks never reach the index | 10 (High) | Open | S | 2026-08-21 | internal |
 | 9 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue | 9 (Medium) | Known Error | M | 2026-06-11 | internal |
 | 9 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight contexts — strands dispatchable lifecycle/ack/upstream-report obligations the framework authorises to proceed | 9 (Medium) | Open | S | 2026-07-26 | corrective-feedback (user, 2026-07-26 |
@@ -84,6 +85,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P492 | Nothing nudges when unpushed work piles up, so batches grow until someone notices | 12 (High) | Open | M | 2026-08-09 | corrective-feedback (user, 2026-08-09) |
 | 6 | P524 | External adopter handles are public across the committed ticket corpus | 12 (High) | Open | M | 2026-08-25 | internal |
 | 6 | P531 | ADR compendium regeneration drops Amends relationships from summaries | 12 (High) | Open | M | 2026-08-31 | internal (user-supplied screenshot) |
+| 6 | P535 | Critical Points outgrew its budget, so the session-start hook truncates the surface it exists to provide | 12 (High) | Open | M | 2026-09-04 | internal |
 | 5 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 (Low) | Open | S | 2026-07-02 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 (Med High) | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 (Medium) | Open | M | 2026-06-17 | internal |
