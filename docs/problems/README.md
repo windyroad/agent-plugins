@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-08-31 **P468 Known Error** - confirmed the bold-only, PASS-first verdict parser; RFC-089 and STORY-083 carry the strict canonical-heading repair, while release and installed-session verification remain outstanding.
+> Last reviewed: 2026-09-03 **P533 captured** — duplicate ticket IDs are silently swallowed by the README reconciler, so its drift rows blame the wrong cause (lightweight aside via /wr-itil:capture-problem)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -99,6 +99,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4 | P442 | WSJF Rankings render convention differentiates tiers only by ordering + the Origin column — no visual tier separator, so inbound-reported priority is not legible | 8 (Medium) | Open | M | 2026-07-06 | corrective-feedback (user, 2026-07-06 |
 | 4 | P467 | work-problems should surface decisions/ratifications continuously (non-blocking), not only batched at loop-end | 8 (Medium) | Open | M | 2026-07-26 | corrective-feedback (user, 2026-07-26) |
 | 4 | P475 | RFCs carry a human-oversight axis they should not have, so 52 false nudges fire at every session start | 8 (Medium) | Open | M | 2026-07-30 | corrective-feedback |
+| 4 | P533 | Duplicate ticket IDs are silently swallowed by the README reconciler, so drift rows blame the wrong cause | 8 (Medium) | Open | M | 2026-09-03 | internal |
 | 4 | P483 | Amendment sections are not a legitimate mechanism — a ratified decision is immutable | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
 | 4 | P485 | Every step in the process adds and none removes, so cruft accumulates without limit | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
 | 4 | P494 | Plugin tests and project-conformance tests are the same suite, so neither can be right | 16 (High) | Open | L | 2026-08-09 | corrective-feedback (user, 2026-08-09) |
