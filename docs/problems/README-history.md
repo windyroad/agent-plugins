@@ -4,6 +4,10 @@
 >
 > See `manage-problem` SKILL.md Step 5 "Last-reviewed line discipline (P134)" for the contract that writes here. Hard ceiling on line 3 (5120 bytes) is surfaced advisory-only by `packages/itil/scripts/check-problems-readme-budget.sh` per ADR-040 line 92's reusable accumulator-doc pattern (sibling to P099's `check-briefing-budgets.sh` on `docs/briefing/<topic>.md`).
 
+## 2026-09-08
+
+> Last reviewed: 2026-09-04 **session retro** — captured two findings: CI's npm-ci fallback silently absorbs lockfile drift until an unrelated job fails, and the session-start Critical Points roll-up is 5.5x its byte budget so the hook truncates it
+
 ## 2026-04-28 (pre-P134 truncation contract — bulk legacy archive)
 
 The 76,582-byte line-3 prose blob accumulated from session-summary fragments prepended on every `manage-problem` Step 5 P094 / Step 7 P062 / `review-problems` Step 5 / `reconcile-readme` Step 5 refresh under the original "ever-growing prose paragraph" convention. P134 closes the accumulator on this surface; the truncated content is preserved verbatim below as the seed of the forward-chronology archive. Future refreshes append per-day fragments at the bottom, NOT into this legacy entry.
