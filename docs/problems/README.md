@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-09 **P477 reopened** — a live Codex checkout-mismatch recurrence preserved the valid score but prescribed an unnecessary rescore because recovery advice depended on an absent environment variable
+> Last reviewed: 2026-09-10 **P477 verification pending** — `@windyroad/risk-scorer@0.19.1` is published and installed; the installed-artifact mismatch smoke passes, while fresh-session user verification remains unclaimed
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -11,7 +11,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
 | | | **Tier 0 — Critical-bypass** (Severity Very High ≥17, security-classified, or incident-linked) | | | | | |
-| 40 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Known Error | S | 2026-08-12 | internal |
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
@@ -301,6 +300,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P400 | architect-mark-reviewed PostToolUse never fires on a SendMessage resume of an architect agent | pending — committed on main, ships next @windyroad/architect release | no — not observed |
 | P403 | Agent frames skill-mandatory mechanical steps as user-optional (detect_mechanical_optional Stop-hook detector; fix vehicle RFC-042) | pending — @windyroad/itil patch committed, ships next release | no — not observed |
 | P533 | Duplicate ticket IDs are silently swallowed by the README reconciler, so drift rows blame the wrong cause | `@windyroad/itil@2.2.0` 2026-09-03 | no — not observed |
+| P477 | Codex collaboration completion bypasses the risk-marker bridge | 2026-09-09 (`@windyroad/risk-scorer@0.19.1`; version-packages commit `e54352d1`, merge `ad476823`, PR #474) | no — not observed |
 
 ## Inbound Upstream Reports
 

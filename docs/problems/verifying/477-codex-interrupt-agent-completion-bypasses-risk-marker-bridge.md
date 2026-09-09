@@ -1,11 +1,11 @@
 # Problem 477: Codex collaboration completion bypasses the risk-marker bridge
 
-**Status**: Known Error (reopened 2026-09-09 after a live Codex recurrence returned a valid checkout-bound score but prescribed an unnecessary rescore instead of the existing explicit-`cd` recovery)
+**Status**: Verification Pending (2026-09-10; recurrence fix published and installed, awaiting a fresh Codex session to exercise the governed-command journey)
 **Reported**: 2026-08-12
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5
 **Origin**: internal
 **Effort**: S
-**WSJF**: 40 — (20 × 2.0) / 1 (Known Error multiplier restored on recurrence)
+**WSJF**: 0 — Verification Pending multiplier
 **JTBD**: JTBD-001
 **Persona**: plugin-developer
 
@@ -84,13 +84,28 @@ No new hook or ADR is required: this restores the intended completed-agent compa
 
 ## Fix Strategy
 
-The complete recurrence repair is the bounded risk-scorer patch in commit
-`e67183ad0d56d23d9e02a3721af8183264db5d4c`. It preserves checkout binding
-while repairing the caller and cleanup edges exposed by the 2026-08-27 replay.
+The 2026-09-09 recurrence repair is the bounded risk-scorer patch in commit
+`297f62265512c65bf8a6707fc58a9943dab935eb`. It removes the optional
+`CODEX_THREAD_ID` dependency from checkout-mismatch recovery advice while
+preserving checkout binding and the valid score.
 
-**Release vehicle**: `.changeset/calm-risk-receipts.md`
+**Release vehicle**: `.changeset/calm-checkout-recovery.md`
 
 ## Fix Released
+
+Released in `@windyroad/risk-scorer@0.19.1` from recurrence-fix commit
+`297f62265512c65bf8a6707fc58a9943dab935eb` via
+`.changeset/calm-checkout-recovery.md` (version-packages commit
+`e54352d1edb29d41a3f754846457ca6b8ed19276`, PR #474, merge commit
+`ad476823a9670782f6f8230c747b361e2c1cedd8`; npm published
+2026-09-09T11:59:59Z).
+
+The source-focused suites passed 53 of 53, the packed artifact smoke passed,
+and the installed 0.19.1 hook preserved score `3` while prescribing an
+explicit leading `cd` with `CODEX_THREAD_ID` absent. User verification remains
+unclaimed until a fresh Codex session exercises the governed-command journey.
+
+### Prior 0.18.17 release
 
 Released in `@windyroad/risk-scorer@0.18.17` from complete repair commit
 `e67183ad0d56d23d9e02a3721af8183264db5d4c` via

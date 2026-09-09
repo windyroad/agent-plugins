@@ -1452,3 +1452,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-09-09
 
 > Last reviewed: 2026-09-04 **session retro** — captured two findings: CI's npm-ci fallback silently absorbs lockfile drift until an unrelated job fails, and the session-start Critical Points roll-up is 5.5x its byte budget so the hook truncates it
+
+## 2026-09-10
+
+> Last reviewed: 2026-09-09 **P477 reopened** — a live Codex checkout-mismatch recurrence preserved the valid score but prescribed an unnecessary rescore because recovery advice depended on an absent environment variable
