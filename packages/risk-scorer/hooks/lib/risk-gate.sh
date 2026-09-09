@@ -56,11 +56,7 @@ check_risk_gate() {
   fi
   if ! _checkout_matches "$CHECKOUT_FILE"; then
     RISK_GATE_CATEGORY="drift"
-    if [ -n "${CODEX_THREAD_ID:-}" ]; then
-      RISK_GATE_REASON="Risk assessment checkout binding does not match the checkout visible to this hook. Retry the same command with an explicit leading \`cd /absolute/path/to/the/assessed-checkout && ...\`; the valid score was preserved, so do not rescore unless that checkout changed."
-    else
-      RISK_GATE_REASON="Risk assessment checkout binding is missing or does not match the current Git checkout. Delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') to rescore this checkout."
-    fi
+    RISK_GATE_REASON="Risk assessment checkout binding does not match the checkout visible to this hook. Retry the same command with an explicit leading \`cd /absolute/path/to/the/assessed-checkout && ...\`; the valid score was preserved, so do not rescore unless that checkout changed."
     return 1
   fi
 

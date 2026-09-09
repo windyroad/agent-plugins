@@ -154,7 +154,7 @@ assert_gate_allows() {
   rm -rf "$first" "$second"
 }
 
-@test "Codex checkout mismatch preserves the score and requires explicit cd" {
+@test "checkout mismatch preserves the score and requires explicit cd without runtime detection" {
   local first second
   first=$(mktemp -d)
   second=$(mktemp -d)
@@ -164,13 +164,11 @@ assert_gate_allows() {
   _checkout_id > "$CHECKOUT_FILE"
   printf '3' > "$SCORE_FILE"
   cd "$second"
-  export CODEX_THREAD_ID=codex-test
 
-  assert_gate_denies "$TEST_SESSION" "commit" "explicit leading"
+  assert_gate_denies "$TEST_SESSION" "commit" 'explicit leading `cd'
   [[ "$RISK_GATE_REASON" == *"do not rescore"* ]]
-  [ -f "$SCORE_FILE" ]
+  [ "$(cat "$SCORE_FILE")" = "3" ]
 
-  unset CODEX_THREAD_ID
   rm -rf "$first" "$second"
 }
 
