@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.19.1
+
+### Patch Changes
+
+- 297f622: Codex checkout-mismatch recovery no longer depends on an optional runtime environment variable. A valid score is preserved and the gate tells the agent to retry from the assessed checkout instead of rescoring or bypassing.
+
 ## 0.19.0
 
 ### Minor Changes
