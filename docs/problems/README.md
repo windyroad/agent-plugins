@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-04 **session retro** — captured two findings: CI's npm-ci fallback silently absorbs lockfile drift until an unrelated job fails, and the session-start Critical Points roll-up is 5.5x its byte budget so the hook truncates it
+> Last reviewed: 2026-09-09 **P477 reopened** — a live Codex checkout-mismatch recurrence preserved the valid score but prescribed an unnecessary rescore because recovery advice depended on an absent environment variable
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -11,6 +11,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
 | | | **Tier 0 — Critical-bypass** (Severity Very High ≥17, security-classified, or incident-linked) | | | | | |
+| 40 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Known Error | S | 2026-08-12 | internal |
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
@@ -406,7 +407,6 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 | ID | Title | Closed via |
 |----|-------|-----------|
 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | Closed 2026-08-31 on installed published-artifact evidence from `@windyroad/architect@0.22.0`: the non-unique fixture raised `[First-Match Footgun]`, while the primary-key fixture passed without the finding. Recovery: `/wr-itil:transition-problem 426 known-error`. |
-| P477 | Codex collaboration completion bypasses the risk-marker bridge | Closed 2026-08-30 on direct installed-runtime evidence: a native `wr-risk-scorer:pipeline` collaboration completed, its checkout-bound marker was accepted by governed commit `9712a054`, and the same agent completed after `followup_task`. Recovery: `/wr-itil:transition-problem 477 known-error`. |
 | P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | Closed 2026-08-21 (run-retro Step 4a sub-step 9 prior-session evidence drain per P282). Fix released `@windyroad/architect@0.21.1` 2026-08-17, live in published 0.21.3. Evidence: `yes — observed: installed v0.21.3 hook permits a clean declared checkout and denies an unpaired one, both from the target index`; regression suite 24/24 green. Recovery: `/wr-itil:transition-problem 499 known-error`. |
 | P164 | Latent octal-eval bug in the next-ID formula across six ticket-creator skills | verified in the field 2026-07-15; drained by the 2026-08-20 retro |
 | P019 | Deprecate single-file JTBD fallback (ADR-008 Option 3) | Closed 2026-07-15 (review-problems Step 4 verification prompt — user confirmed). Fix `@windyroad/jtbd@0.6.0` (breaking, migration via update-guide); ~3 months in production, no regressions. Recovery: `/wr-itil:transition-problem 19 known-error`. |

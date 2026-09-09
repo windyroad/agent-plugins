@@ -1,11 +1,11 @@
 # Problem 477: Codex collaboration completion bypasses the risk-marker bridge
 
-**Status**: Closed (closed-on-evidence 2026-08-30 — an installed native `wr-risk-scorer:pipeline` collaboration completed, its checkout-bound marker was accepted by the governed commit of `9712a054`, and the same agent completed again after `followup_task`. Recovery: rerun /wr-itil:transition-problem 477 known-error to reopen)
+**Status**: Known Error (reopened 2026-09-09 after a live Codex recurrence returned a valid checkout-bound score but prescribed an unnecessary rescore instead of the existing explicit-`cd` recovery)
 **Reported**: 2026-08-12
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5
 **Origin**: internal
 **Effort**: S
-**WSJF**: 20 — (20 × 1.0) / 1 (added 2026-08-21 review)
+**WSJF**: 40 — (20 × 2.0) / 1 (Known Error multiplier restored on recurrence)
 **JTBD**: JTBD-001
 **Persona**: plugin-developer
 
@@ -44,6 +44,15 @@ for the observability slice rather than a defect in this fix — carried by RFC-
 STORY-061.
 
 ## Fix and Verification
+
+### Recurrence on 2026-09-09
+
+A live Codex task received `RISK_SCORES: commit=4 push=0 release=0` and the
+exact assessed `RISK_CWD`, then ran `git commit` through a nested tool whose
+workdir was hidden from the PreToolUse hook. The valid score was preserved,
+but `risk-gate.sh` emitted the generic rescore advice because the hook process
+did not carry `CODEX_THREAD_ID`. The user had to authorise a bypass. The
+recovery advice must not depend on that optional environment variable.
 
 ### Recurrence on 0.18.16
 
