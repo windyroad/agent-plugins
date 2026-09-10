@@ -1464,3 +1464,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-09-10
 
 > Last reviewed: 2026-09-09 **P477 reopened** — a live Codex checkout-mismatch recurrence preserved the valid score but prescribed an unnecessary rescore because recovery advice depended on an absent environment variable
+
+## 2026-09-11
+
+> Last reviewed: 2026-09-11 **P537 reached Known Error** — npm publish dry runs are classified as publication and trigger external-comms review

@@ -1,6 +1,6 @@
 # Problem 402: external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-01
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 (Likely) = 12. **Rated at capture from in-session evidence (5/5 PASS, 0 markers), NOT deferred** — re-rating "at next /wr-itil:review-problems" would itself be the P375 bug (nothing self-fires review-problems). Impact 3: blocks every external-facing commit and forces habitual `BYPASS_RISK_GATE=1`, eroding a load-bearing leak gate (workaround exists). Likelihood 4: reproduces on every background-launched review this session.
 **Origin**: inbound-reported (#400) — stamped 2026-08-21 review from the upstream poll; upstream filing `wr-risk-scorer: external-comms PASS marker lands in subagent's own session dir`
@@ -236,6 +236,12 @@ Move the marker write off the transport side effect. The mark hook fires on `Pos
 - Have the reviewer itself write its verdict to a file the gate reads, so persistence does not depend on any hook firing (P469 records that two reviewers currently lack the `Bash` tool this would need).
 - Keep the hook, but make the gate's DENY name the async-dispatch cause explicitly when a recent verdict exists with no marker, so the caller diagnoses it in one step instead of re-scoring.
 
+## Fix Strategy
+
+RFC-086 carries STORY-086. Extend the existing native Codex completion transport to the external-comms risk and voice reviewer identities, retaining the existing evaluator-specific marker writers and their parent, checkout, policy, surface, and draft-key bindings.
+
+**Release vehicle**: .changeset/calm-agents-interrupt.md
+
 ### Also correct: a diagnosis to not build on
 
 A Codex session (`019f7561`, recurring 2026-07-18 to 2026-08-17) hitting the sibling failure concluded the hook expects `risk-scorer.pipeline` while Codex records `wr-risk-scorer:pipeline`. **That diagnosis is wrong.** `packages/risk-scorer/hooks/risk-score-mark.sh` line 39 matches with `grep -qE 'risk-scorer.pipeline'`, where `.` is a regex wildcard that matches the colon. The subagent identity is not the failure; the missing parent event is, which is what P477 already records.
@@ -295,3 +301,19 @@ The correction separates package state, normalizes supported task names, compare
 - [Merge CI 33354699544](https://github.com/windyroad/agent-plugins/actions/runs/33354699544) subsequently passed on that exact release revision: 4,260 hook checks passed, two skipped, none failed; all 27 actual-agent cases passed.
 
 No package was installed into the user's runtime and no disabled hook setting was changed. Published-package behaviour is verified; installed-session hook firing remains unproven. P402 remains Verification Pending.
+
+## Fix Released — 2026-09-11 native external-comms completion transport
+
+Version Packages PR #475 released `@windyroad/risk-scorer@0.19.2` and `@windyroad/voice-tone@0.8.5` on 2026-09-11 (version commit `4d66e3ab189dea1ac8ab46e6f70614e51fcb1784`, merge commit `99c720b9501ba449354ca432df81a48d3472a786`). Native Codex completion now delivers completed external-comms risk and voice reviews to the existing evaluator-specific marker writers.
+
+Source CI `34539545869` and merge CI `34540583144` passed. Release run `34540583174` passed after its failed job was rerun. A registry check then confirmed stable npm `latest` tags. Direct installation checks confirmed both versions for Claude Code in this project and for Codex. The installed skill and agent surfaces carry both external-comms identities and the native `interrupt_agent` completion instruction.
+
+Restarted-runtime verification remains outstanding.
+
+## Upstream Lifecycle Updates
+
+- **2026-09-11** — Known Error → Verification Pending (inbound)
+  - **Target**: inbound #400 (own repo `windyroad/agent-plugins`)
+  - **Comment URL**: https://github.com/windyroad/agent-plugins/issues/400#issuecomment-5626860055
+  - **Disclosure path**: posted-inbound-comment
+  - **Gate verdict**: external-comms PASS + voice-tone PASS
