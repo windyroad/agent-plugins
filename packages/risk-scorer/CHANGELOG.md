@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.19.2
+
+### Patch Changes
+
+- adafd38: Codex now records completed risk and voice reviews reliably, and npm publish --dry-run no longer triggers publication review.
+
 ## 0.19.1
 
 ### Patch Changes

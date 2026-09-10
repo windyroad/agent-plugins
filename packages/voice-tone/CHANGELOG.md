@@ -1,5 +1,11 @@
 # @windyroad/voice-tone
 
+## 0.8.5
+
+### Patch Changes
+
+- adafd38: Codex now records completed risk and voice reviews reliably, and npm publish --dry-run no longer triggers publication review.
+
 ## 0.8.4
 
 ### Patch Changes
