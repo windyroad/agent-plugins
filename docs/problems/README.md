@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-11 **P402 verification pending** — native Codex external-comms completion transport released and installed; restarted-runtime verification remains
+> Last reviewed: 2026-09-11 **P537 verification pending** — dry-run publication classification released, installed, and checked against installed hooks
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -41,7 +41,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3 | P455 | new evidence on an already-upstream-reported ticket is not routed upstream without a user prompt — no evidence-append mode exists | 6 (Medium) | Open | M | 2026-07-15 | inbound-reported (#348) |
 | | | **Tier 2 — Internal** | | | | | |
 | 30 | P527 | Codex skill names render with a duplicated plugin prefix and title-case branding | 15 (High) | Known Error | S | 2026-08-29 | internal |
-| 20 | P537 | External-comms publication guard blocks npm publish dry runs | 10 (High) | Known Error | S | 2026-09-11 | internal |
 | 16 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole corpus | 8 (Medium) | Known Error | S | 2026-07-04 | internal |
 | 16 | P420 | check-briefing-budgets.sh crashes with `must_split[@]: unbound variable` on empty arrays under macOS default bash 3.2 | 8 (Medium) | Known Error | S | 2026-07-05 | internal |
 | 16 | P471 | run-retro Step 2d ask-hygiene trail path collides across same-day iterations, clobbering prior entries | 8 (Medium) | Known Error | S | 2026-07-26 | internal |
@@ -303,6 +302,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P533 | Duplicate ticket IDs are silently swallowed by the README reconciler, so drift rows blame the wrong cause | `@windyroad/itil@2.2.0` 2026-09-03 | no — not observed |
 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 2026-09-09 (`@windyroad/risk-scorer@0.19.1`; version-packages commit `e54352d1`, merge `ad476823`, PR #474) | no — not observed |
 | P402 | external-comms gate does not reliably persist completed native review markers | 2026-09-11 (`@windyroad/risk-scorer@0.19.2`, `@windyroad/voice-tone@0.8.5`; version-packages commit `4d66e3ab`, merge `99c720b9`, PR #475) | no — not observed |
+| P537 | External-comms publication guard blocks npm publish dry runs | 2026-09-11 (`@windyroad/risk-scorer@0.19.2`, `@windyroad/voice-tone@0.8.5`; version-packages commit `4d66e3ab`, merge `99c720b9`, PR #475) | no — not observed |
 
 ## Inbound Upstream Reports
 

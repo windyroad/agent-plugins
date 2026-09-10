@@ -1468,3 +1468,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-09-11
 
 > Last reviewed: 2026-09-11 **P537 reached Known Error** — npm publish dry runs are classified as publication and trigger external-comms review
+
+> Last reviewed: 2026-09-11 **P402 verification pending** — native Codex external-comms completion transport released and installed; restarted-runtime verification remains

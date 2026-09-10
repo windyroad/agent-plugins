@@ -1,6 +1,6 @@
 # Problem 537: External-comms publication guard blocks npm publish dry runs
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-09-11
 **Priority**: 10 (High) — Impact: 2 × Likelihood: 5 — a deterministic developer-tooling interruption whenever this diagnostic command is used
 **Origin**: internal
@@ -47,6 +47,8 @@ Use `npm pack --dry-run` when it provides equivalent package inspection. This is
 
 RFC-091, *Inspect a package without starting publication*, carries STORY-087 on the existing ratified developer journey. The canonical gate will bypass publication review only when every matched `npm publish` command segment is provably dry-run-only. Any segment capable of publication remains gated.
 
+**Release vehicle**: .changeset/calm-agents-interrupt.md
+
 ## Dependencies
 
 - **Blocks**: (none)
@@ -69,3 +71,11 @@ RFC-091, *Inspect a package without starting publication*, carries STORY-087 on 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-087 | STORY-087: Inspect a package without triggering publication review | in-progress |
+
+## Fix Released
+
+Version Packages PR #475 released `@windyroad/risk-scorer@0.19.2` and `@windyroad/voice-tone@0.8.5` on 2026-09-11 (version commit `4d66e3ab189dea1ac8ab46e6f70614e51fcb1784`, merge commit `99c720b9501ba449354ca432df81a48d3472a786`). `npm publish --dry-run` bypasses publication review only when every matched publish segment is provably dry-run-only; real or mixed publish commands remain gated.
+
+Source CI `34539545869` and merge CI `34540583144` passed. Release run `34540583174` passed after its failed job was rerun. A registry check then confirmed stable npm `latest` tags. Direct installation checks confirmed both versions for Claude Code in this project and for Codex. Checks against the installed hooks confirmed that dry-run publication passes while real publication is denied.
+
+Restarted-runtime verification remains outstanding.
