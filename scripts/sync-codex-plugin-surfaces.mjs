@@ -11,10 +11,15 @@ const skillsOutput = join(root, "skills-codex");
 const hooksOutput = join(root, "hooks-codex");
 const backup = join(root, ".pack-codex-source");
 const supported = new Set(["c4", "connect", "jtbd", "retrospective", "style-guide", "tdd", "voice-tone"]);
-const reviewerCompletion = {
-  "style-guide": { role: "wr-style-guide:agent", writer: "style-guide-mark-reviewed.sh", policy: "docs/STYLE-GUIDE.md" },
-  "voice-tone": { role: "wr-voice-tone:agent", writer: "voice-tone-mark-reviewed.sh", policy: "docs/VOICE-AND-TONE.md" },
-}[packageName];
+const reviewerCompletions = {
+  "style-guide": [
+    { role: "wr-style-guide:agent", writer: "style-guide-mark-reviewed.sh", policy: "docs/STYLE-GUIDE.md" },
+  ],
+  "voice-tone": [
+    { role: "wr-voice-tone:agent", writer: "voice-tone-mark-reviewed.sh", policy: "docs/VOICE-AND-TONE.md" },
+    { role: "wr-voice-tone:external-comms", writer: "external-comms-mark-reviewed.sh", policy: "docs/VOICE-AND-TONE.md" },
+  ],
+}[packageName] ?? [];
 
 if (!supported.has(packageName)) {
   console.error("Usage: sync-codex-plugin-surfaces.mjs <package> --build | --clean");
@@ -130,17 +135,25 @@ if (existsSync(hooks)) {
       }
     }
   }
-  if (reviewerCompletion) {
+  if (reviewerCompletions.length > 0) {
     config.hooks.PostToolUse ||= [];
+    config.hooks.SubagentStop ||= [];
+    const completionCommands = reviewerCompletions.map((_completion, index) => {
+      const filename = index === 0 ? "codex-agent-completion.mjs" : `codex-agent-completion-${index + 1}.mjs`;
+      return { type: "command", command: `node "\${PLUGIN_ROOT}/hooks-codex/${filename}"` };
+    });
     config.hooks.PostToolUse.push({
       matcher: "collaborationspawn_agent|collaborationwait_agent|collaborationinterrupt_agent|spawn_agent|wait_agent|interrupt_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__wait_agent|multi_agent_v1__close_agent",
-      hooks: [{ type: "command", command: 'node "${PLUGIN_ROOT}/hooks-codex/codex-agent-completion.mjs"' }],
+      hooks: completionCommands,
     });
-    config.hooks.SubagentStop ||= [];
-    config.hooks.SubagentStop.push({
-      matcher: `^${reviewerCompletion.role}$`,
-      hooks: [{ type: "command", command: 'node "${PLUGIN_ROOT}/hooks-codex/codex-agent-completion.mjs"' }],
-    });
+    for (const [index, completion] of reviewerCompletions.entries()) {
+      const filename = index === 0 ? "codex-agent-completion.mjs" : `codex-agent-completion-${index + 1}.mjs`;
+      const command = `node "\${PLUGIN_ROOT}/hooks-codex/${filename}"`;
+      config.hooks.SubagentStop.push({
+        matcher: `^${completion.role}$`,
+        hooks: [{ type: "command", command }],
+      });
+    }
   }
   writeFileSync(join(hooksOutput, "hooks.json"), `${JSON.stringify(config, null, 2)}\n`);
   writeFileSync(join(hooksOutput, "codex-adapter.sh"), `#!/usr/bin/env bash
@@ -171,8 +184,9 @@ fi
 
 run_hook "$input"
 `);
-  if (reviewerCompletion) {
-    writeFileSync(join(hooksOutput, "codex-agent-completion.mjs"), `#!/usr/bin/env node
+  for (const [index, completion] of reviewerCompletions.entries()) {
+    const filename = index === 0 ? "codex-agent-completion.mjs" : `codex-agent-completion-${index + 1}.mjs`;
+    writeFileSync(join(hooksOutput, filename), `#!/usr/bin/env node
 
 import { existsSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -180,9 +194,9 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const hookDir = dirname(fileURLToPath(import.meta.url));
-const role = ${JSON.stringify(reviewerCompletion.role)};
-const writer = join(hookDir, "..", "hooks", ${JSON.stringify(reviewerCompletion.writer)});
-const policy = ${JSON.stringify(reviewerCompletion.policy)};
+const role = ${JSON.stringify(completion.role)};
+const writer = join(hookDir, "..", "hooks", ${JSON.stringify(completion.writer)});
+const policy = ${JSON.stringify(completion.policy)};
 const ttlSeconds = process.env.REVIEW_TTL ?? "3600";
 const ttl = Number(ttlSeconds) * 1000;
 

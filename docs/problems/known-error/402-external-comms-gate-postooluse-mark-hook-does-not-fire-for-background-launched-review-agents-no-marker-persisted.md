@@ -1,6 +1,6 @@
 # Problem 402: external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS
 
-**Status**: Verification Pending
+**Status**: Known Error
 **Reported**: 2026-07-01
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 (Likely) = 12. **Rated at capture from in-session evidence (5/5 PASS, 0 markers), NOT deferred** — re-rating "at next /wr-itil:review-problems" would itself be the P375 bug (nothing self-fires review-problems). Impact 3: blocks every external-facing commit and forces habitual `BYPASS_RISK_GATE=1`, eroding a load-bearing leak gate (workaround exists). Likelihood 4: reproduces on every background-launched review this session.
 **Origin**: inbound-reported (#400) — stamped 2026-08-21 review from the upstream poll; upstream filing `wr-risk-scorer: external-comms PASS marker lands in subagent's own session dir`
@@ -20,6 +20,7 @@
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-080 | STORY-080: Record a completed native review without manual marker recovery | accepted |
+| STORY-086 | STORY-086: Complete an external-comms review without repeating it | in-progress |
 
 ## Fix Released — SUPERSEDED by the 2026-08-20 reopen, see ## Reopened below
 
@@ -185,6 +186,12 @@ This is not transcript archaeology. The commit that carried this reopen reproduc
 The dispatching session had **no `run_in_background` parameter on its Agent tool at all** — every Agent call in that surface is asynchronous by construction. This is the point RFC-041's prose fix cannot reach: the caller did not choose the async path and had no synchronous path to choose. The instruction "dispatch the scorer SYNCHRONOUSLY (`run_in_background: false`)" in `risk-gate.sh` names a parameter that does not exist on every calling surface.
 
 Recovery used: invoke the sanctioned marker writer directly with the scorer's genuine verdict — triggering a hook that did not fire, not fabricating its output. This is the same recovery the 2026-07-03 and 2026-08-10 sessions used, and it is why the hand-asserted-marker count is the honest measure of this bug's frequency.
+
+### Recurrence evidence — 2026-09-11
+
+The native Codex completion bridge released for ordinary style-guide and voice-tone reviews did not include `wr-risk-scorer:external-comms` or `wr-voice-tone:external-comms`. A publication dry run received a genuine external-comms PASS, but the calling task reported that the local guard had not registered its marker and began another recovery cycle. This is the failing case in the verification condition, so the ticket returns to Known Error.
+
+RFC-086 now carries STORY-086 for the previously excluded external-comms slice. The fix reuses the existing Codex completion transport and the existing evaluator-specific marker writers; it does not widen reviewer identity or accept narrative verdicts.
 
 #### The title's "does not fire" is NOT established — treat the mechanism as open
 

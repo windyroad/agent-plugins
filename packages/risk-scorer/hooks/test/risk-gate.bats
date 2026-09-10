@@ -72,9 +72,9 @@ assert_gate_allows() {
   assert_gate_denies "$TEST_SESSION" "commit" "run_in_background: false"
 }
 
-@test "Codex missing-score deny instructs completed-agent close compatibility" {
+@test "Codex missing-score deny names interrupt_agent completion compatibility" {
   export CODEX_THREAD_ID=codex-test
-  assert_gate_denies "$TEST_SESSION" "commit" "close that completed agent once"
+  assert_gate_denies "$TEST_SESSION" "commit" "invoke interrupt_agent once on that completed target"
   [[ "$RISK_GATE_REASON" != *"run_in_background: false"* ]]
   [[ "$RISK_GATE_REASON" == *"no transcript parsing or nested codex exec"* ]]
   unset CODEX_THREAD_ID

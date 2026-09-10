@@ -51,7 +51,6 @@ setup() {
 @test "canonical deny message carries runtime-specific completion guidance" {
   grep -qE 'run_in_background: false' "$CANONICAL"
   grep -qi 'SYNCHRONOUSLY' "$CANONICAL"
-  grep -q 'close that completed agent once' "$CANONICAL"
   grep -q 'no transcript parsing or nested codex exec' "$CANONICAL"
 }
 

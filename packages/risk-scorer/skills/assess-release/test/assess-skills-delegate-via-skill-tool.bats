@@ -111,7 +111,7 @@ setup() {
   [ "$status" -eq 0 ]
   run grep -F 'interrupt_agent' "$WRAPPER_PIPELINE"
   [ "$status" -eq 0 ]
-  run grep -F 'close that completed agent exactly' "$WRAPPER_PIPELINE"
+  run grep -F 'invoke `interrupt_agent` exactly once' "$WRAPPER_PIPELINE"
   [ "$status" -eq 0 ]
 }
 

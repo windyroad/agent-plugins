@@ -84,6 +84,11 @@ prompt: <constructed review prompt from step 3>
 
 Wait for the subagent to complete. The subagent outputs a structured verdict block (`EXTERNAL_COMMS_VOICE_TONE_VERDICT: PASS|FAIL` + optional `EXTERNAL_COMMS_VOICE_TONE_REASON: ...` on FAIL). The `PostToolUse:Agent` hook (`external-comms-mark-reviewed.sh`) parses the verdict, derives the marker key from the prompt's `SURFACE:` + `<draft>` structure, and writes the per-evaluator marker automatically on PASS.
 
+On Codex, use `agent_type: wr-voice-tone:external-comms` with
+`fork_turns: "none"`. After it reports completion, invoke `interrupt_agent`
+exactly once on that completed target so the compatibility hook can persist the
+structured verdict.
+
 **Do not write to `${TMPDIR:-/tmp}/claude-risk-*` yourself.** The hook is the only correct mechanism.
 
 ### 5. Present results

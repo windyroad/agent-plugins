@@ -138,6 +138,24 @@ _gh_api_has_body() {
     printf '%s' "$1" | grep -qE '(^|[[:space:]])(--field|--raw-field|--input|-f|-F)([[:space:]]|=)'
 }
 
+# P537: return success only when at least one matched command segment can
+# publish. Every publish segment must opt into a true dry run before the
+# external-comms review can be skipped; mixed commands therefore fail closed.
+_npm_publish_has_real_invocation() {
+    local segment
+    while IFS= read -r segment; do
+        if printf '%s' "$segment" | grep -qE '^\s*npm publish(\s|$)'; then
+            if ! printf '%s' "$segment" | grep -qE '(^|[[:space:]])--dry-run(=true)?($|[[:space:]])' \
+                || printf '%s' "$segment" | grep -qE '(^|[[:space:]])(--dry-run=false|--no-dry-run)($|[[:space:]])'; then
+                return 0
+            fi
+        fi
+    done <<EOF
+$(printf '%s' "$1" | tr ';&|' '\n\n\n')
+EOF
+    return 1
+}
+
 # ---------- Surface detection ----------
 SURFACE=""
 DRAFT=""
@@ -180,7 +198,11 @@ except Exception:
                 exit 0
             fi
         elif echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm publish(\s|$)'; then
-            SURFACE="npm-publish"
+            if _npm_publish_has_real_invocation "$COMMAND"; then
+                SURFACE="npm-publish"
+            else
+                exit 0
+            fi
         elif echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*git commit(\s|$)'; then
             # P082 Phase 1: gate `git commit -m / --message / HEREDOC` so commit
             # message bodies are reviewed by the voice-tone + risk evaluators
@@ -431,7 +453,7 @@ fi
 # (sha256(DRAFT + '\n' + SURFACE)). Single fire per gate cycle.
 VERDICT_PREFIX="${EXTERNAL_COMMS_VERDICT_PREFIX:-EXTERNAL_COMMS_${EXTERNAL_COMMS_EVALUATOR_ID^^}}"
 if [ -n "${CODEX_THREAD_ID:-}" ]; then
-    COMPLETION_GUIDANCE='On Codex, wait for the reviewer to finish, then close that completed agent once before retrying; the PostToolUse compatibility hook consumes the completed close response and persists its structured verdict, with no transcript parsing or nested codex exec.'
+    COMPLETION_GUIDANCE='On Codex, the calling agent waits for the reviewer to finish, then invokes `interrupt_agent` once on that completed target before retrying; the PostToolUse compatibility hook consumes the completed response and persists its structured verdict, with no transcript parsing or nested codex exec.'
 else
     COMPLETION_GUIDANCE='On Claude Code, dispatch the reviewer SYNCHRONOUSLY (run_in_background: false): a background-launched reviewer does not fire its PostToolUse mark hook, so the marker never persists and this gate re-blocks (P402).'
 fi

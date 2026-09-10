@@ -18,7 +18,7 @@ setup() {
   [ "$(head -1 "$pkg/skills/demo/SKILL.md")" = "---" ]
   grep -q "Generated from packages/risk-scorer" "$pkg/skills/demo/SKILL.md"
   grep -q "request_user_input" "$pkg/skills/demo/SKILL.md"
-  grep -q 'close that completed agent once' "$pkg/skills/demo/SKILL.md"
+  grep -q 'invoke `interrupt_agent` once on that completed target' "$pkg/skills/demo/SKILL.md"
   grep -q 'Do not parse transcripts or launch nested `codex exec`' "$pkg/skills/demo/SKILL.md"
   # P527: the packed name stays bare, so Codex prepends the plugin prefix once.
   grep -Fxq 'name: demo' "$pkg/skills/demo/SKILL.md"

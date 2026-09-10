@@ -242,6 +242,27 @@ run_hook() {
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
+@test "P537: npm publish dry run is not gated" {
+  INPUT=$(build_bash_input "npm publish --dry-run")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P537: npm publish with dry-run disabled remains gated" {
+  INPUT=$(build_bash_input "npm publish --dry-run=false")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+}
+
+@test "P537: a dry run followed by a real publish remains gated" {
+  INPUT=$(build_bash_input "npm publish --dry-run && npm publish")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+}
+
 @test "deny message references the on-demand skill (/wr-voice-tone:assess-external-comms)" {
   INPUT=$(build_bash_input "gh issue comment 42 --body 'a draft'")
   run_hook "$INPUT"

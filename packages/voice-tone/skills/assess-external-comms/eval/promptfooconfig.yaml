@@ -1,4 +1,4 @@
-description: pipeline Codex completion contract
+description: voice-tone external-comms Codex completion contract
 
 providers:
   - id: 'exec:bash ./run-skill-eval.sh'
@@ -7,7 +7,7 @@ prompts:
   - '{{prompt}}'
 
 tests:
-  - description: Codex uses a typed context-free fork and closes it once
+  - description: Codex closes the completed typed reviewer exactly once
     provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'
     vars:
       prompt: |
@@ -15,7 +15,7 @@ tests:
         the exact agent type, fork setting, and completed-agent close tool.
     assert:
       - type: contains
-        value: 'agent_type: wr-risk-scorer:pipeline'
+        value: 'agent_type: wr-voice-tone:external-comms'
       - type: contains
         value: 'fork_turns: "none"'
       - type: icontains

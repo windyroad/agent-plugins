@@ -169,6 +169,8 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | in-progress | STORY-046 | Red-CI denial explains the recovery path | S | P208 | RFC-049 | STORY-MAP-002 |
 | accepted | STORY-084 | Land an ordinary pull request without running a release | S | P435 | RFC-062 | STORY-MAP-008 |
 | accepted | STORY-085 | See the ID clash instead of the drift it causes | M | P533 | RFC-090 | STORY-MAP-002 |
+| in-progress | STORY-086 | Complete an external-comms review without repeating it | S | P402 | RFC-086 | STORY-MAP-002 |
+| in-progress | STORY-087 | Inspect a package without triggering publication review | S | P537 | RFC-091 | STORY-MAP-002 |
 
 
 ## Done

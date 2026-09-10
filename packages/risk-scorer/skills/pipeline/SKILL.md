@@ -27,10 +27,9 @@ On Codex, when the Agent tool is exposed as `spawn_agent`, pass
 explicit agent type on a full-history fork; omitting the type on retry also
 prevents the completion bridge from binding the returned verdict. `$ARGUMENTS`
 is already self-contained, so no forked conversation context is required.
-After the Codex agent reports completion, close that completed agent exactly
-once so the compatibility hook receives the structured result. When Codex
-exposes completed-agent close as `interrupt_agent`, invoke it once on the
-completed target; do not relaunch or inspect a transcript.
+After the Codex agent reports completion, invoke `interrupt_agent` exactly once
+on that completed target so the compatibility hook receives the structured
+result. Do not relaunch or inspect a transcript.
 
 ```
 subagent_type: wr-risk-scorer:pipeline

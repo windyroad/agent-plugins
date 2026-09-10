@@ -107,6 +107,15 @@ run_hook() {
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
 }
 
+@test "Codex deny tells the calling agent how to deliver the completed review" {
+  INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure on Node 20'")
+  run bash -c "cd '$TEST_PROJECT_DIR' && printf '%s' \"\$1\" | CODEX_THREAD_ID=thread-1 '$HOOK'" _ "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *'the calling agent waits for the reviewer to finish'* ]]
+  [[ "$output" == *'invokes `interrupt_agent` once on that completed target'* ]]
+}
+
 # P377/RFC-029: the BYPASS_RISK_GATE env override was removed. The only
 # clearance path named in the deny is delegation to the external-comms subagent.
 @test "marker-absent deny names the reviewer and offers no env override (P377/RFC-029)" {
@@ -255,6 +264,27 @@ run_hook() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"deny"* ]]
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
+}
+
+@test "P537: npm publish dry run is not gated" {
+  INPUT=$(build_bash_input "npm publish --dry-run")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "P537: npm publish with dry-run disabled remains gated" {
+  INPUT=$(build_bash_input "npm publish --dry-run=false")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+}
+
+@test "P537: a dry run followed by a real publish remains gated" {
+  INPUT=$(build_bash_input "npm publish --dry-run && npm publish")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
 }
 
 # ---------------------------------------------------------------------------

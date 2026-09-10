@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-10 **P477 verification pending** — `@windyroad/risk-scorer@0.19.1` is published and installed; the installed-artifact mismatch smoke passes, while fresh-session user verification remains unclaimed
+> Last reviewed: 2026-09-11 **P537 reached Known Error** — npm publish dry runs are classified as publication and trigger external-comms review
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -17,6 +17,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Critical) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported** | | | | | |
 | 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
+| 12 | P402 | external-comms gate does not reliably persist completed native review markers | 12 (High) | Known Error | M | 2026-07-01 | inbound-reported (#400) |
 | 10 | P530 | Retrospective consumer-repo assumptions remain after shim fix | 10 (High) | Open | S | 2026-08-28 | inbound-reported (#453) |
 | 9 | P425 | wr-architect edit-gate re-litigates its own same-session PASS — [Unratified Dependency] over-fires on agent-prescribed born-proposed ADRs | 9 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#342) |
 | 9 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter (consumers pin the cache version and break on bump) | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#325) |
@@ -41,6 +42,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3 | P455 | new evidence on an already-upstream-reported ticket is not routed upstream without a user prompt — no evidence-append mode exists | 6 (Medium) | Open | M | 2026-07-15 | inbound-reported (#348) |
 | | | **Tier 2 — Internal** | | | | | |
 | 30 | P527 | Codex skill names render with a duplicated plugin prefix and title-case branding | 15 (High) | Known Error | S | 2026-08-29 | internal |
+| 20 | P537 | External-comms publication guard blocks npm publish dry runs | 10 (High) | Known Error | S | 2026-09-11 | internal |
 | 16 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole corpus | 8 (Medium) | Known Error | S | 2026-07-04 | internal |
 | 16 | P420 | check-briefing-budgets.sh crashes with `must_split[@]: unbound variable` on empty arrays under macOS default bash 3.2 | 8 (Medium) | Known Error | S | 2026-07-05 | internal |
 | 16 | P471 | run-retro Step 2d ask-hygiene trail path collides across same-day iterations, clobbering prior entries | 8 (Medium) | Known Error | S | 2026-07-26 | internal |
@@ -232,7 +234,6 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P373 | review-problems Step 4.5c github-issues poll made non-discarding — polls all open issues, `[problem]`-prefix demoted to a soft signal; adopters opt back in via `strict_title_prefix`. | 2026-06-28 (`@windyroad/itil@0.54.6`) | no — not observed |
 | P383 | capture-problem `--persona` validates against the adopter `docs/jtbd/*/` corpus (enum fallback only when no jtbd dirs) + preserves `JTBD-M-NNN`. Inbound #282. | 2026-06-28 (`@windyroad/{itil,jtbd}`) | no — not observed |
 | P388 | capture-problem promptfoo eval flakiness (P350 derive-ratify case) — eval calibrated 3× 8/8 GREEN; discharged the P199/P350/P383 holding cohort | 2026-06-28 | no — not observed |
-| P402 | external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS | 2026-07-03 (`@windyroad/itil@0.56.0`) | no — not observed |
 | P404 | Implement ADR-089 + ADR-090 (≥1-story-per-RFC + story-map/story ratification) | RFC-037 complete 2026-07-03 (all 5 stories done + ratified); changeset published | no — not observed |
 | P405 | External-comms gate skips read-only advisory-endpoint polls | @windyroad/risk-scorer@0.16.0 (2026-07-03) | no — not observed |
 | P386 | review-problems Step 4.5/4.6 AFK-silent relevance-close refs re-anchored off dangling work-problems Step 6.5 pointer onto subprocess-AFK-by-construction mechanism (doc-only prose fix) | 2026-07-04 (`@windyroad/itil` patch, commit `3bf91f0c`, pending release) | no — not observed |

@@ -98,7 +98,7 @@ DESTINATION: npm public registry
 <draft>
 ${MARKER_DRAFT}
 </draft>
-Wait for it to finish, then close that completed agent once and return the reviewer verdict and key verbatim. Do not compute the verdict yourself or inspect any transcript."
+Wait for it to finish, then invoke interrupt_agent once on that completed target and return the reviewer verdict and key verbatim. Do not compute the verdict yourself or inspect any transcript."
 
 find "$TMPDIR" -type f -name "external-comms-risk-reviewed-${MARKER_KEY}" -print -quit | grep -q .
 
@@ -106,7 +106,7 @@ PIPELINE_TMP="$(mktemp -d "$TMPDIR/pipeline-cwd.XXXXXX")"
 TMPDIR="$PIPELINE_TMP" run_codex "$COMPLETION_REPO" "Use the exact custom agent wr-risk-scorer:pipeline synchronously without full-history fork. Send it exactly this scoring request and treat the supplied fixture scores as authoritative:
 RISK_CWD: ${ASSESSED_REPO}
 POLICY_THRESHOLD: 5
-Commit, push, and release residual risk are each 4/25. Return the required structured score output. Wait for it to finish, then close that completed agent once. Do not compute the scores yourself or inspect any transcript."
+Commit, push, and release residual risk are each 4/25. Return the required structured score output. Wait for it to finish, then invoke interrupt_agent once on that completed target. Do not compute the scores yourself or inspect any transcript."
 
 STATE_HASH="$(find "$PIPELINE_TMP" -type f -name state-hash -print -quit)"
 [[ -n "$STATE_HASH" ]]

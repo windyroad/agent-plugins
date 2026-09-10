@@ -28,8 +28,9 @@ send_event() {
 
 send_configured_event() {
   local package="$1" event="$2" payload="$3" command
-  command="$(jq -r --arg event "$event" '.hooks[$event][-1].hooks[0].command' "$package/hooks-codex/hooks.json")"
-  printf '%s' "$payload" | PLUGIN_ROOT="$package" bash -c "$command"
+  while IFS= read -r command; do
+    printf '%s' "$payload" | PLUGIN_ROOT="$package" bash -c "$command"
+  done < <(jq -r --arg event "$event" '.hooks[$event][-1].hooks[].command' "$package/hooks-codex/hooks.json")
 }
 
 marker_time() {
@@ -216,10 +217,18 @@ stop_payload() {
   send_event "$helper" "$(jq -cn --arg session "$session" --arg cwd "$REPO_ROOT" --arg target "$target-empty" '{session_id:$session,cwd:$cwd,tool_name:"interrupt_agent",tool_input:{target:$target},tool_response:{previous_status:"running"}}')"
   [ ! -e "$marker" ]
 
+  session="bats-p402-voice-external-$$"
+  key="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  marker="$TMPDIR/claude-risk-$session/external-comms-voice-tone-reviewed-$key"
+  send_configured_event "$root" PostToolUse "$(spawn_payload "$session" "$REPO_ROOT" 'wr-voice-tone:external-comms' "$target-external")"
+  send_configured_event "$root" PostToolUse "$(close_payload "$session" "$REPO_ROOT" "$target-external" "EXTERNAL_COMMS_VOICE_TONE_VERDICT: PASS
+EXTERNAL_COMMS_VOICE_TONE_KEY: $key")"
+  [ -e "$marker" ]
+
   session="bats-p402-voice-unrelated-$$"
   marker="/tmp/voice-tone-reviewed-$session"
-  send_event "$helper" "$(spawn_payload "$session" "$REPO_ROOT" 'wr-voice-tone:external-comms' "$target-external")"
-  send_event "$helper" "$(close_payload "$session" "$REPO_ROOT" "$target-external" '**Voice & Tone Review: PASS**')"
+  send_configured_event "$root" PostToolUse "$(spawn_payload "$session" "$REPO_ROOT" 'wr-voice-tone:unknown' "$target-unrelated")"
+  send_configured_event "$root" PostToolUse "$(close_payload "$session" "$REPO_ROOT" "$target-unrelated" '**Voice & Tone Review: PASS**')"
   [ ! -e "$marker" ]
 
   session="bats-p402-voice-parent-$$"
