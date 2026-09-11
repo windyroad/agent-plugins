@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-11 **P538 reached Known Error** - creation callers gate source reports on a derived problem index
+> Last reviewed: 2026-09-11 **P538 closed** - published 2.2.1 preserves problem creation when the index is absent
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -14,7 +14,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
-| 10 | P538 | Problem creation is gated on the problem index existing | 20 (Very High) | Known Error | M | 2026-09-11 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Critical) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported** | | | | | |
 | 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
@@ -409,6 +408,7 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 
 | ID | Title | Closed via |
 |----|-------|-----------|
+| P538 | Problem creation is gated on the problem index existing | Closed 2026-09-11 after the published `@windyroad/itil` 2.2.1 skill created a ticket and canonical index together in a fresh missing-index adopter fixture; the published reconciler passed and exact two-file commit `a0d10e4` completed. Recovery: `/wr-itil:transition-problem 538 known-error`. |
 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | Closed 2026-08-31 on installed published-artifact evidence from `@windyroad/architect@0.22.0`: the non-unique fixture raised `[First-Match Footgun]`, while the primary-key fixture passed without the finding. Recovery: `/wr-itil:transition-problem 426 known-error`. |
 | P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | Closed 2026-08-21 (run-retro Step 4a sub-step 9 prior-session evidence drain per P282). Fix released `@windyroad/architect@0.21.1` 2026-08-17, live in published 0.21.3. Evidence: `yes — observed: installed v0.21.3 hook permits a clean declared checkout and denies an unpaired one, both from the target index`; regression suite 24/24 green. Recovery: `/wr-itil:transition-problem 499 known-error`. |
 | P164 | Latent octal-eval bug in the next-ID formula across six ticket-creator skills | verified in the field 2026-07-15; drained by the 2026-08-20 retro |

@@ -69,4 +69,4 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-083 | STORY-083: A canonical architect PASS unlocks the guarded edit | in-progress |
 | STORY-086 | STORY-086: Complete an external-comms review without repeating it | in-progress |
 | STORY-087 | STORY-087: Inspect a package without triggering publication review | in-progress |
-| STORY-088 | STORY-088: Capture a problem when its index is missing | in-progress |
+| STORY-088 | STORY-088: Capture a problem when its index is missing | done |

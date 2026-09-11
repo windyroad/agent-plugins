@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-09-11 **STORY-088 in progress** - report-first problem creation implementation and installed adopter verification remain outstanding.
+> Last reviewed: 2026-09-11 **STORY-088 done** - published 2.2.1 passed the missing-index adopter journey.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -171,7 +171,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-085 | See the ID clash instead of the drift it causes | M | P533 | RFC-090 | STORY-MAP-002 |
 | in-progress | STORY-086 | Complete an external-comms review without repeating it | S | P402 | RFC-086 | STORY-MAP-002 |
 | in-progress | STORY-087 | Inspect a package without triggering publication review | S | P537 | RFC-091 | STORY-MAP-002 |
-| in-progress | STORY-088 | Capture a problem when its index is missing | M | P538 | RFC-092 | STORY-MAP-002 |
 
 
 ## Done
@@ -180,6 +179,7 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-088 | Capture a problem when its index is missing | 2026-09-11 | P538 |
 | STORY-077 | Move a captured fix straight to verification and keep a reopened problem in the work queue | 2026-08-30 | P512 |
 | STORY-076 | My unattended backlog loop launches every iteration with its governance plugins on macOS | 2026-08-30 | P428 |
 | STORY-071 | Review the complete commit message once | 2026-08-29 | P415 |

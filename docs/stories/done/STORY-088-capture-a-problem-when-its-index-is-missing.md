@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 story-id: capture-a-problem-when-its-index-is-missing
 reported: 2026-09-11
 decision-makers: [Tom Howard]
@@ -29,7 +29,7 @@ In order to preserve a defect when governance state is incomplete, as a develope
 - [x] The new-problem branch of `manage-problem` does the same, while existing-problem operations retain strict reconciliation.
 - [x] Parseable drift repairs generated sections without replacing README narrative.
 - [x] An existing malformed README still halts before content can be overwritten.
-- [ ] The published plugin passes the exact missing-index creation journey in a temporary adopter repository.
+- [x] The published plugin passes the exact missing-index creation journey in a temporary adopter repository.
 
 ## Driving problem trace (required - I6 invariant)
 

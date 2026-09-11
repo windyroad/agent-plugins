@@ -1,11 +1,11 @@
 # Problem 538: Problem creation is gated on the problem index existing
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-09-11
 **Priority**: 20 (Very High) - Impact: Significant (4) x Likelihood: Almost certain (5)
 **Origin**: internal
 **Effort**: M - creation preflight shared by multiple problem-management skills plus focused behavioural coverage
-**WSJF**: 10 - (20 x 1.0) / 2
+**WSJF**: 0 (excluded - closed)
 **JTBD**: JTBD-001
 **Persona**: developer
 
@@ -55,6 +55,14 @@ ADR-123 authorizes report-first problem creation. `capture-problem` and only the
 
 **Release vehicle**: `.changeset/kind-reports-survive.md`
 
+## Fix Released
+
+Released in `@windyroad/itil` 2.2.1 on 2026-09-11. The published `capture-problem` and new-problem `manage-problem` contracts now preserve the source report when the index is missing or parseably stale, then create or repair the index in the same commit. Existing malformed content and non-creation operations remain strict.
+
+Published-package verification used a fresh temporary adopter repository with no `docs/problems/` directory or `docs/problems/README.md`. The installed 2.2.1 `capture-problem` contract created P001 and the canonical README, the published reconciler returned exit 0, and commit `a0d10e498a3724a48edd1b77132261540f56551a` contained exactly those two files.
+
+**Closed 2026-09-11** - direct post-release verification exercised the exact missing-index creation journey against the published package. Recovery: `/wr-itil:transition-problem 538 known-error`.
+
 ## Dependencies
 
 - **Blocks**: (none)
@@ -74,7 +82,7 @@ ADR-123 authorizes report-first problem creation. `capture-problem` and only the
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-088 | STORY-088: Capture a problem when its index is missing | in-progress |
+| STORY-088 | STORY-088: Capture a problem when its index is missing | done |
 
 ## RFCs
 

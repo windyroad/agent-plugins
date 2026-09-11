@@ -1474,3 +1474,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-09-11 **P537 verification pending** — dry-run publication classification released, installed, and checked against installed hooks
 
 > Last reviewed: 2026-09-11 **P538 opened** - problem creation must remain available when the problem index is absent
+
+> Last reviewed: 2026-09-11 **P538 reached Known Error** - creation callers gate source reports on a derived problem index
