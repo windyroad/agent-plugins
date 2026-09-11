@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 2.2.1
+
+### Patch Changes
+
+- b8885c0: Keep problem creation available when the problem index is missing or stale, while preserving strict handling for malformed content and non-creation operations.
+
 ## 2.2.0
 
 ### Minor Changes
