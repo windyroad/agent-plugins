@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-11 **P538 opened** - problem creation must remain available when the problem index is absent
+> Last reviewed: 2026-09-11 **P538 reached Known Error** - creation callers gate source reports on a derived problem index
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -14,7 +14,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
-| 10 | P538 | Problem creation is gated on the problem index existing | 20 (Very High) | Open | M | 2026-09-11 | internal |
+| 10 | P538 | Problem creation is gated on the problem index existing | 20 (Very High) | Known Error | M | 2026-09-11 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Critical) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported** | | | | | |
 | 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
