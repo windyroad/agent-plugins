@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-08-31 **STORY-083 in progress** - implementation commit a02e8d0d satisfies all three acceptance criteria; release remains outstanding.
+> Last reviewed: 2026-09-11 **STORY-088 in progress** - report-first problem creation implementation and installed adopter verification remain outstanding.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -171,6 +171,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-085 | See the ID clash instead of the drift it causes | M | P533 | RFC-090 | STORY-MAP-002 |
 | in-progress | STORY-086 | Complete an external-comms review without repeating it | S | P402 | RFC-086 | STORY-MAP-002 |
 | in-progress | STORY-087 | Inspect a package without triggering publication review | S | P537 | RFC-091 | STORY-MAP-002 |
+| in-progress | STORY-088 | Capture a problem when its index is missing | M | P538 | RFC-092 | STORY-MAP-002 |
 
 
 ## Done

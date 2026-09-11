@@ -50,22 +50,30 @@ Per ADR-013 Rule 6 fail-safe: every decision above resolves without interactive 
 
 ## Steps
 
-### 0. README reconciliation preflight (P118)
+### 0. README reconciliation preflight (P118, P538, ADR-123)
 
-Same as `/wr-itil:manage-problem` Step 0 — diagnose-only check. Halt-and-route on Exit 1 (committed cross-session drift); INLINE_REFRESH carve-out (P149) preserved. capture-problem itself does NOT refresh README.md (see Step 6); the preflight is purely a fail-fast on pre-existing drift.
+Run the strict diagnose-only check, but do not let derived-index repair discard the report this creation-only skill exists to preserve. `capture-problem` always creates a new problem, so ADR-123 authorizes it to carry a missing-index or parseable-drift result forward to the inline Step 6 repair. An existing malformed README still halts because replacing it could destroy human-authored narrative.
 
 ```bash
 wr-itil-reconcile-readme docs/problems > /tmp/wr-itil-drift-$$.txt
 reconcile_exit=$?
-if [ "$reconcile_exit" -eq 1 ]; then
-  wr-itil-classify-readme-drift /tmp/wr-itil-drift-$$.txt docs/problems
-  classify_exit=$?
-  rm -f /tmp/wr-itil-drift-$$.txt
-  # classify_exit 0 (INLINE_REFRESH): proceed (no inline refresh in this skill).
-  # classify_exit 1 (HALT_ROUTE_RECONCILE): halt; invoke /wr-itil:reconcile-readme.
-  # classify_exit 2 (parse error): conservative halt-and-route.
-fi
+case "$reconcile_exit" in
+  0) readme_repair="clean" ;;
+  1) readme_repair="drift" ;; # preserve the diagnostic; Step 6 repairs generated sections
+  2)
+    if [ ! -f docs/problems/README.md ]; then
+      readme_repair="missing" # Step 6 creates the canonical index
+    else
+      rm -f /tmp/wr-itil-drift-$$.txt
+      echo "capture-problem: existing docs/problems/README.md is malformed; refusing to overwrite human-authored content" >&2
+      exit 2
+    fi
+    ;;
+esac
+rm -f /tmp/wr-itil-drift-$$.txt
 ```
+
+For `readme_repair=drift` or `missing`, emit one advisory naming the repair that will ride with the capture commit, then continue to Step 1. Do not invoke `/wr-itil:reconcile-readme` first and do not emit a bypass token. The ticket plus repaired or newly-created index remain one ADR-014 commit grain.
 
 ### 1. Parse the description and flags from `$ARGUMENTS`
 
@@ -319,6 +327,8 @@ Single `Write` to `docs/problems/open/<NNN>-<kebab-title>.md` (per ADR-031 per-s
 #### README.md refresh on new ticket (P094)
 
 After writing the new `.open.md` file at Step 5, regenerate `docs/problems/README.md` to insert the new ticket's row into the WSJF Rankings, and stage the refreshed README in the same commit as the new ticket. The mechanism is **inline at this execution site per P331** — not deferred via cross-reference — so a single-pass agent reading Step 6 does not silently skip the archive step (the canonical P331 silent-skip regression).
+
+**ADR-123 repair routing:** when Step 0 set `readme_repair=missing`, create the canonical README from ticket truth and skip history rotation because there is no displaced line 3. When it set `readme_repair=drift`, replace only the generated ranking/queue sections and preserve every narrative line outside those sections before applying the normal line-3 rotation below. `readme_repair=clean` follows the normal refresh. An existing malformed README never reaches this step.
 
 **Mechanism**: use the same rendering rules as `/wr-itil:manage-problem` Step 5 P094 / Step 7 P062 (glob `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md` AND the per-state-subdir layout `docs/problems/open/*.md` / `docs/problems/known-error/*.md` / `docs/problems/verifying/*.md` / `docs/problems/parked/*.md`; rank open/known-error by WSJF; list verifyings in the Verification Queue ordered by Released date ASC per P150; list parkeds in the Parked section). The refresh is a **render, not a re-rank** — existing WSJF values on the other ticket files are trusted per P062's established discipline. Only the new ticket's own (deferred-placeholder) WSJF is consumed from its freshly-written file. **WSJF Rankings tier + tie-break sort** (P138 + ADR-076) and **Verification Queue sort direction** (P150) and **Likely-verified cell shape** (P186) all follow the canonical render rules — see `/wr-itil:manage-problem` Step 5 P094 block for the full prose; drift here re-opens those tickets.
 

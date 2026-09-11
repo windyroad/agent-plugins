@@ -46,12 +46,14 @@ Reproduction on 2026-09-11: a temporary adopter fixture containing `docs/problem
 - [x] Trace every creation caller through the README reconciliation preflight.
 - [x] Identify the creation-only boundary where capture can preserve the report without weakening strict reconciliation elsewhere.
 - [x] Document a safe workaround.
-- [ ] Create a focused behavioural regression test.
-- [ ] Create an INVEST story for the permanent fix.
+- [x] Create a focused behavioural regression test.
+- [x] Create an INVEST story for the permanent fix.
 
 ## Fix Strategy
 
 ADR-123 authorizes report-first problem creation. `capture-problem` and only the new-problem branch of `manage-problem` will continue over a missing index or parseable drift, then use their existing same-commit refresh step to create or repair the generated index sections. An existing malformed README, existing-problem operations, the reconciler, and all non-creation callers retain strict halt behavior.
+
+**Release vehicle**: `.changeset/kind-reports-survive.md`
 
 ## Dependencies
 
@@ -67,3 +69,15 @@ ADR-123 authorizes report-first problem creation. `capture-problem` and only the
 - ADR-123 supersedes only the problem-creation preflight routing in ADR-014 and leaves its remaining commit discipline intact.
 - The duplicate search found these related themes; the user selected a focused ticket rather than expanding P351.
 - The hang-off candidate pre-filter exceeded its five-ticket cap because the shared skill and README paths are widely referenced, so the fresh-context arbitration was skipped per the workflow contract.
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-088 | STORY-088: Capture a problem when its index is missing | in-progress |
+
+## RFCs
+
+| ID | Title | Status |
+|----|-------|--------|
+| RFC-092 | Capture a problem when its index is missing | proposed |

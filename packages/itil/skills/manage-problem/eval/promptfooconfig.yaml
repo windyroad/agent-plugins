@@ -50,6 +50,33 @@ prompts:
   - '{{prompt}}'
 
 tests:
+  - description: P538 creation preflight - classify the operation before missing-index routing
+    vars:
+      prompt: |
+        I am executing /wr-itil:manage-problem in an adopter repository where
+        `docs/problems/README.md` is absent. The strict reconciler returned
+        exit 2 with `PARSE_ERROR: README not found`, and the request is to
+        create a new problem with a valid description.
+
+        Per P538 and ADR-123, do I halt at Step 0? Explain when the operation
+        is classified, what the new-problem path writes and commits, and what
+        the same preflight result would do for an existing-problem update.
+        Also state what happens when exit 2 came from an existing malformed
+        README rather than an absent one.
+    assert:
+      - type: regex
+        value: 'ADR-123'
+      - type: icontains
+        value: 'docs/problems/README.md'
+      - type: regex
+        value: '(classif|operation)[\s\S]{0,1200}(new.problem|creation)[\s\S]{0,1200}([Cc]ontinue|[Cc]reate)'
+      - type: regex
+        value: '(same|single|one)[- ][Cc]ommit|[Cc]ommit[\s\S]{0,80}(together|both|one|single|same)'
+      - type: regex
+        value: '(existing.problem|update|transition)[\s\S]{0,600}([Hh]alt|strict|[Bb]lock)'
+      - type: regex
+        value: '[Mm]alformed[\s\S]{0,500}([Hh]alt|[Rr]efus|[Bb]lock)'
+
   - description: K→V transition — Release-vehicle seed precedes git mv (P330 Option B)
     vars:
       prompt: |

@@ -121,6 +121,35 @@ prompts:
   - '{{prompt}}'
 
 tests:
+  # --- P538 / ADR-123: a missing derived index never blocks capture ---
+
+  - description: Step 0 missing README - preserve the report and create the canonical index in the same commit
+    vars:
+      prompt: |
+        I am executing /wr-itil:capture-problem in an adopter repository.
+        `docs/problems/README.md` does not exist, so
+        `wr-itil-reconcile-readme docs/problems` returned exit 2 with
+        `PARSE_ERROR: README not found`. The problem description is present
+        and valid.
+
+        Per P538 and ADR-123, do I halt before writing the ticket? Describe
+        what happens to the new ticket and README, the commit boundary, and
+        how I would handle exit 2 if an existing README were malformed
+        instead of absent.
+    assert:
+      - type: regex
+        value: 'ADR-123'
+      - type: icontains
+        value: 'docs/problems/README.md'
+      - type: regex
+        value: '(does not halt|do not halt|continue)[\s\S]{0,1200}(create|generate)[\s\S]{0,200}README'
+      - type: regex
+        value: '(same|single|one)[- ][Cc]ommit|[Cc]ommit[\s\S]{0,80}(together|both)'
+      - type: regex
+        value: '[Mm]alformed[\s\S]{0,500}([Hh]alt|[Rr]efus|[Bb]lock)'
+      - type: regex
+        value: '(do not|does not|no)[\s\S]{0,80}(bypass|preceding|separate reconcile)'
+
   # --- P199: Step 6 inline README staging (Option 2 amendment 2026-06-05) ---
 
   - description: Step 6 inline README staging — README.md staged in same commit; no RISK_BYPASS trailer

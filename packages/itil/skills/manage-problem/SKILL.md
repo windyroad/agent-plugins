@@ -275,20 +275,20 @@ On a flat-layout adopter repo (first invocation post-update — JTBD-101 plugin-
 
 After Step 0a completes (whether no-op or migration), proceed to Step 0 README reconciliation preflight. The reconcile-readme script reads the post-migration layout; the in-flow Step 5 / Step 7 README refresh paths re-render the README from the per-state subdir shape.
 
-### 0. README reconciliation preflight (P118)
+### 0. README reconciliation preflight (P118, P538, ADR-123)
 
 Before parsing the request, run the diagnose-only reconciliation check. The contract here catches **cross-session drift** that per-operation refresh paths (P094 refresh-on-create + P062 refresh-on-transition) cannot retroactively see — if any past session committed a ticket change without staging the README refresh, the next manage-problem invocation reads a stale README that lies about what is open / verifying / closed.
 
+Store the exit code and diagnostic until Step 1 classifies the requested operation. Do not halt before classification: ADR-123 permits only new-problem creation to preserve the report first and repair a missing or parseably stale derived index in the same commit. Existing-problem operations keep the strict routing below.
+
 ```bash
-wr-itil-reconcile-readme docs/problems
+wr-itil-reconcile-readme docs/problems > /tmp/wr-itil-drift-$$.txt
+reconcile_exit=$?
 ```
 
 The `wr-itil-reconcile-readme` command is a `$PATH`-resolved shim shipped in `packages/itil/bin/` that dispatches the canonical `packages/itil/scripts/reconcile-readme.sh` body. ADR-049 — never invoke the canonical script via repo-relative path; the path does not resolve in adopter trees.
 
-Exit-code routing:
-- **Exit 0 (clean)**: continue to Step 1.
-- **Exit 1 (drift detected)**: structured diff lines printed to stdout, one per drift entry (≤150 bytes per ADR-038 progressive-disclosure budget). Capture stdout to a temp file and classify the drift via the **uncommitted-rename carve-out** (P149) before halt-routing — see "Drift classification carve-out" immediately below.
-- **Exit 2 (parse error)**: README missing or malformed. Halt with the parse-error message; this needs investigation, not mechanical reconciliation. AFK orchestrators halt-with-report per ADR-013 Rule 6.
+Exit-code routing is applied after Step 1 classifies the operation. Exit 0 continues. Exit 1 carries structured drift lines in the temp file. Exit 2 is split mechanically into a missing README (`[ ! -f docs/problems/README.md ]`) and an existing malformed README.
 
 #### Drift classification carve-out (P149)
 
@@ -362,6 +362,17 @@ Determine the operation from `$ARGUMENTS`:
 - If arguments contain "work", **delegate to `/wr-itil:work-problem`** via the Skill tool. See "Deprecated-argument forwarders" below.
 - If arguments contain "review", **delegate to `/wr-itil:review-problems`** via the Skill tool. See "Deprecated-argument forwarders" below.
 - Otherwise, this is a new problem creation
+
+#### Creation-only reconciliation routing (P538, ADR-123)
+
+After classifying the request, apply the stored Step 0 result:
+
+- **New problem + Exit 1 (parseable drift):** preserve the diagnostic, continue through duplicate checking and ticket creation, then repair only the generated README sections at Step 5 while preserving narrative. Stage the ticket and repaired index together.
+- **New problem + Exit 2 + README absent:** continue through ticket creation, then create the canonical README from ticket truth at Step 5. There is no prior line 3 to rotate. Stage the ticket and new index together.
+- **New problem + Exit 2 + existing README:** halt with the parse-error message. Existing malformed content is not safe to overwrite.
+- **Every non-creation operation:** retain the prior strict behavior. Exit 1 runs the P149 classifier below and halt-routes unless every drifting ID is an in-flow staged rename. Exit 2 halts. Forwarders delegate only after this routing passes.
+
+Remove the Step 0 temp file after routing. The creation exception never invokes a preceding reconciliation commit and never emits a bypass token.
 
 #### Deprecated-argument forwarders (ADR-010 amended + P071)
 
@@ -616,6 +627,8 @@ The `## Dependencies` section uses **bare ticket IDs** (`P038`, not `[P038](./03
 #### README.md refresh on new ticket (P094)
 
 After writing the new `.open.md` file, regenerate `docs/problems/README.md` to insert the new ticket's row into the WSJF Rankings, and stage the refreshed README in the same commit as the new ticket. Without this refresh, new tickets are absent from the ranked table until the next `/wr-itil:review-problems` invocation or the next Step 7 transition — staleness accumulates silently on every creation-only session.
+
+**ADR-123 repair routing:** when Step 0 reported a missing README, create the canonical README from ticket truth and skip history rotation because no line 3 was displaced. For parseable drift, replace only generated ranking/queue sections and preserve all narrative outside those sections before the normal line-3 rotation. An existing malformed README remains blocked before Step 5.
 
 **Mechanism**: use the same rendering rules as Step 7's P062 block (glob `docs/problems/*.open.md` / `*.known-error.md` / `*.verifying.md` / `*.parked.md`; rank open/known-error by WSJF; list verifyings in the Verification Queue ordered by release age; list parkeds in the Parked section). The refresh is a **render, not a re-rank** — existing WSJF values on the other ticket files are trusted per P062's established discipline. Only the new ticket's own WSJF is consumed from its freshly-written file.
 
