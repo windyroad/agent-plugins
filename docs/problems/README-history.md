@@ -16,6 +16,8 @@
 
 > Last reviewed: 2026-09-11 **P538 closed** - published 2.2.1 preserves problem creation when the index is absent
 
+> Last reviewed: 2026-09-12 **P402 returned to Known Error** - installed Codex denial omitted its required completed-review recovery step
+
 ## 2026-04-28 (pre-P134 truncation contract — bulk legacy archive)
 
 The 76,582-byte line-3 prose blob accumulated from session-summary fragments prepended on every `manage-problem` Step 5 P094 / Step 7 P062 / `review-problems` Step 5 / `reconcile-readme` Step 5 refresh under the original "ever-growing prose paragraph" convention. P134 closes the accumulator on this surface; the truncated content is preserved verbatim below as the seed of the forward-chronology archive. Future refreshes append per-day fragments at the bottom, NOT into this legacy entry.

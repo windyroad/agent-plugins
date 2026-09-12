@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-12 **P402 returned to Known Error** - installed Codex denial omitted its required completed-review recovery step
+> Last reviewed: 2026-09-12 **P402 moved to Verification Pending** - published recovery denials now state both runtime paths without relying on `CODEX_THREAD_ID`
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -17,7 +17,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Critical) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported** | | | | | |
 | 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
-| 12 | P402 | external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS | 12 (High) | Known Error | M | 2026-07-01 | inbound-reported (#400) |
 | 10 | P530 | Retrospective consumer-repo assumptions remain after shim fix | 10 (High) | Open | S | 2026-08-28 | inbound-reported (#453) |
 | 9 | P425 | wr-architect edit-gate re-litigates its own same-session PASS — [Unratified Dependency] over-fires on agent-prescribed born-proposed ADRs | 9 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#342) |
 | 9 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter (consumers pin the cache version and break on bump) | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#325) |
@@ -303,6 +302,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P533 | Duplicate ticket IDs are silently swallowed by the README reconciler, so drift rows blame the wrong cause | `@windyroad/itil@2.2.0` 2026-09-03 | no — not observed |
 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 2026-09-09 (`@windyroad/risk-scorer@0.19.1`; version-packages commit `e54352d1`, merge `ad476823`, PR #474) | no — not observed |
 | P537 | External-comms publication guard blocks npm publish dry runs | 2026-09-11 (`@windyroad/risk-scorer@0.19.2`, `@windyroad/voice-tone@0.8.5`; version-packages commit `4d66e3ab`, merge `99c720b9`, PR #475) | no — not observed |
+| P402 | external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS | 2026-09-12 (`@windyroad/risk-scorer@0.19.3`, `@windyroad/voice-tone@0.8.6`; version commit `8c9e4f4c`, merge `9cc26afc`, PR #477, workflow 34684064046) | no — not observed |
 
 ## Inbound Upstream Reports
 

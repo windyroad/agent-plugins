@@ -1,6 +1,6 @@
 # Problem 402: external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-01
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 (Likely) = 12. **Rated at capture from in-session evidence (5/5 PASS, 0 markers), NOT deferred** — re-rating "at next /wr-itil:review-problems" would itself be the P375 bug (nothing self-fires review-problems). Impact 3: blocks every external-facing commit and forces habitual `BYPASS_RISK_GATE=1`, eroding a load-bearing leak gate (workaround exists). Likelihood 4: reproduces on every background-launched review this session.
 **Origin**: inbound-reported (#400) — stamped 2026-08-21 review from the upstream poll; upstream filing `wr-risk-scorer: external-comms PASS marker lands in subagent's own session dir`
@@ -328,10 +328,24 @@ Source CI `34539545869` and merge CI `34540583144` passed. Release run `34540583
 
 Restarted-runtime verification remains outstanding.
 
+## Fix Released — 2026-09-12 self-contained recovery guidance
+
+Version Packages PR #477 released `@windyroad/risk-scorer@0.19.3` and `@windyroad/voice-tone@0.8.6` (implementation commit `14fd85f57141666cf49b1ed6c606a63cf99715d5`, version commit `8c9e4f4ceccafd1d4c9f6600679fa8a31437dfc8`, merge commit `9cc26afcd5d54e106c808ddf9648d38614d18c14`). The denial no longer relies on `CODEX_THREAD_ID` to choose one runtime's recovery instructions; it always states both the Codex completed-review path and the Claude Code synchronous-review path.
+
+[Source CI 34683471011](https://github.com/windyroad/agent-plugins/actions/runs/34683471011) passed both jobs. [Release run 34684064046](https://github.com/windyroad/agent-plugins/actions/runs/34684064046) passed after a bounded rerun absorbed npm registry propagation: the first verifier saw risk-scorer `0.19.3` before its `latest` tag advanced, while voice-tone `0.8.6` was already current. Fresh stable npm tarballs for both packages were then executed with `CODEX_THREAD_ID` absent; both returned denials containing the Codex and Claude Code instructions.
+
+Published-package behaviour is verified. A restarted installed task exercising the same denial remains the exact verification needed before closure.
+
 ## Upstream Lifecycle Updates
 
 - **2026-09-11** — Known Error → Verification Pending (inbound)
   - **Target**: inbound #400 (own repo `windyroad/agent-plugins`)
   - **Comment URL**: https://github.com/windyroad/agent-plugins/issues/400#issuecomment-5626860055
+  - **Disclosure path**: posted-inbound-comment
+  - **Gate verdict**: external-comms PASS + voice-tone PASS
+
+- **2026-09-12** — Known Error → Verification Pending (inbound)
+  - **Target**: inbound #400 (own repo `windyroad/agent-plugins`)
+  - **Comment URL**: https://github.com/windyroad/agent-plugins/issues/400#issuecomment-5644852523
   - **Disclosure path**: posted-inbound-comment
   - **Gate verdict**: external-comms PASS + voice-tone PASS
