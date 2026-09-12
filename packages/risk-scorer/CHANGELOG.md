@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.19.3
+
+### Patch Changes
+
+- 14fd85f: Make external-comms denial messages always explain the Codex and Claude Code completion steps, even when runtime environment variables are unavailable.
+
 ## 0.19.2
 
 ### Patch Changes
