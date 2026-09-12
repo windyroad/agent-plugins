@@ -1,6 +1,6 @@
 # Problem 477: Codex collaboration completion bypasses the risk-marker bridge
 
-**Status**: Known Error (2026-09-13; Codex 0.153.4 emits dotted collaboration tool names and `input_text` response arrays that the bridge did not accept)
+**Status**: Verification Pending (2026-09-13; `@windyroad/risk-scorer@0.19.4` released and installed, awaiting a fresh-session native collaboration journey)
 **Reported**: 2026-08-12
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5
 **Origin**: internal
@@ -117,12 +117,12 @@ No new hook or ADR is required: this restores the intended completed-agent compa
 The 2026-09-13 recurrence repair accepts Codex 0.153's dotted collaboration
 tool names and decodes its `input_text` response array before the existing bridge reads `task_name` or
 `previous_status.completed`. It does not widen the accepted role, target,
-checkout, or score contracts. The source-focused risk-scorer suite passed 478
-of 478 before the packed regression case was added; the extracted npm package
-then passed both packed bridge checks, including the exact 0.153 payload.
+checkout, or score contracts. The full risk-scorer suite passed 479 of 479. The
+affected source and packed bridge suites passed 36 of 36, including the exact
+0.153 payload.
 Architecture review passed under ADR-083, and no new ADR is required.
 
-**Current release vehicle**: `.changeset/fix-codex-input-text-risk-receipts.md`
+**Release vehicle**: `.changeset/fix-codex-input-text-risk-receipts.md`
 
 The 2026-09-09 recurrence repair is the bounded risk-scorer patch in commit
 `297f62265512c65bf8a6707fc58a9943dab935eb`. It removes the optional
@@ -132,6 +132,26 @@ preserving checkout binding and the valid score.
 **Release vehicle**: `.changeset/calm-checkout-recovery.md`
 
 ## Fix Released
+
+### 0.19.4 recurrence repair
+
+Released in `@windyroad/risk-scorer@0.19.4` from recurrence-fix commit
+`e81e39ab3c4274073b6a085d1ec695b172ae6764` via
+`.changeset/fix-codex-input-text-risk-receipts.md` (version-packages commit
+`794372c0e4372e9393b0801fa971a456c36acc8e`, PR #478, merge commit
+`e6288d5d7a9abd57e6657b4630ea1ae6a1257c93`, released 2026-09-13).
+
+Release workflow `34726166361` completed successfully after npm registry
+propagation made `latest` resolve to 0.19.4. The supported Codex installer put
+0.19.4 at user scope. A direct replay through that installed artifact used the
+exact dotted `collaboration.spawn_agent` and `collaboration.interrupt_agent`
+names plus the `input_text` response-array shape and persisted commit, push,
+and release scores of 4 against the assessed checkout identity.
+
+Awaiting user verification in a fresh Codex session that exercises the native
+collaboration completion and the following governed-command gate. The current
+session loaded the pre-release hook matcher, so it cannot prove that
+session-start registration boundary without a restart.
 
 Released in `@windyroad/risk-scorer@0.19.1` from recurrence-fix commit
 `297f62265512c65bf8a6707fc58a9943dab935eb` via
