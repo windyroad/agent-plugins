@@ -109,8 +109,8 @@ Mapped which past reviews actually wrote their marker (by key, in `$TMPDIR/claud
 
 - [ ] Confirm whether background/forced-async `Agent` dispatch fires the PostToolUse mark hook at all, and if so, under which session_id (background-agent SID vs parent live SID) the marker lands.
 - [ ] Determine whether the fix is (a) a foreground/synchronous review path the mark hook can observe, or (b) a multi-SID marker-write (cf. P260 Option-C bounded multi-UUID write) so the marker lands under the live session's SID regardless of which context fired the hook.
-- [ ] Create reproduction test
-- [ ] Re-word the gate's remediation text: `run_in_background: false` is not universally reachable (see the 2026-08-20 evidence below), so the message must name a path an agent in that harness can actually take. The 2026-09-12 recurrence isolates the remaining defect: runtime selection for that text depends on `CODEX_THREAD_ID`, which is not reliably present in Codex PreToolUse hook environments.
+- [x] Create reproduction test
+- [x] Re-word the gate's remediation text: `run_in_background: false` is not universally reachable (see the 2026-08-20 evidence below), so the message must name a path an agent in that harness can actually take. The 2026-09-12 recurrence isolates the remaining defect: runtime selection for that text depends on `CODEX_THREAD_ID`, which is not reliably present in Codex PreToolUse hook environments.
 
 ### Evidence 2026-08-20 — the prescribed remediation is unreachable in some harnesses
 
@@ -250,7 +250,15 @@ RFC-086 carries STORY-086. Extend the existing native Codex completion transport
 
 For the 2026-09-12 recurrence, remove the deny message's dependency on `CODEX_THREAD_ID`: always name the Codex completed-`interrupt_agent` path and the Claude Code synchronous-dispatch path. Keep the change in the canonical shared hook, sync the two published consumer copies per ADR-017, and add one behavioural check proving a Codex-capable recovery instruction is present even when `CODEX_THREAD_ID` is absent.
 
-**Release vehicle**: .changeset/calm-agents-interrupt.md
+Implementation evidence:
+
+- RED: the focused Bats case failed with `CODEX_THREAD_ID` absent because the denial omitted the Codex `interrupt_agent` instruction.
+- GREEN: the same case passed after the canonical hook began stating both conditional runtime paths. The risk-scorer, voice-tone, canonical-source, and sync suites passed 100/100.
+- The shared hook was synced byte-identically into both published consumer packages; `scripts/sync-external-comms-gate.sh --check` passed.
+- Fresh `npm pack` tarballs for both packages were extracted and each packaged hook was executed with `CODEX_THREAD_ID` absent; both denials contained the Codex completed-`interrupt_agent` and Claude Code synchronous-dispatch instructions.
+- Architecture review passed with no new decision required; JTBD review passed for JTBD-001 and STORY-086; the modified test was mechanically classified as behavioural.
+
+**Release vehicle**: `.changeset/clear-runtime-recovery.md`
 
 ### Also correct: a diagnosis to not build on
 

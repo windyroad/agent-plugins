@@ -107,13 +107,14 @@ run_hook() {
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
 }
 
-@test "Codex deny tells the calling agent how to deliver the completed review" {
+@test "deny names both runtime recovery paths when CODEX_THREAD_ID is absent" {
   INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure on Node 20'")
-  run bash -c "cd '$TEST_PROJECT_DIR' && printf '%s' \"\$1\" | CODEX_THREAD_ID=thread-1 '$HOOK'" _ "$INPUT"
+  run_hook "$INPUT"
   [ "$status" -eq 0 ]
   [[ "$output" == *"deny"* ]]
   [[ "$output" == *'the calling agent waits for the reviewer to finish'* ]]
-  [[ "$output" == *'invokes `interrupt_agent` once on that completed target'* ]]
+  [[ "$output" == *'invokes `interrupt_agent` exactly once on that completed target'* ]]
+  [[ "$output" == *'On Claude Code, the calling agent dispatches the reviewer synchronously (`run_in_background: false`)'* ]]
 }
 
 # P377/RFC-029: the BYPASS_RISK_GATE env override was removed. The only
