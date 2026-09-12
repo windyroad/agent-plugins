@@ -16,13 +16,24 @@ const riskAgentRoles = new Set([
   "wr-risk-scorer:inbound-report",
 ]);
 
-function response(input) {
-  if (typeof input.tool_response === "object" && input.tool_response) return input.tool_response;
+function parsedResponse(value) {
+  if (Array.isArray(value)) {
+    const text = value
+      .filter((item) => item && typeof item === "object" && typeof item.text === "string")
+      .map((item) => item.text)
+      .join("\n");
+    return parsedResponse(text);
+  }
+  if (typeof value === "object" && value) return value;
   try {
-    return JSON.parse(input.tool_response);
+    return parsedResponse(JSON.parse(value));
   } catch {
     return {};
   }
+}
+
+function response(input) {
+  return parsedResponse(input.tool_response);
 }
 
 function riskDir(sessionId) {
@@ -418,13 +429,13 @@ if (!/^[A-Za-z0-9-]+$/.test(input.session_id || "")) {
   process.exit(0);
 }
 
-if (["collaborationspawn_agent", "spawn_agent", "multi_agent_v1__spawn_agent"].includes(input.tool_name)) {
+if (["collaboration.spawn_agent", "collaborationspawn_agent", "spawn_agent", "multi_agent_v1__spawn_agent"].includes(input.tool_name)) {
   rememberSpawn(input);
 }
-if (["collaborationinterrupt_agent", "interrupt_agent", "close_agent", "multi_agent_v1__close_agent"].includes(input.tool_name)) {
+if (["collaboration.interrupt_agent", "collaborationinterrupt_agent", "interrupt_agent", "close_agent", "multi_agent_v1__close_agent"].includes(input.tool_name)) {
   markClose(input);
 }
-if (["collaborationwait_agent", "wait_agent", "multi_agent_v1__wait_agent"].includes(input.tool_name)) {
+if (["collaboration.wait_agent", "collaborationwait_agent", "wait_agent", "multi_agent_v1__wait_agent"].includes(input.tool_name)) {
   markWait(input);
 }
 if (input.hook_event_name === "SubagentStop") {

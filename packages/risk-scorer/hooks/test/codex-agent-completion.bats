@@ -73,6 +73,16 @@ direct_pipeline_interrupt_input() {
     "$SESSION" "$OTHER_REPO" "${TARGET#/root/}" "$PIPELINE_REPO"
 }
 
+codex_0153_spawn_input() {
+  printf '{"session_id":"%s","cwd":"%s","tool_name":"collaboration.spawn_agent","tool_input":{"agent_type":"wr-risk-scorer:pipeline"},"tool_response":[{"type":"input_text","text":"{\\"task_name\\":\\"%s\\"}"}]}' \
+    "$SESSION" "$TMP" "$TARGET"
+}
+
+codex_0153_pipeline_interrupt_input() {
+  printf '{"session_id":"%s","cwd":"%s","tool_name":"collaboration.interrupt_agent","tool_input":{"target":"%s"},"tool_response":[{"type":"input_text","text":"{\\"previous_status\\":{\\"completed\\":\\"RISK_SCORES: commit=4 push=4 release=4\\\\nRISK_CWD: %s\\"}}"}]}' \
+    "$SESSION" "$OTHER_REPO" "$TARGET" "$PIPELINE_REPO"
+}
+
 current_empty_wait_input() {
   printf '{"session_id":"%s","cwd":"%s","tool_name":"collaborationwait_agent","tool_input":{"timeout_ms":3600000},"tool_response":"{\"message\":\"Wait completed.\",\"timed_out\":false}"}' \
     "$SESSION" "$TMP"
@@ -302,10 +312,40 @@ dispatch_pretool() {
   [ ! -e "$OTHER_REPO/.risk-reports" ]
 }
 
+@test "Codex 0.153 input_text responses persist a completed pipeline assessment" {
+  dispatch "$(codex_0153_spawn_input)"
+  dispatch "$(codex_0153_pipeline_interrupt_input)"
+
+  rdir="$TMPDIR/claude-risk-$SESSION"
+  [ "$(cat "$rdir/commit")" = "4" ]
+  [ "$(cat "$rdir/push")" = "4" ]
+  [ "$(cat "$rdir/release")" = "4" ]
+  expected_checkout="$(cd "$PIPELINE_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && _checkout_id)"
+  [ "$(cat "$rdir/checkout-id")" = "$expected_checkout" ]
+}
+
+@test "Codex completion bridge rejects an unrecognised near-suffix tool name" {
+  unknown_spawn="$(codex_0153_spawn_input | sed 's/collaboration\.spawn_agent/collaboration.respawn_agent/')"
+  dispatch "$unknown_spawn"
+  dispatch "$(codex_0153_pipeline_interrupt_input)"
+
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+}
+
 @test "PostToolUse routes direct Codex interrupt_agent completions" {
   run node -e '
     const hooks = require(process.argv[1]).hooks.PostToolUse;
     if (!hooks.some(({ matcher }) => matcher.split("|").includes("interrupt_agent"))) process.exit(1);
+  ' "$HOOK_DIR/hooks.json"
+  [ "$status" -eq 0 ]
+}
+
+@test "PostToolUse routes dotted Codex collaboration completions" {
+  run node -e '
+    const hooks = require(process.argv[1]).hooks.PostToolUse;
+    const matcher = hooks.map(({ matcher }) => matcher).join("|");
+    if (!new RegExp(matcher).test("collaboration.spawn_agent")) process.exit(1);
+    if (!new RegExp(matcher).test("collaboration.interrupt_agent")) process.exit(1);
   ' "$HOOK_DIR/hooks.json"
   [ "$status" -eq 0 ]
 }

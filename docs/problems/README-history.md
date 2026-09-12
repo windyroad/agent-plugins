@@ -1482,3 +1482,9 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-09-11 **P538 opened** - problem creation must remain available when the problem index is absent
 
 > Last reviewed: 2026-09-11 **P538 reached Known Error** - creation callers gate source reports on a derived problem index
+
+## 2026-09-13
+
+> Last reviewed: 2026-09-12 **P402 moved to Verification Pending** - published recovery denials now state both runtime paths without relying on `CODEX_THREAD_ID`
+
+> Last reviewed: 2026-09-13 **P477 returned to Known Error** - Codex 0.153.4 emits dotted collaboration names and `input_text` arrays that the completion bridge did not accept

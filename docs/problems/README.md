@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-12 **P402 moved to Verification Pending** - published recovery denials now state both runtime paths without relying on `CODEX_THREAD_ID`
+> Last reviewed: 2026-09-13 **P477 returned to Known Error** - Codex 0.153.4 emits dotted collaboration names and `input_text` arrays that the completion bridge did not accept
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -11,6 +11,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
 | | | **Tier 0 — Critical-bypass** (Severity Very High ≥17, security-classified, or incident-linked) | | | | | |
+| 40 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Known Error | S | 2026-08-12 | internal |
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
@@ -300,7 +301,6 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P400 | architect-mark-reviewed PostToolUse never fires on a SendMessage resume of an architect agent | pending — committed on main, ships next @windyroad/architect release | no — not observed |
 | P403 | Agent frames skill-mandatory mechanical steps as user-optional (detect_mechanical_optional Stop-hook detector; fix vehicle RFC-042) | pending — @windyroad/itil patch committed, ships next release | no — not observed |
 | P533 | Duplicate ticket IDs are silently swallowed by the README reconciler, so drift rows blame the wrong cause | `@windyroad/itil@2.2.0` 2026-09-03 | no — not observed |
-| P477 | Codex collaboration completion bypasses the risk-marker bridge | 2026-09-09 (`@windyroad/risk-scorer@0.19.1`; version-packages commit `e54352d1`, merge `ad476823`, PR #474) | no — not observed |
 | P537 | External-comms publication guard blocks npm publish dry runs | 2026-09-11 (`@windyroad/risk-scorer@0.19.2`, `@windyroad/voice-tone@0.8.5`; version-packages commit `4d66e3ab`, merge `99c720b9`, PR #475) | no — not observed |
 | P402 | external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS | 2026-09-12 (`@windyroad/risk-scorer@0.19.3`, `@windyroad/voice-tone@0.8.6`; version commit `8c9e4f4c`, merge `9cc26afc`, PR #477, workflow 34684064046) | no — not observed |
 

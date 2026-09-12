@@ -1,11 +1,11 @@
 # Problem 477: Codex collaboration completion bypasses the risk-marker bridge
 
-**Status**: Verification Pending (2026-09-10; recurrence fix published and installed, awaiting a fresh Codex session to exercise the governed-command journey)
+**Status**: Known Error (2026-09-13; Codex 0.153.4 emits dotted collaboration tool names and `input_text` response arrays that the bridge did not accept)
 **Reported**: 2026-08-12
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5
 **Origin**: internal
 **Effort**: S
-**WSJF**: 0 — Verification Pending multiplier
+**WSJF**: 40
 **JTBD**: JTBD-001
 **Persona**: plugin-developer
 
@@ -45,6 +45,36 @@ STORY-061.
 
 ## Fix and Verification
 
+### Recurrence on 2026-09-13
+
+A live Codex 0.153.4 task spawned the exact `wr-risk-scorer:pipeline` role,
+received `RISK_SCORES: commit=5 push=5 release=5` with the exact assessed
+`RISK_CWD`, waited for completion, and invoked `interrupt_agent` once. The
+next governed release command still reported `No release risk score found`.
+An independent replay in the plugin repository produced the same missing
+parent marker.
+
+Codex 0.153.4 exposes these calls as the dotted names
+`collaboration.spawn_agent` and `collaboration.interrupt_agent`, while the hook
+matcher, dispatcher, and parser accepted only plain, flattened, or legacy
+multi-agent names. It also serializes the native collaboration result exposed
+to `PostToolUse` as an array of `input_text` items whose text contains the JSON
+result. The bridge therefore did not route the dotted event; even a directly
+replayed event reached a `response` parser that treated every non-null object,
+including that array, as the decoded result. It found neither the spawn
+`task_name` nor the interrupt `previous_status.completed`, wrote no spawn-state
+file, and discarded the valid score without an error. The existing tests
+supplied accepted tool names plus decoded objects or bare JSON strings, so they
+did not exercise the runtime payload that failed.
+
+The recurrence repair routes the exact dotted names and unwraps and parses the
+text-item array before applying
+the existing exact-role, session, target, checkout, state-hash, and atomic
+claim controls. A behavioural test now feeds the exact Codex 0.153 response
+shape through the real dispatcher and asserts the checkout-bound commit, push,
+and release markers. A negative near-suffix tool-name case keeps unrecognised
+events fail-closed.
+
 ### Recurrence on 2026-09-09
 
 A live Codex task received `RISK_SCORES: commit=4 push=0 release=0` and the
@@ -83,6 +113,16 @@ cleanup candidates.
 No new hook or ADR is required: this restores the intended completed-agent compatibility path using the already-enabled `SubagentStop`, `PreToolUse:Bash`, and `UserPromptSubmit` events without changing the scoring or delivery contract.
 
 ## Fix Strategy
+
+The 2026-09-13 recurrence repair accepts Codex 0.153's dotted collaboration
+tool names and decodes its `input_text` response array before the existing bridge reads `task_name` or
+`previous_status.completed`. It does not widen the accepted role, target,
+checkout, or score contracts. The source-focused risk-scorer suite passed 478
+of 478 before the packed regression case was added; the extracted npm package
+then passed both packed bridge checks, including the exact 0.153 payload.
+Architecture review passed under ADR-083, and no new ADR is required.
+
+**Current release vehicle**: `.changeset/fix-codex-input-text-risk-receipts.md`
 
 The 2026-09-09 recurrence repair is the bounded risk-scorer patch in commit
 `297f62265512c65bf8a6707fc58a9943dab935eb`. It removes the optional
