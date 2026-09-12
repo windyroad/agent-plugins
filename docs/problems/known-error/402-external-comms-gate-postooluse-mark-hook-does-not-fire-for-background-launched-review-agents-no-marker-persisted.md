@@ -1,6 +1,6 @@
 # Problem 402: external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS
 
-**Status**: Verification Pending
+**Status**: Known Error
 **Reported**: 2026-07-01
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 (Likely) = 12. **Rated at capture from in-session evidence (5/5 PASS, 0 markers), NOT deferred** — re-rating "at next /wr-itil:review-problems" would itself be the P375 bug (nothing self-fires review-problems). Impact 3: blocks every external-facing commit and forces habitual `BYPASS_RISK_GATE=1`, eroding a load-bearing leak gate (workaround exists). Likelihood 4: reproduces on every background-launched review this session.
 **Origin**: inbound-reported (#400) — stamped 2026-08-21 review from the upstream poll; upstream filing `wr-risk-scorer: external-comms PASS marker lands in subagent's own session dir`
@@ -110,7 +110,7 @@ Mapped which past reviews actually wrote their marker (by key, in `$TMPDIR/claud
 - [ ] Confirm whether background/forced-async `Agent` dispatch fires the PostToolUse mark hook at all, and if so, under which session_id (background-agent SID vs parent live SID) the marker lands.
 - [ ] Determine whether the fix is (a) a foreground/synchronous review path the mark hook can observe, or (b) a multi-SID marker-write (cf. P260 Option-C bounded multi-UUID write) so the marker lands under the live session's SID regardless of which context fired the hook.
 - [ ] Create reproduction test
-- [ ] Re-word the gate's remediation text: `run_in_background: false` is not universally reachable (see the 2026-08-20 evidence below), so the message must name a path an agent in that harness can actually take.
+- [ ] Re-word the gate's remediation text: `run_in_background: false` is not universally reachable (see the 2026-08-20 evidence below), so the message must name a path an agent in that harness can actually take. The 2026-09-12 recurrence isolates the remaining defect: runtime selection for that text depends on `CODEX_THREAD_ID`, which is not reliably present in Codex PreToolUse hook environments.
 
 ### Evidence 2026-08-20 — the prescribed remediation is unreachable in some harnesses
 
@@ -193,6 +193,14 @@ The native Codex completion bridge released for ordinary style-guide and voice-t
 
 RFC-086 now carries STORY-086 for the previously excluded external-comms slice. The fix reuses the existing Codex completion transport and the existing evaluator-specific marker writers; it does not widen reviewer identity or accept narrative verdicts.
 
+### Recurrence evidence — 2026-09-12
+
+An installed Codex task in `home-loan-mcp` attempted `gh issue create` after a genuine `wr-risk-scorer:external-comms` PASS. The gate denied the retry with the Claude-only instruction to use `run_in_background: false`; it did not tell the Codex caller to invoke `interrupt_agent` on the completed reviewer. The task therefore repeated the review, remained blocked, and fell back to GitHub's browser UI.
+
+The exact denial proves the source's runtime branch selected the wrong arm in a Codex task. The branch relies solely on `CODEX_THREAD_ID`, but that variable was absent from the PreToolUse hook environment. The completion bridge and reviewer verdict were available; the actionable recovery instruction was hidden behind an unreliable environment heuristic.
+
+**Root cause:** a guardrail error message whose recovery differs by runtime conditionally omits one recovery path based on runtime detection that the hook contract does not guarantee. The gate should always state both conditional paths, making the denial self-contained even when runtime identity is unavailable.
+
 #### The title's "does not fire" is NOT established — treat the mechanism as open
 
 This ticket's title, and its 2026-07-01 description, both assert the hook *does not fire*. The 2026-08-20 reproduction turned up evidence that does not fit that claim, and it is recorded here rather than smoothed over.
@@ -239,6 +247,8 @@ Move the marker write off the transport side effect. The mark hook fires on `Pos
 ## Fix Strategy
 
 RFC-086 carries STORY-086. Extend the existing native Codex completion transport to the external-comms risk and voice reviewer identities, retaining the existing evaluator-specific marker writers and their parent, checkout, policy, surface, and draft-key bindings.
+
+For the 2026-09-12 recurrence, remove the deny message's dependency on `CODEX_THREAD_ID`: always name the Codex completed-`interrupt_agent` path and the Claude Code synchronous-dispatch path. Keep the change in the canonical shared hook, sync the two published consumer copies per ADR-017, and add one behavioural check proving a Codex-capable recovery instruction is present even when `CODEX_THREAD_ID` is absent.
 
 **Release vehicle**: .changeset/calm-agents-interrupt.md
 
