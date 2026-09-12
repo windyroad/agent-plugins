@@ -1,7 +1,7 @@
 # Risk Policy — Windy Road Agent Plugins
 
 > ISO 31000-aligned risk criteria for pipeline risk scoring.
-> Last reviewed: 2026-08-04
+> Last reviewed: 2026-09-12
 
 > Reviewed monthly and after any significant change to distribution channels, package architecture, or CI/CD infrastructure.
 
@@ -79,11 +79,18 @@ Every FAIL verdict cites the specific class violated (verbatim — copy the bull
 
 Pipeline gates block when cumulative residual risk exceeds 5. This means:
 - Very Low (1-2) and Low (3-5) risk changes proceed without intervention
-- Medium (6-9) and above require explicit acknowledgement or risk reduction
+- Medium (6-9) and above must be reduced to within appetite or halted
 
 This conservative threshold reflects that these packages are installed into users' development environments and promote a professional services brand. Broken installs or misbehaving hooks directly damage user trust and brand reputation.
 
 The threshold tracks the new Low ceiling under ADR-086's rebalanced label bands (was 4 under superseded ADR-065). The shift admits residual=5 (the Impact=5/Likelihood=1 floor for severe-but-rare risks like R008-credentials-in-committed-files) within appetite, with the residual control being the post-incident rotation-runbook readiness named in those risks' Treatment sections.
+
+## Authorized Bypass Scenarios
+
+- **Risk-reducing changes** proceed via the risk-reducing path when they meet the scorer's established reducing criteria. The scorer emits `RISK_BYPASS: reducing`; the gate honours a drift-revalidated, TTL-bounded `reducing-*` marker. Risk-neutral changes within appetite proceed normally without a bypass marker.
+- **Incident response is not a separate carve-out.** An active incident is a risk already being realised (Likelihood 5), so an incident-response change is scored against that live baseline and proceeds only if net-risk-reducing, per ADR-042 Rule 1b. The `incident-release` marker exists only to let a net-reducing restore-service release proceed despite red or unreadable CI during a live outage.
+- **Above-appetite risk is never bypassable by a prompt or environment variable.** There is no "commit/release anyway" question and no `BYPASS_RISK_GATE` or `ci-bypass` override, removed by P377/RFC-029. Above appetite, the action auto-remediates to within appetite or halts, per ADR-042 Rule 1.
+- **Default-permitted-when-silent.** A project whose `RISK-POLICY.md` predates this section still permits the risk-reducing and incident paths above. This section makes the policy the explicit single source of truth and should be added at the next review.
 
 ## Risk Catalog
 
