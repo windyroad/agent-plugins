@@ -1,6 +1,6 @@
 # Problem 477: Codex collaboration completion bypasses the risk-marker bridge
 
-**Status**: Verification Pending (2026-09-13; `@windyroad/risk-scorer@0.19.4` released and installed, awaiting a fresh-session native collaboration journey)
+**Status**: Closed (closed-on-evidence 2026-09-13 - a fresh Codex session completed the installed `wr-risk-scorer:pipeline`, automatically persisted checkout-bound 0/0/0 markers through `collaboration.interrupt_agent`, and admitted the following governed command. Recovery: `/wr-itil:transition-problem 477 known-error`)
 **Reported**: 2026-08-12
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5
 **Origin**: internal
@@ -148,10 +148,13 @@ exact dotted `collaboration.spawn_agent` and `collaboration.interrupt_agent`
 names plus the `input_text` response-array shape and persisted commit, push,
 and release scores of 4 against the assessed checkout identity.
 
-Awaiting user verification in a fresh Codex session that exercises the native
-collaboration completion and the following governed-command gate. The current
-session loaded the pre-release hook matcher, so it cannot prove that
-session-start registration boundary without a restart.
+Fresh-session verification completed on 2026-09-13 after restarting Codex. The
+installed `wr-risk-scorer:pipeline` returned commit, push, and release scores of
+0 for `/private/tmp/windyroad-p477.JBjAIC`; the native
+`collaboration.interrupt_agent` completion automatically persisted all three
+checkout-bound markers. The following governed `git commit --dry-run` was
+admitted from that exact checkout. Git exited 1 only because the working tree
+was clean. No manual marker replay or bypass was used.
 
 Released in `@windyroad/risk-scorer@0.19.1` from recurrence-fix commit
 `297f62265512c65bf8a6707fc58a9943dab935eb` via

@@ -1488,3 +1488,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-09-12 **P402 moved to Verification Pending** - published recovery denials now state both runtime paths without relying on `CODEX_THREAD_ID`
 
 > Last reviewed: 2026-09-13 **P477 returned to Known Error** - Codex 0.153.4 emits dotted collaboration names and `input_text` arrays that the completion bridge did not accept
+
+> Last reviewed: 2026-09-13 **P477 verification pending** - `@windyroad/risk-scorer@0.19.4` is released and installed; fresh-session native collaboration verification remains

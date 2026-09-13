@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-13 **P477 verification pending** - `@windyroad/risk-scorer@0.19.4` is released and installed; fresh-session native collaboration verification remains
+> Last reviewed: 2026-09-13 **P477 closed on evidence** - fresh-session native completion automatically persisted checkout-bound risk markers and admitted the governed command
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -302,7 +302,6 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P533 | Duplicate ticket IDs are silently swallowed by the README reconciler, so drift rows blame the wrong cause | `@windyroad/itil@2.2.0` 2026-09-03 | no — not observed |
 | P537 | External-comms publication guard blocks npm publish dry runs | 2026-09-11 (`@windyroad/risk-scorer@0.19.2`, `@windyroad/voice-tone@0.8.5`; version-packages commit `4d66e3ab`, merge `99c720b9`, PR #475) | no — not observed |
 | P402 | external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS | 2026-09-12 (`@windyroad/risk-scorer@0.19.3`, `@windyroad/voice-tone@0.8.6`; version commit `8c9e4f4c`, merge `9cc26afc`, PR #477, workflow 34684064046) | no — not observed |
-| P477 | Codex collaboration completion bypasses the risk-marker bridge | 2026-09-13 (`@windyroad/risk-scorer@0.19.4`; version-packages commit `794372c0`, merge `e6288d5d`, PR #478, workflow `34726166361`) | no — not observed |
 
 ## Inbound Upstream Reports
 
@@ -408,6 +407,7 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 
 | ID | Title | Closed via |
 |----|-------|-----------|
+| P477 | Codex collaboration completion bypasses the risk-marker bridge | Closed 2026-09-13 on fresh-session installed-artifact evidence: native `collaboration.interrupt_agent` completion automatically persisted checkout-bound 0/0/0 markers and admitted the following governed command. No manual replay or bypass. Recovery: `/wr-itil:transition-problem 477 known-error`. |
 | P538 | Problem creation is gated on the problem index existing | Closed 2026-09-11 after the published `@windyroad/itil` 2.2.1 skill created a ticket and canonical index together in a fresh missing-index adopter fixture; the published reconciler passed and exact two-file commit `a0d10e4` completed. Recovery: `/wr-itil:transition-problem 538 known-error`. |
 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | Closed 2026-08-31 on installed published-artifact evidence from `@windyroad/architect@0.22.0`: the non-unique fixture raised `[First-Match Footgun]`, while the primary-key fixture passed without the finding. Recovery: `/wr-itil:transition-problem 426 known-error`. |
 | P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | Closed 2026-08-21 (run-retro Step 4a sub-step 9 prior-session evidence drain per P282). Fix released `@windyroad/architect@0.21.1` 2026-08-17, live in published 0.21.3. Evidence: `yes — observed: installed v0.21.3 hook permits a clean declared checkout and denies an unpaired one, both from the target index`; regression suite 24/24 green. Recovery: `/wr-itil:transition-problem 499 known-error`. |
