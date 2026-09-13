@@ -1,0 +1,46 @@
+description: Codex review-decisions cognitive accessibility gate eval.
+
+evaluateOptions:
+  maxConcurrency: 1
+
+providers:
+  - id: 'exec:bash ./run-codex-skill-eval.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Review-decisions passes the full ADR before first presentation
+    vars:
+      prompt: |
+        An unconfirmed ADR is next in the drain. The external reviewer has an
+        enforced read-only sandbox and returns PASS. Explain the ordering from
+        loading the ADR through the ratification question.
+    assert:
+      - type: regex
+        value: '(?:complete|Complete)(?: unconfirmed)? ADR[\s\S]*PASS[\s\S]*(?:no (?:further )?edit|[Mm]ake no further edit)[\s\S]*(?:plain-language )?summary[\s\S]*(?:ADR )?file[\s\S]*(?:structured (?:ratification )?question|request_user_input)'
+
+  - description: Review-decisions rechecks an amendment before re-presentation
+    vars:
+      prompt: |
+        The ADR passed cognitive review and was presented. The decision-maker
+        chose Amend and supplied a change. Explain when the oversight marker may
+        be written and what must happen before the ADR is shown again.
+    assert:
+      - type: regex
+        value: '(?:oversight )?marker[\s\S]*only after[\s\S]*Confirm'
+      - type: regex
+        value: '(?:apply|Apply)[\s\S]*(?:amendment|change)'
+      - type: regex
+        value: '(?:[Rr]epeat|[Rr]erun|[Rr]e-run)[\s\S]*cognitive-accessibility review[\s\S]*PASS'
+      - type: regex
+        value: '(?:summary|plain-language)[\s\S]*(?:complete amended ADR|ADR file)[\s\S]*(?:structured (?:ratification )?question|request_user_input)'
+
+  - description: Review-decisions stops when no read-only reviewer can run
+    vars:
+      prompt: |
+        The external reviewer is missing and the bundled reviewer fails to
+        start. Explain whether the ADR may be presented for ratification.
+    assert:
+      - type: regex
+        value: '(?:may not|must not|cannot|[Dd]o not)[\s\S]*(?:present|ratification)[\s\S]*(?:stop|[Nn]o (?:ratification|cognitive-review) marker|must not (?:ask|write))'

@@ -13,11 +13,10 @@
 #     pattern across the 4-surface set (capture-problem / manage-incident /
 #     manage-problem / create-adr) per the helper at
 #     `packages/shared/derive-first-dispatch.sh`.
-#   - Step 5 / 5a two-fire split (P339 / P340 — substance-confirm precedes
-#     draft-quality review): Step 5 fires TWO separate `AskUserQuestion`
-#     passes — substance-confirm GATES the born-confirmed marker write;
-#     draft-quality review fires AFTER 5a passes and does NOT gate the
-#     marker. Bundling them re-introduces the ADR-078 ratification gap.
+#   - Step 4.5 / Step 5 split (P339 / P340): optional draft-quality input is
+#     applied before cognitive review; the later substance-confirm question
+#     alone gates the born-confirmed marker write. Bundling them re-introduces
+#     the ADR-078 ratification gap.
 #   - Step 5a brief-before-ID at the option-shape AskUserQuestion (P350-
 #     architect): the question text + every option label inline the
 #     substance of the option (chosen-option short name + self-contained
@@ -32,8 +31,8 @@
 #     subprocesses spawned via `claude -p` MUST write
 #     `human-oversight: unconfirmed` instead — documented ADR-074 carve-out
 #     from the ADR-013 Rule 6 universal queue-and-continue default.
-#   - Step 5a retitle-after-decision (P354 — ADR-044 category-4 silent-
-#     framework): before the marker write, if the on-disk slug matches a
+#   - Step 4.5 retitle-before-review (P354 — ADR-044 category-4 silent-
+#     framework): before cognitive review, if the on-disk slug matches a
 #     question-shape pattern (`-vs-`, `should-`, `whether-`, `-or-`), the
 #     skill mechanically derives the outcome slug from the chosen-option
 #     short name, edits the H1, then `git mv`. Confirmation is written only
@@ -197,9 +196,9 @@ tests:
           observable evidence. Saying it does NOT fire AskUserQuestion
           PASSES.
 
-  # --- Step 5 / 5a two-fire split (P339 / P340) -----------------------------
+  # --- Draft-quality / cognitive PASS / substance-confirm ordering ----------
 
-  - description: Step 5 two-fire split — substance-confirm precedes draft-quality review; substance-confirm gates marker; draft-quality does NOT
+  - description: Draft-quality precedes cognitive PASS and substance-confirm; only substance-confirm gates marker
     vars:
       prompt: |
         I am the /wr-architect:create-adr Step 5 confirm-with-user step.
@@ -207,59 +206,41 @@ tests:
         (Option A / Option B / Option C). I need to confirm with the user
         before any born-confirmed marker writes.
 
-        Per the Step 5 contract (P339 + P340 amendment 2026-05-31), how
-        many separate `AskUserQuestion` passes does Step 5 fire? What is
-        the order? Which of the two fires GATES the born-confirmed
-        marker write? Which does NOT gate the marker? What happens if I
-        bundle them into a single "review pass" question?
+        Per the current contract, what is the order of optional draft-quality
+        editing, full-ADR cognitive accessibility review, and the substantive
+        ratification question? Which question gates the born-confirmed marker?
+        May any ADR edit occur after the final cognitive PASS and before
+        presentation?
     assert:
-      # Tier A — must name TWO separate fires. Pattern handles markdown-
-      # code-span insertions between adjectives (e.g. "two separate
-      # `AskUserQuestion` passes" which inserts a code span between
-      # "separate" and "passes") + step-naming shapes (5a/5b).
+      # Tier A — must name the separate quality and substance surfaces.
       - type: regex
-        value: '[Tt]wo\s+separate|[Tt]wo\s+(?:AskUserQuestion\s+)?(?:fires?|passes?)|2\s+(?:separate\s+)?(?:fires?|passes?)|TWO\s+|5a\s+(?:and|\+|/)\s+5b|Step\s+5a|substance-confirm\s+fire\s+\(5a\)'
+        value: '[Dd]raft[\s\-]?[Qq]uality'
       # Tier A — must name substance-confirm as the gating fire. Case-
       # insensitive char-class on the leading S because LLM responses
       # often title-case the contract name in headings.
       - type: regex
         value: '[Ss]ubstance[\s\-]?[Cc]onfirm'
-      # Tier A — must name draft-quality review as the non-gating fire.
+      # Tier A — must name cognitive review and PASS.
       - type: regex
-        value: '[Dd]raft[\s\-]?[Qq]uality'
+        value: '[Cc]ognitive[\s\-]?[Aa]ccessibility|PASS'
       # Tier A — must reference the P339 / P340 / ADR-078 origin.
       - type: regex
         value: 'P339|P340|ADR-078|bundled\s+(?:review[\s\-]?)?pass|ratification\s+gap'
       # Tier A — must name marker write semantics.
       - type: regex
         value: 'born[\s\-]?confirmed|marker\s+write|human[\s\-]?oversight|gate(?:s)?\s+the\s+marker'
-      # Tier B — semantic invariant: substance-confirm precedes
-      # draft-quality; substance-confirm gates the marker write; bundling
-      # re-introduces the ADR-078 ratification gap.
+      # Tier B — semantic invariant: all draft edits, then cognitive PASS,
+      # then substance-confirm presentation; only substance-confirm gates.
       - type: llm-rubric
         value: |
-          The response describes Step 5 firing TWO SEPARATE
-          `AskUserQuestion` passes in this order:
-            (1) the substance-confirm fire (Step 5a) — the user picks the
-                chosen option from the considered-options set; THIS fire
-                GATES the born-confirmed marker write.
-            (2) the draft-quality review fire (Step 5b, optional) — narrow
-                questions on prose quality / consulted-informed list / edge
-                cases; fires AFTER substance-confirm passes; does NOT
-                gate the marker.
-          Bundling the two into a single "review pass" question (the
-          ADR-078 commit 5196e3d in-session exemplar that motivated P339 +
-          P340) re-introduces the ratification gap: a "Yes" answer is
-          treated as substance-ratification when in practice the user is
-          confirming draft quality alone, landing the human-oversight
-          marker on substance the user never explicitly affirmed. PASS if
-          the response identifies the two-fire split + correct order +
-          substance-confirm-gates-marker semantics + draft-quality-does-NOT-
-          gate-marker semantics. FAIL if the response says Step 5 fires
-          ONE bundled AskUserQuestion that asks both substance + draft
-          quality, OR says draft-quality gates the marker, OR says
-          substance-confirm and draft-quality are interchangeable. Saying
-          draft-quality does NOT gate the marker PASSES.
+          The response gives this order: optional draft-quality questions and
+          all resulting edits first; then full-ADR cognitive accessibility
+          review until PASS; then summary, ADR file, and the separate
+          substantive option question. Only the substantive option selection
+          gates the human-oversight marker. No ADR edit may occur between the
+          final cognitive PASS and presentation. FAIL if quality editing occurs
+          after PASS, if presentation precedes PASS, or if draft quality gates
+          the marker.
 
   # --- Step 5a brief-before-ID at the option-shape AskUserQuestion ---------
 
@@ -396,25 +377,25 @@ tests:
           P348 hollow-marker bug), OR says AFK halts and refuses to
           create the ADR (would block JTBD-006).
 
-  # --- Step 5a retitle-after-decision (P354 — silent-framework) ------------
+  # --- Step 4.5 retitle-before-review (P354 — silent-framework) -------------
 
-  - description: Step 5a retitle-after-decision — mechanical no-AskUserQuestion; retitle before the confirmation marker is written last
+  - description: Step 4.5 retitle-before-review — mechanical no-AskUserQuestion; cognitive PASS follows the edit
     vars:
       prompt: |
-        I am the /wr-architect:create-adr Step 5a substance-confirm step.
-        The substance-confirm fire just passed; the
-        `wr-architect-mark-oversight-confirmed` helper has NOT run; the
+        I am the /wr-architect:create-adr Step 4.5 finalization step.
+        The draft records "Marketplace-only distribution" as its chosen
+        option; the `wr-architect-mark-oversight-confirmed` helper has NOT run; the
         `human-oversight: confirmed` line is not yet on disk. The on-disk
         filename is `docs/decisions/079-marketplace-vs-git-source-distribution.proposed.md`
         (the slug is question-shaped — matches the `-vs-` pattern). The
-        user picked "Marketplace-only distribution" as the chosen option.
+        cognitive accessibility review has not run yet.
 
-        Per the Step 5a retitle-after-decision contract (P354 — ADR-044
+        Per the Step 4.5 retitle-before-review contract (P354 — ADR-044
         category-4 silent-framework), what does create-adr do next? Does
         the retitle fire `AskUserQuestion` to confirm the new slug? What
         helper derives the new outcome slug? What is the ORDER of
         operations (Edit the H1 vs `git mv` the file), and when is the
-        confirmation marker written?
+        cognitive review and confirmation marker happen?
     assert:
       # Tier A — must be mechanical / no AskUserQuestion.
       - type: regex
@@ -436,11 +417,10 @@ tests:
       # confirmation is the final content write.
       - type: llm-rubric
         value: |
-          The response describes Step 5a's retitle-after-decision as a
+          The response describes Step 4.5's retitle-before-review as a
           MECHANICAL operation (ADR-044 category-4 silent-framework) —
           no `AskUserQuestion` fires (per the P132 inverse-P078 guard,
-          the chosen option is already known from the substance-confirm
-          answer just above). The new outcome slug is derived from the
+          the outcome is already recorded in the mutable draft). The new outcome slug is derived from the
           chosen-option short name ("Marketplace-only distribution") via
           the shared helper's `derive_kebab_slug` function — the same
           helper Step 2's Title derivation uses. The ORDER of operations is:
@@ -451,9 +431,9 @@ tests:
                 — no Edit/Write hook fires; rename is captured as a
                 rename in git history).
             (3) THEN emit the I2-isomorphic stderr advisory.
-            (4) Complete any remaining draft-quality and supersession
-                preparation, then write `human-oversight: confirmed` as
-                the final ADR content change.
+            (4) Complete remaining draft edits, obtain cognitive accessibility
+                PASS, present the ADR, and only after a matching substantive
+                choice write `human-oversight: confirmed` as the final content change.
           PASS if the response identifies mechanical + derive_kebab_slug
           helper + H1-Edit-before-git-mv ordering + marker-last ordering.
           FAIL if the response says

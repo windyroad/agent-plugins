@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 121 (108 in-force, 13 historical)
+**Total ADRs:** 122 (109 in-force, 13 historical)
 
 ---
 
 ## In-force decisions
 
-_108 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_109 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -549,6 +549,11 @@ _108 ADRs. These are the current rules. The architect agent reads this section f
 **Chosen:** Chosen option: **"Report-first problem creation"**, because a derived index must not discard the report it exists to surface. The same-commit repair preserves the repository's consistency boundary without weakening strict reconciliation out...
 **Confirmation:** Focused behavioral skill evaluations show both capture-problem and the new-problem branch of manage-problem co...; A focused evaluation shows parseable index drift is repaired without changing narrative outside generated sect...; A focused evaluation shows an existing malformed index still halts before any overwrite.; Existing reconciliation tests confirm strict exit codes and all non-creation callers remain unchanged.; The packed plugin is installed into a temporary adopter repository with no problem index, and an exact problem...
 **Related:** ADR-014, ADR-032
+
+### ADR-124 — Cognitive Accessibility Review Before ADR Ratification
+**Status:** proposed | **Oversight:** confirmed
+**Chosen:** Chosen option: **"Prefer the external reviewer and use a bundled fallback"**, because it provides specialist review without breaking standalone installs.
+**Confirmation:** Automated tests that exercise the workflow confirm that the external reviewer can return PASS and that review ...; Automated workflow tests confirm that the bundled reviewer runs when the external reviewer cannot run.; Automated workflow tests confirm that the same review path runs again after issues are fixed.; Automated workflow tests confirm that ratification stops when neither reviewer can run.; Automated workflow tests confirm that changing the chosen option or amending the ADR triggers another review b...; Installer tests confirm that the base architect reviewer and bundled cognitive accessibility reviewer each ins...; The bundled reviewer and shared review criteria ship with the architect package.; Tests confirm that the repository's Codex agent files remain consistent with their source files.
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: wr-architect:create-adr
 description: Create a new Architecture Decision Record (MADR 4.0) in docs/decisions/. Examines existing decisions, asks about the problem and options, and writes a properly formatted ADR.
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent
 ---
 
 # Architecture Decision Record Generator
@@ -34,7 +34,7 @@ Resolve each field via the following dispatch. **The order is load-bearing** —
 
 | Field | Dispatch | ADR-044 category |
 |-------|----------|------------------|
-| **Title** | Derive silently. Kebab-case the first 8-10 non-stopword tokens of the user's prose problem-statement (same slug derivation as `/wr-itil:capture-problem` Step 1.4, `/wr-itil:manage-incident` Step 4, and `/wr-itil:manage-problem` Step 4 — uses the shared helper's `derive_kebab_slug` function). At intake the derived slug typically encodes the **question** (the problem-statement is question-shaped); the title-as-outcome convention in Step 2a below names the GOOD/BAD shapes, and Step 5a's mechanical retitle-after-decision check renames the file to the chosen-option's outcome shape after substance-confirm passes. Emit stderr advisory: `create-adr: derived title='<slug>' from problem-statement; re-invoke with the desired title or rename the file if the slug is wrong`. Do NOT fire AskUserQuestion. | category-4 silent-framework |
+| **Title** | Derive silently. Kebab-case the first 8-10 non-stopword tokens of the user's prose problem-statement (same slug derivation as `/wr-itil:capture-problem` Step 1.4, `/wr-itil:manage-incident` Step 4, and `/wr-itil:manage-problem` Step 4 — uses the shared helper's `derive_kebab_slug` function). At intake the derived slug typically encodes the **question** (the problem-statement is question-shaped); the title-as-outcome convention in Step 2a below names the GOOD/BAD shapes, and Step 4.5 mechanically retitles the file from the outcome recorded in the draft before cognitive review. Emit stderr advisory: `create-adr: derived title='<slug>' from problem-statement; re-invoke with the desired title or rename the file if the slug is wrong`. Do NOT fire AskUserQuestion. | category-4 silent-framework |
 | **status** (frontmatter) | Always `proposed` for new ADRs per Step 4 template convention. No ask, no advisory needed — SKILL convention is unambiguous. | category-4 silent-framework |
 | **date** (frontmatter) | Today's date (`date +%Y-%m-%d`) per Step 4 template. No ask, no advisory needed — wall-clock derivation is unambiguous. | category-4 silent-framework |
 | **reassessment-date** (frontmatter) | Today + 3 months (`date -v+3m +%Y-%m-%d` on BSD-date / `date -d '+3 months' +%Y-%m-%d` on GNU-date) per Step 4 template. Emit stderr advisory: `create-adr: derived reassessment-date='<YYYY-MM-DD>' from today+3-months default; re-invoke with --reassessment-date= or edit the frontmatter to override`. | category-4 silent-framework |
@@ -49,7 +49,7 @@ Resolve each field via the following dispatch. **The order is load-bearing** —
 
 **Inferred fields (no ask, no advisory needed)**:
 
-- **supersedes** (frontmatter): empty list by default; populated only via Step 5c supersession handling when the user explicitly cites a superseded decision.
+- **supersedes** (frontmatter): empty list by default; populated in Step 4.5 when the user explicitly cites a superseded decision.
 
 **Stderr advisory contract**: each derived field emits a SINGLE line to stderr (NOT stdout, NOT in the ADR body) via the shared helper's `emit_stderr_advisory` function in `packages/architect/lib/derive-first-dispatch.sh`. The canonical format produced by the helper:
 
@@ -87,7 +87,7 @@ ADR titles must name the **decision outcome** as a short noun phrase, not the qu
 - `whether-to-monorepo-or-polyrepo` (open-question pattern `whether-`)
 - `marketplace-or-direct-distribution` (pure option-set pattern `-or-`)
 
-**At intake the derived title is acceptable in either shape**: Step 2's `derive_kebab_slug` runs against the problem-statement, which is typically question-shaped. The title-as-outcome convention is enforced at Step 5a's mechanical retitle-after-decision check (post substance-confirm, when the chosen option is locked in). The title need not be outcome-shaped before the decision is made.
+**At intake the derived title is acceptable in either shape**: Step 2's `derive_kebab_slug` runs against the problem-statement, which is typically question-shaped. Step 4.5 enforces the title-as-outcome convention from the outcome recorded in the draft before cognitive review. The title need not be outcome-shaped before the decision is made.
 
 (Serves JTBD-001 — skimmable titles speed the read path for the governance-enforcement persona.)
 
@@ -214,12 +214,26 @@ Chosen option: **"Option X"**, because [primary justification].
 
 Use today's date for the `date` field. Set `reassessment-date` to 3 months from today unless the user specifies otherwise.
 
-### 5. Confirm with the user — two separate fires (P339 + P340)
+### 4.5 Finalize and review the ADR before presenting it for ratification
 
-Step 5 fires TWO separate `AskUserQuestion` passes, in this order:
+Complete all draft edits before cognitive accessibility review:
 
-1. **Substance-confirm fire** — the user picks the chosen option from the considered-options set. THIS fire gates the born-confirmed marker write.
-2. **Draft-quality review fire** (optional, after substance-confirm passes) — narrow questions on prose quality, consulted/informed list, edge cases. Does NOT gate the marker.
+1. Optionally ask the separate draft-quality questions about the problem statement, option trade-offs, confirmation criteria, and consulted or informed people. Apply the answers now. This question does not ratify the ADR.
+2. Add any `supersedes:` entry and mechanically retitle a question-shaped filename or heading from the draft's recorded chosen option.
+3. Read `../../references/cognitive-accessibility-rubric.md`, relative to this `SKILL.md`, and the complete unconfirmed ADR.
+
+Use this runtime-specific review path. Supply the shared rubric and complete ADR text in the prompt. Tell the reviewer to return only `PASS` or `ISSUES FOUND` in the rubric's format.
+
+- **Claude Code:** run a fresh `claude -p --agent accessibility-agents:cognitive-accessibility --tools "" --permission-mode dontAsk` subprocess. Pipe the rubric and ADR bytes to stdin; never interpolate ADR text into a shell command. The empty tool set is load-bearing because the external agent may declare write-capable tools. If the command is unavailable or exits nonzero, repeat with `--agent wr-architect:cog-a11y`. If that also fails, stop before presenting the ADR.
+- **Codex:** use the native subagent tool with `cognitive-accessibility` only when the runtime confirms its sandbox is read-only. Otherwise treat it as unavailable. Fall back to `wr-architect-cog-a11y`, whose installed configuration must also confirm `sandbox_mode = "read-only"`. If neither read-only reviewer runs, stop before presenting the ADR.
+
+`ISSUES FOUND` never activates the fallback. Apply only clarity fixes that preserve the decision, then re-run the same review path. If a suggested fix could change the decision, stop for user direction. Continue only on `PASS`. The pass applies only to this workflow run and gets no persistent marker.
+
+After the final `PASS`, do not edit the ADR before presenting the summary, ADR file, and structured substance question. If any later answer requires an ADR edit, return to this step and obtain another `PASS` before re-presentation.
+
+### 5. Confirm the substance with the user (P339 + P340)
+
+The optional draft-quality question occurred before cognitive review and does not gate the marker. Step 5 now fires only the separate substance-confirm question: the user picks the chosen option from the considered-options set, and that answer gates the born-confirmed marker write.
 
 This split closes the P339 / P340 gap: previously Step 5 fired ONE bundled "review pass" AskUserQuestion ("does the problem statement + Decision Outcome (Option X) capture the situation? — yes/no/edits/different-option"), and the user's "Yes" was treated as substance-ratification when in practice the user was confirming draft quality alone. The bundled answer landed the human-oversight marker on substance the user never explicitly affirmed. ADR-078 commit 5196e3d is the in-session exemplar; user correction 2026-05-31: *"I never approved the scripted extraction. You are supposed to run decisions by me"* + *"the previous iteration of the decision, with the programmatic extraction was not approved. How did that ADR skip ratification?"*. ADR-074 § Enforcement surface 1 is what this step now operationalises at the create-adr surface.
 
@@ -251,7 +265,7 @@ options:
   - ...one entry per considered option
 ```
 
-**Defer the marker write until the draft is final.** A matching substance-confirm answer authorises confirmation, but `human-oversight: confirmed` is the final content write to the ADR. Complete the retitle, optional draft-quality edits, and any `supersedes:` declaration first, then write the marker in Step 5d. AFK iter subprocesses spawned via `claude -p` have no `AskUserQuestion` access; they MUST leave `human-oversight: unconfirmed` for the interactive drain.
+**Defer the marker write until the draft is final.** Complete the retitle, optional draft-quality edits, and any `supersedes:` declaration before cognitive review. A matching substance-confirm answer then authorises `human-oversight: confirmed` as the final content write in Step 5b. This ordering is required because a confirmed ADR is immutable. AFK iter subprocesses spawned via `claude -p` have no `AskUserQuestion` access; they MUST leave `human-oversight: unconfirmed` for the interactive drain.
 
 **ADR-013 Rule 6 carve-out audit (P352, 2026-06-06 amendment)**: the universal AFK default is queue-and-continue. This Step 5 substance-confirm HALT-and-write-`human-oversight: unconfirmed` shape is a documented carve-out, authorised by **ADR-074** (Confirm decision substance before building dependent work). Rationale: an ADR with `human-oversight: confirmed` enters the world born-confirmed (it does not appear in `/wr-architect:review-decisions`' unoversighted set), so dependent work — every implementation that cites this ADR as authority — would be built on substance that was never user-affirmed. AFK writing `human-oversight: unconfirmed` IS the queue-and-continue shape: the loop continues; the substance-confirm decision is queued to the next interactive drain. Persona-correct for JTBD-006 ("queued for my return, not guessed at"); the carve-out is from the auto-confirm shape, not from queue-and-continue itself.
 
@@ -259,14 +273,14 @@ options:
 
 - DO NOT write the marker.
 - Re-draft Decision Outcome + Consequences + Confirmation + Pros and Cons (and Reassessment Criteria if affected) against the newly-chosen option.
-- Re-fire the substance-confirm `AskUserQuestion` against the re-drafted text to verify the substance now matches the user's pick.
+- Return to Step 4.5, re-run cognitive accessibility review until `PASS`, and re-present the summary, ADR file, and substance-confirm `AskUserQuestion`.
 - The marker writes ONLY after a substance-confirm pass whose answer matches the draft on disk.
 
 This is NOT a soft "warn and proceed" path — the marker only ever writes when the draft on disk encodes the user's substantive pick. Mismatch is a re-draft trigger, not an override.
 
-**Retitle-after-decision check (P354 — ADR-044 category-4 silent-framework).** Before the marker write, check the on-disk filename slug for a question-shape pattern (`-vs-`, `should-`, `whether-`, `-or-`). If matched, the title was derived at intake against a question-shaped problem-statement and must be retitled to the chosen-option's outcome shape now that the substance is locked in. The convention is named in Step 2a above.
+**Retitle-before-review check (P354 — ADR-044 category-4 silent-framework).** In Step 4.5, check the on-disk filename slug for a question-shape pattern (`-vs-`, `should-`, `whether-`, `-or-`). If matched, the title was derived at intake against a question-shaped problem-statement and must be retitled to the outcome recorded in the draft before cognitive review. The convention is named in Step 2a above.
 
-This step is **mechanical — no AskUserQuestion fires** (per P132 inverse-P078 guard). The chosen option is now known from the substance-confirm answer just above; derive the outcome slug from the chosen-option short name via the same `derive_kebab_slug` helper Step 2's Title derivation uses (`packages/architect/lib/derive-first-dispatch.sh`). Sequence:
+This step is **mechanical — no AskUserQuestion fires** (per P132 inverse-P078 guard). The draft's recorded chosen option is already known; derive the outcome slug from its short name via the same `derive_kebab_slug` helper Step 2's Title derivation uses (`packages/architect/lib/derive-first-dispatch.sh`). Sequence:
 
 1. Derive `new_slug = derive_kebab_slug "<chosen option short name>"`.
 2. Edit the H1 in the on-disk file to the new outcome shape (H1 stays human-readable Title Case; the slug is for the filename).
@@ -278,28 +292,9 @@ If the on-disk slug does NOT match a question-shape pattern (already outcome-sha
 
 (Serves JTBD-001 — outcome-shaped on-disk title; category-4 silent-framework per ADR-044.)
 
-#### 5b. Draft-quality review fire (optional, after 5a passes)
+#### 5b. Write the confirmation marker last
 
-After the substance-confirm fire passes, fire a separate narrow `AskUserQuestion` for draft-quality review before writing the marker:
-
-1. Does the problem statement accurately capture the situation?
-2. Are the pros/cons fair and complete?
-3. Are the confirmation criteria testable?
-4. Should anyone else be listed as consulted or informed?
-
-Apply any feedback by editing the file. This fire is OPTIONAL — when the agent has high confidence the prose is sound and the consulted/informed list is complete, this fire MAY be skipped. It runs before the marker write because a confirmed ADR is immutable. Draft-quality answers do not decide whether confirmation is allowed; the earlier substance-confirm answer does.
-
-#### 5c. Prepare supersession (if applicable)
-
-If this decision replaces an existing one:
-
-1. Add `supersedes: [NNN-old-decision-title]` to the new decision's frontmatter.
-2. Rename the old decision file from `.accepted.md` (or `.proposed.md`) to `.superseded.md` using `git mv`.
-3. Do not edit the old decision's frontmatter or body. Its content is the immutable historical record; the filename and the new decision's `supersedes:` entry carry the lifecycle transition. This removes the P057 staging trap because there is no post-rename edit to re-stage.
-
-#### 5d. Write the confirmation marker last
-
-Only after every draft edit is complete, call the marker-evidence helper and insert the confirmation lines:
+Only after a matching substance selection, with no ADR edit since the final cognitive accessibility `PASS`, call the marker-evidence helper and insert the confirmation lines:
 
 ```bash
 wr-architect-mark-oversight-confirmed docs/decisions/<NNN>-<slug>.proposed.md
@@ -313,6 +308,8 @@ oversight-date: YYYY-MM-DD   # today
 ```
 
 The PostToolUse hook writes the session-scoped evidence marker consumed by `architect-oversight-marker-discipline.sh`. Calling the helper without a real substance-confirm event is forbidden. Once these lines land, do not edit the ADR body or clear the marker; a later choice requires a new superseding ADR.
+
+If the new ADR supersedes an older decision, now rename the older file to `*.superseded.md` with `git mv`. Do not edit the old decision's frontmatter or body. This eliminates the P057 staging trap: there is no post-rename edit.
 
 **Refresh the decisions compendium (ADR-077).** After the ADR file is written and any born-confirmed marker is applied, regenerate `docs/decisions/README.md` so the architect-agent routine load surface includes the new entry. Run:
 

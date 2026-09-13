@@ -27,6 +27,7 @@
     "agents/",
     "hooks/",
     "skills/",
+    "references/",
     "scripts/",
     ".agents/",
     ".claude-plugin/",

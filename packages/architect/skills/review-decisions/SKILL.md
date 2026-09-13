@@ -1,7 +1,7 @@
 ---
 name: wr-architect:review-decisions
-description: Drain the set of recorded decisions (ADRs) that lack human oversight. Surfaces each unconfirmed ADR's chosen option and alternatives via AskUserQuestion so a human confirms, amends, or rejects the auto-made call, then writes the human-oversight marker. Use when the session-start nudge reports decisions lack oversight, or any time you want to review recorded decisions.
-allowed-tools: Read, Glob, Grep, Bash, Edit, AskUserQuestion
+description: Drain the set of recorded decisions (ADRs) that lack human oversight. Cognitively reviews each ADR before surfacing its chosen option and alternatives via AskUserQuestion so a human confirms, amends, or rejects the auto-made call; writes the human-oversight marker only after confirmation. Use when the session-start nudge reports decisions lack oversight, or any time you want to review recorded decisions.
+allowed-tools: Read, Glob, Grep, Bash, Edit, AskUserQuestion, Agent
 ---
 
 # Review Decisions — human-oversight drain
@@ -35,15 +35,26 @@ The `wr-architect-detect-unoversighted` command is a `$PATH`-resolved shim (ADR-
 
 Read **only the frontmatter + title + Decision Outcome** of each unoversighted ADR (not full bodies — keep it cheap). Group by topic cluster (e.g. release-cadence, governance-gates, AFK-orchestration, decision-recording) and order **load-bearing first**: ADRs that other ADRs cite as parents, that are `accepted` (already shipped — highest drift cost if the auto-pick was wrong), or that govern a hook/gate the user interacts with daily. Defer narrow / low-coupling ADRs.
 
+### Step 2.5: Cognitive-accessibility review before ratification
+
+For each ADR, read `../../references/cognitive-accessibility-rubric.md`, relative to this `SKILL.md`, and the complete unconfirmed ADR. Supply both in the reviewer prompt.
+
+- **Claude Code:** run a fresh `claude -p --agent accessibility-agents:cognitive-accessibility --tools "" --permission-mode dontAsk` subprocess. Pipe the rubric and ADR bytes to stdin; never interpolate ADR text into a shell command. The empty tool set prevents the external agent from changing project files. If the command is unavailable or exits nonzero, repeat with `--agent wr-architect:cog-a11y`. If that also fails, stop before presenting the ADR.
+- **Codex:** use the native subagent tool with `cognitive-accessibility` only when the runtime confirms its sandbox is read-only. Otherwise treat it as unavailable. Fall back to `wr-architect-cog-a11y`, whose installed configuration must also confirm `sandbox_mode = "read-only"`. If neither read-only reviewer runs, stop before presenting the ADR.
+
+`ISSUES FOUND` never activates the fallback. Apply only clarity fixes that preserve the decision, then re-run the same review path. If a suggested fix could change the decision, stop for user direction. Continue only on `PASS`.
+
+After the final `PASS`, do not edit the ADR before presenting its summary, the ADR file, and the structured ratification question. The pass applies only to this workflow run and gets no persistent marker.
+
 ### Step 3: Present each decision via AskUserQuestion (batched)
 
-For each ADR in the ordered queue, surface the decision as an `AskUserQuestion` (cap **4 ADRs per call** per ADR-013 Rule 1; issue further calls sequentially). For each ADR:
+For each ADR that passed Step 2.5, present these three parts in order: a short plain-language summary, the ADR file itself, then an `AskUserQuestion`. A filesystem path is not a substitute for presenting the file. Cap each structured call at **4 ADRs** per ADR-013 Rule 1; issue further calls sequentially. For each ADR:
 
 - **Question**: the decision the ADR records (its Decision Outcome, in one line).
 - **Context**: the chosen option + the alternatives the ADR considered (grounded in the ADR's Considered Options section per ADR-026), and any cited parent ADRs.
 - **Options** (per ADR):
   - **Confirm** — the recorded decision is correct; write the marker.
-  - **Amend** — the decision is mostly right but needs a change; capture the change, apply it to the ADR body, then write the marker.
+  - **Amend** — the decision is mostly right but needs a change; capture and apply the change, then review and present it again before confirmation can write the marker.
   - **Reject / supersede** — the auto-made pick is wrong; capture the supersede ticket (see Step 4) and write the **rejected-pending-supersede** marker so the drain stops re-asking.
   - **Defer** — skip this sitting; leave unoversighted for a later run.
 
@@ -65,7 +76,8 @@ This is a genuine human-decision surface (the whole point of P283) — `AskUserQ
 
 ### Step 4: Apply the outcome
 
-- **Confirm / Amend**: this queue contains only unconfirmed ADRs, so the user may still amend their draft substance. Apply any directed body change first. Then run `wr-architect-mark-oversight-confirmed <adr-path>` as a standalone Bash command; do not combine it with another command, because its PostToolUse event binds the evidence to this exact session and ADR. Finally, write `human-oversight: confirmed` + `oversight-date: <today, YYYY-MM-DD>` into the ADR's frontmatter (insert after the `date:` line if absent; never duplicate). Confirmation is the final content write. Both edits go through the standard architect / JTBD edit gate per ADR-014.
+- **Confirm**: run `wr-architect-mark-oversight-confirmed <adr-path>` as a standalone Bash command; do not combine it with another command, because its PostToolUse event binds the evidence to this exact session and ADR. Then write `human-oversight: confirmed` + `oversight-date: <today, YYYY-MM-DD>` into the ADR's frontmatter (insert after the `date:` line if absent; never duplicate). Confirmation is the final content write.
+- **Amend**: apply the directed change, then return to Step 2.5. Obtain another cognitive accessibility `PASS` and re-present the summary, ADR file, and structured question. Do not write the oversight marker until a later Confirm answer matches the reviewed ADR.
 - **Reject / supersede** (ADR-066 amendment per P316):
   1. Capture the supersede ticket via a follow-up `AskUserQuestion`: "Which problem ticket tracks the supersede?" — options: existing `P<NNN>` IDs surfaced from `docs/problems/`, **Capture a new ticket** (delegate to `/wr-itil:capture-problem`), or **Defer (leave un-tracked for now)**.
   2. If a ticket ID is captured, write `human-oversight: rejected-pending-supersede` + `supersede-ticket: P<NNN>` into the ADR's frontmatter. The detector excludes ADRs carrying both, so the drain stops re-asking until either the successor lands (the rejected file is renamed to `*.superseded.md` without rewriting its content) or the rejection is revisited.

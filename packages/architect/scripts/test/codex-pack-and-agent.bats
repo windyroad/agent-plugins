@@ -10,9 +10,11 @@ setup() {
   mkdir -p "$TMP/project"
   (cd "$TMP/project" && node "$PACKAGE/scripts/codex-agent.mjs" --scope project >/dev/null)
   [ -f "$TMP/project/.codex/agents/wr-architect-agent.toml" ]
+  [ -f "$TMP/project/.codex/agents/wr-architect-cog-a11y.toml" ]
 
   CODEX_HOME="$TMP/home" node "$PACKAGE/scripts/codex-agent.mjs" --scope user >/dev/null
   [ -f "$TMP/home/agents/wr-architect-agent.toml" ]
+  [ -f "$TMP/home/agents/wr-architect-cog-a11y.toml" ]
 }
 
 @test "SessionStart repairs only Codex user registration" {
@@ -23,6 +25,14 @@ setup() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"restart Codex"* ]]
   [ -f "$TMP/codex-home/agents/wr-architect-agent.toml" ]
+  [ -f "$TMP/codex-home/agents/wr-architect-cog-a11y.toml" ]
+
+  rm "$TMP/codex-home/agents/wr-architect-cog-a11y.toml"
+
+  run env CODEX_THREAD_ID=test CODEX_HOME="$TMP/codex-home" node "$PACKAGE/scripts/codex-agent.mjs" --session-start
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"restart Codex"* ]]
+  [ -f "$TMP/codex-home/agents/wr-architect-cog-a11y.toml" ]
 
   run env CODEX_THREAD_ID=test CODEX_HOME="$TMP/codex-home" node "$PACKAGE/scripts/codex-agent.mjs" --session-start
   [ "$status" -eq 0 ]
@@ -43,6 +53,7 @@ setup() {
   run npm exec --yes --package "$TMP"/*.tgz -- windyroad-architect --runtime codex --scope user
   [ "$status" -eq 0 ]
   [ -f "$CODEX_HOME/agents/wr-architect-agent.toml" ]
+  [ -f "$CODEX_HOME/agents/wr-architect-cog-a11y.toml" ]
   run codex plugin list
   [ "$status" -eq 0 ]
   [[ "$output" == *"wr-architect@windyroad-architect-local"* ]]
@@ -70,6 +81,8 @@ teardown() {
   [ "$status" -ne 0 ]
   run grep -F 'the Needs-Direction handoff rule' "$TMP/package/skills/create-adr/SKILL.md"
   [ "$status" -eq 0 ]
+  [ -f "$TMP/package/agents/cog-a11y.md" ]
+  [ -f "$TMP/package/references/cognitive-accessibility-rubric.md" ]
   run grep -E '\b(The the|the the|inverse-the)\b' "$TMP/package/skills/create-adr/SKILL.md"
   [ "$status" -ne 0 ]
   # P527: the packed frontmatter name is BARE. Both runtimes namespace a skill
@@ -91,7 +104,10 @@ teardown() {
   run node "$PACKAGE/scripts/codex-agent.mjs" --scope user
   [ "$status" -eq 0 ]
   target="$CODEX_HOME/agents/wr-architect-agent.toml"
+  fallback="$CODEX_HOME/agents/wr-architect-cog-a11y.toml"
   grep -Fq 'name = "wr-architect:agent"' "$target"
+  grep -Fq 'name = "wr-architect-cog-a11y"' "$fallback"
+  grep -Fq 'sandbox_mode = "read-only"' "$fallback"
 
   printf '# user managed\n' > "$target"
   node "$PACKAGE/scripts/codex-agent.mjs" --scope user >/dev/null
@@ -99,4 +115,5 @@ teardown() {
 
   node "$PACKAGE/scripts/codex-agent.mjs" --scope user --uninstall
   [ -e "$target" ]
+  [ ! -e "$fallback" ]
 }

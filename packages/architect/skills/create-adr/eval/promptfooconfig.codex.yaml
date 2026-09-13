@@ -49,3 +49,47 @@ tests:
         value: |
           The response says non-interactive Codex runs must not invent
           ratification and should leave or write human-oversight: unconfirmed.
+
+  - description: Codex create-adr requires a read-only cognitive PASS before presentation
+    vars:
+      prompt: |
+        Validate the cognitive-accessibility gate. The external reviewer exists,
+        has an enforced read-only sandbox, and returns PASS. Explain the exact
+        ordering before the ADR is presented for ratification and whether any
+        edit may occur between PASS and presentation.
+    assert:
+      - type: llm-rubric
+        value: |
+          The response requires full-ADR cognitive review to PASS before the
+          summary, ADR file, and structured ratification question are presented.
+          It allows no ADR edit between the final PASS and presentation.
+
+  - description: Codex create-adr falls back only when the external reviewer cannot run safely
+    vars:
+      prompt: |
+        Validate reviewer routing in Codex for three cases: the external
+        cognitive-accessibility reviewer is not confirmed read-only; it returns
+        ISSUES FOUND; and both external and bundled reviewers fail to start.
+        Explain the required action for each case.
+    assert:
+      - type: llm-rubric
+        value: |
+          The response uses the bundled wr-architect-cog-a11y reviewer when the
+          external reviewer is unavailable, fails to start, or is not confirmed
+          read-only. ISSUES FOUND does not switch reviewers: clarity fixes are
+          applied and the same path re-runs. If both paths fail, presentation
+          stops.
+
+  - description: Codex create-adr rechecks a redraft before re-presentation
+    vars:
+      prompt: |
+        The ADR passed cognitive review, but the decision-maker selected a
+        different considered option from the one recorded in the draft. Explain
+        the required sequence before asking for ratification again.
+    assert:
+      - type: llm-rubric
+        value: |
+          The response requires re-drafting the ADR for the selected option,
+          running cognitive accessibility review again until PASS, and only then
+          re-presenting the summary, ADR file, and structured question. It does
+          not write the human-oversight marker before that later confirmation.

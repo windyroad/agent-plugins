@@ -21,6 +21,12 @@ const AGENTS = [
     name: "wr-architect",
     fallbackDescription: "Architecture reviewer for structural and technology decisions.",
   },
+  {
+    source: join(REPO_ROOT, "packages", "architect", "agents", "cog-a11y.md"),
+    target: join(REPO_ROOT, ".codex", "agents", "wr-architect-cog-a11y.toml"),
+    name: "wr-architect-cog-a11y",
+    fallbackDescription: "Cognitive accessibility reviewer for ADRs before ratification.",
+  },
   ...riskAgentSpecs.map((spec) => ({
     target: join(REPO_ROOT, ".codex", "agents", spec.filename),
     render: () => renderRiskAgent(spec),

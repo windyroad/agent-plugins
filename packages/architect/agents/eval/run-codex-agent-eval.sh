@@ -5,6 +5,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 PROMPT="${*:-}"
+AGENT_NAME="wr-architect:agent"
+
+if [[ "$PROMPT" == "[COG_A11Y]"* ]]; then
+  AGENT_NAME="wr-architect-cog-a11y"
+  PROMPT="${PROMPT#\[COG_A11Y\]}"
+fi
 
 if [[ -z "$PROMPT" ]]; then
   echo "run-codex-agent-eval.sh: prompt argument is required" >&2
@@ -43,15 +49,23 @@ npm pack "$REPO_ROOT/packages/architect" --pack-destination "$TMP_PACK_DIR" >/de
 NPM_SPEC="$(find "$TMP_PACK_DIR" -maxdepth 1 -type f -name '*.tgz' -print -quit)"
 CODEX_BINARY="${CODEX_BINARY:-$(command -v codex)}" npm exec --yes --package "$NPM_SPEC" -- windyroad-architect --runtime codex --scope user >/dev/null
 test -f "$CODEX_HOME/agents/wr-architect-agent.toml"
+test -f "$CODEX_HOME/agents/wr-architect-cog-a11y.toml"
 cp -R "$SCRIPT_DIR/fixtures/repo/." "$TMP_REPO/"
 git -C "$TMP_REPO" init --quiet
 
-codex exec \
+OUTPUT="$(codex exec \
   --ephemeral \
   --cd "$TMP_REPO" \
   -c 'approval_policy="never"' \
   --sandbox read-only \
   --dangerously-bypass-hook-trust \
-  "Spawn the installed custom collaborator agent named wr-architect:agent. Wait for it and close that same agent. Do not substitute another agent or perform the review inline.
+  "Spawn the installed custom collaborator agent named ${AGENT_NAME}. Wait for it and close that same agent. Do not substitute another agent or perform the review inline. Return the collaborator's final output verbatim without adding a verdict label or summary.
 
-${PROMPT}" </dev/null
+${PROMPT}" </dev/null)"
+
+[[ ! -e "$TMP_REPO/forbidden.txt" ]] || {
+  echo "run-codex-agent-eval.sh: reviewer changed the read-only fixture" >&2
+  exit 3
+}
+
+printf '%s\n' "$OUTPUT"
