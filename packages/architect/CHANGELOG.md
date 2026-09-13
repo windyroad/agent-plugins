@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 0.23.0
+
+### Minor Changes
+
+- c69f793: Require ADR cognitive-accessibility review before create-adr and review-decisions present ADRs for ratification, with a bundled fallback reviewer for standalone installs.
+
 ## 0.22.2
 
 ### Patch Changes
