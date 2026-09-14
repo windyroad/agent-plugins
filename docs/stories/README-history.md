@@ -77,3 +77,7 @@
 > Last reviewed: 2026-08-31 **STORY-082 in progress** - The P503 shared Bash-write dispatcher passes focused behavior and packed-candidate checks.
 
 > Last reviewed: 2026-08-31 **STORY-083 accepted** - I6-I10 and map-derived I12 pass for the P468 architect-verdict parser repair.
+
+## 2026-09-14
+
+> Last reviewed: 2026-09-11 **STORY-088 done** - published 2.2.1 passed the missing-index adopter journey.

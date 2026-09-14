@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: continue-after-a-reviewer-passes-without-plugin-specific-recovery
 reported: 2026-09-14
 decision-makers: [Tom Howard]
