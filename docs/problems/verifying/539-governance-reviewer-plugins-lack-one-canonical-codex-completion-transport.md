@@ -1,6 +1,6 @@
 # Problem 539: Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-09-14
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5 — derived at capture from repeated fail-closed delivery blocks across multiple governance plugins and fresh tasks
 **Origin**: internal (user-reported recurrence)
@@ -65,6 +65,14 @@ The reproduction in `packages/shared/test/codex-reviewer-completion-transport.ba
 ## Fix Strategy
 
 RFC-093, “Reviewer results work across governance plugins,” delivers STORY-089 through the existing approved problem-resolution story map. The implementation keeps each package's marker and receipt state machine intact while moving native event-name and response decoding to one ADR-017 canonical helper synced into every consumer. Packed-package tests exercise the public artefacts; post-release verification must use fresh installed tasks so source correctness is not confused with a stale loaded plugin version.
+
+## Fix Released
+
+Released on 2026-09-14 as `@windyroad/architect@0.23.1`, `@windyroad/jtbd@0.14.4`, `@windyroad/risk-scorer@0.19.5`, `@windyroad/style-guide@0.6.4`, and `@windyroad/voice-tone@0.8.7` through PR #480 (merge `eb1d5e6e5`). Registry readback confirmed each exact version and its matching `latest` tag.
+
+Fresh tarballs downloaded from npm contained the same canonical helper hash. Exact dotted collaboration events with `input_text` array responses persisted the expected architect, JTBD, risk-scorer, style-guide, and voice-tone markers. Release run `34810660758` published successfully but its immediate stable-tag check caught npm propagation before risk-scorer `latest` advanced; subsequent registry readback confirmed `0.19.5` as `latest`.
+
+This proves the published package path independently. A genuinely fresh Codex application task has not yet exercised the newly installed release, so the problem remains Verification Pending rather than Closed.
 
 ## Dependencies
 
