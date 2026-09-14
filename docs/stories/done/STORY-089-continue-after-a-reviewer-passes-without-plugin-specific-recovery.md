@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 story-id: continue-after-a-reviewer-passes-without-plugin-specific-recovery
 reported: 2026-09-14
 decision-makers: [Tom Howard]
@@ -30,7 +30,7 @@ In order to continue governed work without repeating a completed review, as a de
 - [x] Architect consumes the same canonical decoder through its existing package-specific packing and dispatch flow.
 - [x] Risk-scorer consumes the same canonical decoder without weakening its specialised SubagentStop receipt, checkout, state-hash, or completion-identity controls.
 - [x] Malformed, unrelated, stale, policy-drifted, checkout-mismatched, duplicate, non-PASS, and writer-failure completions remain fail-closed.
-- [ ] All affected packages are published and a fresh installed Codex task exercises the native completion path without manual marker recovery.
+- [x] All affected packages are published and a fresh installed Codex task exercises the native completion path without manual marker recovery.
 
 ## Driving problem trace
 

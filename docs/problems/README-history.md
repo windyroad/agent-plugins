@@ -1498,3 +1498,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-09-14 **P539 captured** — governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate (lightweight aside via /wr-itil:capture-problem)
 
 > Last reviewed: 2026-09-14 **P539 known error** — native completion decoding forked across reviewer packages, leaving dotted collaboration events and input_text arrays unsupported outside risk-scorer
+
+> Last reviewed: 2026-09-14 **P539 verification pending** — five reviewer packages are published and independently exercise the canonical native completion path; fresh application-task observation remains

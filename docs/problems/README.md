@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-14 **P539 verification pending** — five reviewer packages are published and independently exercise the canonical native completion path; fresh application-task observation remains
+> Last reviewed: 2026-09-14 **P539 closed** — released reviewer plugins persisted native completion markers in a fresh task and admitted the next governed operation without manual recovery
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -302,7 +302,6 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P533 | Duplicate ticket IDs are silently swallowed by the README reconciler, so drift rows blame the wrong cause | `@windyroad/itil@2.2.0` 2026-09-03 | no — not observed |
 | P537 | External-comms publication guard blocks npm publish dry runs | 2026-09-11 (`@windyroad/risk-scorer@0.19.2`, `@windyroad/voice-tone@0.8.5`; version-packages commit `4d66e3ab`, merge `99c720b9`, PR #475) | no — not observed |
 | P402 | external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS | 2026-09-12 (`@windyroad/risk-scorer@0.19.3`, `@windyroad/voice-tone@0.8.6`; version commit `8c9e4f4c`, merge `9cc26afc`, PR #477, workflow 34684064046) | no — not observed |
-| P539 | Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate | 2026-09-14 (`@windyroad/architect@0.23.1`, `@windyroad/jtbd@0.14.4`, `@windyroad/risk-scorer@0.19.5`, `@windyroad/style-guide@0.6.4`, `@windyroad/voice-tone@0.8.7`; merge `eb1d5e6e5`, PR #480) | no — not observed |
 
 ## Inbound Upstream Reports
 
@@ -408,6 +407,7 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 
 | ID | Title | Closed via |
 |----|-------|-----------|
+| P539 | Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate | Closed 2026-09-14 on fresh installed-runtime evidence: session `01a09e85-1e48-7762-ab31-bf945af29cf7` loaded the released plugins, persisted native reviewer completion markers, and admitted governed commit `40095da4e` without manual recovery. Recovery: `/wr-itil:transition-problem 539 known-error`. |
 | P477 | Codex collaboration completion bypasses the risk-marker bridge | Closed 2026-09-13 on fresh-session installed-artifact evidence: native `collaboration.interrupt_agent` completion automatically persisted checkout-bound 0/0/0 markers and admitted the following governed command. No manual replay or bypass. Recovery: `/wr-itil:transition-problem 477 known-error`. |
 | P538 | Problem creation is gated on the problem index existing | Closed 2026-09-11 after the published `@windyroad/itil` 2.2.1 skill created a ticket and canonical index together in a fresh missing-index adopter fixture; the published reconciler passed and exact two-file commit `a0d10e4` completed. Recovery: `/wr-itil:transition-problem 538 known-error`. |
 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | Closed 2026-08-31 on installed published-artifact evidence from `@windyroad/architect@0.22.0`: the non-unique fixture raised `[First-Match Footgun]`, while the primary-key fixture passed without the finding. Recovery: `/wr-itil:transition-problem 426 known-error`. |

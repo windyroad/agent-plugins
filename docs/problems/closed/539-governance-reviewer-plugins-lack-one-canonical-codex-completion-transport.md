@@ -1,6 +1,6 @@
 # Problem 539: Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate
 
-**Status**: Verification Pending
+**Status**: Closed (closed-on-evidence 2026-09-14 — a fresh Codex task loaded the released reviewer plugins, persisted native completion markers, and admitted the governed lifecycle commit without manual recovery. Recovery: `/wr-itil:transition-problem 539 known-error`)
 **Reported**: 2026-09-14
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5 — derived at capture from repeated fail-closed delivery blocks across multiple governance plugins and fresh tasks
 **Origin**: internal (user-reported recurrence)
@@ -72,7 +72,11 @@ Released on 2026-09-14 as `@windyroad/architect@0.23.1`, `@windyroad/jtbd@0.14.4
 
 Fresh tarballs downloaded from npm contained the same canonical helper hash. Exact dotted collaboration events with `input_text` array responses persisted the expected architect, JTBD, risk-scorer, style-guide, and voice-tone markers. Release run `34810660758` published successfully but its immediate stable-tag check caught npm propagation before risk-scorer `latest` advanced; subsequent registry readback confirmed `0.19.5` as `latest`.
 
-This proves the published package path independently. A genuinely fresh Codex application task has not yet exercised the newly installed release, so the problem remains Verification Pending rather than Closed.
+Fresh installed-runtime verification completed in Codex session `01a09e85-1e48-7762-ab31-bf945af29cf7`. The task loaded the released plugins, completed the native pipeline, external-comms, and voice reviewers, persisted their markers through the canonical completion bridge, and admitted lifecycle commit `40095da4e88e89a2157d6dab8d32c9af261bdf99` without a manual marker replay or governance bypass.
+
+## Verification
+
+The post-release fresh-task journey succeeded on 2026-09-14. Published-package transport, installed plugin versions, native completion marker persistence, and the next guarded operation were independently observed. CI run `34812540341` passed after the verification-pending commit. P539 is closed on that evidence; the supported recovery is `/wr-itil:transition-problem 539 known-error`.
 
 ## Dependencies
 
@@ -96,4 +100,4 @@ This proves the published package path independently. A genuinely fresh Codex ap
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-089 | STORY-089: I can continue after a reviewer passes, without plugin-specific recovery | in-progress |
+| STORY-089 | STORY-089: I can continue after a reviewer passes, without plugin-specific recovery | done |
