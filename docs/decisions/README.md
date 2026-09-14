@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 122 (109 in-force, 13 historical)
+**Total ADRs:** 123 (110 in-force, 13 historical)
 
 ---
 
 ## In-force decisions
 
-_109 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_110 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -554,6 +554,12 @@ _109 ADRs. These are the current rules. The architect agent reads this section f
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Prefer the external reviewer and use a bundled fallback"**, because it provides specialist review without breaking standalone installs.
 **Confirmation:** Automated tests that exercise the workflow confirm that the external reviewer can return PASS and that review ...; Automated workflow tests confirm that the bundled reviewer runs when the external reviewer cannot run.; Automated workflow tests confirm that the same review path runs again after issues are fixed.; Automated workflow tests confirm that ratification stops when neither reviewer can run.; Automated workflow tests confirm that changing the chosen option or amending the ADR triggers another review b...; Installer tests confirm that the base architect reviewer and bundled cognitive accessibility reviewer each ins...; The bundled reviewer and shared review criteria ship with the architect package.; Tests confirm that the repository's Codex agent files remain consistent with their source files.
+
+### ADR-125 — Manifest-bound legacy projections for story-map migration
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Chosen option: **"Add a manifest-bound `legacyProjection` section outside ordinary delivery data"**.
+**Confirmation:** A map without legacyProjection keeps the same rendered output, query results, and fingerprint. Re-rendering pr...; An ordinary card without a real story still fails validation.; Delivery rows retain existing RFC, status, problem, approval, and query behavior.; A valid manifested projection renders into committed HTML with the required semantic table, caption, headers, ...; Projection bands and cards contribute no RFC identity, release status, problem derivation, story approval, or ...; The map oversight fingerprint changes when projection substance changes and remains stable for presentation-on...; Validation fails in each of these cases:; Changing the projection after migration fails until a newly ratified decision updates its manifest fingerprint...; The first canonical-file fingerprint is verified when created, retained as a receipt, and ignored as a gate on...; Existing story-map query and reverse-reference tests pass unchanged, and new behavioral tests cover every fail...; The migration skill accepts only a complete structured mapping whose cited adopter decision has confirmed huma...; The migration skill does not interpret legacy HTML. It rejects a missing, incomplete, or ambiguous mapping bef...
+**Related:** ADR-090, ADR-102, ADR-103, ADR-104, ADR-105, ADR-107
 
 ---
 
