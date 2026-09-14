@@ -49,12 +49,12 @@ Both the shipped template and the whole corpus were wrong together, so cloning t
 
 ### Phase 2 — manifest-bound adopter legacy projections
 
-- [ ] Ratify an upstream decision that specialises ADR-090, ADR-102, ADR-103, ADR-104, ADR-105, and ADR-107 for accepted adopter maps whose historical cards have no story files.
-- [ ] Add a `legacyProjection` data section that is separate from ordinary releases and tasks and contributes no delivery authority, RFC membership, status, problem derivation, story approval, or story-query result.
-- [ ] Bind eligible projections to a deterministic migration manifest with fail-closed source and projection fingerprints; keep the canonical-result fingerprint as a historical receipt rather than a gate on later ordinary map evolution.
-- [ ] Render the projection into committed, accessible HTML with semantic tables, keyboard-scrollable regions, landmarks, explicit empty-cell text, and clear historical-context labels.
-- [ ] Include projection substance in the map oversight fingerprint and preserve current behaviour for maps without projections, ordinary unbacked-card rejection, delivery rows, queries, and idempotent rendering.
-- [ ] Decide explicitly whether a generic migration carrier can transform legacy maps without guessing their meaning; if not, keep the shared release to format support and leave each adopter's ratified migration responsible for its own content conversion.
+- [x] Ratify an upstream decision that specialises ADR-090, ADR-102, ADR-103, ADR-104, ADR-105, and ADR-107 for accepted adopter maps whose historical cards have no story files.
+- [x] Add a manifest-bound historical pre-RFC row subtype that is separate from ordinary tasks and contributes no delivery authority, RFC membership, status, problem derivation, story approval, or story-query result.
+- [x] Bind eligible projections to a deterministic migration manifest with fail-closed source and projection fingerprints; keep the canonical-result fingerprint as a historical receipt rather than a gate on later ordinary map evolution.
+- [x] Render the projection into committed, accessible HTML with semantic tables, keyboard-scrollable regions, landmarks, explicit empty-cell text, and clear historical-context labels.
+- [x] Include projection substance in the map oversight fingerprint and preserve current behaviour for maps without projections, ordinary unbacked-card rejection, delivery rows, queries, and idempotent rendering.
+- [x] Ship a narrow migration carrier that accepts only a complete adopter-ratified mapping and does not infer legacy meaning.
 - [ ] Release the updated `@windyroad/itil` package before any adopter replaces legacy maps using this variant.
 
 ## Dependencies
@@ -89,3 +89,5 @@ Consolidated away and removed from the tree (2026-08-05, and STORY-MAP-001 on 20
 What remains: all eight live maps are `human-oversight: unconfirmed`. The shape change drifted every fingerprint, which this ticket predicted, so each needs a human ratification pass before an RFC can reference its stories.
 
 **2026-09-14 — adopter migration capability added to scope.** A fresh hang-off check routed a downstream adopter's lossless legacy-map requirement here instead of creating a duplicate problem. Phase 2 owns the shared, manifest-bound projection format and release; each adopter repository separately owns its exact content migration after that release is installed.
+
+**2026-09-14 — Phase 2 implemented, release pending.** The renderer and query surface now validate manifest-bound historical pre-RFC rows, the oversight fingerprint includes their substance, and `/wr-itil:migrate-story-map` performs the authorised deterministic replacement with rollback on failure. Behavioral tests cover accessible rendering, unchanged ordinary behavior, mapping rejection, retained-source verification, manifest and authority failures, and idempotency. The package remains unreleased until the final checklist item completes.

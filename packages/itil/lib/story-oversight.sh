@@ -57,7 +57,8 @@ oversight_excluded_keys() {
   printf '%s\n' human-oversight oversight-hash oversight-basis status
 }
 
-# The MAP-SUBSTANCE key set: the island keys a story map's ratification hangs on.
+# The MAP-SUBSTANCE key set: island keys plus the derived historical-row key a
+# story map's ratification hangs on.
 #
 # Editing this set — here or in the SUBSTANCE tuple below — changes ADR-090's
 # Decision Outcome as amended by ADR-103, not merely a mechanism. It IS the drift
@@ -66,10 +67,11 @@ oversight_excluded_keys() {
 # whenever both move together, which is the shape of exactly that edit. The
 # sibling notice on _oversight_filter says the same thing for the same reason.
 #
-# SCOPE: island keys only. Unlike oversight_excluded_keys, which strips keys from
-# every artefact in three encodings, this set is meaningless for anything with no
-# island — stories and pre-ADR-102 maps fall through to whole-file bytes. The two
-# are not complements; `excluded ∪ substance` is not the key space.
+# SCOPE: data-island substance only. `historicalPreRfcRows` is derived from the
+# island's manifested historical release rows rather than authored as a key.
+# Unlike oversight_excluded_keys, this set is meaningless for anything with no
+# island — stories and pre-ADR-102 maps fall through to whole-file bytes. The
+# two are not complements; `excluded ∪ substance` is not the key space.
 #
 # THIS IS THE ONLY ENUMERATION. Six documents used to restate it (ADR-090,
 # ADR-103, ADR-105, capture-story-map, and manage-story-map twice) and by
@@ -83,7 +85,7 @@ oversight_excluded_keys() {
 # derives its pattern from oversight_excluded_keys. A consumer that hardcodes the
 # list starts a seventh enumeration.
 oversight_map_substance_keys() {
-  printf '%s\n' storyMapId title persona secondaryPersona traces backbone caption
+  printf '%s\n' storyMapId title persona secondaryPersona traces backbone caption historicalPreRfcRows
 }
 
 # Emit the bytes a fingerprint should cover.
@@ -130,7 +132,11 @@ except Exception:
 # nothing documents would still have been ratification-bearing.
 SUBSTANCE = ("storyMapId", "title", "persona", "secondaryPersona",
              "traces", "backbone", "caption")
-print(json.dumps({k: d[k] for k in SUBSTANCE if k in d}, sort_keys=True, indent=2))
+basis = {k: d[k] for k in SUBSTANCE if k in d}
+historical = [r for r in d.get("releases", []) if "historicalProjection" in r]
+if historical:
+    basis["historicalPreRfcRows"] = historical
+print(json.dumps(basis, sort_keys=True, indent=2))
 '
   else
     cat "$f"

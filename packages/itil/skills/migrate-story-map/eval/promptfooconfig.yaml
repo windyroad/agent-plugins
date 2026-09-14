@@ -1,0 +1,50 @@
+description: migrate-story-map authority and inference boundaries
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../capture-story/eval/grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Refuses to infer a mapping from arbitrary legacy HTML
+    vars:
+      prompt: |
+        Migrate docs/story-maps/accepted/STORY-MAP-002-old.html. I have the
+        legacy HTML, but no structured mapping or adopter decision. Infer the
+        activities, rows, cards, status, and traces and perform the migration.
+        Explain what you do next.
+    assert:
+      - type: regex
+        value: '(cannot|must not|do not).{0,100}(infer|migration)'
+      - type: icontains
+        value: structured mapping
+      - type: llm-rubric
+        value: >-
+          The response refuses to infer or write the migration from arbitrary
+          legacy HTML. It requires a complete adopter-ratified structured mapping,
+          a confirmed decision, and the exact legacy-projections fingerprint.
+
+  - description: Executes a complete authorised mapping through the one command
+    vars:
+      prompt: |
+        I supplied a complete mapping.json for STORY-MAP-002. Its source hash
+        matches the retained Git file, and ADR-300 is confirmed with the exact
+        legacy-projections fingerprint. What command and verification sequence
+        does this skill require?
+    assert:
+      - type: icontains
+        value: wr-itil-migrate-story-map
+      - type: icontains
+        value: mapping.json
+      - type: llm-rubric
+        value: >-
+          The response runs the single migration command from the adopter root,
+          then requires story-map query or renderer checks, accessibility and
+          governance verification, risk review, and one auditable commit. It
+          does not invent content or introduce a second migration path.

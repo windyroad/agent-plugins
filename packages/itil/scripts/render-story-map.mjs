@@ -36,6 +36,7 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { validateHistoricalRows } from './story-map-history.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE = join(HERE, '..', 'templates', 'story-map.html');
@@ -397,6 +398,7 @@ function resolveHref(mapPath, id) {
  *  when card status was stored.
  */
 function rowStatus(row, tasks, statuses) {
+  if (row.historicalProjection) return 'historical';
   const mine = tasks.filter((t) => t.release === row.id);
   const terminal = (s) => s === 'done' || s === 'archived';
   const shipped = mine.length && mine.every((t) => terminal(statuses[t.storyId]));
@@ -511,7 +513,7 @@ function renderStatus(map, storiesDir, mapPath) {
  * alongside colour.
  * ------------------------------------------------------------------------- */
 
-const BADGE_GLYPH = { 'b-live': '\u2713', 'b-next': '\u2192', 'b-defect': '\u26a0' };
+const BADGE_GLYPH = { 'b-live': '\u2713', 'b-next': '\u2192', 'b-history': '\u25c7', 'b-defect': '\u26a0' };
 
 /** Status as a class. Derived, never an authored badge — a hand-written R1/R2
  *  ordinal duplicated the RFC identity and collided with it. */
@@ -519,6 +521,7 @@ function badgeClass(rel) {
   switch (String(rel.status || '').toLowerCase()) {
     case 'delivered': return 'b-live';
     case 'proposed':  return rel.rfc ? 'b-next' : 'b-defect';
+    case 'historical': return 'b-history';
     default:          return 'b-defect';
   }
 }
@@ -543,6 +546,10 @@ function badgeClass(rel) {
  */
 function rowLabel(rel) {
   const status = String(rel.status || '').toLowerCase();
+  if (status === 'historical') {
+    const projection = rel.historicalProjection;
+    return `Historical context: ${projection.sourceLabel} as of ${projection.reported}`;
+  }
   if (rel.rfc) {
     if (status === 'delivered') return `Delivered: ${rel.rfc}`;
     if (status === 'proposed') return `Proposed: ${rel.rfc}`;
@@ -647,6 +654,15 @@ function cardHtml(task, status, value, hrefs) {
   return out + '</div>';
 }
 
+function historicalCardHtml(card) {
+  let out = '<div class="task historical-card">';
+  out += '<div class="t-status ts-arch">Historical context</div>';
+  out += `<span class="t-title">${esc(card.title)}</span>`;
+  out += `<div class="t-value">${esc(card.text)}</div>`;
+  out += `<div class="t-ref">Recorded status: ${esc(card.statusLabel)}</div>`;
+  return out + '</div>';
+}
+
 /** The whole grid: caption, both header axes, and one row per release. */
 /** Read back the payload we just serialised, so the grid and the island share
  *  one resolution rather than computing it twice. */
@@ -724,23 +740,28 @@ function renderGrid(map, derived) {
     }
     out += '</th>';
 
-    const filled = backbone.map((act) =>
-      tasks.filter((t) => t.activity === act.id && t.release === rel.id));
+    const historicalCards = rel.historicalProjection?.cards ?? [];
+    const filled = backbone.map((act) => rel.historicalProjection
+      ? historicalCards.filter((card) => card.activity === act.id)
+      : tasks.filter((t) => t.activity === act.id && t.release === rel.id));
+    const noun = rel.historicalProjection ? 'historical cards' : 'stories';
 
     if (filled.every((h) => h.length === 0)) {
       // A wholly empty band is silent in a screen reader's browse mode while
       // being a loud full-width hatch visually. One spanning cell states it
       // once — per-cell text would bury a sparse map's few cards.
-      out += `<td class="cell empty" colspan="${backbone.length || 1}"><span class="vh">No stories in this release band.</span></td>`;
+      out += `<td class="cell empty" colspan="${backbone.length || 1}"><span class="vh">No ${noun} in this release band.</span></td>`;
     } else {
       for (const [i, here] of filled.entries()) {
         if (!here.length) {
-          out += `<td class="cell empty"><span class="vh">No stories for ${esc(backbone[i]?.title || 'this activity')} in ${esc(rel.name || rel.id || 'this release')}.</span></td>`;
+          out += `<td class="cell empty"><span class="vh">No ${noun} for ${esc(backbone[i]?.title || 'this activity')} in ${esc(rel.name || rel.id || 'this release')}.</span></td>`;
           continue;
         }
         out += '<td class="cell"><ul class="tasks" role="list">';
         for (const t of here) {
-          out += '<li>' + cardHtml(t, statuses[t.storyId], values[t.storyId], hrefs) + '</li>';
+          out += '<li>' + (rel.historicalProjection
+            ? historicalCardHtml(t)
+            : cardHtml(t, statuses[t.storyId], values[t.storyId], hrefs)) + '</li>';
         }
         out += '</ul></td>';
       }
@@ -966,6 +987,7 @@ function render(map, storiesDir, mapPath) {
     throw new Error('story map needs a non-empty "releases" array (the horizontal slices)');
   }
 
+  validateHistoricalRows(map, mapPath);
   assertEveryCardHasAStory(map, storiesDir);
   assertArchivedIsSeparated(map, storiesDir);
   assertOneReleasePerStory(map);

@@ -254,14 +254,18 @@ PYEOF
     local first=1 k
     for k in $CANDIDATES; do
       [ "$first" = 1 ] || printf ','
-      printf '"%s":"probe"' "$k"
+      if [ "$k" = releases ]; then
+        printf '"releases":[{"id":"legacy-r1","historicalProjection":{"reported":"2026-01-01","sourceBandId":"r1","sourceLabel":"R1","cards":[]}}]'
+      else
+        printf '"%s":"probe"' "$k"
+      fi
       first=0
     done
     printf '}\n</script>\n</body>\n</html>\n'
   } > "$probe"
 
   local hashed declared
-  hashed="$(_oversight_hashable "$probe" | grep -oE '"[a-zA-Z]+":' | tr -d '":' | sort | tr '\n' ' ')"
+  hashed="$(_oversight_hashable "$probe" | python3 -c 'import json, sys; print(" ".join(sorted(json.load(sys.stdin))))') "
   declared="$(oversight_map_substance_keys | sort | tr '\n' ' ')"
   [ -n "$declared" ]
 

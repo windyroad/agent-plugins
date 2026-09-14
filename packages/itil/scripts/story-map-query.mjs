@@ -23,6 +23,7 @@
 // @adr ADR-090 (drift-invalidated human-oversight marker)
 
 import { readFileSync } from 'node:fs';
+import { validateHistoricalRows } from './story-map-history.mjs';
 
 const ISLAND_OPEN = '<script id="story-map-data" type="application/json">';
 
@@ -41,11 +42,14 @@ function island(path) {
   const from = start + ISLAND_OPEN.length;
   const end = html.indexOf('</script>', from);
   if (end === -1) return null;
+  let data;
   try {
-    return JSON.parse(html.slice(from, end).replace(/\\u003c/g, '<'));
+    data = JSON.parse(html.slice(from, end).replace(/\\u003c/g, '<'));
   } catch {
     return null;
   }
+  validateHistoricalRows(data, path);
+  return data;
 }
 
 /** Everything the renderer derived from outside the island — story statuses and

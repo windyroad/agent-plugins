@@ -62,3 +62,21 @@ tests:
           The response ratifies the map once and explains that moving a card
           between release rows is scheduling, not map substance, so it does not
           reopen approval when the journey, identity and traces are unchanged.
+
+  - description: Historical substance reopens approval while ordinary scheduling does not
+    vars:
+      prompt: |
+        A ratified canonical map contains one manifest-bound historical pre-RFC
+        row. Compare moving an ordinary story card to another release row with
+        changing the historical card's recorded status text. Which edit reopens
+        ratification, and how may the historical edit proceed?
+    assert:
+      - type: icontains
+        value: historical
+      - type: regex
+        value: '(reopen|re-ratif)'
+      - type: llm-rubric
+        value: >-
+          The response says ordinary scheduling does not reopen approval, while
+          changing historical substance does and requires newly confirmed adopter
+          authority with the exact matching historical fingerprint.

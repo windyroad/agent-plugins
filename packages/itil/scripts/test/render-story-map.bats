@@ -1434,3 +1434,105 @@ JSON
   grep -q '<strong>Agreed.</strong>' "$m" || { echo "a ratified map still reads as unagreed"; return 1; }
   ! grep -q 'name the row that is wrong' "$m" || { echo "a ratified map still asks to be ratified"; return 1; }
 }
+
+@test "manifested historical pre-RFC rows render as static dated context" {
+  local root="$TMP/history"
+  mkdir -p "$root/docs/story-maps/draft" "$root/docs/decisions"
+  local map="$root/docs/story-maps/draft/STORY-MAP-990-history.html"
+  printf '<html><body>Retained legacy map</body></html>\n' > "$map"
+  git -C "$root" init -q
+  git -C "$root" config user.email test@example.com
+  git -C "$root" config user.name Test
+  git -C "$root" add "$map"
+  git -C "$root" commit -qm 'retain legacy map'
+  local source_commit source_hash
+  source_commit="$(git -C "$root" rev-parse HEAD)"
+  source_hash="$(shasum -a 256 "$map" | awk '{print $1}')"
+  cat > "$map" <<'HTML'
+<script id="story-map-data" type="application/json">
+{
+  "storyMapId": "STORY-MAP-990",
+  "title": "Historical journey",
+  "traces": { "jtbd": ["JTBD-990"] },
+  "backbone": [
+    { "id": "notice", "title": "Notice it" },
+    { "id": "act", "title": "Act on it" }
+  ],
+  "releases": [
+    {
+      "id": "legacy-r1",
+      "name": "R1",
+      "preRfc": true,
+      "historicalProjection": {
+        "reported": "2026-01-02",
+        "sourceBandId": "r1",
+        "sourceLabel": "R1",
+        "sourceNote": "Recorded before migration",
+        "cards": [
+          { "activity": "notice", "title": "See the old signal", "text": "Available in the retained map.", "statusLabel": "Research only" }
+        ]
+      }
+    },
+    {
+      "id": "legacy-empty",
+      "name": "Earlier",
+      "preRfc": true,
+      "historicalProjection": {
+        "reported": "2025-12-01",
+        "sourceBandId": "earlier",
+        "sourceLabel": "Earlier",
+        "sourceNote": "No cards were recorded",
+        "cards": []
+      }
+    }
+  ],
+  "tasks": []
+}
+</script>
+HTML
+
+  local hash
+  hash="$(RENDER_PATH="$RENDER" MAP_PATH="$map" node --input-type=module -e '
+    const fs = await import("node:fs");
+    const history = await import(`file://${process.env.RENDER_PATH.replace("render-story-map.mjs", "story-map-history.mjs")}`);
+    const source = fs.readFileSync(process.env.MAP_PATH, "utf8");
+    const data = JSON.parse(source.match(/<script id="story-map-data" type="application\/json">\s*([\s\S]*?)\s*<\/script>/)[1]);
+    process.stdout.write(history.historicalProjectionHash(data));
+  ')"
+  cat > "$root/docs/decisions/300-history.proposed.md" <<EOF
+---
+human-oversight: confirmed
+legacy-projections:
+  STORY-MAP-990: $hash
+---
+# History
+EOF
+  cat > "$root/docs/story-maps/legacy-projection-manifest.json" <<EOF
+{
+  "schemaVersion": 1,
+  "maps": [{
+    "mapId": "STORY-MAP-990",
+    "path": "docs/story-maps/draft/STORY-MAP-990-history.html",
+    "authorityAdr": "ADR-300",
+    "sourceCommit": "$source_commit",
+    "sourceSha256": "$source_hash",
+    "historicalSha256": "$hash",
+    "canonicalSha256": "1111111111111111111111111111111111111111111111111111111111111111"
+  }]
+}
+EOF
+
+  run node "$RENDER" "$map"
+  [ "$status" -eq 0 ] || { echo "historical render failed: $output"; return 1; }
+  grep -q 'Historical context: R1 as of 2026-01-02' "$map"
+  grep -q '<div class="t-status ts-arch">Historical context</div>' "$map"
+  grep -q 'Recorded status: Research only' "$map"
+  grep -q 'No historical cards for Act on it in R1' "$map"
+  grep -q 'No historical cards in this release band.' "$map"
+  ! grep -q 'href=.*See the old signal' "$map"
+
+  run bash -c "printf '%s\\ttrue\\tconfirmed\\n' '$map' | node '$REPO_ROOT/packages/itil/scripts/story-map-query.mjs' list"
+  [ "$status" -eq 0 ] || { echo "historical query failed: $output"; return 1; }
+  [[ "$output" == *'"rfcs": []'* ]]
+  [[ "$output" == *'"cards": 0'* ]]
+}

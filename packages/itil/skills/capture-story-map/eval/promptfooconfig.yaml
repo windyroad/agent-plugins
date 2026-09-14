@@ -148,3 +148,22 @@ tests:
         value: >-
           The response gives the stories separate rows and ships the upgrade-cost
           reducer first because doing so lowers the cost of later releases.
+
+  - description: Refuses historical rows for newly captured capability
+    vars:
+      prompt: |
+        I am capturing a new story map for a capability that already works, but
+        there is no retained legacy story map and no story or RFC. Can I add a
+        historicalProjection row with preRfc true so the journey looks complete?
+        State the correct next action.
+    assert:
+      - type: regex
+        value: '(^No\b|cannot|must not|do not)'
+      - type: icontains
+        value: retained legacy map
+      - type: llm-rubric
+        value: >-
+          The response refuses to author a historical pre-RFC projection during
+          new capture. It distinguishes the valid migrate-story-map path for
+          retained history under exact confirmed adopter authority, and directs
+          new work through ordinary RFC and story records.

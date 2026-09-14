@@ -369,3 +369,33 @@ JSON
   # `untraced` and the stored value loses.
   [ "$output" = "untraced" ]
 }
+
+@test "a historical row with no valid manifest makes the query fail closed" {
+  local map="$TMP/docs/story-maps/draft/STORY-MAP-947-x.html"
+  cat > "$map" <<'HTML'
+<script id="story-map-data" type="application/json">
+{
+  "storyMapId": "STORY-MAP-947",
+  "title": "Unmanifested history",
+  "backbone": [{ "id": "a", "title": "A" }],
+  "releases": [{
+    "id": "legacy",
+    "name": "Legacy",
+    "preRfc": true,
+    "historicalProjection": {
+      "reported": "2026-01-01",
+      "sourceBandId": "legacy",
+      "sourceLabel": "Legacy",
+      "sourceNote": "Recorded before migration",
+      "cards": []
+    }
+  }],
+  "tasks": []
+}
+</script>
+HTML
+
+  run bash -c "cd '$TMP' && '$QUERY' list"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"valid legacy-projection-manifest.json"* ]]
+}
