@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 2.3.0
+
+### Minor Changes
+
+- 78a3e9d: Add manifest-bound historical pre-RFC rows and a governed story-map migration skill so adopters can replace retained legacy maps without inventing delivery records.
+
 ## 2.2.1
 
 ### Patch Changes
