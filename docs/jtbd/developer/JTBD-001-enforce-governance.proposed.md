@@ -56,12 +56,14 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-023 | STORY-023: Ship → verify → problem closes with a real trace; adopter gets the fix | done |
 | STORY-063 | STORY-063: Check ADR pairing in the checkout being committed | done |
 | STORY-077 | STORY-077: Move a captured fix straight to verification and keep a reopened problem in the work queue | done |
+| STORY-088 | STORY-088: Capture a problem when its index is missing | done |
 | STORY-013 | STORY-013: Full gate: an RFC exists → I proceed; none → I create it first | draft |
 | STORY-033 | STORY-033: Loud cold-path diagnostic for oversight-marker shims | draft |
 | STORY-037 | STORY-037: Commit gate honours the RISK-POLICY stated review cadence for staleness | draft |
 | STORY-052 | STORY-052: Surface still-outstanding family members before a close | draft |
 | STORY-060 | STORY-060: Pick up a captured ticket and know what was observed | draft |
 | STORY-064 | STORY-064: A ticket that only names a decision as background stays open | draft |
+| STORY-089 | STORY-089: I can continue after a reviewer passes, without plugin-specific recovery | draft |
 | STORY-062 | STORY-062: Keep problem ranking correct after a status transition | in-progress |
 | STORY-078 | STORY-078: A reviewer catches first-match binding when the key is not unique | in-progress |
 | STORY-079 | STORY-079: Review only options consistent with documented desired outcomes | in-progress |
@@ -69,4 +71,3 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-083 | STORY-083: A canonical architect PASS unlocks the guarded edit | in-progress |
 | STORY-086 | STORY-086: Complete an external-comms review without repeating it | in-progress |
 | STORY-087 | STORY-087: Inspect a package without triggering publication review | in-progress |
-| STORY-088 | STORY-088: Capture a problem when its index is missing | done |

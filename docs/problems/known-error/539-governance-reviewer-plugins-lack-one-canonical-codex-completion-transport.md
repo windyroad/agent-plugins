@@ -78,3 +78,10 @@ The reproduction in `packages/shared/test/codex-reviewer-completion-transport.ba
 - Architecture review returned PASS with no new ADR required for capture. Any later fix must reuse the existing shared sync/self-contained package model unless it deliberately changes the completion protocol or packaging architecture.
 
 (captured via /wr-itil:capture-problem; expand at next investigation)
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-089 | STORY-089: I can continue after a reviewer passes, without plugin-specific recovery | draft |
