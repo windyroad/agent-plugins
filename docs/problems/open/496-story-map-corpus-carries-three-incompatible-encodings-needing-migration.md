@@ -47,11 +47,22 @@ Both the shipped template and the whole corpus were wrong together, so cloning t
 - [ ] Re-ratify each migrated map. The shape change drifts the stored fingerprint, so a human confirm is required per ADR-090 — four currently carry an `oversight-hash`.
 - [ ] Confirm reverse-trace still resolves after migration (`update-story-references-section.sh <map> "Story Maps"`).
 
+### Phase 2 — manifest-bound adopter legacy projections
+
+- [ ] Ratify an upstream decision that specialises ADR-090, ADR-102, ADR-103, ADR-104, ADR-105, and ADR-107 for accepted adopter maps whose historical cards have no story files.
+- [ ] Add a `legacyProjection` data section that is separate from ordinary releases and tasks and contributes no delivery authority, RFC membership, status, problem derivation, story approval, or story-query result.
+- [ ] Bind eligible projections to a deterministic migration manifest with fail-closed source and projection fingerprints; keep the canonical-result fingerprint as a historical receipt rather than a gate on later ordinary map evolution.
+- [ ] Render the projection into committed, accessible HTML with semantic tables, keyboard-scrollable regions, landmarks, explicit empty-cell text, and clear historical-context labels.
+- [ ] Include projection substance in the map oversight fingerprint and preserve current behaviour for maps without projections, ordinary unbacked-card rejection, delivery rows, queries, and idempotent rendering.
+- [ ] Decide explicitly whether a generic migration carrier can transform legacy maps without guessing their meaning; if not, keep the shared release to format support and leave each adopter's ratified migration responsible for its own content conversion.
+- [ ] Release the updated `@windyroad/itil` package before any adopter replaces legacy maps using this variant.
+
 ## Dependencies
 
 - **Depends on**: ADR-102 (shipped encoding + renderer), which must be ratified first.
 - **Safe to defer**: every consumer matches either `data-story-id` or the `<meta>` block, and neither is container-dependent — `reconcile-story-maps.sh` and `render-story-map-index.sh` read only `<meta>` and the filename. A mixed corpus is therefore mechanically safe, which is why this is Low rather than blocking.
 - **Composes with**: the ADR-102 hash amendment. Migration is the deliberate one-time re-hash that amendment calls for.
+- **Blocks**: a ratified downstream-adopter decision to replace legacy story maps in place.
 
 ## Related
 
@@ -76,3 +87,5 @@ Consolidated away and removed from the tree (2026-08-05, and STORY-MAP-001 on 20
 **2026-08-05 — migration done; ticket now covers only the residue.** All eleven predecessors were rebuilt or consolidated: nine stacked maps re-authored onto the grid, one two-dimensional map transposed, one widened from a stub. Five stubs were absorbed and removed. Every live map renders from the canonical template, and release bands on STORY-MAP-002 were re-derived from actual story status rather than guessed.
 
 What remains: all eight live maps are `human-oversight: unconfirmed`. The shape change drifted every fingerprint, which this ticket predicted, so each needs a human ratification pass before an RFC can reference its stories.
+
+**2026-09-14 — adopter migration capability added to scope.** A fresh hang-off check routed a downstream adopter's lossless legacy-map requirement here instead of creating a duplicate problem. Phase 2 owns the shared, manifest-bound projection format and release; each adopter repository separately owns its exact content migration after that release is installed.
