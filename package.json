@@ -28,6 +28,8 @@
     "check:install-utils": "bash scripts/sync-install-utils.sh --check",
     "sync:session-marker": "bash scripts/sync-session-marker.sh",
     "check:session-marker": "bash scripts/sync-session-marker.sh --check",
+    "sync:codex-completion-input": "bash scripts/sync-codex-completion-input.sh",
+    "check:codex-completion-input": "bash scripts/sync-codex-completion-input.sh --check",
     "sync:external-comms-gate": "bash scripts/sync-external-comms-gate.sh",
     "check:external-comms-gate": "bash scripts/sync-external-comms-gate.sh --check",
     "sync:staleness-check": "bash scripts/sync-staleness-check.sh",

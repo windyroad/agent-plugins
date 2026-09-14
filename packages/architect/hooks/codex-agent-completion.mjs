@@ -4,14 +4,10 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, response } from "./lib/codex-completion-input.mjs";
 
 const hookDir = dirname(fileURLToPath(import.meta.url));
 const role = "wr-architect:agent";
-
-function response(input) {
-  if (typeof input.tool_response === "object" && input.tool_response) return input.tool_response;
-  try { return JSON.parse(input.tool_response); } catch { return {}; }
-}
 
 function riskDir(sessionId) {
   return join(process.env.TMPDIR || "/tmp", `claude-risk-${sessionId}`);
@@ -50,6 +46,14 @@ function complete(input) {
   });
 }
 
+function wait(input) {
+  const statuses = response(input).status;
+  if (!statuses || typeof statuses !== "object") return;
+  for (const [target, status] of Object.entries(statuses)) {
+    complete({ ...input, tool_input: { target }, tool_response: { previous_status: status } });
+  }
+}
+
 let body = "";
 process.stdin.setEncoding("utf8");
 for await (const chunk of process.stdin) body += chunk;
@@ -57,5 +61,6 @@ let input;
 try { input = JSON.parse(body); } catch { process.exit(0); }
 if (!/^[A-Za-z0-9-]+$/.test(input.session_id || "")) process.exit(0);
 
-if (["collaborationspawn_agent", "spawn_agent", "multi_agent_v1__spawn_agent"].includes(input.tool_name)) remember(input);
-if (["collaborationinterrupt_agent", "close_agent", "multi_agent_v1__close_agent"].includes(input.tool_name)) complete(input);
+if (SPAWN_TOOLS.has(input.tool_name)) remember(input);
+if (CLOSE_TOOLS.has(input.tool_name)) complete(input);
+if (WAIT_TOOLS.has(input.tool_name)) wait(input);

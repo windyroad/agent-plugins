@@ -12,7 +12,7 @@
       { "matcher": "Bash|Edit|Write|ExitPlanMode", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-dispatch.sh pre-tool" }] }
     ],
     "PostToolUse": [
-      { "matcher": "Agent|Bash|Edit|Skill|Write|collaborationspawn_agent|collaborationinterrupt_agent|spawn_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__close_agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-dispatch.sh post-tool" }] }
+      { "matcher": "Agent|Bash|Edit|Skill|Write|collaboration.spawn_agent|collaboration.wait_agent|collaboration.interrupt_agent|collaborationspawn_agent|collaborationwait_agent|collaborationinterrupt_agent|spawn_agent|wait_agent|interrupt_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__wait_agent|multi_agent_v1__close_agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/architect-dispatch.sh post-tool" }] }
     ]
   }
 }

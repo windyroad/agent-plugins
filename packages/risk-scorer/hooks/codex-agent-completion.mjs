@@ -5,6 +5,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameS
 import { dirname, isAbsolute, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, response } from "./lib/codex-completion-input.mjs";
 
 const hookDir = dirname(fileURLToPath(import.meta.url));
 const riskAgentRoles = new Set([
@@ -15,26 +16,6 @@ const riskAgentRoles = new Set([
   "wr-risk-scorer:external-comms",
   "wr-risk-scorer:inbound-report",
 ]);
-
-function parsedResponse(value) {
-  if (Array.isArray(value)) {
-    const text = value
-      .filter((item) => item && typeof item === "object" && typeof item.text === "string")
-      .map((item) => item.text)
-      .join("\n");
-    return parsedResponse(text);
-  }
-  if (typeof value === "object" && value) return value;
-  try {
-    return parsedResponse(JSON.parse(value));
-  } catch {
-    return {};
-  }
-}
-
-function response(input) {
-  return parsedResponse(input.tool_response);
-}
 
 function riskDir(sessionId) {
   return join(process.env.TMPDIR || "/tmp", `claude-risk-${sessionId}`);
@@ -429,13 +410,13 @@ if (!/^[A-Za-z0-9-]+$/.test(input.session_id || "")) {
   process.exit(0);
 }
 
-if (["collaboration.spawn_agent", "collaborationspawn_agent", "spawn_agent", "multi_agent_v1__spawn_agent"].includes(input.tool_name)) {
+if (SPAWN_TOOLS.has(input.tool_name)) {
   rememberSpawn(input);
 }
-if (["collaboration.interrupt_agent", "collaborationinterrupt_agent", "interrupt_agent", "close_agent", "multi_agent_v1__close_agent"].includes(input.tool_name)) {
+if (CLOSE_TOOLS.has(input.tool_name)) {
   markClose(input);
 }
-if (["collaboration.wait_agent", "collaborationwait_agent", "wait_agent", "multi_agent_v1__wait_agent"].includes(input.tool_name)) {
+if (WAIT_TOOLS.has(input.tool_name)) {
   markWait(input);
 }
 if (input.hook_event_name === "SubagentStop") {

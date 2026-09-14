@@ -81,3 +81,5 @@
 ## 2026-09-14
 
 > Last reviewed: 2026-09-11 **STORY-088 done** - published 2.2.1 passed the missing-index adopter journey.
+
+> Last reviewed: 2026-09-14 **STORY-089 accepted** — I7, I8, I10, and map-derived approval pass for the P539 shared completion-transport slice.

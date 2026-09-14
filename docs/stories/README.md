@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-09-14 **STORY-089 accepted** — I7, I8, I10, and map-derived approval pass for the P539 shared completion-transport slice.
+> Last reviewed: 2026-09-14 **STORY-089 in progress** — canonical native completion decoding and packed reviewer coverage are implemented; publication verification remains.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -171,7 +171,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-085 | See the ID clash instead of the drift it causes | M | P533 | RFC-090 | STORY-MAP-002 |
 | in-progress | STORY-086 | Complete an external-comms review without repeating it | S | P402 | RFC-086 | STORY-MAP-002 |
 | in-progress | STORY-087 | Inspect a package without triggering publication review | S | P537 | RFC-091 | STORY-MAP-002 |
-| accepted | STORY-089 | I can continue after a reviewer passes, without plugin-specific recovery | L | P539 | RFC-093 | STORY-MAP-002 |
+| in-progress | STORY-089 | I can continue after a reviewer passes, without plugin-specific recovery | L | P539 | RFC-093 | STORY-MAP-002 |
 
 
 ## Done

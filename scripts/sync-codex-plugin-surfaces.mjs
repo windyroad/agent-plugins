@@ -12,6 +12,9 @@ const hooksOutput = join(root, "hooks-codex");
 const backup = join(root, ".pack-codex-source");
 const supported = new Set(["c4", "connect", "jtbd", "retrospective", "style-guide", "tdd", "voice-tone"]);
 const reviewerCompletions = {
+  jtbd: [
+    { role: "wr-jtbd:agent", writer: "jtbd-mark-reviewed.sh", policy: "docs/jtbd" },
+  ],
   "style-guide": [
     { role: "wr-style-guide:agent", writer: "style-guide-mark-reviewed.sh", policy: "docs/STYLE-GUIDE.md" },
   ],
@@ -143,7 +146,7 @@ if (existsSync(hooks)) {
       return { type: "command", command: `node "\${PLUGIN_ROOT}/hooks-codex/${filename}"` };
     });
     config.hooks.PostToolUse.push({
-      matcher: "collaborationspawn_agent|collaborationwait_agent|collaborationinterrupt_agent|spawn_agent|wait_agent|interrupt_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__wait_agent|multi_agent_v1__close_agent",
+      matcher: "collaboration.spawn_agent|collaboration.wait_agent|collaboration.interrupt_agent|collaborationspawn_agent|collaborationwait_agent|collaborationinterrupt_agent|spawn_agent|wait_agent|interrupt_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__wait_agent|multi_agent_v1__close_agent",
       hooks: completionCommands,
     });
     for (const [index, completion] of reviewerCompletions.entries()) {
@@ -192,6 +195,7 @@ import { existsSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, 
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, response } from "../hooks/lib/codex-completion-input.mjs";
 
 const hookDir = dirname(fileURLToPath(import.meta.url));
 const role = ${JSON.stringify(completion.role)};
@@ -199,11 +203,6 @@ const writer = join(hookDir, "..", "hooks", ${JSON.stringify(completion.writer)}
 const policy = ${JSON.stringify(completion.policy)};
 const ttlSeconds = process.env.REVIEW_TTL ?? "3600";
 const ttl = Number(ttlSeconds) * 1000;
-
-function response(input) {
-  if (typeof input.tool_response === "object" && input.tool_response) return input.tool_response;
-  try { return JSON.parse(input.tool_response); } catch { return {}; }
-}
 
 function stateDir(sessionId) {
   return join(process.env.TMPDIR || "/tmp", \`claude-risk-\${sessionId}\`);
@@ -386,9 +385,9 @@ if (!/^[0-9]+$/.test(ttlSeconds) || !Number.isSafeInteger(ttl) || ttl <= 0) {
   process.exit(0);
 }
 
-if (["collaborationspawn_agent", "spawn_agent", "multi_agent_v1__spawn_agent"].includes(input.tool_name)) remember(input);
-if (["collaborationinterrupt_agent", "interrupt_agent", "close_agent", "multi_agent_v1__close_agent"].includes(input.tool_name)) close(input);
-if (["collaborationwait_agent", "wait_agent", "multi_agent_v1__wait_agent"].includes(input.tool_name)) wait(input);
+if (SPAWN_TOOLS.has(input.tool_name)) remember(input);
+if (CLOSE_TOOLS.has(input.tool_name)) close(input);
+if (WAIT_TOOLS.has(input.tool_name)) wait(input);
 if (input.hook_event_name === "SubagentStop") {
   if (input.agent_type !== role) diagnostic("unrelated-subagent-stop", input);
   else complete(input, input.agent_id, input.last_assistant_message);

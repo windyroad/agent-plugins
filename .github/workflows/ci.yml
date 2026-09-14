@@ -82,6 +82,9 @@ jobs:
       - name: Check session-marker.sh copies in sync (P095, ADR-038)
         run: npm run check:session-marker
 
+      - name: Check Codex completion input copies in sync (P539, ADR-017)
+        run: npm run check:codex-completion-input
+
       - name: Check external-comms-gate.sh copies in sync (P064, ADR-028 amended)
         run: npm run check:external-comms-gate
 

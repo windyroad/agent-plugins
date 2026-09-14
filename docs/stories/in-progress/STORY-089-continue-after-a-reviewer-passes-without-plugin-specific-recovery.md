@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: continue-after-a-reviewer-passes-without-plugin-specific-recovery
 reported: 2026-09-14
 decision-makers: [Tom Howard]
@@ -25,11 +25,11 @@ In order to continue governed work without repeating a completed review, as a de
 
 ## Acceptance criteria
 
-- [ ] One canonical helper decodes dotted and flattened native collaboration event names plus object, JSON-string, and `input_text` array responses.
-- [ ] Packed style-guide, voice-tone, and JTBD plugins persist their existing marker after a bound genuine PASS delivered through dotted collaboration events and `input_text` arrays.
-- [ ] Architect consumes the same canonical decoder through its existing package-specific packing and dispatch flow.
-- [ ] Risk-scorer consumes the same canonical decoder without weakening its specialised SubagentStop receipt, checkout, state-hash, or completion-identity controls.
-- [ ] Malformed, unrelated, stale, policy-drifted, checkout-mismatched, duplicate, non-PASS, and writer-failure completions remain fail-closed.
+- [x] One canonical helper decodes dotted and flattened native collaboration event names plus object, JSON-string, and `input_text` array responses.
+- [x] Packed style-guide, voice-tone, and JTBD plugins persist their existing marker after a bound genuine PASS delivered through dotted collaboration events and `input_text` arrays.
+- [x] Architect consumes the same canonical decoder through its existing package-specific packing and dispatch flow.
+- [x] Risk-scorer consumes the same canonical decoder without weakening its specialised SubagentStop receipt, checkout, state-hash, or completion-identity controls.
+- [x] Malformed, unrelated, stale, policy-drifted, checkout-mismatched, duplicate, non-PASS, and writer-failure completions remain fail-closed.
 - [ ] All affected packages are published and a fresh installed Codex task exercises the native completion path without manual marker recovery.
 
 ## Driving problem trace

@@ -9,6 +9,7 @@ setup() {
 teardown() {
   rm -f /tmp/{style-guide,voice-tone}-{reviewed,plan-reviewed}-bats-p402-*-"$$"{,.hash,-other,-other.hash,-child,-child.hash}
   rm -f /tmp/{style-guide,voice-tone,jtbd}-{reviewed,plan-reviewed}-bats-p539-*-"$$"{,.hash}
+  rm -f /tmp/architect-{reviewed,plan-reviewed}-bats-p539-architect-"$$"{,.hash}
   rm -f /tmp/jtbd-verdict
 }
 
@@ -98,6 +99,22 @@ native_array_close_payload() {
       "$(native_array_close_payload "$session" "$REPO_ROOT" "$target" "$verdict")"
     [ -e "$marker" ]
   done
+}
+
+@test "packed architect consumes the shared current native completion decoder" {
+  local root helper session target marker
+  root="$(pack_plugin architect)"
+  helper="$root/hooks/codex-agent-completion.mjs"
+  session="bats-p539-architect-$$"
+  target="/root/p539-architect"
+  marker="/tmp/architect-reviewed-$session"
+
+  [ -f "$root/hooks/lib/codex-completion-input.mjs" ]
+  send_event "$helper" \
+    "$(native_array_spawn_payload "$session" "$REPO_ROOT" 'wr-architect:agent' "$target")"
+  send_event "$helper" \
+    "$(native_array_close_payload "$session" "$REPO_ROOT" "$target" '**Architecture Review: PASS**')"
+  [ -e "$marker" ]
 }
 
 @test "packed style-guide transports only genuine bound native completions" {
