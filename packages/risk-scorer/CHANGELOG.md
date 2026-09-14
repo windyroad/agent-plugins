@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.19.5
+
+### Patch Changes
+
+- 36b6df7: Fix Codex reviewer completion handling so dotted collaboration events and `input_text` response arrays reach existing marker writers. JTBD now ships the same completion bridge. Architect and risk-scorer reuse the canonical decoder while keeping their package-specific safeguards.
+
 ## 0.19.4
 
 ### Patch Changes
