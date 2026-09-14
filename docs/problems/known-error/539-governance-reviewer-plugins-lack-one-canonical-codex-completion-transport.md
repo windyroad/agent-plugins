@@ -1,6 +1,6 @@
 # Problem 539: Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate
 
-**Status**: Open
+**Status**: Known Error
 **Reported**: 2026-09-14
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5 — derived at capture from repeated fail-closed delivery blocks across multiple governance plugins and fresh tasks
 **Origin**: internal (user-reported recurrence)
@@ -41,12 +41,26 @@ Use the exact plugin-specific recovery path named by the fail-closed gate after 
 
 ### Investigation Tasks
 
-- [ ] Inventory every marker-owning governance reviewer and map its Codex completion decoder, generated surface, and marker writer.
-- [ ] Confirm the single existing shared generator/sync boundary that should own native completion decoding while keeping published packages self-contained per ADR-017.
-- [ ] Capture current native dotted collaboration events and `input_text` payload arrays as one behavioural contract fixture exercised by every marker-owning plugin.
+- [x] Inventory every marker-owning governance reviewer and map its Codex completion decoder, generated surface, and marker writer.
+- [x] Confirm the single existing shared generator/sync boundary that should own native completion decoding while keeping published packages self-contained per ADR-017.
+- [x] Capture current native dotted collaboration events and `input_text` payload arrays as one behavioural contract fixture exercised by every marker-owning plugin.
 - [ ] Separate source correctness from installed-version freshness and define fresh-task verification for each affected published plugin.
-- [ ] Preserve fail-closed role, package, parent, checkout, policy, and TTL bindings while removing duplicated transport parsing.
-- [ ] Create reproduction test.
+- [x] Preserve fail-closed role, package, parent, checkout, policy, and TTL bindings while removing duplicated transport parsing.
+- [x] Create reproduction test.
+
+### Confirmed root cause
+
+The native completion event boundary had forked across packages. The generated style-guide and voice-tone bridge accepted flattened collaboration tool names and treated any object-valued `tool_response` as the decoded response, so current dotted names such as `collaboration.spawn_agent` were not matched and current `input_text` arrays were never unwrapped. JTBD had no generated completion bridge at all. Architect carried a separate package-local decoder, while risk-scorer had independently learned the current dotted/array shapes in P477.
+
+The reproduction in `packages/shared/test/codex-reviewer-completion-transport.bats` packs the affected plugins, sends the captured dotted collaboration events with JSON wrapped in an `input_text` array, and expects each existing marker writer to receive the genuine PASS. It failed before implementation because the style-guide matcher omitted the dotted event and because the packed JTBD package contained no completion bridge.
+
+### Evidence
+
+- `scripts/sync-codex-plugin-surfaces.mjs` generated completion bridges only for style-guide and voice-tone.
+- `packages/jtbd/hooks/hooks.json` exposed only the Claude `Agent` completion hook.
+- `packages/architect/hooks/codex-agent-completion.mjs` duplicated the earlier direct-object/flattened-event decoder.
+- `packages/risk-scorer/hooks/codex-agent-completion.mjs` contained the newer P477 dotted-event and recursive array decoder, proving the repair had remained local to one package.
+- The focused packed-package reproduction returned RED before the fix at the dotted style-guide matcher assertion.
 
 ## Dependencies
 

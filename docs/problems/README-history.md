@@ -1494,3 +1494,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-09-14
 
 > Last reviewed: 2026-09-13 **P477 closed on evidence** - fresh-session native completion automatically persisted checkout-bound risk markers and admitted the governed command
+
+> Last reviewed: 2026-09-14 **P539 captured** — governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate (lightweight aside via /wr-itil:capture-problem)

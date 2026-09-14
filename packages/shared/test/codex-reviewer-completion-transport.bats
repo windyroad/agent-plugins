@@ -8,6 +8,8 @@ setup() {
 
 teardown() {
   rm -f /tmp/{style-guide,voice-tone}-{reviewed,plan-reviewed}-bats-p402-*-"$$"{,.hash,-other,-other.hash,-child,-child.hash}
+  rm -f /tmp/{style-guide,voice-tone,jtbd}-{reviewed,plan-reviewed}-bats-p539-*-"$$"{,.hash}
+  rm -f /tmp/jtbd-verdict
 }
 
 pack_plugin() {
@@ -55,6 +57,47 @@ wait_payload() {
 stop_payload() {
   jq -cn --arg session "$1" --arg cwd "$2" --arg role "$3" --arg target "$4" --arg output "$5" \
     '{session_id:$session,cwd:$cwd,hook_event_name:"SubagentStop",agent_type:$role,agent_id:$target,last_assistant_message:$output}'
+}
+
+native_array_spawn_payload() {
+  local response
+  response="$(jq -cn --arg target "$4" '{task_name:$target}')"
+  jq -cn --arg session "$1" --arg cwd "$2" --arg role "$3" --arg response "$response" \
+    '{session_id:$session,cwd:$cwd,tool_name:"collaboration.spawn_agent",tool_input:{agent_type:$role,message:"review"},tool_response:[{type:"input_text",text:$response}]}'
+}
+
+native_array_close_payload() {
+  local response
+  response="$(jq -cn --arg output "$4" '{previous_status:{completed:$output}}')"
+  jq -cn --arg session "$1" --arg cwd "$2" --arg target "$3" --arg response "$response" \
+    '{session_id:$session,cwd:$cwd,tool_name:"collaboration.interrupt_agent",tool_input:{target:$target},tool_response:[{type:"input_text",text:$response}]}'
+}
+
+@test "packed reviewers share the current dotted collaboration and input_text completion transport" {
+  local package root role verdict session target marker
+
+  for package in style-guide voice-tone jtbd; do
+    root="$(pack_plugin "$package")"
+    case "$package" in
+      style-guide)
+        role="wr-style-guide:agent"; verdict='**Style Guide Review: PASS**'; marker="/tmp/style-guide-reviewed-bats-p539-$package-$$" ;;
+      voice-tone)
+        role="wr-voice-tone:agent"; verdict='**Voice & Tone Review: PASS**'; marker="/tmp/voice-tone-reviewed-bats-p539-$package-$$" ;;
+      jtbd)
+        role="wr-jtbd:agent"; verdict='**JTBD Review: PASS**'; marker="/tmp/jtbd-reviewed-bats-p539-$package-$$" ;;
+    esac
+    session="bats-p539-$package-$$"
+    target="/root/p539-$package"
+
+    [ -f "$root/hooks-codex/codex-agent-completion.mjs" ]
+    jq -e '.hooks.PostToolUse[] | select(.matcher | contains("collaboration.spawn_agent"))' "$root/hooks-codex/hooks.json"
+    send_event "$root/hooks-codex/codex-agent-completion.mjs" \
+      "$(native_array_spawn_payload "$session" "$REPO_ROOT" "$role" "$target")"
+    [ "$package" != jtbd ] || printf 'PASS\n' > /tmp/jtbd-verdict
+    send_event "$root/hooks-codex/codex-agent-completion.mjs" \
+      "$(native_array_close_payload "$session" "$REPO_ROOT" "$target" "$verdict")"
+    [ -e "$marker" ]
+  done
 }
 
 @test "packed style-guide transports only genuine bound native completions" {
