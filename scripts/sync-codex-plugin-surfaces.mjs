@@ -130,9 +130,13 @@ if (existsSync(hooks)) {
   for (const [event, groups] of Object.entries(config.hooks || {})) {
     for (const group of groups) {
       if (group.matcher) group.matcher = group.matcher.replaceAll("AskUserQuestion", "request_user_input");
+      for (const hook of group.hooks || []) {
+        if (hook.command) hook.command = hook.command.replaceAll("${CLAUDE_PLUGIN_ROOT}", "${PLUGIN_ROOT}");
+        if (packageName === "voice-tone" && event === "UserPromptSubmit") hook.additionalContextLimit = 0;
+      }
       if ((event === "PreToolUse" || event === "PostToolUse") && /Edit|Write|Agent/.test(group.matcher || "")) {
         for (const hook of group.hooks || []) {
-          const command = hook.command.replaceAll("${CLAUDE_PLUGIN_ROOT}", "${PLUGIN_ROOT}");
+          const command = hook.command;
           hook.command = `bash "\${PLUGIN_ROOT}/hooks-codex/codex-adapter.sh" ${JSON.stringify(command)}`;
         }
       }

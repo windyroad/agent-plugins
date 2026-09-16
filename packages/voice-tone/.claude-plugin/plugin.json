@@ -50,6 +50,17 @@
         },
         "schema_version": "2.0"
       },
+      "assistant-voice-tone-stop": {
+        "band": "Experimental",
+        "computed_at": "2026-09-17T00:00:00Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 0,
+          "days_shipped": 0,
+          "invocations_30d": null
+        },
+        "schema_version": "2.0"
+      },
       "voice-tone-enforce-edit": {
         "band": "Experimental",
         "computed_at": "2026-05-18T11:42:50Z",
@@ -106,6 +117,17 @@
           "closed_tickets_window": 5,
           "days_shipped": 40,
           "invocations_30d": 6
+        },
+        "schema_version": "2.0"
+      },
+      "update-assistant-guide": {
+        "band": "Experimental",
+        "computed_at": "2026-09-17T00:00:00Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 0,
+          "days_shipped": 0,
+          "invocations_30d": 0
         },
         "schema_version": "2.0"
       },

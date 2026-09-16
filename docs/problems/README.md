@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-14 **P539 closed** — released reviewer plugins persisted native completion markers in a fresh task and admitted the next governed operation without manual recovery
+> Last reviewed: 2026-09-17 **P540 captured as Known Error** — assistant responses lack an opt-in project prose guide and bounded semantic self-review
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -70,6 +70,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P284 | Release pipeline halts — `changeset publish` E404 on a new version of an existing scoped package (@windyroad/architect@0.8.0) | 3 (Low) | Known Error | S | 2026-05-23 | internal |
 | 6 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 (Med) | Known Error | M | 2026-05-26 | internal |
 | 6 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 6 (Medium) | Known Error | M | 2026-07-03 | internal |
+| 6 | P540 | Assistant responses cannot opt into project voice-and-tone guidance | 12 (High) | Known Error | M | 2026-09-17 | internal (user-requested capability) |
 | 6 | P481 | Two ratified decisions describe a story-map format that no longer exists | 6 (Medium) | Open | S | 2026-08-08 | architect-review |
 | 6 | P504 | No skill surface reopens a closed problem ticket, and closure notes prescribe a command that refuses | 6 (Medium) | Open | S | 2026-08-20 | internal |
 | 6 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 (High) | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |

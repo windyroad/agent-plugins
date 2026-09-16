@@ -13,6 +13,9 @@
       { "matcher": "Agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/voice-tone-mark-reviewed.sh" }] },
       { "matcher": "Agent", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/external-comms-mark-reviewed.sh" }] },
       { "matcher": "Agent|Bash|Skill", "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/voice-tone-slide-marker.sh" }] }
+    ],
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/assistant-voice-tone-stop.sh" }] }
     ]
   }
 }

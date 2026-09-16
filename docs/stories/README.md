@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-09-14 **STORY-089 done** — published reviewer plugins persisted native completion markers in a fresh Codex task without plugin-specific recovery.
+> Last reviewed: 2026-09-17 **STORY-090 in progress** — implementation is complete and release verification remains.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -171,6 +171,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-085 | See the ID clash instead of the drift it causes | M | P533 | RFC-090 | STORY-MAP-002 |
 | in-progress | STORY-086 | Complete an external-comms review without repeating it | S | P402 | RFC-086 | STORY-MAP-002 |
 | in-progress | STORY-087 | Inspect a package without triggering publication review | S | P537 | RFC-091 | STORY-MAP-002 |
+| in-progress | STORY-090 | Keep assistant responses in my chosen voice | M | P540 | RFC-094 | STORY-MAP-008 |
 
 
 ## Done

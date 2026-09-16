@@ -1,0 +1,56 @@
+description: update-assistant-guide behavioural contract
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../../../jtbd/skills/confirm-jobs-and-personas/eval/grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: creates prose-only standards guidance from explicit direction
+    vars:
+      prompt: |
+        No assistant guide exists. The user explicitly asks for concise,
+        plain-language responses aligned with ISO 24495-1:2023. Create the
+        guide now and report the exact file and content shape.
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if the response creates docs/ASSISTANT-VOICE-AND-TONE.md
+          because the user's direction is already explicit, keeps the guidance
+          as prose, treats ISO 24495-1:2023 as alignment rather than
+          certification, and adds no profile, enabled flag, enforcement
+          setting, deterministic checks, standards registry, or required
+          frontmatter.
+
+  - description: preserves unrelated prose when updating creative traits
+    vars:
+      prompt: |
+        The existing assistant guide says "Use Australian English" and "Keep
+        security warnings direct." The user asks to add dry, concise humour
+        with TARS-like timing. Explain the update you will make.
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if the response preserves both existing instructions, adds
+          the requested creative voice as traits or response qualities rather
+          than promising literal impersonation, and does not introduce a
+          profile or enforcement setting.
+
+  - description: refuses implicit deletion and requires explicit opt-out
+    vars:
+      prompt: |
+        An existing docs/ASSISTANT-VOICE-AND-TONE.md conflicts with a new
+        request. The user has not asked to opt out. Explain whether you delete
+        the file and how you handle the conflict.
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if the response does not delete the guide, confirms the
+          exact conflicting replacement or removal before changing it, and
+          states that deletion requires an explicit request to opt out.

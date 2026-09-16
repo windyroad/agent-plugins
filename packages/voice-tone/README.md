@@ -1,6 +1,6 @@
 # @windyroad/voice-tone
 
-**Voice and tone enforcement for Claude Code.** Reviews user-facing copy against your brand's voice and tone guide before it ships. *Maturity: Experimental (suite-bootstrap window; 169 invocations / 30d).*
+**Voice and tone guidance for Claude Code and Codex.** Reviews user-facing copy before it ships and can shape ordinary assistant responses. *Maturity: Experimental (suite-bootstrap window; 169 invocations / 30d).*
 
 Part of [Windy Road Agent Plugins](../../README.md).
 
@@ -35,13 +35,20 @@ The plugin works automatically. On first use in a project without a voice guide,
 
 This examines your existing content and asks about your brand voice, target audience, and tone preferences to generate a `docs/VOICE-AND-TONE.md` tailored to your project.
 
+### Assistant responses
+
+Run `/wr-voice-tone:update-assistant-guide` to create or update `docs/ASSISTANT-VOICE-AND-TONE.md`. The file's existence is the only enablement switch. Its prose may describe plain-language standards such as ISO 24495-1:2023 or ASD-STE100, or creative voice traits. The same assistant applies the guide and performs one semantic self-review before stopping; this adds one continuation's latency and token use, and some runtimes may briefly show the first response before its correction.
+
+This supports the plugin's Claude Code and Codex command-hook runtimes, not ordinary web ChatGPT conversations. Standards references express alignment, not certification.
+
 ## How It Works
 
 | Hook | Trigger | What it does |
 |------|---------|-------------|
-| `voice-tone-eval.sh` | Every prompt | Evaluates whether the task involves user-facing copy |
+| `voice-tone-eval.sh` | Every prompt | Evaluates copy work and injects an opted-in assistant-response guide |
 | `voice-tone-enforce-edit.sh` | Edit or Write | Blocks edits until the voice-tone agent has reviewed |
 | `voice-tone-mark-reviewed.sh` | Agent completes | Marks the review as done (TTL: 3600s) |
+| `assistant-voice-tone-stop.sh` | Response stop | Requests one guarded semantic self-review when the assistant guide exists |
 
 ## Agent
 

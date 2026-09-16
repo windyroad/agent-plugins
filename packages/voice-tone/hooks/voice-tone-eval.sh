@@ -1,6 +1,8 @@
 #!/bin/bash
 # Voice & Tone - UserPromptSubmit hook (P095 / ADR-038)
 # Detects VOICE-AND-TONE.md in the project and injects delegation instruction.
+# Also injects docs/ASSISTANT-VOICE-AND-TONE.md when a project opts into
+# assistant-response voice guidance.
 # If the file doesn't exist, instructs Claude to create it via the agent.
 #
 # Progressive disclosure (ADR-038): full MANDATORY block on first
@@ -9,9 +11,45 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/session-marker.sh
 source "$SCRIPT_DIR/lib/session-marker.sh"
+# shellcheck source=lib/gate-helpers.sh
+source "$SCRIPT_DIR/lib/gate-helpers.sh"
 
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null || echo "")
+ASSISTANT_GUIDE="docs/ASSISTANT-VOICE-AND-TONE.md"
+
+inject_assistant_guide() {
+  [ -f "$ASSISTANT_GUIDE" ] || return 0
+
+  local hash marker hash_file previous_hash
+  hash=$(_substance_hash_path "$ASSISTANT_GUIDE")
+  marker="/tmp/assistant-voice-tone-announced-${SESSION_ID}"
+  hash_file="${marker}.hash"
+
+  if [ -n "$SESSION_ID" ] && [ -f "$marker" ] && [ -f "$hash_file" ]; then
+    previous_hash=$(cat "$hash_file" 2>/dev/null || echo "")
+    [ "$previous_hash" = "$hash" ] && return 0
+  fi
+
+  cat <<'HOOK_OUTPUT'
+INSTRUCTION: ASSISTANT VOICE AND TONE GUIDE ACTIVE.
+The project has opted into assistant-response voice guidance with docs/ASSISTANT-VOICE-AND-TONE.md.
+
+Apply the guide to ordinary assistant responses. Treat named standards and style references as prose guidance for alignment, not as a certification claim.
+
+<assistant-voice-and-tone-guide>
+HOOK_OUTPUT
+  cat "$ASSISTANT_GUIDE"
+  cat <<'HOOK_OUTPUT'
+</assistant-voice-and-tone-guide>
+HOOK_OUTPUT
+
+  if [ -n "$SESSION_ID" ]; then
+    _atomic_mark_with_hash "$marker" "$hash" || return 1
+  fi
+}
+
+inject_assistant_guide
 
 if [ -f "docs/VOICE-AND-TONE.md" ]; then
   if has_announced "voice-tone" "$SESSION_ID"; then
