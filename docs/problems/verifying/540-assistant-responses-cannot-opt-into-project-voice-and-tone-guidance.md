@@ -1,6 +1,6 @@
 # Problem 540: Assistant responses cannot opt into project voice-and-tone guidance
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-09-17
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture from a missing capability affecting every ordinary response when a project needs a consistent voice
 **Origin**: internal (user-requested capability)
@@ -50,12 +50,22 @@ The plugin has no assistant-response policy file, prompt-injection path, Stop-ho
 
 ADR-126 chooses an opt-in `docs/ASSISTANT-VOICE-AND-TONE.md` prose guide, native first-prompt injection, and one guarded same-assistant Stop continuation. RFC-094 and STORY-090 deliver that capability inside `@windyroad/voice-tone` without deterministic checks, profiles, an external evaluator, or a certification claim.
 
+**Release vehicle**: .changeset/assistant-response-voice-tone.md
+
 ## Verification
 
 - Absent-guide, injection, content-change, first-Stop, and retry-guard behaviour pass in both projected runtimes.
 - The update skill creates and updates the guide while preserving unrelated prose and requiring explicit opt-out for deletion.
 - The packed package contains the complete hooks and skill.
 - The published package is read back from npm and smoke-tested from a fresh install.
+
+## Fix Released
+
+Released in `@windyroad/voice-tone@0.9.0` (version-packages commit `cbad761398cf243f097f98ba0aed60227cf6f3ac`, PR #482, merge commit `130b41475a723b020ea2f2db6b84ae4f68a81699`, released 2026-09-17).
+
+The release adds the opt-in assistant-response guide, bounded same-assistant semantic self-review, and guided create/update skill across the Claude Code and Codex package surfaces.
+
+Observed in the releasing session: npm `latest` resolved to `0.9.0`, and a fresh registry install passed package-content, projected-hook, guide-injection, and Stop-decision smoke checks. Awaiting adopter verification in an ordinary interactive session.
 
 ## Dependencies
 

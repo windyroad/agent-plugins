@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-09-17 **STORY-090 in progress** — implementation is complete and release verification remains.
+> Last reviewed: 2026-09-17 **STORY-090 done** — @windyroad/voice-tone@0.9.0 shipped assistant-response voice guidance and fresh-install smoke checks passed.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -171,7 +171,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-085 | See the ID clash instead of the drift it causes | M | P533 | RFC-090 | STORY-MAP-002 |
 | in-progress | STORY-086 | Complete an external-comms review without repeating it | S | P402 | RFC-086 | STORY-MAP-002 |
 | in-progress | STORY-087 | Inspect a package without triggering publication review | S | P537 | RFC-091 | STORY-MAP-002 |
-| in-progress | STORY-090 | Keep assistant responses in my chosen voice | M | P540 | RFC-094 | STORY-MAP-008 |
 
 
 ## Done
@@ -180,6 +179,7 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-090 | Keep assistant responses in my chosen voice | 2026-09-17 | P540 |
 | STORY-089 | I can continue after a reviewer passes, without plugin-specific recovery | 2026-09-14 | P539 |
 | STORY-088 | Capture a problem when its index is missing | 2026-09-11 | P538 |
 | STORY-077 | Move a captured fix straight to verification and keep a reopened problem in the work queue | 2026-08-30 | P512 |

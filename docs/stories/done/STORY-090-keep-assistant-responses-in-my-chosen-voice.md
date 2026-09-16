@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 story-id: keep-assistant-responses-in-my-chosen-voice
 reported: 2026-09-17
 decision-makers: [Tom Howard]
@@ -25,13 +25,13 @@ In order to receive consistently readable responses without repeating instructio
 
 ## Acceptance criteria
 
-- [ ] The feature is enabled only when `docs/ASSISTANT-VOICE-AND-TONE.md` exists; absence produces no hook output or extra model turn.
-- [ ] The complete prose guide is injected on the first prompt and only reinjected after substantive content changes.
-- [ ] The same main assistant may review and replace its response once; the Stop retry guard prevents a second continuation.
-- [ ] No profile, enforcement setting, deterministic response check, nested assistant, MCP evaluator, or certification claim is introduced.
-- [ ] `/wr-voice-tone:update-assistant-guide` creates or updates the guide, preserves unrelated prose, and deletes only on explicit opt-out.
-- [ ] Claude Code and Codex projected hooks pass equivalent behavioural fixtures, and the packed plugin contains every required file.
-- [ ] The published `@windyroad/voice-tone` package is read back from npm and smoke-tested from a fresh install.
+- [x] The feature is enabled only when `docs/ASSISTANT-VOICE-AND-TONE.md` exists; absence produces no hook output or extra model turn.
+- [x] The complete prose guide is injected on the first prompt and only reinjected after substantive content changes.
+- [x] The same main assistant may review and replace its response once; the Stop retry guard prevents a second continuation.
+- [x] No profile, enforcement setting, deterministic response check, nested assistant, MCP evaluator, or certification claim is introduced.
+- [x] `/wr-voice-tone:update-assistant-guide` creates or updates the guide, preserves unrelated prose, and deletes only on explicit opt-out.
+- [x] Claude Code and Codex projected hooks pass equivalent behavioural fixtures, and the packed plugin contains every required file.
+- [x] The published `@windyroad/voice-tone` package is read back from npm and smoke-tested from a fresh install.
 
 ## Driving problem trace
 
