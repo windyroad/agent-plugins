@@ -84,6 +84,13 @@ Source and extracted packed-candidate tests can establish release readiness, but
 - In the positive journey, a fresh native `wr-architect:agent` completed with canonical `## Architecture Review: PASS`. The completion hook then logged that it could not resolve the parent transcript because no rollout existed for the parent thread. No parent review marker was written, the subsequent Bash write was denied, and `proof.txt` remained absent. The shipped completion journey therefore failed installed verification; P468 remains Known Error.
 - A separate negative `apply_patch` control was allowed without any architect review, even with the architect hook entries enabled for the isolated invocation. This establishes an additional uncovered Codex edit path; the Bash denial result must not be generalized to all edit tools.
 
+## Installed-session re-verification, 2026-09-17
+
+- `main` was fetched and was already identical to `origin/main` at `3658dcaa7`; the requested rebase was a no-op. The installed plugin was `@windyroad/architect@0.23.1`, and the fresh isolated process reported `codex-cli 0.145.0`.
+- An unreviewed Bash-write control was denied and created no file, confirming that the installed PreToolUse gate was active.
+- In a separate fresh `codex exec --ephemeral` journey, a native `wr-architect:agent` returned canonical `## Architecture Review: PASS`. Codex then logged `failed to resolve parent transcript path for subagent hook` because no rollout existed for the ephemeral parent thread. The plugin's pending completion state remained unconsumed, no parent review marker was written, the exact Bash write was denied, and `proof.txt` remained absent.
+- The installed-session failure therefore still reproduces. P468 remains Known Error; the later shared completion-decoder repair in P539 does not repair Codex's failure to deliver the native completion event when the ephemeral parent transcript cannot be resolved.
+
 ## Dependencies
 
 - **Blocks**: (none)
