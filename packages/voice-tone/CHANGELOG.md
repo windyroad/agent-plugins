@@ -1,5 +1,11 @@
 # @windyroad/voice-tone
 
+## 0.9.1
+
+### Patch Changes
+
+- 6400c8b: Require opted-in assistant voice guidance to produce one complete replacement, and verify the final Codex response from a packed plug-in.
+
 ## 0.9.0
 
 ### Minor Changes
