@@ -149,6 +149,7 @@ R001 + R008 are confidentiality classes (different surfaces). R004 is a state-le
 | [R095](R095-cumulative-branch-ratification-and-validation-gap.active.md) | Cumulative Branch Ratification And Validation Gap | — | — | pending review |
 | [R096](R096-adr-116-ratification-precondition-unmet.active.md) | Adr 116 Ratification Precondition Unmet | — | — | pending review |
 | [R097](R097-hook-regression-installed-runtime-smoke-gap.active.md) | Hook Regression Installed Runtime Smoke Gap | — | — | pending review |
+| [R098](R098-hook-protocol-success-user-visible-response-failure.active.md) | Hook protocol succeeds while the user-visible response fails | 16 (High) | 16 (High) | above |
 
 > **Pending-review queue**: Remaining active auto-scaffolded entries carry ADR-026 sentinels for ungrounded scoring fields and `Status: Active (auto-scaffolded — pending review)` for downstream human curation. Obsolete release-delay and atomic-holding entries were retired when ADR-099 removed held changesets as a shipment control.
 
