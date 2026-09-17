@@ -69,14 +69,18 @@ run_stop_hook() {
   [ "$output" = "" ]
 }
 
-@test "assistant voice Stop present guide: blocks once for self-review" {
+@test "assistant voice Stop present guide: requires one unmistakably guided complete replacement" {
   echo "Use plain language." > "$WORKDIR/docs/ASSISTANT-VOICE-AND-TONE.md"
 
   run run_stop_hook false
 
   [ "$status" -eq 0 ]
   [ "$(jq -r '.decision' <<<"$output")" = "block" ]
-  [[ "$(jq -r '.reason' <<<"$output")" == *"Review your previous response semantically"* ]]
+  reason="$(jq -r '.reason' <<<"$output")"
+  [[ "$reason" == *"rewrite your previous response as one complete final response"* ]]
+  [[ "$reason" == *"make the voice requested by the guide unmistakable"* ]]
+  [[ "$reason" == *"Always emit the complete replacement response"* ]]
+  [[ "$reason" == *"Never return an empty response, a verdict, or review commentary"* ]]
 }
 
 @test "assistant voice Stop retry guard: active stop hook is silent" {

@@ -13,7 +13,7 @@ STOP_HOOK_ACTIVE=$(printf '%s' "$INPUT" | jq -r '.stop_hook_active // false' 2>/
 LAST_ASSISTANT_MESSAGE=$(printf '%s' "$INPUT" | jq -r '.last_assistant_message // empty' 2>/dev/null || echo "")
 [ -n "$LAST_ASSISTANT_MESSAGE" ] || exit 0
 
-jq -n --arg reason 'Review your previous response semantically against docs/ASSISTANT-VOICE-AND-TONE.md. If the response does not align, emit one complete corrected final response in the requested voice and tone. If no correction is needed, finish without adding user-facing commentary. Do not claim standards certification; claim alignment only when relevant.' '{
+jq -n --arg reason 'Read docs/ASSISTANT-VOICE-AND-TONE.md and rewrite your previous response as one complete final response. Preserve its meaning, but make the voice requested by the guide unmistakable rather than merely acceptable. Always emit the complete replacement response, even when the previous response already aligns. Never return an empty response, a verdict, or review commentary. Do not claim standards certification; claim alignment only when relevant.' '{
   decision: "block",
   reason: $reason
 }'

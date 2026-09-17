@@ -48,15 +48,16 @@ The plugin has no assistant-response policy file, prompt-injection path, Stop-ho
 
 ## Fix Strategy
 
-ADR-126 chooses an opt-in `docs/ASSISTANT-VOICE-AND-TONE.md` prose guide, native first-prompt injection, and one guarded same-assistant Stop continuation. RFC-094 and STORY-090 deliver that capability inside `@windyroad/voice-tone` without deterministic checks, profiles, an external evaluator, or a certification claim.
+ADR-127 supersedes ADR-126 after installed-runtime experiments reproduced an empty final continuation. It retains the opt-in `docs/ASSISTANT-VOICE-AND-TONE.md` prose guide and native first-prompt injection, but requires the guarded Stop continuation to emit one complete replacement and make the requested voice unmistakable. RFC-094 and STORY-090 deliver that capability inside `@windyroad/voice-tone` without deterministic style checks, profiles, an external evaluator, or a certification claim.
 
-**Release vehicle**: .changeset/assistant-response-voice-tone.md
+**Release vehicle**: `.changeset/fix-voice-tone-final-response.md`
 
 ## Verification
 
 - Absent-guide, injection, content-change, first-Stop, and retry-guard behaviour pass in both projected runtimes.
 - The update skill creates and updates the guide while preserving unrelated prose and requiring explicit opt-out for deletion.
 - The packed package contains the complete hooks and skill.
+- A packed-plugin Codex journey proves that the final assistant output is non-empty and applies an observable guide instruction.
 - The published package is read back from npm and smoke-tested from a fresh install.
 
 ## Fix Released
@@ -67,6 +68,8 @@ The release adds the opt-in assistant-response guide, bounded same-assistant sem
 
 Observed in the releasing session: npm `latest` resolved to `0.9.0`, and a fresh registry install passed package-content, projected-hook, guide-injection, and Stop-decision smoke checks. Awaiting adopter verification in an ordinary interactive session.
 
+That adopter verification failed: the released conditional Stop instruction allowed silence when the assistant considered its first response acceptable. Codex displayed a generic first response, then recorded an empty continuation as the final output. Protocol checks had verified hook output, not the user-visible result. ADR-127 records the replacement contract selected by installed-runtime experiments; release verification now includes the actual final Codex response.
+
 ## Dependencies
 
 - **Blocks**: durable project-specific voice and tone for ordinary assistant responses
@@ -74,7 +77,7 @@ Observed in the releasing session: npm `latest` resolved to `0.9.0`, and a fresh
 
 ## Related
 
-- ADR-126: Opt-in prose-guided assistant-response self-review.
+- ADR-127: Unmistakably guided complete replacement (supersedes ADR-126).
 - P440 concerns the separate external-communications reviewer’s knowledge of project idiom and does not absorb this response-generation surface.
 - Mandatory hang-off arbitration returned `PROCEED_NEW`: none of P440, P200, P038, P257, or P469 owns ordinary assistant response hooks or the assistant guide.
 

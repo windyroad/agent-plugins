@@ -27,7 +27,7 @@ In order to receive consistently readable responses without repeating instructio
 
 - [x] The feature is enabled only when `docs/ASSISTANT-VOICE-AND-TONE.md` exists; absence produces no hook output or extra model turn.
 - [x] The complete prose guide is injected on the first prompt and only reinjected after substantive content changes.
-- [x] The same main assistant may review and replace its response once; the Stop retry guard prevents a second continuation.
+- [x] The same main assistant emits one complete, unmistakably guided replacement; the Stop retry guard prevents a second continuation.
 - [x] No profile, enforcement setting, deterministic response check, nested assistant, MCP evaluator, or certification claim is introduced.
 - [x] `/wr-voice-tone:update-assistant-guide` creates or updates the guide, preserves unrelated prose, and deletes only on explicit opt-out.
 - [x] Claude Code and Codex projected hooks pass equivalent behavioural fixtures, and the packed plugin contains every required file.
@@ -43,7 +43,7 @@ JTBD-013 requires each opted-in response to follow project prose guidance withou
 
 ## Implementation notes
 
-Implement ADR-126 in the existing voice-and-tone plugin. Reuse native command hooks and the current Codex projection path; keep the retry ceiling explicit and the absent-guide path silent.
+Implement ADR-127 in the existing voice-and-tone plugin. Reuse native command hooks and the current Codex projection path; keep the retry ceiling explicit and the absent-guide path silent.
 
 ## Dependencies
 
@@ -52,4 +52,4 @@ Implement ADR-126 in the existing voice-and-tone plugin. Reuse native command ho
 
 ## Related
 
-- ADR-126: Opt-in prose-guided assistant-response self-review.
+- ADR-127: Unmistakably guided complete replacement (supersedes ADR-126).

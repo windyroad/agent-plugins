@@ -37,7 +37,7 @@ This examines your existing content and asks about your brand voice, target audi
 
 ### Assistant responses
 
-Run `/wr-voice-tone:update-assistant-guide` to create or update `docs/ASSISTANT-VOICE-AND-TONE.md`. The file's existence is the only enablement switch. Its prose may describe plain-language standards such as ISO 24495-1:2023 or ASD-STE100, or creative voice traits. The same assistant applies the guide and performs one semantic self-review before stopping; this adds one continuation's latency and token use, and some runtimes may briefly show the first response before its correction.
+Run `/wr-voice-tone:update-assistant-guide` to create or update `docs/ASSISTANT-VOICE-AND-TONE.md`. The file's existence is the only enablement switch. Its prose may describe plain-language standards such as ISO 24495-1:2023 or ASD-STE100, or creative voice traits. Before stopping, the same assistant always rewrites its response in full and makes the requested voice unmistakable. This adds one continuation's latency and token use, and some runtimes may briefly show the first response before its replacement.
 
 This supports the plugin's Claude Code and Codex command-hook runtimes, not ordinary web ChatGPT conversations. Standards references express alignment, not certification.
 
@@ -48,7 +48,7 @@ This supports the plugin's Claude Code and Codex command-hook runtimes, not ordi
 | `voice-tone-eval.sh` | Every prompt | Evaluates copy work and injects an opted-in assistant-response guide |
 | `voice-tone-enforce-edit.sh` | Edit or Write | Blocks edits until the voice-tone agent has reviewed |
 | `voice-tone-mark-reviewed.sh` | Agent completes | Marks the review as done (TTL: 3600s) |
-| `assistant-voice-tone-stop.sh` | Response stop | Requests one guarded semantic self-review when the assistant guide exists |
+| `assistant-voice-tone-stop.sh` | Response stop | Requests one guarded, complete replacement when the assistant guide exists |
 
 ## Agent
 

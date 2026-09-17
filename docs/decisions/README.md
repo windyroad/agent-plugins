@@ -11,7 +11,7 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 124 (111 in-force, 13 historical)
+**Total ADRs:** 125 (111 in-force, 14 historical)
 
 ---
 
@@ -561,17 +561,17 @@ _111 ADRs. These are the current rules. The architect agent reads this section f
 **Confirmation:** A map without a manifest-bound historical pre-RFC row keeps the same rendered output, query results, and finge...; Existing story-backed rows with bare preRfc: true retain their current delivered-history behavior.; An ordinary card without a real story still fails validation.; Ordinary RFC rows retain existing RFC, status, problem, approval, and query behavior.; A valid historical pre-RFC row renders in the committed map table with its source label, reported date, semant...; Historical rows and cards contribute no RFC identity, delivery status, problem derivation, story approval, or ...; Historical labels are shown as dated source labels and never translated into current delivery claims.; Validation fails in each of these cases:; Changing historical substance fails until a newly ratified decision authorises the new fingerprint.; Existing story-map query and reverse-reference tests pass unchanged, and new behavioral tests cover every fail...; The migration skill accepts only a complete mapping whose cited adopter decision has confirmed human oversight...; The migration skill rejects incomplete, ambiguous, or mismatched input before writing and makes no change when...; No migration adds a historical card absent from the retained source file.
 **Related:** ADR-090, ADR-102, ADR-103, ADR-104, ADR-105, ADR-107
 
-### ADR-126 — Opt-in prose-guided assistant-response self-review
-**Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **"Inject prose guidance and allow one semantic self-review continuation"**.
-**Confirmation:** Behavioural tests prove that an absent guide produces no injection, Stop output, or continuation.; Behavioural tests prove first-prompt injection, no unchanged repeat injection, and reinjection after a substan...; Behavioural tests prove the first Stop may request one self-review and stop_hook_active: true cannot request a...; Tests prove the implementation contains no deterministic response parser, nested assistant invocation, MCP eva...; Skill tests cover create, update, unrelated-prose preservation, conflict confirmation, and explicit-only delet...; Claude Code and Codex hook fixtures exercise the same behaviour planned by this decision.; The packed plugin contains the guide-management skill, hook commands, and supporting files.; User documentation states opt-in behaviour, token and latency cost, first-response visibility, supported runti...; The governed release is pushed, published, read back from the package registry, and smoke-tested from a fresh ...
-**Related:** ADR-028, ADR-038, ADR-045, ADR-083, ADR-094
+### ADR-127 — Unmistakably guided complete replacement
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [ADR-126]
+**Chosen:** Chosen option: **"Emit one unmistakably guided complete replacement"**, because it was the only tested wording that both prevented an empty final output and made the creative guide visibly affect the response.
+**Confirmation:** A hook test fails if the Stop reason permits silence or does not require one complete replacement.; Existing tests continue to prove absent-guide silence and the one-turn guard.; A packed-plugin Codex journey uses a guide requiring an observable marker.; The journey asserts that the final assistant output is non-empty and contains that marker.; A second journey uses expressive prose guidance and confirms that the final response visibly applies it withou...; Hook projection or shell output alone is insufficient release evidence.; Documentation states the replacement and first-response visibility behaviour.
+**Related:** ADR-126
 
 ---
 
 ## Historical decisions
 
-_13 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
+_14 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
 
 ### ADR-001 — Unified Install Experience via npm Package
 **Status:** superseded
@@ -642,3 +642,9 @@ _13 ADRs. These were tried and superseded, rejected, or deprecated. Read them as
 **Superseded-by:** ADR-099
 **Chosen:** Chosen option: **"(b) Real shipment control + (c) Reconcile K→V release lifecycle — riding together in a single RFC-first fix path"**, confirmed by the user via `AskUserQuestion` 2026-06-17 (`/wr-architect:review-decisions` drain across...
 **Related:** ADR-042, ADR-070, ADR-066, ADR-074
+
+### ADR-126 — Opt-in prose-guided assistant-response self-review
+**Status:** superseded | **Oversight:** confirmed
+**Chosen:** Chosen option: **"Inject prose guidance and allow one semantic self-review continuation"**.
+**Confirmation:** Behavioural tests prove that an absent guide produces no injection, Stop output, or continuation.; Behavioural tests prove first-prompt injection, no unchanged repeat injection, and reinjection after a substan...; Behavioural tests prove the first Stop may request one self-review and stop_hook_active: true cannot request a...; Tests prove the implementation contains no deterministic response parser, nested assistant invocation, MCP eva...; Skill tests cover create, update, unrelated-prose preservation, conflict confirmation, and explicit-only delet...; Claude Code and Codex hook fixtures exercise the same behaviour planned by this decision.; The packed plugin contains the guide-management skill, hook commands, and supporting files.; User documentation states opt-in behaviour, token and latency cost, first-response visibility, supported runti...; The governed release is pushed, published, read back from the package registry, and smoke-tested from a fresh ...
+**Related:** ADR-028, ADR-038, ADR-045, ADR-083, ADR-094
