@@ -1,6 +1,6 @@
 # Problem 540: Assistant responses cannot opt into project voice-and-tone guidance
 
-**Status**: Verification Pending
+**Status**: Closed (closed-on-evidence 2026-09-17 — fresh registry install of `@windyroad/voice-tone@0.9.1` produced a non-empty final Codex response containing the guide marker; release workflow 35218418697 passed on rerun. Recovery: rerun `/wr-itil:transition-problem 540 known-error` to reopen)
 **Reported**: 2026-09-17
 **Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture from a missing capability affecting every ordinary response when a project needs a consistent voice
 **Origin**: internal (user-requested capability)
@@ -69,6 +69,8 @@ The release adds the opt-in assistant-response guide, bounded same-assistant sem
 Observed in the releasing session: npm `latest` resolved to `0.9.0`, and a fresh registry install passed package-content, projected-hook, guide-injection, and Stop-decision smoke checks. Awaiting adopter verification in an ordinary interactive session.
 
 That adopter verification failed: the released conditional Stop instruction allowed silence when the assistant considered its first response acceptable. Codex displayed a generic first response, then recorded an empty continuation as the final output. Protocol checks had verified hook output, not the user-visible result. ADR-127 records the replacement contract selected by installed-runtime experiments; release verification now includes the actual final Codex response.
+
+The correction shipped in `@windyroad/voice-tone@0.9.1` (fix commit `6400c8bbe4cc7b6b8004ae9e1cefd468c16c8777`, version-packages commit `3fb7d65b6`, PR #483, merge commit `21c5cf682885fc9f0d0ed05a0d7b1491fa6255c2`, released 2026-09-17). npm `latest` resolved to `0.9.1`. A fresh registry install into an isolated Codex home produced the final response `The published release works. RELEASED_VOICE_GUIDE_APPLIED`; it was non-empty and contained the guide's required marker. Release workflow `35218418697` passed on rerun after registry propagation completed.
 
 ## Dependencies
 

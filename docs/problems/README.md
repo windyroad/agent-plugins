@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-17 **P540 moved to Verification Pending** — @windyroad/voice-tone@0.9.0 shipped assistant-response voice guidance and awaits adopter verification.
+> Last reviewed: 2026-09-17 **P540 closed on evidence** — published @windyroad/voice-tone@0.9.1 produced a non-empty, guide-marked final Codex response from a fresh registry install.
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -301,7 +301,6 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P403 | Agent frames skill-mandatory mechanical steps as user-optional (detect_mechanical_optional Stop-hook detector; fix vehicle RFC-042) | pending — @windyroad/itil patch committed, ships next release | no — not observed |
 | P533 | Duplicate ticket IDs are silently swallowed by the README reconciler, so drift rows blame the wrong cause | `@windyroad/itil@2.2.0` 2026-09-03 | no — not observed |
 | P537 | External-comms publication guard blocks npm publish dry runs | 2026-09-11 (`@windyroad/risk-scorer@0.19.2`, `@windyroad/voice-tone@0.8.5`; version-packages commit `4d66e3ab`, merge `99c720b9`, PR #475) | no — not observed |
-| P540 | Assistant responses cannot opt into project voice-and-tone guidance | 2026-09-17 (`@windyroad/voice-tone@0.9.0`; version-packages commit `cbad761398cf243f097f98ba0aed60227cf6f3ac`, merge `130b41475a723b020ea2f2db6b84ae4f68a81699`, PR #482) | no — not observed |
 | P402 | external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS | 2026-09-12 (`@windyroad/risk-scorer@0.19.3`, `@windyroad/voice-tone@0.8.6`; version commit `8c9e4f4c`, merge `9cc26afc`, PR #477, workflow 34684064046) | no — not observed |
 
 ## Inbound Upstream Reports
@@ -408,6 +407,7 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 
 | ID | Title | Closed via |
 |----|-------|-----------|
+| P540 | Assistant responses cannot opt into project voice-and-tone guidance | Closed 2026-09-17 on fresh published-artifact evidence: `@windyroad/voice-tone@0.9.1` installed into an isolated Codex home and produced a non-empty final response containing the required guide marker; release workflow 35218418697 passed on rerun. Recovery: `/wr-itil:transition-problem 540 known-error`. |
 | P539 | Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate | Closed 2026-09-14 on fresh installed-runtime evidence: session `01a09e85-1e48-7762-ab31-bf945af29cf7` loaded the released plugins, persisted native reviewer completion markers, and admitted governed commit `40095da4e` without manual recovery. Recovery: `/wr-itil:transition-problem 539 known-error`. |
 | P477 | Codex collaboration completion bypasses the risk-marker bridge | Closed 2026-09-13 on fresh-session installed-artifact evidence: native `collaboration.interrupt_agent` completion automatically persisted checkout-bound 0/0/0 markers and admitted the following governed command. No manual replay or bypass. Recovery: `/wr-itil:transition-problem 477 known-error`. |
 | P538 | Problem creation is gated on the problem index existing | Closed 2026-09-11 after the published `@windyroad/itil` 2.2.1 skill created a ticket and canonical index together in a fresh missing-index adopter fixture; the published reconciler passed and exact two-file commit `a0d10e4` completed. Recovery: `/wr-itil:transition-problem 538 known-error`. |
