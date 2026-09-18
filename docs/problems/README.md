@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-18 — full re-rank as the Step 0b pre-flight of the AFK `/wr-itil:work-problems` loop. Inbound discovery ran on the TTL-expiry auto-recheck branch (cache 20 days stale): 88 open issues polled, 1 new (#473), routed safe-and-valid to new ticket **P544** (briefing topic-file entries decay toward deletion because nothing ever loads them) with the reporter acknowledgement posted. Relevance-close pass closed **P425** and **P450** on clean multi-shape evidence; 107 further candidates returned CLOSE-CANDIDATE-WITH-CAVEAT and are held for the next interactive review. WSJF repairs: **P503** 8 → 16 (Known Error multiplier was never applied after the transition), and WSJF lines added to **P534, P535, P536, P541, P542, P543**, which captured without one. No Open → Known Error auto-transitions: 75 of 93 open tickets still carry unticked Investigation Tasks. All 165 Verification Queue cells read `no — not observed`, so nothing was closable on evidence under AFK.
+> Last reviewed: 2026-09-19 **P545 captured** — the verification-close drain has no state assertion, and the do-not-close guard green-lights tickets that are already closed (lightweight aside via /wr-itil:capture-problem).
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -89,6 +89,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P531 | ADR compendium regeneration drops Amends relationships from summaries | 12 (High) | Open | M | 2026-08-31 | internal (user-supplied screenshot) |
 | 6 | P535 | Critical Points outgrew its budget, so the session-start hook truncates the surface it exists to provide | 12 (High) | Open | M | 2026-09-04 | internal |
 | 6 | P541 | Release verification fails good releases — propagation window too short, and per-package nesting makes widening worse | 12 (High) | Open | M | 2026-09-18 | internal |
+| 6 | P545 | The verification-close drain has no state assertion, and the do-not-close guard green-lights tickets that are already closed | 12 (High) | Open | M | 2026-09-19 | internal |
 | 5 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 (Low) | Open | S | 2026-07-02 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 (Medium) | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 (Medium) | Open | M | 2026-06-17 | internal |
