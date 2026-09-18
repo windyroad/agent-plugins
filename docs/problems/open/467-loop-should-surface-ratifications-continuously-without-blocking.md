@@ -20,6 +20,8 @@ The enhancement the user voiced: *"if there's a way to have the iterator working
 - A held vehicle (e.g. P429 commit-convention reshape, P430 STORY-047) authored early in a loop cannot be ratified until the entire loop ends, so its code fix can't land until a whole new loop run.
 - A present user watching the loop sees ratifications pile into a single end-of-loop batch rather than being offered them as they arise.
 
+- **The loop-end batch does not merely delay — it LOSES entries (new evidence 2026-09-19, and it contradicts this ticket's own Impact rating).** P429, the witness named in the Analytics line below, queued two questions on 2026-07-26: ratification of the ADR-014 + ADR-024 commit-subject amendments, and a four-option design pick for its regression guard. Neither was ever answered. `.afk-run-state/outstanding-questions.jsonl` today holds three entries, none of them P429's, and nothing was back-written to the ticket — so the questions did not survive to any drain, interactive or otherwise. Nearly two months of selections re-derived the same dead end, each burning a top-of-queue iteration slot on a Tier-1 Known Error that cannot progress. Recorded in that ticket's body under "Re-selection pass 2026-09-19".
+
 ## Workaround
 
 Current: the loop batches all outstanding_questions at Step 2.4 gate (a) / Step 2.5 and the user ratifies then; each subsequent loop run advances the ratified vehicles one more step.
@@ -28,7 +30,7 @@ Current: the loop batches all outstanding_questions at Step 2.4 gate (a) / Step 
 
 - **Who is affected**: maintainer running work-problems while present/intermittently present; loop throughput on fix-shaped tickets.
 - **Frequency**: every loop that authors held vehicles (currently most fix-shaped iters — see P456 throughput observation).
-- **Severity**: Medium (8) — throughput/UX; no correctness harm.
+- **Severity**: Medium (8) — throughput/UX. **The "no correctness harm" half of this rating is contradicted by the 2026-09-19 evidence above** and is flagged as a re-rank candidate for the next `/wr-itil:review-problems` pass: a queue that silently drops queued user decisions is losing work, not merely deferring it, which is a correctness axis this rating does not currently price in. Not re-scored here — WSJF re-ranking is the review skill's job, and the re-rate wants the whole backlog in view.
 - **Analytics**: 2026-07-26 loop — P429 + P430 both authored held vehicles surfaced only at loop-end.
 
 ## Root Cause Analysis
@@ -37,6 +39,7 @@ Current: the loop batches all outstanding_questions at Step 2.4 gate (a) / Step 
 
 - [ ] Design a non-blocking continuous-surface mechanism: emit a ratification-available signal as each iter queues one, without the orchestrator waiting on it (the loop keeps dispatching other dispatchable tickets).
 - [ ] Define how a mid-loop ratification result re-enters the loop (re-scan the now-unblocked vehicle on the next Step 1) without violating the iter subprocess boundary (ADR-032).
+- [ ] **Establish whether entries are dropped on write, on rotation, or on a partial drain** — the 2026-09-19 P429 evidence shows loss but not the mechanism. Until that is known, the continuous-surface design above cannot assume the jsonl is a reliable substrate; a durable write (into the ticket body, which does survive) may need to be part of the queueing contract rather than an afterthought.
 - [ ] Reconcile with Step 2.4 gate (a) loop-end batch — continuous surface should supplement, not replace, the end-of-loop drain.
 
 ## Dependencies

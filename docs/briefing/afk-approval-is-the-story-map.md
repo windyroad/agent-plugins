@@ -1,0 +1,11 @@
+# Approval Is the Story Map's (ADR-103)
+
+Split out of [`afk-ratification-hold.md`](./afk-ratification-hold.md) on 2026-09-19 per the
+P099 Tier 3 budget rotation — the rule had grown past 1.7 KB and is the single most-cited AFK
+fact, so it earns its own load. Read [`afk-ratification-hold.md`](./afk-ratification-hold.md)
+for what an iter may author when the map is NOT ratified, and
+[`afk-vehicle-authoring-gates.md`](./afk-vehicle-authoring-gates.md) for the write-gate order.
+
+## What You Need to Know
+
+- **THE WALL IS BROKEN — approval is the story MAP's (2026-08-07).** ADR-103 retired the ADR-101 carve-out entirely: `wr-itil-check-afk-accept-eligible`, the `afk_accept_pure_decomposition` config key and the `afk-accept:` story field are GONE — do not reach for them. A story is approved when the story map it sits on is ratified. A story carries NO oversight field at all — approval is derived from its `story-maps:` field, and the marker writer refuses a story path. Ratifying a map approves every story on it, including stories added later, so an AFK loop that needs to land a story on an already-ratified map may accept and implement it with no further ratification event. Adding a release row or a story to a row no longer drifts a map's fingerprint. What still needs a human — all four legs, per ADR-103 line 47: a NEW map, a NEW activity column, a change to a map's own prose or traces, **or a NEW ADR**. The ADR leg is the one this entry used to omit and the one that most often fires: if the fix changes substance recorded in a ratified decision, ADR-116 allows change only by supersession, so the proposal needs a new ADR and implementation is refused however well-approved the story is. **Ratification is a MARKER, not a directory** — on 2026-08-21 all five maps sat in `docs/story-maps/draft/` and every one carried `"humanOversight": "confirmed"` with a matching hash. Reading the directory says nothing; read the marker. Test with `story_is_approved` for a story and `is_story_map_ratified` for a map; the story tier has no marker to read. **Everything below still holds for a story whose map is not ratified.** <!-- signal-score: 11 | last-classified: 2026-08-30 | first-written: 2026-07-26 -->
