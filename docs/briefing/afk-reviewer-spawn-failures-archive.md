@@ -1,0 +1,13 @@
+# Reviewer Spawn Failures — Archive
+
+Entries rotated out of [`afk-reviewer-spawn-failures.md`](./afk-reviewer-spawn-failures.md) on
+2026-09-19 when their signal scores reached the removal threshold. Both are recovery playbooks:
+they decay because nothing went wrong, not because they stopped being true. Rotated rather than
+deleted so the recovery steps survive for the session that needs them.
+
+## What You Need to Know
+
+- **A reviewer that dies on `API Error: 529 Overloaded` has not failed your prompt — retry it, and do not rewrite the ask.** P434 2026-07-26 lost five reviewer spawns this way (architect ×2, jtbd ×1, accessibility ×2) across a stretch where the API was broadly overloaded; each death was server-side and the prompts that eventually passed were the same prompts. Two things matter for recovery. `SendMessage` to the dead agent resumes it from its transcript cheaply and it keeps everything it had already read — but a resumed agent does **not** fire the PostToolUse marker hook, so a PASS obtained by resume cannot unblock a gated Write and you still need a fresh synchronous spawn (the architect deny message states this for its own gate as P400; it held for the accessibility gate too). And dropping the retry to `model: sonnet` cleared it repeatedly where opus kept dying — worth reaching for on the second failure rather than the fifth. Do not read these deaths as user kills or as prompt defects; that misattribution is the same class as the memory note on dispatched-iter deaths (P358 / P214). <!-- signal-score: -4 | last-classified: 2026-08-30 | first-written: 2026-07-26 -->
+
+- **A genuine architect PASS can leave the gate still locked, because the marker lands under the SUBAGENT's session id rather than the session's.** P417 iter 2026-07-26: a fresh `wr-architect:agent` spawn returned `**Architecture Review: PASS**` in the required leading-bold form, and the next Edit still denied with *"No architect review marker found for this session"*. `ls -lt /tmp/architect-*` showed the marker written moments earlier at `/tmp/architect-reviewed-<subagent-uuid>`, while every `*-announced-*` marker for the session carried a different uuid — the P368 SID-discovery class, hitting the architect gate rather than an oversight shim. A second PASS may land under a second wrong uuid. Treat the deny as a compatibility failure and use only a currently supported reviewer-completion path; if none is exposed, stop without manufacturing or replaying marker state. Tracked by P400 / P215 / RFC-021. <!-- signal-score: -5 | last-classified: 2026-08-31 | first-written: 2026-07-26 -->
+
