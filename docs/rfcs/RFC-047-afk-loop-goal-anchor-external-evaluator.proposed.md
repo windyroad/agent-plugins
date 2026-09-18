@@ -28,10 +28,10 @@ Anchor `/wr-itil:work-problems` (and headless single-ticket `/wr-itil:work-probl
 
 ## Scope
 
-1. `packages/itil/skills/work-problems/SKILL.md` — new Step 0e "`/goal` loop-anchor": canonical goal condition verbatim; copy-paste-complete headless launch one-liner (`claude -p "/goal <condition> — achieve this by running /wr-itil:work-problems"`); interactive loop-start nudge fallback (proceed regardless, never halt); orchestrator-session-only placement (never iter subprocesses).
+1. `packages/itil/skills/work-problems/SKILL.md` — new Step 0e "`/goal` loop-anchor": canonical goal condition verbatim; copy-paste-complete headless launch one-liner (`claude -p "/goal <condition> — achieve this by running /wr-itil:work-problems"`); interactive loop-start nudge fallback (proceed regardless, never halt); scope-based placement per ADR-128 (superseding ADR-094 in part) — drain-scoped goals on the orchestrator session only, per-ticket goals on the iter subprocess, with a runtime-specific carrier (dispatch-prompt declaration on Claude Code, native goal-set on Codex).
 2. Step 2.4 Gate (0) amendment — the re-scan classification table MUST be PRINTED in turn output (the evaluator judges only surfaced transcript evidence, ADR-026); one-directional anchor note (a cleared or never-set goal does not discharge Gate (0)). No turn-bound clause (P422 — trust the goal).
 3. `packages/itil/skills/work-problem/SKILL.md` — short parallel headless-anchor note for single-ticket runs.
-4. Paired promptfoo Tier-A/Tier-B eval cases in `packages/itil/skills/work-problems/eval/promptfooconfig.yaml` per ADR-061 Rule 4 evidence floor.
+4. Paired promptfoo Tier-A/Tier-B eval cases in `packages/itil/skills/work-problems/eval/promptfooconfig.yaml` per ADR-075 (promptfoo agent prose-verdict eval harness) evidence floor.
 5. `@windyroad/itil` patch changeset in the same commit per ADR-014.
 
 ## Tasks

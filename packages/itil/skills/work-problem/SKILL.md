@@ -13,7 +13,7 @@ This skill is the P071 phased-landing split of `/wr-itil:manage-problem work` pe
 ## Name distinction (work-problem vs work-problems)
 
 - **`/wr-itil:work-problem`** (singular, this skill) — one ticket per invocation. Framework-mediated selection (WSJF + tie-break ladder). Intended for a user who wants to dispatch the next-highest ticket and then stop. User-override path: `/wr-itil:work-problem <NNN>` to pin a specific ticket.
-- **`/wr-itil:work-problems`** (plural, AFK orchestrator) — loops through the backlog by WSJF, delegating each iteration to this skill (via the Agent tool, per ADR-032 + P077). Intended for AFK batch runs; non-interactive selection; stops only when nothing actionable remains.
+- **`/wr-itil:work-problems`** (plural, AFK orchestrator) — loops through the backlog by WSJF, dispatching each iteration to this skill as `/wr-itil:work-problem <NNN>` in a fresh `claude -p` subprocess (per ADR-032 as amended by P084; the earlier Agent-tool shape is superseded — an Agent-tool subagent has no Agent tool of its own, so governance gates could not be satisfied inside it). Each dispatch is anchored by a per-ticket goal per ADR-128. Intended for AFK batch runs; non-interactive selection; stops only when nothing actionable remains.
 
 Both names coexist intentionally per P071's out-of-scope note on the naming coexistence. The plural orchestrator uses this skill as its per-iteration unit.
 
@@ -53,6 +53,14 @@ fi
 
 - **Cache fresh** (no output): read `docs/problems/README.md` and use the cached WSJF Rankings table for Step 2.
 - **Cache stale** (prints "stale") or `README.md` missing: **delegate to `/wr-itil:review-problems`** via the Skill tool to refresh the ranking before proceeding. Do NOT re-implement the re-scoring logic here — that would fork the review path and break P062's canonical-cache-writer contract. The review skill's Step 4 verification prompt runs on this refresh path (P048 Candidate 1: Verification Queue prompts always fire so pending verifications don't accumulate off-ledger).
+
+**Pinned + unattended short-circuit — skip this whole step (ADR-128).** <!-- @jtbd JTBD-006 (Progress the Backlog While I'm Away — an unanswerable prompt and an off-grain ranking commit must not enter an absent-user subprocess) --> When this skill is invoked against a **pinned ticket** (`/wr-itil:work-problem <NNN>`) AND the invocation **declares the run unattended**, skip the freshness check entirely: do not read the ranking, do not delegate to `/wr-itil:review-problems`, do not prompt, do not commit. Proceed straight to Step 3 with the named ticket.
+
+Two things make this necessary rather than merely cheaper. The refresh delegation fires the review skill's Verification Queue prompt — **unanswerable in a subprocess with no user attached** (ADR-013 Rule 6; ADR-044). And its ranking rewrite is an **off-grain commit** inside what is supposed to be a single per-ticket unit of work (ADR-014), which can also trip the orchestrator's unexpected-dirty-state halt. The ranking is not consulted at all when the ticket is pinned, so the refresh buys nothing here.
+
+**The discriminator is a declaration, not a detection.** This skill is prose: it cannot observe a TTY, and under `claude -p` there is nothing to sniff. The unattended state is **declared by the dispatcher**. The exact sentence this short-circuit keys on, emitted by `/wr-itil:work-problems` Step 5 item 1: <!-- UNATTENDED-DECLARATION-CONSUMER --> **The user is AFK and this run is unattended.** A rule keyed on something the skill cannot observe would silently collapse to always or never — so the two surfaces are bound mechanically, not by hope: `wr-itil-check-goal-condition-drift` asserts the marked sentence is identical on both sides and fails CI if either is reworded.
+
+**The interactive pinned path is unchanged.** `/wr-itil:work-problem <NNN>` is also the documented *user-override* path, where a user IS present, the verification prompt IS answerable, and firing it is a deliberate piggyback keeping pending verifications from accumulating off-ledger. It is **the absent user, not the pin**, that makes the refresh wrong. The unattended loop carries the verification cadence on other surfaces; the interactive singular path has none, so a blanket short-circuit would delete a self-firing cadence and hand the maintainer something to remember.
 
 ### 2. Select the ticket (framework-mediated)
 
@@ -123,7 +131,7 @@ After the delegated `/wr-itil:manage-problem <NNN>` completes:
 
 ## Goal anchor for headless runs (P390 / ADR-094)
 
-A headless single-ticket run can anchor its completion with Claude Code's native `/goal` external evaluator (≥ v2.1.139), so a fresh model — not the working agent — judges whether the ticket genuinely reached an end state: `claude -p "/goal Run /wr-itil:work-problem to work the top ticket. Complete when the report printed in the conversation shows a committed outcome (with commit SHA) or a recorded blocker for the selected ticket."` (No turn-bound: trust the goal — the loop stops only at its real end states: a committed outcome, a recorded blocker, or quota exhaustion.) There is no programmatic mid-session surface for setting a goal (probed 2026-07-06, v2.1.201) — interactive users type `/goal` themselves; the skill proceeds identically either way. The plural orchestrator's anchor contract (canonical condition, printed-evidence rule, one-directional semantics) lives at `/wr-itil:work-problems` Step 0e.
+A headless single-ticket run can anchor its completion with Claude Code's native `/goal` external evaluator (≥ v2.1.139), so a fresh model — not the working agent — judges whether the ticket genuinely reached an end state: `claude -p "/goal Run /wr-itil:work-problem to work the top ticket. Complete when the report printed in the conversation shows a committed outcome (with commit SHA) or a recorded blocker for the selected ticket."` (No turn-bound: trust the goal — the loop stops only at its real end states: a committed outcome, a recorded blocker, or quota exhaustion.) **On the Claude Code surface** there is no programmatic mid-session surface for setting a goal (probed 2026-07-06 at v2.1.201; re-probed 2026-09-18 at v2.1.276 — no `--goal` flag, and the Skill tool rejects it as a UI command) — interactive users type `/goal` themselves; the skill proceeds identically either way. That is a property of *that runtime's* surface, not of goals generally: the **Codex surface** exposes `thread/goal/get` / `set` / `clear` and can set a goal for itself directly (ADR-128, one rule / two mechanisms). The plural orchestrator's anchor contract (canonical condition, printed-evidence rule, one-directional semantics) lives at `/wr-itil:work-problems` Step 0e.
 
 ## Related
 
@@ -134,11 +142,13 @@ A headless single-ticket run can anchor its completion with Claude Code's native
 - **ADR-044** (`docs/decisions/044-decision-delegation-contract.proposed.md`) — Decision-Delegation Contract; this skill's Step 2 selection is framework-mediated per the ADR's Prioritisation row. Step 4 scope-expansion is a category-2 (deviation-approval) surface per the ADR's 6-class taxonomy.
 - **ADR-014** — governance skills commit their own work. The delegated `/wr-itil:manage-problem <NNN>` owns the per-ticket commit; this skill does not re-commit.
 - **ADR-018** — release cadence. AFK orchestrator owns release cadence; this skill does NOT auto-release.
-- **ADR-032** — governance skill invocation patterns. `/wr-itil:work-problems` delegates iterations via the Agent tool; this singular skill is the canonical execution unit.
+- **ADR-032** — governance skill invocation patterns. `/wr-itil:work-problems` dispatches iterations to this skill in a fresh `claude -p` subprocess (the Agent-tool shape is superseded per P084); this singular skill is the canonical execution unit.
 - **ADR-037** (`docs/decisions/037-skill-testing-strategy.proposed.md`) — contract-assertion bats pattern applied to this skill.
 - **P031** — git-history freshness check rationale (mtime unreliable in worktrees). Applies to the README cache this skill reads.
 - **P062** — `/wr-itil:review-problems` is the canonical README.md cache writer. This skill defers to it for refreshes.
-- **P077** — `/wr-itil:work-problems` Step 5 delegates iterations via the Agent tool. The delegated subagent invokes this skill's execution unit per iteration.
+- **P077** — established the AFK iteration-isolation wrapper and the `ITERATION_SUMMARY` return contract. Its Agent-tool spawn mechanism was superseded by **P084** (an Agent-tool subagent has no Agent tool of its own, so governance gates could not be satisfied); `/wr-itil:work-problems` Step 5 now dispatches `/wr-itil:work-problem <NNN>` in a `claude -p` subprocess, anchored per-ticket under **ADR-128**.
+- **ADR-128** — per-ticket goal anchors each AFK iteration; the pinned + unattended short-circuit at Step 1 above, and the declaration-as-discriminator contract.
+- **JTBD-006** (Progress the Backlog While I'm Away) — the job this skill serves as the loop's per-iteration execution unit; the Step 1 short-circuit exists so an unanswerable prompt and an off-grain commit never enter an absent-user subprocess.
 - **JTBD-001** (`docs/jtbd/developer/JTBD-001-enforce-governance.proposed.md`) — discoverable surface via `/wr-itil:` autocomplete. Users type `/wr-itil:work-problem` rather than remembering the `manage-problem work` subcommand.
 - **JTBD-101** (`docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`) — one skill per distinct user intent.
 - `packages/itil/skills/manage-problem/SKILL.md` — hosts the thin-router forwarder for the deprecated `manage-problem work` form; also the delegated execution target for each ticket.

@@ -51,6 +51,7 @@
     "check:agent-instructions": "node scripts/check-agent-instructions.mjs",
     "sync:shim-wrappers": "bash scripts/sync-shim-wrappers.sh",
     "check:shim-wrappers": "bash scripts/sync-shim-wrappers.sh --check",
+    "check:goal-condition-drift": "bash packages/itil/scripts/check-goal-condition-drift.sh",
     "check:executable-modes": "bash scripts/check-executable-modes.sh",
     "check:architect-published-ids": "bash packages/architect/scripts/check-published-internal-ids.sh",
     "version": "changeset version && node scripts/sync-plugin-manifests.mjs && node scripts/sync-codex-plugin-manifests.mjs && node scripts/sync-codex-agents.mjs",

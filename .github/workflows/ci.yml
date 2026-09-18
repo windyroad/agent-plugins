@@ -105,6 +105,9 @@ jobs:
       - name: Check shim-wrapper templates in sync (P343, ADR-080)
         run: npm run check:shim-wrappers
 
+      - name: Check /goal canonical condition embedded verbatim (ADR-128, ADR-017)
+        run: npm run check:goal-condition-drift
+
       - name: Check plugin entrypoints are tracked executable (P447, R074)
         run: npm run check:executable-modes
 

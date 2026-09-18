@@ -292,3 +292,62 @@ setup() {
   run grep -nE "tdd-review:[[:space:]]+structural-permitted" "${BATS_TEST_FILENAME}"
   [ "$status" -eq 0 ]
 }
+
+# --- ADR-128: pinned + unattended freshness short-circuit ----------------
+#
+# The pre-ADR-128 freshness assertion greps for the presence of the git-log
+# block, which this change leaves in place — so it stays green while asserting
+# nothing about the new branch above it. These cases assert the branch.
+
+@test "SKILL.md short-circuits the freshness check on the pinned+unattended path (ADR-128)" {
+  run grep -inE "pinned .*unattended short-circuit" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "the short-circuit requires BOTH pinned AND unattended, never pinned alone (ADR-128)" {
+  # Scoping is load-bearing: <NNN> is also the INTERACTIVE user-override path,
+  # where a user is present, the verification prompt is answerable, and it is
+  # the only self-firing verification cadence that path has. A blanket
+  # pin-keyed short-circuit would delete that cadence.
+  block="$(sed -n '/Pinned + unattended short-circuit/,/^### 2\./p' "$SKILL_FILE")"
+  [[ "$block" == *"AND"* ]]
+  [[ "$block" == *"declares the run unattended"* ]]
+  [[ "$block" == *"interactive pinned path is unchanged"* ]]
+}
+
+@test "the short-circuit forbids refresh, prompt and commit on the unattended path (ADR-128)" {
+  block="$(sed -n '/Pinned + unattended short-circuit/,/^### 2\./p' "$SKILL_FILE")"
+  [[ "$block" == *"do not delegate to"* ]]
+  [[ "$block" == *"do not prompt"* ]]
+  [[ "$block" == *"do not commit"* ]]
+}
+
+@test "the discriminator is declared by the dispatcher, not detected (ADR-128)" {
+  # Prose cannot observe a TTY and claude -p offers nothing to sniff; a rule
+  # keyed on an unobservable condition collapses to always or never.
+  run grep -F 'UNATTENDED-DECLARATION-CONSUMER' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -inE "declaration, not a detection" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "the freshness block survives the short-circuit (non-vacuity guard, ADR-128)" {
+  # Guards the inverse of the scorer's finding: the short-circuit must be an
+  # added branch, not a deletion of the interactive freshness path.
+  run grep -F 'readme_commit=$(git log -1 --format=%H -- docs/problems/README.md' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  run grep -inE "delegate to .*review-problems" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md scopes the no-agent-settable-goal claim to the Claude Code surface (ADR-128)" {
+  # Codex exposes thread/goal/set; an absolute claim is falsified by this
+  # repo's own eval suite.
+  run grep -inE "On the Claude Code surface.*no programmatic mid-session surface" "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "SKILL.md no longer claims iterations are dispatched via the Agent tool (P084 regression guard)" {
+  run grep -inE "delegat(es|ing) iterations via the Agent tool" "$SKILL_FILE"
+  [ "$status" -ne 0 ]
+}

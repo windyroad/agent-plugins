@@ -26,7 +26,7 @@ In order to trust that an AFK backlog drain only stops when the backlog is genui
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
 - [ ] `packages/itil/skills/work-problems/SKILL.md` Step 0e carries the canonical `/goal` condition verbatim plus a copy-paste-complete headless launch one-liner (`claude -p "/goal <condition>"` carrying the skill invocation).
-- [ ] Step 0e nudges-and-proceeds when the loop is unanchored (never halts) and places the goal on the orchestrator session only — never on `claude -p` iter subprocesses.
+- [ ] Step 0e nudges-and-proceeds when the loop is unanchored (never halts) and places goals by **scope**, per ADR-128 (superseding ADR-094 in part): a drain-scoped goal on the orchestrator session and never on a `claude -p` iter subprocess; a per-ticket goal on the iter itself. The carrier is runtime-specific — a dispatch-prompt declaration on the Claude Code surface, native goal-set on Codex — while the scope rule is the same on both.
 - [ ] Step 2.4 Gate (0) requires the re-scan classification table be PRINTED in turn output (evaluator evidence per ADR-026), and states that a turn-bound goal-clear does not discharge Gate (0).
 - [ ] `packages/itil/skills/work-problem/SKILL.md` documents the headless anchor shape for single-ticket runs.
 - [ ] Paired promptfoo Tier-A/Tier-B eval cases in `packages/itil/skills/work-problems/eval/promptfooconfig.yaml` are GREEN per ADR-061 Rule 4.

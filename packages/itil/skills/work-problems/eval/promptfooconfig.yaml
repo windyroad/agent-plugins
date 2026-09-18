@@ -107,6 +107,15 @@ providers:
 # route to llm-rubric, graded by claude under subscription auth (no API
 # key) via grade-llm-rubric.sh.
 defaultTest:
+  # Fail-loud control-integrity guard: promptfoo reports a PASS and exits 0
+  # even when the exec provider fails to load, producing empty output. Empty
+  # output trivially satisfies every negative-shaped assertion ("does NOT
+  # halt", "does NOT name quota exhaustion"), so the suite can report green
+  # without ever running the SKILL. This floor makes that mode fail instead:
+  # any real SKILL response to these prompts is far longer than 200 chars.
+  assert:
+    - type: javascript
+      value: 'typeof output === "string" && output.trim().length > 200'
   options:
     provider:
       id: 'exec:bash ./grade-llm-rubric.sh'
@@ -707,6 +716,53 @@ tests:
           judgement as sufficient to stop. Saying the orchestrator does NOT
           emit ALL_DONE / does NOT stop PASSES.
 
+  # --- ADR-128: per-ticket goal anchors each AFK iteration ------------------
+
+  - description: Step 5 — dispatching one iteration → targets /wr-itil:work-problem <NNN> with a per-ticket goal, never a drain-scoped one
+    vars:
+      prompt: |
+        I am the /wr-itil:work-problems orchestrator. Step 3 selected P442 as
+        the highest-WSJF actionable ticket and I am about to dispatch one
+        iteration subprocess for it.
+
+        Per Step 5: (a) which skill does the dispatch prompt invoke, and with
+        what argument? (b) do I attach a /goal to the iteration, and if so is
+        it scoped to draining the backlog or to this one ticket? (c) what
+        exactly must satisfy that goal condition? (d) should the condition
+        name quota exhaustion as one of the end states? (e) why does the
+        dispatch prompt have to state that the run is unattended?
+    assert:
+      # Tier A — must name the singular skill as the dispatch target.
+      - type: regex
+        value: 'work-problem\s+P?442|work-problem <NNN>|work-problem\b'
+      # Tier A — must reference the per-ticket (not drain-scoped) goal.
+      - type: regex
+        value: 'per[\s\-]?ticket|ITERATION_SUMMARY|one ticket'
+      # Tier B — semantic invariants for the ADR-128 dispatch shape.
+      - type: llm-rubric
+        value: |
+          The response says the orchestrator dispatches the SINGULAR skill
+          /wr-itil:work-problem pinned to the selected ticket (P442), NOT a
+          hand-rolled prompt invoking manage-problem directly. It attaches a
+          goal scoped to THAT ONE TICKET, never to draining the backlog — a
+          drain-scoped goal on an iteration would push it past its one-ticket
+          carve-out. The condition is satisfied by artefacts the iteration
+          ALREADY PRINTS (its ITERATION_SUMMARY block: worked with a
+          commit_sha, or skipped with a skip_reason_category, or a halt naming
+          a concrete blocker), so it discharges when the iteration would have
+          exited anyway and does not leave it held open looking like a hang to
+          the idle-timeout watchdog. It says quota exhaustion must NOT be
+          named in the condition, because quota death exits non-zero with no
+          ITERATION_SUMMARY printed at all, so naming it would make the
+          condition unsatisfiable; it is detected by the exit-code check
+          instead. It explains the unattended declaration is the discriminator
+          the singular skill keys its freshness short-circuit on, because
+          prose cannot detect an absent user. PASS if the dispatch target, the
+          per-ticket scoping, and the printed-artefact discharge are all
+          correct. FAIL if it dispatches manage-problem directly, attaches a
+          backlog-drain goal to the iteration, or names quota exhaustion as a
+          goal end state.
+
   # --- P390 reopened: Step 0e /goal loop-anchor (ADR-094 / RFC-047 / STORY-040) -
 
   - description: Step 0e — loop starts unanchored (no active /goal) → one nudge line with the exact /goal command, then proceed; never halt, never AskUserQuestion
@@ -733,18 +789,27 @@ tests:
       # AskUserQuestion; agent cannot set the goal itself.
       - type: llm-rubric
         value: |
-          On an unanchored interactive loop start, the response says the
-          orchestrator prints ONE nudge line surfacing the exact /goal
-          command for the user, then PROCEEDS with the loop regardless —
-          the anchor is defense-in-depth, never a precondition. It does
-          NOT halt/block waiting for the goal, does NOT fire
-          AskUserQuestion at this step, and does NOT claim the agent can
-          set the goal itself via a tool (no programmatic mid-session
-          surface exists; only the user types /goal). PASS if it
-          nudges-and-proceeds with no halt and no ask. FAIL if it halts,
-          blocks on the user, fires AskUserQuestion, or claims to set the
-          goal programmatically. Saying it does NOT halt / does NOT ask
-          PASSES.
+          On an unanchored interactive loop start, the response surfaces
+          the canonical /goal condition for the USER to type into the
+          RUNNING session, then PROCEEDS with the loop regardless — the
+          anchor is defense-in-depth, never a precondition. Judge the
+          invariants, not the formatting: whether it is one line or a
+          copy-paste block is irrelevant. It does NOT halt/block waiting
+          for the goal, does NOT fire AskUserQuestion at this step, and
+          does NOT claim that on THIS (Claude Code) runtime the agent can
+          set the goal itself via a tool — there is no programmatic
+          mid-session surface here, so only the user types /goal. That
+          claim is scoped to this runtime: a response noting that the
+          Codex runtime CAN set a goal natively (thread/goal/set) is
+          correct and still PASSES (ADR-128 — one rule, two mechanisms).
+          It also does NOT hand the user the headless `claude -p` launch
+          one-liner, which would start a SECOND concurrent orchestrator
+          on the same repo. PASS if it surfaces the condition for the
+          user, proceeds, and neither halts nor asks. FAIL if it halts,
+          blocks on the user, fires AskUserQuestion, claims it can set
+          the goal programmatically on this runtime, or emits the
+          headless launcher into the running session. Saying it does NOT
+          halt / does NOT ask PASSES.
 
   # --- P528: Codex native persisted Goal lifecycle ---------------------------
 

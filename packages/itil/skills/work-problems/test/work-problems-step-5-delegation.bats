@@ -331,3 +331,41 @@ setup() {
   run grep -nE "P089" "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
+
+# --- ADR-128: dispatch target + per-ticket goal anchor -------------------
+#
+# The pre-ADR-128 suite asserted only the `claude -p` mechanics, so it passed
+# unchanged against the old hand-rolled prompt that invoked manage-problem
+# directly. These cases assert the delta itself.
+
+@test "Step 5 dispatches the singular work-problem skill pinned to the ticket (ADR-128)" {
+  run grep -F '/wr-itil:work-problem P<NNN>' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "Step 5 carries a per-ticket goal anchor, not a drain-scoped one (ADR-128)" {
+  run grep -F 'PER_TICKET_GOAL' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+  # The per-ticket condition must name the ticket, never backlog-emptiness.
+  run grep -F 'Ticket P${TICKET_NNN} has reached a real end state' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}
+
+@test "the per-ticket goal enumerates all three printed end states (ADR-128)" {
+  line="$(grep -F 'Ticket P${TICKET_NNN} has reached a real end state' "$SKILL_FILE" | head -1)"
+  [[ "$line" == *"commit_sha"* ]]
+  [[ "$line" == *"skip_reason_category"* ]]
+  [[ "$line" == *"halts naming a concrete blocker"* ]]
+}
+
+@test "the per-ticket goal does NOT name quota exhaustion (ADR-128 unsatisfiable-condition guard)" {
+  # Quota death exits non-zero with no ITERATION_SUMMARY printed at all, so a
+  # condition naming it can never be satisfied. It stays on the exit-code path.
+  line="$(grep -F 'Ticket P${TICKET_NNN} has reached a real end state' "$SKILL_FILE" | head -1)"
+  [[ "$line" != *"quota"* ]]
+}
+
+@test "Step 5 item 1 carries the marked unattended declaration the singular skill keys on (ADR-128)" {
+  run grep -F 'UNATTENDED-DECLARATION-SOURCE' "$SKILL_FILE"
+  [ "$status" -eq 0 ]
+}

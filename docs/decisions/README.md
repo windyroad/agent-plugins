@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 125 (111 in-force, 14 historical)
+**Total ADRs:** 126 (112 in-force, 14 historical)
 
 ---
 
 ## In-force decisions
 
-_111 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_112 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -566,6 +566,12 @@ _111 ADRs. These are the current rules. The architect agent reads this section f
 **Chosen:** Chosen option: **"Emit one unmistakably guided complete replacement"**, because it was the only tested wording that both prevented an empty final output and made the creative guide visibly affect the response.
 **Confirmation:** A hook test fails if the Stop reason permits silence or does not require one complete replacement.; Existing tests continue to prove absent-guide silence and the one-turn guard.; A packed-plugin Codex journey uses a guide requiring an observable marker.; The journey asserts that the final assistant output is non-empty and contains that marker.; A second journey uses expressive prose guidance and confirms that the final response visibly applies it withou...; Hook projection or shell output alone is insufficient release evidence.; Documentation states the replacement and first-response visibility behaviour.
 **Related:** ADR-126
+
+### ADR-128 — Per-ticket goal anchors each AFK iteration
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ["ADR-094 (in part — the orchestrator-session-only goal-placement rule at Decision Outcome item 1, and the item-2 premise sentence that no agent-settable goal surface exists; the rest of ADR-094 stands)"]
+**Chosen:** Chosen option: **"Per-ticket goal, discharged by the iteration's own end-of-run summary"**, because it adds the missing external check at the iteration level without adding any new machinery, and because tying the condition to an artefact t...
+**Confirmation:** The orchestrator's dispatch step names the singular work-a-problem skill pinned to the selected ticket, and th...; The orchestrator's skill body states the placement rule in its narrowed form — a goal scoped to the whole ba...; The delivery artefacts that still assert the blanket form — the draft story's unchecked acceptance criterion...; The per-ticket condition enumerates the three printed end states named above, and does not name quota exhausti...; No iteration is ever dispatched with a backlog-drain-scoped condition.; The singular skill short-circuits its freshness check only when invoked against a pinned ticket and the dispat...; Every statement that no agent-settable goal surface exists is scoped to the Claude Code surface rather than st...; The three stale claims in the singular skill that the orchestrator delegates via the agent-spawn mechanism are...; The evaluator's usage entry is named in the orchestrator's cost-extraction allowlist, and each iteration's rep...; Both copy-paste blocks in the loop-anchor step embed the canonical condition text verbatim as a substring, wit...; A containment check asserts that embedding mechanically: it exits non-zero on divergence, a CI step runs it, a...; The loop-anchor eval rubric asserts the surfacing invariants rather than a line count, and scopes its no-progr...; The singular skill traces the backlog-progress job in its Related section and inline on the new short-circuit ...; A behavioural check shows that an iteration dispatched against a ticket it cannot progress emits a skip carryi...
+**Related:** ADR-094, ADR-116, ADR-017, ADR-075
 
 ---
 
