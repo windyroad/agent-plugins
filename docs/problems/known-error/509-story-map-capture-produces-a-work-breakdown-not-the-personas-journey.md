@@ -78,7 +78,7 @@ The ADR tier solved the same class on the title axis by adding a stated conventi
 
 ### Investigation Tasks
 
-- [ ] **Adjudicate the `preRfc` conflict first** — it blocks symptom 2. Either the closed-set rule at SKILL line 185 gains an exception for genuinely-pre-existing capability, or already-working work gets a different carrier. Decide, record as an ADR, then implement
+- [ ] **Adjudicate the `preRfc` conflict first** — it blocks symptom 2. Either the closed-set rule at SKILL line 185 gains an exception for genuinely-pre-existing capability, or already-working work gets a different carrier. Decide, record as an ADR, then implement. *Decided 2026-09-19 (exception, not a new carrier) and recorded 2026-09-19 as a decision superseding ADR-107 in part. Still unticked: the decision is `human-oversight: unconfirmed`, so implementation is held pending ratification.*
 - [x] Add a journey-derivation step at capture: read the persona, derive the sequence of steps they walk, and author the backbone from that rather than from the change
 - [x] Decide whether the derivation is agent-silent or surfaces the derived journey for confirmation before the map is written — derivation is mechanical from the confirmed persona/JTBD; the existing optional taste prompt may refine the derived title
 - [x] Change the title derivation so a map's title names the journey, not the change — the current first-8-10-tokens-of-description slug cannot produce one
@@ -103,10 +103,20 @@ Confirmed by the maintainer via a batched direction surface on 2026-09-19, drain
 
 **What this does and does not unblock.** It pins the substance for the superseding decision — it is NOT that decision. Symptom 2 stays blocked on the `preRfc` adjudication until a decision superseding ADR-107 in part is recorded and ratified through its own surface. Symptoms 1 and 3 remain unblocked independently of this.
 
+## Iteration 2026-09-19
+
+The confirmed direction is now recorded as a decision. `docs/decisions/130-already-released-stories-earn-an-evidenced-pre-rfc-row.proposed.md` supersedes ADR-107 in part — one sentence, the one closing the `preRfc` set to new rows — and admits a new row only when every card on it names a real story that has already been released, proved by release evidence rather than by a mention.
+
+The exception is narrower than the direction strictly required, and the narrowing is deliberate. Cards stay story-backed, so ADR-125's rule that every ordinary card names a real story file is untouched and exactly one rule changes. The cost is stated in the decision: capability delivered before story files existed still cannot be drawn on a newly captured map. Symptom 2 therefore closes for story-era capability and stays open for anything older; ADR-125's migration path already covers the retained-legacy-map case.
+
+Reviewed before landing by the architect (PASS), the jobs reviewer (PASS) and the cognitive-accessibility reviewer required by ADR-124 before ratification. The cognitive review found 16 issues on the first pass and 5 on the second, all applied. The sharpest was the same defect that review caught in ADR-107 itself: the evidence list was written as an open set where a closed one was meant, with the *inadmissible* half described as load-bearing — which would have readmitted the citation-shaped backing the decision exists to refuse. The list is now explicitly closed at three items.
+
+**Implementation remains held.** The decision is born `human-oversight: unconfirmed` — this was an unattended run with no way to confirm substance — so nothing may be built on it until it is ratified at `/wr-architect:review-decisions`. One embedded design choice inside it was resolved by the agent rather than the maintainer and is worth a look at that ratification: a row that asks for the marker and does not qualify is **demoted** to an ordinary row (rendering "Untraced"), not refused at capture. That follows ADR-107's own posture — it weighed a render-time hard stop and rejected it as premature because the badge already makes the defect visible — but the opposite call is defensible, and a Reassessment criterion covers it.
+
 ## Dependencies
 
 - **Blocks**: (none)
-- **Blocked by**: the `preRfc` adjudication, for symptom 2 only. Symptoms 1 and 3 are unblocked
+- **Blocked by**: ratification of the decision recorded 2026-09-19 that supersedes ADR-107 in part (`docs/decisions/130-already-released-stories-earn-an-evidenced-pre-rfc-row.proposed.md`), for symptom 2 only. The adjudication itself is done; what remains is human confirmation of the recorded substance. Symptoms 1 and 3 are unblocked
 - **Composes with**: P457, P354, P508
 
 ## Related

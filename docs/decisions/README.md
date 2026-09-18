@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 127 (113 in-force, 14 historical)
+**Total ADRs:** 128 (114 in-force, 14 historical)
 
 ---
 
 ## In-force decisions
 
-_113 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_114 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -578,6 +578,12 @@ _113 ADRs. These are the current rules. The architect agent reads this section f
 **Chosen:** Chosen option: **"Only shipped-and-released evidence"**.
 **Confirmation:** A ticket that cites a ratified decision only under ## Related does not return CLOSE-CANDIDATE, and does not re...; A ticket that cites a ratified decision inside its ## Fix Released section does not return a close candidate o...; A ticket that names an existing skill or hook path, anywhere in its body, does not return a close candidate on...; A ticket whose every checkbox is ticked returns a close candidate, and its verdict names the lines that carrie...; A ticket with at least one unticked checkbox returns CLOSE-CANDIDATE-WITH-CAVEAT with the multi-phase-mixed-pr...; The file-no-longer-exists, self-marker-in-body and driver-child-ticket-closed verdicts are unchanged against t...; Re-run the evaluator across the whole open and known-error population and record the measured close rate. The ...; Every verdict emitted carries a locating cite naming the section or line.
 **Related:** ADR-079, ADR-116, ADR-103, ADR-110, ADR-026, ADR-022, ADR-052, ADR-119, ADR-096
+
+### ADR-130 — Already-released stories earn an evidenced pre-RFC row
+**Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** ["ADR-107 (in part — one sentence only; see 'What this supersedes, and what it does not' below)"]
+**Chosen:** Chosen option: **"A narrowly evidenced exception to the closed set, on story-backed cards only"**, because the rule being relaxed was written against a hazard that released work cannot pose, and reusing a row shape that already appears on e...
+**Confirmation:** A capture that marks a row preRfc: true where every card names a released story produces that row, and the map...; A row asking for the marker where any card names a story that is not done, or whose release is not recorded, i...; A row whose stories are all done but unreleased does not qualify, so delivery still earns nothing — behaviou...; A row backed only by a change merged but not yet released does not qualify — behavioural test, because this ...; A row backed only by a mention — an existing decision record, a skill file on disk, a ticked acceptance crit...; A card on such a row that names no story file is refused by the existing rule for ordinary cards, unchanged by...; A newly drawn pre-RFC row contributes no request-for-comments identity to the map's derived list — behaviour...; Drawing such a row does not invalidate the map's human-oversight marker — behavioural test against the finge...; An ordinary row with no identity and no marker still renders with the "Untraced" badge — the existing ADR-10...; ADR-125's manifest-bound historical rows behave exactly as before — the existing migration tests pass unchan...
+**Related:** ADR-107, ADR-103, ADR-104, ADR-116, ADR-125, ADR-129
 
 ---
 
