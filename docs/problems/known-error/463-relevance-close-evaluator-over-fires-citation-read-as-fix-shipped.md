@@ -49,8 +49,9 @@ The failure is worst exactly where the ticket is most valuable — a ticket repo
 
 - [x] Confirm the `ADR-shipped-confirmed` + `named-skill-or-feature-exists` match shapes fire on a `## Related`/`## Dependencies` citation with no fix-evidence context. **CONFIRMED 2026-08-21** — see the P465 worked example in Symptoms; the ADRs it matched on are cited in the Description as the decisions nothing implements.
 - [x] Design the tightening: scope shapes 2 and 3 to a fix-evidence region rather than the whole body. **DESIGNED 2026-08-21** — see `## Fix Strategy`. Build is held pending the superseding decision; the option set is queued for the maintainer.
-- [ ] Record the decision superseding ADR-079 in part (shape-2 + shape-3 mechanical checks only), then implement the chosen option.
-- [ ] Tighten the predicates in `packages/itil/scripts/evaluate-relevance.sh` once that decision is ratified.
+- [x] Record the decision superseding ADR-079 in part (shape-2 + shape-3 mechanical checks only). **RECORDED 2026-09-19 as ADR-129 — "Only shipped-and-released evidence closes a ticket"** (`docs/decisions/129-only-shipped-and-released-evidence-closes-a-ticket.proposed.md`), born `human-oversight: unconfirmed`. Implementing the chosen option is the next task below and is held pending ratification.
+- [ ] Tighten the predicates in `packages/itil/scripts/evaluate-relevance.sh` once ADR-129 is ratified. **Held** — ADR-103 refuses implementation while the proposal needs an unratified decision.
+- [ ] Re-draw STORY-064's acceptance criteria 3 and 5 to the switched-off reading before any implementing commit. Both encode the positional option ADR-129 did not choose ("the signal is narrowed rather than switched off"). The story is `draft`, so ADR-096 blocks implementation today — but that protection lapses the moment the story is promoted, so the re-draw must precede the `accepted` transition. While re-drawing, re-check the story's `JTBD-001` secondary trace: it rests on the hand-check burden of the 81% rate, and the switch-off changes that argument.
 - [ ] Behavioural coverage: a ticket citing a confirmed ADR only in `## Related` must NOT return CLOSE-CANDIDATE (extend `packages/itil/scripts/test/evaluate-relevance.bats`).
 - [ ] Reconcile the documented ~4.2% expectation with observed behaviour; update the skill doc if the target changed.
 
@@ -91,10 +92,23 @@ Confirmed by the maintainer via a batched direction surface on 2026-09-19, drain
 
 **What this does and does not unblock.** It pins the substance for the decision that supersedes ADR-079 in part — it is NOT that decision, and it is NOT ratification of any decision-record body. The `Blocked by` line above still stands: the superseding decision must be recorded and ratified through its own surface before implementation. The next step is to draft it carrying this substance, not to start building.
 
+## Decision recorded (2026-09-19)
+
+The superseding decision is on disk as **ADR-129, "Only shipped-and-released evidence closes a ticket"**. It supersedes ADR-079 in part — its shape-2 `ADR-shipped-confirmed` check, its shape-3 `named-skill-or-feature-exists` check, and the Phase 2 chosen-option shape list that carries them. ADR-079 is not renamed; everything else in it still governs.
+
+The record states one mechanic without hedge: a decision-record citation and a skill-path citation never count as evidence a fix shipped, anywhere in a ticket — switched off outright, not made positional. The surviving fix-evidence set is released and resolution section content plus completed task checkboxes.
+
+Two gate findings shaped the record beyond the pinned direction, and both are worth the maintainer's eye at ratification:
+
+- **The completed-checkbox arm is an addition, not a narrowing, and it carries almost all the remaining weight.** ADR-079's shape-4 literal list contains no `- [x]`; the evaluator reads checkboxes today only in the opposite direction, as the input to its `multi-phase-mixed-progress` caveat. Measured across the 119 open and known-error tickets: 30 carry at least one ticked task, 4 carry a `## Fix Released` or `## Resolution` heading. So the checkbox arm is roughly seven times the released-section arm, and it is the arm with no ADR-079 provenance. ADR-129 therefore records it as its own new substance with a bound — it counts only when no unticked checkbox remains anywhere in the body, and the `multi-phase-mixed-progress` caveat is retained and named load-bearing. Without that bound a ticked *investigation* task would read as a shipped fix, which is this ticket's own defect on a second axis (this ticket is the counterexample: two investigation tasks ticked while live and blocked).
+- **STORY-064 encodes the option that was not chosen.** Its acceptance criteria 3 and 5 both say the signal is narrowed rather than switched off. Recorded as displaced downstream; the re-draw task is in Investigation Tasks above.
+
+Implementation is held. ADR-129 is born `human-oversight: unconfirmed` — the 2026-09-19 direction pins the substance but is not ratification of the decision body (P357), and this run had no confirmation surface available.
+
 ## Dependencies
 
 - **Blocks**: (none)
-- **Blocked by**: the not-yet-recorded decision superseding ADR-079 in part (shape-2 + shape-3 mechanical checks). ADR-103 refuses implementation while a proposal needs an unratified ADR.
+- **Blocked by**: ratification of **ADR-129** (Only shipped-and-released evidence closes a ticket) — recorded 2026-09-19, born `human-oversight: unconfirmed`. ADR-103 refuses implementation while a proposal needs an unratified ADR. The decision is now on disk; what remains is a human confirming its substance at the `/wr-architect:review-decisions` drain.
 - **Composes with**: P347 (ADR-079 Phase 2 — the four-shape extension that added these predicates), P346 (evaluator/relevance-close master), P385/P386 (work-problems Step 3.6 pre-dispatch relevance gate consumers), P461 (downstream evidence-scan over-firing without version-gating — same over-eager-signal class).
 
 ## Related

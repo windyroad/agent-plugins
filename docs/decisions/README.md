@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 126 (112 in-force, 14 historical)
+**Total ADRs:** 127 (113 in-force, 14 historical)
 
 ---
 
 ## In-force decisions
 
-_112 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_113 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -572,6 +572,12 @@ _112 ADRs. These are the current rules. The architect agent reads this section f
 **Chosen:** Chosen option: **"Per-ticket goal, discharged by the iteration's own end-of-run summary"**, because it adds the missing external check at the iteration level without adding any new machinery, and because tying the condition to an artefact t...
 **Confirmation:** The orchestrator's dispatch step names the singular work-a-problem skill pinned to the selected ticket, and th...; The orchestrator's skill body states the placement rule in its narrowed form — a goal scoped to the whole ba...; The delivery artefacts that still assert the blanket form — the draft story's unchecked acceptance criterion...; The per-ticket condition enumerates the three printed end states named above, and does not name quota exhausti...; No iteration is ever dispatched with a backlog-drain-scoped condition.; The singular skill short-circuits its freshness check only when invoked against a pinned ticket and the dispat...; Every statement that no agent-settable goal surface exists is scoped to the Claude Code surface rather than st...; The three stale claims in the singular skill that the orchestrator delegates via the agent-spawn mechanism are...; The evaluator's usage entry is named in the orchestrator's cost-extraction allowlist, and each iteration's rep...; Both copy-paste blocks in the loop-anchor step embed the canonical condition text verbatim as a substring, wit...; A containment check asserts that embedding mechanically: it exits non-zero on divergence, a CI step runs it, a...; The loop-anchor eval rubric asserts the surfacing invariants rather than a line count, and scopes its no-progr...; The singular skill traces the backlog-progress job in its Related section and inline on the new short-circuit ...; A behavioural check shows that an iteration dispatched against a ticket it cannot progress emits a skip carryi...
 **Related:** ADR-094, ADR-116, ADR-017, ADR-075
+
+### ADR-129 — Only shipped-and-released evidence closes a ticket
+**Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** ["ADR-079 (in part — the Phase 2 `ADR-shipped-confirmed` and `named-skill-or-feature-exists` mechanical checks, and the Phase 2 chosen-option shape list that carries them; everything else in ADR-079 stands)"]
+**Chosen:** Chosen option: **"Only shipped-and-released evidence"**.
+**Confirmation:** A ticket that cites a ratified decision only under ## Related does not return CLOSE-CANDIDATE, and does not re...; A ticket that cites a ratified decision inside its ## Fix Released section does not return a close candidate o...; A ticket that names an existing skill or hook path, anywhere in its body, does not return a close candidate on...; A ticket whose every checkbox is ticked returns a close candidate, and its verdict names the lines that carrie...; A ticket with at least one unticked checkbox returns CLOSE-CANDIDATE-WITH-CAVEAT with the multi-phase-mixed-pr...; The file-no-longer-exists, self-marker-in-body and driver-child-ticket-closed verdicts are unchanged against t...; Re-run the evaluator across the whole open and known-error population and record the measured close rate. The ...; Every verdict emitted carries a locating cite naming the section or line.
+**Related:** ADR-079, ADR-116, ADR-103, ADR-110, ADR-026, ADR-022, ADR-052, ADR-119, ADR-096
 
 ---
 
