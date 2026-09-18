@@ -90,16 +90,20 @@ corrected + 4 previously-unregistered shapes added + rationale paragraph) and AD
 
 ### Self-firing trigger for the held work (ADR-087 cadence annotation)
 
-The held items are reachable by exactly two self-firing paths, and it is worth being precise
-about which, because one plausible-looking path does **not** fire:
+The held items were believed reachable by two self-firing paths when this section was first
+written. **Only the first is still live** — see the 2026-09-19 pass note below for the
+evidence that retired the second:
 
-1. **This ticket's own WSJF rank.** It is a Tier-1 Known Error at WSJF 16, so
+1. **This ticket's own WSJF rank — LIVE.** It is a Tier-1 Known Error at WSJF 16, so
    `/wr-itil:work-problems` selects it on its own cadence. The held Investigation Tasks above
    are unchecked, so selection surfaces them.
-2. **The AFK orchestrator's outstanding-questions drain.** The ratification question and the
-   regression-guard design question are emitted in this iteration's `ITERATION_SUMMARY`
-   and land in `.afk-run-state/outstanding-questions.jsonl` for batched surfacing at the next
-   interactive drain.
+2. ~~**The AFK orchestrator's outstanding-questions drain.**~~ **RETIRED 2026-09-19 — do not
+   rely on this.** The claim was that the ratification question and the regression-guard
+   design question, once emitted in an `ITERATION_SUMMARY`, persist in
+   `.afk-run-state/outstanding-questions.jsonl` until an interactive drain answers them. They
+   do not: the queue rotated at some point after 2026-07-26 and dropped both without either
+   being answered or back-written here. Each pass re-emits them and each rotation can drop
+   them again, so the queue is a best-effort surface, not a durable re-entry point.
 
 **What does NOT fire (verified, 2026-07-26).** The `/wr-architect:review-decisions` drain and
 its session-start nudge will **not** surface these amendments.
@@ -147,6 +151,39 @@ Also worth deciding at the same time: whether the recurring class this belongs t
 *shipped SKILL prose must be valid in the **adopter's** toolchain, not only ours*
 (P151 / P153 / P219 / P317 / P429) — deserves its own ADR, which would give future guards
 of this shape the pre-authorising clause ADR-049 clause 3 gave the path lint.
+
+### Re-selection pass 2026-09-19 — still held, and one self-firing path has gone dead
+
+Selected again by its own WSJF rank (path 1 below). Re-verified from the working tree this
+pass, not carried over from the prior note:
+
+- The corpus is **unchanged**: all 12 ID-leading example subjects are still present and
+  unflipped (`manage-problem` lines 912 / 1145 / 1146, `transition-problem` 354 / 356,
+  `manage-incident` 305 / 306, `mitigate-incident` 170, `restore-incident` 148,
+  `manage-rfc` 250, `report-upstream` 671, `update-upstream` 539).
+- Both amendments still carry in-body `human-oversight: unconfirmed` (ADR-014 line 149,
+  ADR-024 `## Amendments` 2026-07-26 entry). The flip therefore remains a
+  build-on-unratified-decision (ADR-074 surface 3) and was **not** implemented.
+- No story map, story, or RFC has been minted for this ticket's JTBD-302 class — the
+  RFC-first precondition is untouched.
+
+**Path 2 is dead — the trigger annotation above has been corrected in place to say so.**
+That section claimed the ratification question and the regression-guard design question stay
+live via the AFK orchestrator's outstanding-questions drain. They do not. `.afk-run-state/outstanding-questions.jsonl`
+currently holds three entries, none of them this ticket's — the queue has rotated since
+2026-07-26 and both questions were lost without ever being answered or back-written here.
+The questions are re-emitted in this pass's `ITERATION_SUMMARY`, but a queue that drops
+entries silently is not a durable re-entry point for a ticket that is fully held on them.
+Treat **path 1 (this ticket's own WSJF rank) as the only live trigger**, and expect each
+selection to re-derive this same dead end until a human answers. Same class as the
+named-re-entry-point-is-not-self-firing-cadence gap already tracked in P375 — hang any
+durable fix for the dropped-queue behaviour off that parent rather than opening a sibling.
+
+**Cost of the current shape**: this is a Tier-1 Known Error at WSJF 16, so it sorts to the
+top of the queue and consumes an iteration slot on every AFK pass, each of which can only
+re-confirm the block. If the ratification drain is not going to happen soon, the honest
+options are to drop its rank or to move it out of the selectable queue until the two
+answers land — itself a maintainer call, not an agent one.
 
 ## Dependencies
 
