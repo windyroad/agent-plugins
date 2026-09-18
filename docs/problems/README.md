@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-18 **P541 captured** — release verification failed a good release: the post-publish window is far shorter than real npm propagation, and its per-package nesting makes widening it worse (lightweight aside via /wr-itil:capture-problem)
+> Last reviewed: 2026-09-19 **P542 captured** — the oversight-marker shim silently writes nothing unless the command is a bare two-word invocation, which is what makes hand-writing the ratification marker look reasonable (lightweight aside via /wr-itil:capture-problem)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -46,6 +46,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 16 | P471 | run-retro Step 2d ask-hygiene trail path collides across same-day iterations, clobbering prior entries | 8 (Medium) | Known Error | S | 2026-07-26 | internal |
 | 16 | P511 | The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate | 8 (Medium) | Known Error | S | 2026-08-21 | internal |
 | 16 | P536 | Governance gate state binds to the physical worktree, blocking commits from a linked worktree and silently disabling the WIP gate inside one | 16 (High) | Open | M | 2026-09-08 | internal |
+| 16 | P542 | The oversight-marker shim silently writes nothing when the command is not a bare two-word invocation | 16 (High) | Open | M | 2026-09-19 | internal |
 | 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Known Error | M | 2026-08-20 | internal |
 | 12 | P468 | architect-mark-reviewed misses a genuine PASS whose verdict line is a markdown heading rather than bold | 6 (Medium) | Known Error | S | 2026-07-26 | internal |
 | 12 | P148 | Agent defers ticket creation to retro summary instead of immediately capturing it | 12 (High) | Known Error | M | 2026-04-29 | internal |

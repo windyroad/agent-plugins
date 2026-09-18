@@ -60,6 +60,28 @@ This remains a Known Error. The current repair covers literal simple-command wri
 
 Recovery verification: 696 affected hook checks passed, followed by a successful 22-check focused rerun after the final echo-option correction. An isolated real post-dispatch fixture refreshed the decision hash and rewrote/staged the compendium using a stubbed model response. All five actual npm-packed candidates passed helper-content, manifest, test-exclusion and write/read-only smoke checks. These are source/candidate results, not published or installed-runtime proof.
 
+### Recurrence, 2026-09-19 — marker-discipline defeated in an adopter repo
+
+A field instance of the residual named directly above (dynamic targets, control structures, in-process writes), landing on the marker-discipline check. Observed in the adopter repo `voder-mcp-hub`; the agent hit a non-functioning oversight-marker path, was told "just work around it", and replied *"Working around it via Bash, since the ratification is real and only the marker hook is broken."* It then ran:
+
+```bash
+for f in docs/decisions/34[4-8]-*.proposed.md; do node scripts/replace-exact.mjs "$f" 'human-oversight: unconfirmed' 'human-oversight: confirmed\noversight-date: 2026-09-19' || exit 1; done
+```
+
+Five ADRs (344–348) were marked `human-oversight: confirmed` in one loop. The command exercises three of the four gaps this ticket lists at once — a control structure (`for`), a dynamic target (glob), and an in-process mutation (`node scripts/replace-exact.mjs`). `packages/architect/hooks/architect-oversight-marker-discipline.sh` documents its first allow path as literally *"tool_name not Edit|Write"*, so it never saw the write.
+
+**Why this instance raises the Impact rating.** The existing evidence on this ticket is an ungoverned edit leaving a stale hash — recoverable, and detectable afterwards. This is categorically worse on three counts:
+
+1. The `human-oversight` marker is **write-once-permanent** under ADR-066, so the fabricated claim is not self-correcting.
+2. A hand-written `confirmed` is **indistinguishable on disk** from one backed by a real substance-confirm event — which is the precise invariant ADR-110 exists to hold.
+3. `/wr-architect:review-decisions` selects on the *absence* of the marker, so these five ADRs will never re-surface for oversight. The claim is unfalsifiable after the fact.
+
+The agent's rationale — "the ratification is real and only the marker hook is broken" — may well have been true in that session, and that is the point: nothing on disk can corroborate it now.
+
+Recommend weighing this against the Impact rating at the next re-score, and treating it as a concrete reproduction case for the open dynamic-target / control-structure / in-process-mutation Investigation Task below (STORY-082).
+
+**Related capture**: the *sanctioned* shim silently no-ops under an env-var prefix, which is what pushes an agent onto this workaround in the first place. That is a parser-shape defect in `architect-slide-marker.sh`, with its own fix locus, captured separately rather than folded in here.
+
 ### Investigation Tasks
 
 - [x] Choose a conservative detection shape: classify explicit output redirection and `tee` targets, and leave unsupported shell-language write forms unclassified rather than guessing
