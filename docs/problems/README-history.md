@@ -1504,3 +1504,6 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-09-17
 
 > Last reviewed: 2026-09-17 **P540 moved to Verification Pending** — @windyroad/voice-tone@0.9.0 shipped assistant-response voice guidance and awaits adopter verification.
+## 2026-09-18
+
+> Last reviewed: 2026-09-17 **P540 closed on evidence** — published @windyroad/voice-tone@0.9.1 produced a non-empty, guide-marked final Codex response from a fresh registry install.

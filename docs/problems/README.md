@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-17 **P540 closed on evidence** — published @windyroad/voice-tone@0.9.1 produced a non-empty, guide-marked final Codex response from a fresh registry install.
+> Last reviewed: 2026-09-18 **P541 captured** — release verification failed a good release: the post-publish window is far shorter than real npm propagation, and its per-package nesting makes widening it worse (lightweight aside via /wr-itil:capture-problem)
 
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
@@ -55,6 +55,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 12 | P495 | The release queue can be consumed in a working copy and nothing says so | 12 (High) | Open | S | 2026-08-09 | internal |
 | 12 | P522 | The pipeline scorer's caller contract is unenforced, so a direct dispatch fails silently and misdirects the blame | 12 (High) | Open | S | 2026-08-25 | internal |
 | 12 | P534 | The `npm ci || npm install` fallback hides lockfile drift until an unrelated job fails | 12 (High) | Open | S | 2026-09-04 | internal |
+| 12 | P541 | Release verification fails good releases — propagation window too short, and per-package nesting makes widening worse | 12 (High) | Open | M | 2026-09-18 | internal |
 | 10 | P515 | `drain-register-queue.sh` appends index rows past the end of the register table, so auto-scaffolded risks never reach the index | 10 (High) | Open | S | 2026-08-21 | internal |
 | 9 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue | 9 (Medium) | Known Error | M | 2026-06-11 | internal |
 | 9 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight contexts — strands dispatchable lifecycle/ack/upstream-report obligations the framework authorises to proceed | 9 (Medium) | Open | S | 2026-07-26 | corrective-feedback (user, 2026-07-26 |
