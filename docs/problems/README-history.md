@@ -1511,3 +1511,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-09-19
 
 > Last reviewed: 2026-09-18 **P541 captured** — release verification failed a good release: the post-publish window is far shorter than real npm propagation, and its per-package nesting makes widening it worse (lightweight aside via /wr-itil:capture-problem)
+
+> Last reviewed: 2026-09-19 **P542 captured** — the oversight-marker shim silently writes nothing unless the command is a bare two-word invocation, which is what makes hand-writing the ratification marker look reasonable (lightweight aside via /wr-itil:capture-problem)
