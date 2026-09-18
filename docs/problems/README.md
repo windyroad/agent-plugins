@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-19 **P546 captured** — the cognitive-accessibility reviewer ADR-124 requires before every ratification is tool-less, so dispatching it a file path returns a refusal and burns a spawn; the document must be pasted inline (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-09-19 **P547 + P548 captured** — an AFK per-iter constraints file carried another ticket's *confirmed direction* verbatim (pinning P463's evaluator fix substance onto the P160 iteration), and the story `done` gate is stated as an OR on the manual path and an AND on the auto-fire path (lightweight aside via /wr-itil:capture-problem).
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -74,6 +74,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P481 | Two ratified decisions describe a story-map format that no longer exists | 6 (Medium) | Open | S | 2026-08-08 | architect-review |
 | 6 | P493 | A docs-only change runs the full build, so pushing prose costs what shipping code costs | 6 (Medium) | Open | S | 2026-08-09 | corrective-feedback (user, 2026-08-09) |
 | 6 | P504 | No skill surface reopens a closed problem ticket, and closure notes prescribe a command that refuses | 6 (Medium) | Open | S | 2026-08-20 | internal |
+| 6 | P548 | The story `done` gate is stated as an OR on the manual path and an AND on the auto-fire path, so the same story is simultaneously done-eligible and not | 6 (Medium) | Open | S | 2026-09-19 | internal |
 | 6 | P395 | external-comms agent silently goes dormant on the credibility axis — no nudge to author the missing RISK-POLICY section | 12 (High) | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28) |
 | 6 | P399 | ADR-073 fix-time auto-create emits a SKELETON RFC; it should author the RFC fully | 12 (High) | Open | M | 2026-06-28 | corrective-feedback (user, 2026-06-28 — ratified at the work-problems loop-end decision surface) |
 | 6 | P401 | Capture/RFC persona-JTBD anchoring shoehorns (or discards the problem) instead of interviewing the human to elicit the real who/why | 12 (High) | Open | M | 2026-06-29 | corrective-feedback (user, 2026-06-29 — during the RFC-first ADR-072/060/087 ratification walkthrough) |
@@ -91,6 +92,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P535 | Critical Points outgrew its budget, so the session-start hook truncates the surface it exists to provide | 12 (High) | Open | M | 2026-09-04 | internal |
 | 6 | P541 | Release verification fails good releases — propagation window too short, and per-package nesting makes widening worse | 12 (High) | Open | M | 2026-09-18 | internal |
 | 6 | P545 | The verification-close drain has no state assertion, and the do-not-close guard green-lights tickets that are already closed | 12 (High) | Open | M | 2026-09-19 | internal |
+| 6 | P547 | A per-iter constraints file carried another ticket's confirmed direction verbatim, pinning the wrong fix substance onto the dispatched ticket | 12 (High) | Open | M | 2026-09-19 | internal |
 | 5 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 (Low) | Open | S | 2026-07-02 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 (Medium) | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 (Medium) | Open | M | 2026-06-17 | internal |
