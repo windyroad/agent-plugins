@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-19 **P545 captured** — the verification-close drain has no state assertion, and the do-not-close guard green-lights tickets that are already closed (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-09-19 **P546 captured** — the cognitive-accessibility reviewer ADR-124 requires before every ratification is tool-less, so dispatching it a file path returns a refusal and burns a spawn; the document must be pasted inline (lightweight aside via /wr-itil:capture-problem).
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -63,6 +63,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a "run interactive run-retro" recommendation instead of performing the split | 8 (Medium) | Open | S | 2026-07-03 | internal |
 | 8 | P472 | reconcile-stories reports permanent false MISSING_REVERSE_TRACE drift against ADR-090's ratified-stories-only rule | 8 (Medium) | Open | S | 2026-07-26 | internal |
 | 8 | P516 | `story-map-edit add-card` omits the `ref` back-link, so a card renders with no Traces line | 8 (Medium) | Open | S | 2026-08-21 | internal |
+| 8 | P546 | The cognitive-accessibility reviewer is tool-less, so dispatching it a file path burns a reviewer spawn | 8 (Medium) | Open | S | 2026-09-19 | internal |
 | 8 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 (High) | Open | M | 2026-07-06 | internal |
 | 8 | P536 | Governance gate state binds to the physical worktree, blocking commits from a linked worktree and silently disabling the WIP gate inside one | 16 (High) | Open | M | 2026-09-08 | internal |
 | 8 | P542 | The oversight-marker shim silently writes nothing when the command is not a bare two-word invocation | 16 (High) | Open | M | 2026-09-19 | internal |
