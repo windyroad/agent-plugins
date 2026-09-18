@@ -5,6 +5,7 @@
 **Priority**: 16 (High) — Impact: 4 × Likelihood: 4 — derived at capture from the description per Step 4a
 **Origin**: internal
 **Effort**: M — derived at capture per Step 4a
+**WSJF**: 8 — (16 × 1.0) / 2 (added 2026-09-18 review — capture wrote no WSJF line)
 **JTBD**: JTBD-001
 **Persona**: developer
 

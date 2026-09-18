@@ -1,6 +1,6 @@
 # Problem 425: wr-architect edit-gate re-litigates its own same-session PASS — [Unratified Dependency] over-fires on agent-prescribed born-proposed ADRs
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-07-06
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3
 **Origin**: inbound-reported (#342)
@@ -122,3 +122,13 @@ Four viable options (D and the cautions on A/C added by architect review 2026-07
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-010 | proposed | Architect flags changes built on an unratified ADR |
+
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists, driver-child-ticket-closed (ADR-079 Phase 1 + Phase 2)
+- **Closed on**: 2026-09-18
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass
+- **Cite (per-shape evidence)**: ADRs human-oversight-confirmed: ADR-044 (docs/decisions/044-decision-delegation-contract.proposed.md), ADR-052 (docs/decisions/052-behavioural-tests-default-for-skill-testing.proposed.md), ADR-066 (docs/decisions/066-human-oversight-marker-and-review-decisions-drain.proposed.md), ADR-070 (docs/decisions/070-rfcs-hold-no-independent-decisions.proposed.md), ADR-074 (docs/decisions/074-confirm-decision-substance-before-building-dependent-work.proposed.md), ADR-096 (docs/decisions/096-no-implement-while-draft.proposed.md); feature surfaces exist: packages/architect/skills/capture-adr/SKILL.md; packages/architect/agents/agent.md; packages/jtbd/agents/agent.md; /wr-architect:capture-adr → packages/architect/skills/capture-adr/SKILL.md; /wr-architect:review-decisions → packages/architect/skills/review-decisions/SKILL.md; drivers closed: P371 (docs/problems/closed/371-i13-gate-auto-creates-new-rfc-instead-of-wiring-existing-fix-vehicle-trace.md)
+- **Persist**: this section is committed in the ticket file itself; the script body at `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: verdict is deterministic given the body + git state. False-positive remediation: `git revert` the relevance-close commit OR `git mv` the ticket back to its prior state. The >=7-day age gate + Phase 1 false-positive fixes (state-suffix / sibling-file / rename) + shape-cumulative annotation guard against premature evaluation.

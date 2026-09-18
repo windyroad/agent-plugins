@@ -325,3 +325,37 @@ Invoked as `/wr-itil:review-problems` Step 4.5 from the `/wr-itil:work-problems`
 - **Reporter acknowledgement**: not posted. The risk review passed and the revised copy passed voice/tone review, but the required voice-tone compatibility marker could not be persisted into this parent Codex session. The external action remained fail-closed; no gate was bypassed.
 - **Relevance and verification**: 0 clean relevance-close candidates; 61 caveated false-positive candidates remain covered by P463. The verification table contained no newly observed or regression evidence, so no lifecycle transition was performed and no user question interrupted the AFK loop.
 - **Cache refresh**: `.upstream-cache.json` rewritten at `last_checked: 2026-08-30T02:02:26Z` with the 87-issue snapshot and #453 → P530 audit entry.
+
+## 2026-09-18T21:29:51Z — Discovery pass
+
+Reached as the Step 0b pre-flight of `/wr-itil:work-problems` (AFK-by-construction; mechanical-stage carve-out per ADR-044 cat 4 / P132 — no `AskUserQuestion` at any branch decision).
+
+**Cache branch**: TTL-expiry auto-recheck. `last_checked` was 2026-08-30T02:02:26Z, ~20 days against `ttl_seconds: 86400`, so the fresh poll fired without the explicit `--force-upstream-recheck` flag.
+
+**Channels polled**: 3 of 3 configured.
+
+| Channel | Status | Reports |
+|---|---|---|
+| github-issues:windyroad/agent-plugins | ok | 88 live (1 new, 87 unchanged); 40 previously-cached issues no longer open, retained with `upstream_state: closed` for audit replay |
+| github-discussions:windyroad/agent-plugins | error (fail-soft) | HTTP 410 — Discussions are disabled for this repo (known: P406) |
+| github-security-advisories:windyroad/agent-plugins | ok | 0 |
+
+**Pipeline outcomes by classification**:
+
+| Classification | Count | Local tickets | Upstream closed |
+|---|---|---|---|
+| safe-and-valid-local-ticket-created | 1 | P544 | — |
+| above-threshold-pushback | 0 | — | — |
+| clear-malicious-closed | 0 | — | — |
+| already-fixed-in-newer | 0 | — | — |
+| matched-local-ticket | 0 | — | — |
+
+**Per-report detail — #473** (*Briefing topic-file entries decay toward deletion because they are never loaded*, tompahoward, 2026-09-04):
+
+- Step 1 version-aware classification: `still-active`. The semantic-comparator found no closed ticket whose `## Fix Released` version anchor supersedes the reporter's version. `cache_audit_note: phase1-version-missing` — the body carries no `## Versions` section; the reporter version (`wr-retrospective` 0.25.0) appears only in closing prose.
+- Step 2 JTBD-alignment (`wr-jtbd:agent`): `aligned-with-new-JTBD-for-existing-persona` — ratified `developer` persona. `cache_audit_note: new-jtbd-flag`. JTBD-001 and JTBD-006 were checked and rejected as edit-review-shaped and AFK-loop-shaped respectively; JTBD-011 is the nearest neighbour but is bounded to turn conduct and is itself `human-oversight: unconfirmed`, so amending it would drag an unratified dependency into the fix path. Elicitation queued for the next interactive `/wr-jtbd:confirm-jobs-and-personas` drain.
+- Step 3 dual-axis risk (`wr-risk-scorer:inbound-report`): `safe-low-fix-risk`, PASS on both axes. No info-extraction, backdoor request, or code-injection on the Request axis; no privilege escalation, load-bearing-check removal, or adopter-attack-surface expansion on the Fix axis. The reviewer noted it could not compute `INBOUND_REPORT_KEY` (no Bash in its tool set) and declined to fabricate one.
+- Inflow discipline (`wr-itil:hang-off-check`, ADR-032 5th invocation pattern): `PROCEED_NEW` against candidates P535, P507, P414, P105, P235. P535 is the mirror-image sibling on the Tier 1 surface — entries only ever enter the roll-up there, while entries only ever fall out of the topic tree here — but neither is the other's parent. Recorded as a cluster candidate on P544's `## Related`.
+- Branch: safe-and-valid. Local ticket **P544** created with `**Origin**: inbound-reported (#473)`, Priority 15 (High) — Impact 3 × Likelihood 5, Effort M, WSJF 7.5.
+
+**Cache refresh**: `docs/problems/.upstream-cache.json` rewritten at `last_checked: 2026-09-18T21:29:51Z`.

@@ -1,14 +1,658 @@
 {
   "$schema": "https://windyroad.github.io/agent-plugins/schemas/upstream-cache.json",
   "$comment": "Cache file for inbound report discovery (P079 / ADR-062). Written by /wr-itil:review-problems Step 8.5 after each discovery pass.",
-  "last_checked": "2026-08-30T02:02:26Z",
-  "$last_pass_note": "/wr-itil:review-problems Step 4.5 discovery pass 2026-08-30T02:02:26Z. github-issues polled unfiltered: 87 live, 1 new (#453), 86 unchanged, 0 closed. #453 passed inbound risk and JTBD routing; hang-off verdict PROCEED_NEW; local ticket P530 created with Origin inbound-reported (#453). Reporter acknowledgement was not posted because the required voice-tone compatibility marker could not be persisted in this Codex parent session; the external gate remained fail-closed. github-discussions returned HTTP 410 (P406); github-security-advisories returned 0 reports. Cache and audit log refreshed.",
+  "last_checked": "2026-09-18T21:29:51Z",
+  "$last_pass_note": "/wr-itil:review-problems Step 4.5 discovery pass 2026-09-18T21:29:51Z, reached as the Step 0b pre-flight of /wr-itil:work-problems (AFK-by-construction). Cache was 20 days old against ttl_seconds 86400, so the TTL-expiry auto-recheck branch fired without the explicit flag. github-issues polled unfiltered: 88 live, 1 new (#473), 87 unchanged, 40 previously-cached issues no longer open (retained with upstream_state closed for audit replay). #473 ran the full six-step assessment pipeline: step 1 still-active (no closed-ticket fix-version match; phase1-version-missing), step 2 JTBD aligned-with-new-JTBD-for-existing-persona (developer), step 3 dual-axis risk safe-low-fix-risk, hang-off arbiter PROCEED_NEW. Routed to the safe-and-valid branch; local ticket P544 created with Origin inbound-reported (#473). github-discussions returned HTTP 410 (P406, fail-soft); github-security-advisories returned 0 reports.",
   "channels": {
     "github-issues:windyroad/agent-plugins": {
-      "fetched_at": "2026-08-30T02:02:26Z",
+      "fetched_at": "2026-09-18T21:29:51Z",
       "filter": "polled --state open UNFILTERED (P373); title_prefix soft signal only",
       "status": "ok",
       "reports": [
+        {
+          "number": 42,
+          "title": "[problem] ADR-022 .known-error.md → .verifying.md transition not happening consistently at release time",
+          "author": "tompahoward",
+          "createdAt": "2026-04-21T00:20:36Z",
+          "body_hash": "b66ba6368d1d0dae",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 56,
+          "title": "[problem] Risk scorer credits monitoring/post-release activities as residual-risk reducers",
+          "author": "tompahoward",
+          "createdAt": "2026-04-24T00:02:16Z",
+          "body_hash": "7c1c3eac26e80d90",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 57,
+          "title": "[problem] Review-marker TTL forces repeated re-review cycles on multi-file work",
+          "author": "tompahoward",
+          "createdAt": "2026-04-24T00:02:22Z",
+          "body_hash": "2062a14e3aaf4944",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 58,
+          "title": "[problem] Docs-only changes should not invoke risk scorer or trigger drift detection",
+          "author": "tompahoward",
+          "createdAt": "2026-04-24T00:02:24Z",
+          "body_hash": "6ccd5e56a7531244",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 59,
+          "title": "[problem] Risk-scorer agent does not write numeric score to gate files",
+          "author": "tompahoward",
+          "createdAt": "2026-04-24T00:02:25Z",
+          "body_hash": "a807b7dae1004900",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 60,
+          "title": "[problem] Risk scorer ignores release-risk accumulation across commits",
+          "author": "tompahoward",
+          "createdAt": "2026-04-24T00:02:27Z",
+          "body_hash": "bae46e8f3cc60865",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 61,
+          "title": "[problem] manage-problem skill should auto-commit ticket file changes",
+          "author": "tompahoward",
+          "createdAt": "2026-04-24T00:02:29Z",
+          "body_hash": "f0f4b8475e2317db",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 62,
+          "title": "[problem] work-problems Step 6.5 lacks baseline CI health check before drain",
+          "author": "tompahoward",
+          "createdAt": "2026-04-24T00:02:30Z",
+          "body_hash": "256fe774ce03fbc4",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 63,
+          "title": "[problem] manage-problem has no cadence for checking upstream-bound tickets",
+          "author": "tompahoward",
+          "createdAt": "2026-04-24T00:04:58Z",
+          "body_hash": "4387d60dbaf303df",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 76,
+          "title": "[problem] manage-problem SKILL.md uses repo-relative script path that fails for plugin-installed users",
+          "author": "tompahoward",
+          "createdAt": "2026-04-26T20:58:23Z",
+          "body_hash": "702f7b8aaea70578",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 77,
+          "title": "[problem] manage-problem SKILL.md doesn't explain how to obtain the actual session UUID for the P119 marker",
+          "author": "tompahoward",
+          "createdAt": "2026-04-26T20:58:59Z",
+          "body_hash": "7b972d19f2d2a4c0",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 78,
+          "title": "[problem] architect-mark-reviewed.sh strict-verdict-string parsing under-counts affirmative ISSUES FOUND verdicts as FAIL",
+          "author": "tompahoward",
+          "createdAt": "2026-04-26T22:47:24Z",
+          "body_hash": "3d7151ba72e89323",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 79,
+          "title": "[problem] architect-refresh-hash.sh only refreshes hash on docs/decisions/* writes, leaving cross-session drift on other gated paths",
+          "author": "tompahoward",
+          "createdAt": "2026-04-26T22:48:55Z",
+          "body_hash": "698160ca31f76ec6",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 80,
+          "title": "[problem] architect-gate drift detection rm's marker without offering recovery path",
+          "author": "tompahoward",
+          "createdAt": "2026-04-26T22:50:09Z",
+          "body_hash": "c655a2c4bab5a4d6",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 81,
+          "title": "[problem] work-problems Step 5 exit-code rule does not handle is_error:true transient API failures (529 Overloaded)",
+          "author": "tompahoward",
+          "createdAt": "2026-04-26T22:51:15Z",
+          "body_hash": "e47f49a05811005d",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 82,
+          "title": "[problem] risk-scorer 30-min TTL expired during long-running orchestrator turns",
+          "author": "tompahoward",
+          "createdAt": "2026-04-26T22:52:22Z",
+          "body_hash": "7050cd894bc13771",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 83,
+          "title": "[problem] work-problems iteration boundary leaves run-retro BRIEFING.md edits uncommitted",
+          "author": "tompahoward",
+          "createdAt": "2026-04-26T22:53:33Z",
+          "body_hash": "8a11e12c7cf209ef",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 84,
+          "title": "[problem] work-problems SKILL.md AFK-fallback marker wording uses em-dash, forces consumer-side whitelist",
+          "author": "tompahoward",
+          "createdAt": "2026-04-26T22:55:02Z",
+          "body_hash": "4050a0ab7c86e6df",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 85,
+          "title": "[problem] manage-problem Step 0 reconcile-readme.sh hits exit 127 on marketplace consumers; script only on disk for vendored installs",
+          "author": "tompahoward",
+          "createdAt": "2026-04-26T22:56:18Z",
+          "body_hash": "ad27ab6902636a54",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 86,
+          "title": "[problem] git-push-gate.sh does not check CI status on push/release before scoring risk",
+          "author": "tompahoward",
+          "createdAt": "2026-04-27T03:50:15Z",
+          "body_hash": "52723fd380617eb7",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 87,
+          "title": "[problem] report-upstream SKILL.md Step 5 example uses --label flag that fails when upstream repo hasn't pre-created the label",
+          "author": "tompahoward",
+          "createdAt": "2026-04-27T04:04:16Z",
+          "body_hash": "0404f2ade77d5ef7",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 97,
+          "title": "[problem] work-problems orchestrator carries prior-ticket Fix Strategy text into iter dispatch without re-grounding in design intent",
+          "author": "tompahoward",
+          "createdAt": "2026-04-28T02:31:22Z",
+          "body_hash": "56ae9180570cc656",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 98,
+          "title": "[problem] work-problems iter workers don't add changesets — fix commits accumulate without release path",
+          "author": "tompahoward",
+          "createdAt": "2026-04-28T02:31:57Z",
+          "body_hash": "b2c16163511e0421",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 110,
+          "title": "[problem] wr-risk-scorer:assess-release SKILL.md step 5 prose says \"Skill tool\" but provides Agent-tool parameter",
+          "author": "tompahoward",
+          "createdAt": "2026-05-03T05:04:36Z",
+          "body_hash": "e6858e0229de550e",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 117,
+          "title": "[problem] No /wr-retrospective:migrate-briefing skill — legacy docs/BRIEFING.md → docs/briefing/ topic-tree migration is manual per-adopter",
+          "author": "tompahoward",
+          "createdAt": "2026-05-10T20:10:01Z",
+          "body_hash": "1761465715adefe1",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 120,
+          "title": "[problem] architect-enforce-edit + jtbd-enforce-edit hooks should add docs/retros/ to the exclusion list",
+          "author": "tompahoward",
+          "createdAt": "2026-05-13T07:55:22Z",
+          "body_hash": "e733d89ac41027d7",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 121,
+          "title": "[problem] wr-risk-scorer:pipeline treats changesets as queued when introducing commits are already on origin",
+          "author": "tompahoward",
+          "createdAt": "2026-05-13T07:58:34Z",
+          "body_hash": "32305e86135390bf",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 123,
+          "title": "[problem] @windyroad/tdd hook only recognises same-dir or __tests__/ test associations",
+          "author": "tompahoward",
+          "createdAt": "2026-05-13T13:12:00Z",
+          "body_hash": "f4b976746da40578",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 124,
+          "title": "[problem] wr-voice-tone:agent returns blanket FAIL when docs/VOICE-AND-TONE.md is missing",
+          "author": "tompahoward",
+          "createdAt": "2026-05-13T13:12:54Z",
+          "body_hash": "10996f5c68dbb795",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 125,
+          "title": "[problem] external-comms gate marker key cannot be computed by the reviewer agent (Read/Glob/Grep tool surface — no shasum); hash-scope ambiguity adds three recurrences",
+          "author": "tompahoward",
+          "createdAt": "2026-05-13T20:12:24Z",
+          "body_hash": "8e2fa16bdf660e46",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 126,
+          "title": "[problem] capture-problem → manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam)",
+          "author": "tompahoward",
+          "createdAt": "2026-05-13T20:13:45Z",
+          "body_hash": "43eeab2af47e1acb",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 137,
+          "title": "[problem] manage-problem SKILL.md commit-message convention fails @commitlint/config-conventional subject-case rule",
+          "author": "tompahoward",
+          "createdAt": "2026-05-17T12:13:47Z",
+          "body_hash": "77c4a27573b95b29",
+          "classification": "matched-local-ticket",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "matched_local_ticket": "P429",
+          "upstream_state": "open"
+        },
+        {
+          "number": 138,
+          "title": "[problem] /wr-itil:work-problems assistant defers actionable items to 'next session' when user is observably present",
+          "author": "tompahoward",
+          "createdAt": "2026-05-17T12:15:40Z",
+          "body_hash": "51834706a0730459",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
+          "upstream_state": "open"
+        },
+        {
+          "number": 139,
+          "title": "[problem] migrate-problems-layout.sh helper uses bashisms but /wr-itil:work-problems Step 0a SKILL.md does not specify bash — sourcing fails under zsh",
+          "author": "tompahoward",
+          "createdAt": "2026-05-17T20:51:10Z",
+          "body_hash": "c8c72e9ff6777486",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)",
+          "upstream_state": "open"
+        },
+        {
+          "number": 149,
+          "title": "[problem] external-comms gate friction + commit/push/release threshold drift (composed P010+P007)",
+          "author": "tompahoward",
+          "createdAt": "2026-05-18T11:55:37Z",
+          "body_hash": "bfda21a42bc40001",
+          "classification": "closed-upstream",
+          "cache_audit_note": "CLOSED upstream as of 2026-05-26 poll — P010 fixed by 56bae5f (released risk-scorer 0.11.0, mirrored locally as P198) and P007 fixed by 3c732ba (released risk-scorer 0.11.0, mirrored as P286). No pipeline action needed.",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 169,
+          "title": "wr-architect: add a standing 'first-match on a non-unique collection' review heuristic (two identity/binding footguns passed review)",
+          "author": "tompahoward",
+          "createdAt": "2026-05-28T01:03:11Z",
+          "body_hash": "619a60cb5a76a107",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P426",
+          "cache_audit_note": "2026-07-26 discovery pass: semantic-comparator hit via on-ticket Origin/Reported-Upstream backlink (P426, known-error). Maintainer self-filed (outbound mirror) — no reporter-facing ack posted per the 2026-05-15 discovery-only direction.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 170,
+          "title": "Issue templates declare labels ('problem', 'needs-triage') that don't exist in the repo",
+          "author": "tompahoward",
+          "createdAt": "2026-05-28T01:13:43Z",
+          "body_hash": "dfd0786fa5d7657d",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P436",
+          "cache_audit_note": "2026-07-26 discovery pass: semantic-comparator hit via on-ticket Origin/Reported-Upstream backlink (P436, open). Maintainer self-filed (outbound mirror) — no reporter-facing ack posted per the 2026-05-15 discovery-only direction.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 180,
+          "title": "[problem] wr-itil / wr-architect / wr-jtbd gate-marker friction (composed P036+P038+P044)",
+          "author": "tompahoward",
+          "createdAt": "2026-05-30T10:01:11Z",
+          "body_hash": "ca680bcd39e2f2b1",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31",
+          "upstream_state": "open"
+        },
+        {
+          "number": 181,
+          "title": "[problem] wr-itil gate-marker UX + AFK orchestrator robustness follow-on (composed P035+P037+P041)",
+          "author": "tompahoward",
+          "createdAt": "2026-05-30T10:37:19Z",
+          "body_hash": "bf42a1e4668d406d",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31",
+          "upstream_state": "open"
+        },
+        {
+          "number": 183,
+          "title": "[problem] jtbd-enforce-edit hook uses relative docs/jtbd path; fails when cwd is not project root",
+          "author": "tompahoward",
+          "createdAt": "2026-05-31T00:26:30Z",
+          "body_hash": "e2cca93fdefc6a5f",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 184,
+          "title": "[problem] reconcile-readme.sh section-end fallback-chain produces false-positive STALE when Parked section sits between WSJF Rankings and Verification Queue",
+          "author": "tompahoward",
+          "createdAt": "2026-05-31T03:06:08Z",
+          "body_hash": "dc63199cd381ca8d",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31",
+          "upstream_state": "open"
+        },
+        {
+          "number": 185,
+          "title": "[problem] capture-adr SKILL.md template literals carry U+2014 long-dashes; first Write blocked on adopters with no-em-dash hook",
+          "author": "tompahoward",
+          "createdAt": "2026-05-31T03:08:09Z",
+          "body_hash": "45f9dad56e1818f1",
+          "classification": "matched-local-ticket",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31",
+          "matched_local_ticket": "P424",
+          "upstream_state": "open"
+        },
+        {
+          "number": 186,
+          "title": "[problem] P186 evidence-cell canonical wire format uses U+2014 separator; blocks adopters with no-em-dash hook",
+          "author": "tompahoward",
+          "createdAt": "2026-05-31T03:10:19Z",
+          "body_hash": "21eeb6fd674bc133",
+          "classification": "matched-local-ticket",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31",
+          "matched_local_ticket": "P424",
+          "upstream_state": "open"
+        },
+        {
+          "number": 187,
+          "title": "[problem] transition-problem + review-problems + run-retro lack sibling-family completeness scan before close; friction-class tickets recur",
+          "author": "tompahoward",
+          "createdAt": "2026-05-31T03:12:45Z",
+          "body_hash": "c13abd2f39c3c9f7",
+          "classification": "matched-local-ticket",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31",
+          "matched_local_ticket": "P433",
+          "upstream_state": "open"
+        },
+        {
+          "number": 188,
+          "title": "[problem] staging-trap recovery contract re-stages only trapped file; co-staged sibling files dropped, splits ADR-014 single-commit grain",
+          "author": "tompahoward",
+          "createdAt": "2026-05-31T03:15:17Z",
+          "body_hash": "633d11ea3d9e4bed",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-05-31",
+          "upstream_state": "open"
+        },
+        {
+          "number": 194,
+          "title": "wr-itil: reconcile-readme script extends VQ slice across Parked when Closed appears after Parked",
+          "author": "tompahoward",
+          "createdAt": "2026-06-01T11:04:39Z",
+          "body_hash": "478c9d86565fe809",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 196,
+          "title": "wr-risk-scorer: gate-library parser-tolerance gap -- RISK-POLICY.md format too rich for fixed regex",
+          "author": "tompahoward",
+          "createdAt": "2026-06-01T11:05:17Z",
+          "body_hash": "cb2884e2f6057b98",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 197,
+          "title": "wr-risk-scorer: agents/pipeline.md hardcoded RISK-POLICY citations drift from actual policy text",
+          "author": "tompahoward",
+          "createdAt": "2026-06-01T11:05:19Z",
+          "body_hash": "6a24343f8007d971",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 202,
+          "title": "[problem] /wr-itil:capture-problem lacks a premise-triage gate; lands phantom tickets when description is wrong",
+          "author": "tompahoward",
+          "createdAt": "2026-06-02T06:42:34Z",
+          "body_hash": "c59835c3eb8a4067",
+          "classification": "matched-local-ticket",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-10",
+          "matched_local_ticket": "P434",
+          "upstream_state": "open"
+        },
+        {
+          "number": 217,
+          "title": "[problem] external-comms gate marker hash invalidated by commit-message body changes (Co-Authored-By trailer, body re-wording, -m vs HEREDOC); forces re-review on every retry",
+          "author": "tompahoward",
+          "createdAt": "2026-06-03T02:43:37Z",
+          "body_hash": "69328d64eb577caf",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-10",
+          "upstream_state": "open"
+        },
+        {
+          "number": 218,
+          "title": "[problem] P165 README-refresh-discipline hook over-fires on non-ranking-bearing problem-ticket edits",
+          "author": "tompahoward",
+          "createdAt": "2026-06-03T02:45:35Z",
+          "body_hash": "d28a52eb4d6ee985",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-10",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 219,
+          "title": "[problem] wr-architect-generate-decisions-compendium emits em-dashes (U+2014) that violate adopter no-em-dash policies; forces 43-instance manual scrub on every regen",
+          "author": "tompahoward",
+          "createdAt": "2026-06-03T02:46:45Z",
+          "body_hash": "15edd73eb63100be",
+          "classification": "matched-local-ticket",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-10",
+          "matched_local_ticket": "P424",
+          "upstream_state": "open"
+        },
+        {
+          "number": 221,
+          "title": "wr-jtbd:agent returns files-only output without textual PASS/ISSUES verdict",
+          "author": "tompahoward",
+          "createdAt": "2026-06-04T04:35:43Z",
+          "body_hash": "15a1abf321410102",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 222,
+          "title": "work-problems Step 4 classifier does not pre-detect ADR-074 substance-gate likelihood before dispatch",
+          "author": "tompahoward",
+          "createdAt": "2026-06-04T04:36:02Z",
+          "body_hash": "9760bb165fca19e6",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 223,
+          "title": "architect ADR tooling (capture-adr template + compendium generator) emits em-dashes, blocks no-em-dash consumer projects",
+          "author": "tompahoward",
+          "createdAt": "2026-06-04T04:36:24Z",
+          "body_hash": "124db7ac184c182c",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P424",
+          "cache_audit_note": "2026-07-26 discovery pass: semantic-comparator hit via on-ticket Origin/Reported-Upstream backlink (P424, open). Maintainer self-filed (outbound mirror) — no reporter-facing ack posted per the 2026-05-15 discovery-only direction.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 235,
+          "title": "wr-risk-scorer git-push-gate: blocks `git push` without guidance when `npm run push:watch` doesn't exist; also fires on non-npm projects",
+          "author": "tompahoward",
+          "createdAt": "2026-06-07T17:36:37Z",
+          "body_hash": "426b731506fbefb4",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P435",
+          "cache_audit_note": "2026-07-26 discovery pass: semantic-comparator hit via on-ticket Origin/Reported-Upstream backlink (P435, open). Maintainer self-filed (outbound mirror) — no reporter-facing ack posted per the 2026-05-15 discovery-only direction.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 236,
+          "title": "[problem] wr-risk-scorer:external-comms gate fires on private-repo git commit messages — git commits aren't external comms on private repos",
+          "author": "tompahoward",
+          "createdAt": "2026-06-08T04:22:53Z",
+          "body_hash": "0a7ed3e9c3154667",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-10",
+          "upstream_state": "closed"
+        },
+        {
+          "number": 241,
+          "title": "[problem] @windyroad/risk-scorer@0.12.7 — appetite-from-policy parser regex too narrow + subagent prompt hardcodes ≤4 with false RISK-POLICY citation (follow-up to closed #149)",
+          "author": "tompahoward",
+          "createdAt": "2026-06-08T11:54:20Z",
+          "body_hash": "d740c14bfea5bd3c",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-10",
+          "upstream_state": "open"
+        },
+        {
+          "number": 253,
+          "title": "wr-risk-scorer:external-comms misses static-site / deck content edits — factual-claim risk goes ungated",
+          "author": "tompahoward",
+          "createdAt": "2026-06-08T21:45:02Z",
+          "body_hash": "930d999530b9a560",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P435",
+          "cache_audit_note": "2026-07-26 discovery pass: semantic-comparator hit via on-ticket Origin/Reported-Upstream backlink (P435, open). Maintainer self-filed (outbound mirror) — no reporter-facing ack posted per the 2026-05-15 discovery-only direction.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 256,
+          "title": "[problem] /wr-itil:update-upstream Step 1 ticket-lookup glob silently false-no-ops under zsh",
+          "author": "tompahoward",
+          "createdAt": "2026-06-14T15:30:49Z",
+          "body_hash": "2a24382431e4f38b",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-17",
+          "upstream_state": "open"
+        },
+        {
+          "number": 257,
+          "title": "[problem] itil-correction-detect UserPromptSubmit hook false-positives on orchestrator/AFK prompt text",
+          "author": "tompahoward",
+          "createdAt": "2026-06-14T15:30:54Z",
+          "body_hash": "69d06ff68d1a68a4",
+          "classification": "matched-local-ticket",
+          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-17",
+          "matched_local_ticket": "P430",
+          "upstream_state": "open"
+        },
+        {
+          "number": 258,
+          "title": "wr-voice-tone:agent is told to write a verdict file but has no Bash/Write tool (marker never lands)",
+          "author": "tompahoward",
+          "createdAt": "2026-06-16T01:51:46Z",
+          "body_hash": "66b8fd8cb0cbd970",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 273,
+          "title": "wr-risk-scorer bootstrap-catalog: ID allocation fails once R008+ exists; README hardcodes the suite name",
+          "author": "tompahoward",
+          "createdAt": "2026-06-21T10:38:33Z",
+          "body_hash": "f77ce3edb76d3a11",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P164, P374",
+          "cache_audit_note": "discovered 2026-06-21 manually after channel filter missed it (P373 captures the filter defect); routed by user direction: octal eval bug → P164 Phase 2 reopen V→KE; hardcoded suite name → P374 new ticket; #273 ack comment posted with cross-references. Title prefix '[problem]' absent — would have been missed by the title_prefix filter; surfaces P373 as the filter-too-narrow class.",
+          "discovered_at": "2026-06-21T13:26:29Z",
+          "upstream_state": "closed"
+        },
         {
           "number": 274,
           "title": "work-problems: claude -p iter subprocesses miss project-scoped governance plugins (need --plugin-dir in dispatch)",
@@ -54,518 +698,6 @@
           "upstream_state": "closed"
         },
         {
-          "number": 257,
-          "title": "[problem] itil-correction-detect UserPromptSubmit hook false-positives on orchestrator/AFK prompt text",
-          "author": "tompahoward",
-          "createdAt": "2026-06-14T15:30:54Z",
-          "body_hash": "69d06ff68d1a68a4",
-          "classification": "matched-local-ticket",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-17",
-          "matched_local_ticket": "P430"
-        },
-        {
-          "number": 256,
-          "title": "[problem] /wr-itil:update-upstream Step 1 ticket-lookup glob silently false-no-ops under zsh",
-          "author": "tompahoward",
-          "createdAt": "2026-06-14T15:30:49Z",
-          "body_hash": "2a24382431e4f38b",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-17"
-        },
-        {
-          "number": 149,
-          "title": "[problem] external-comms gate friction + commit/push/release threshold drift (composed P010+P007)",
-          "author": "tompahoward",
-          "createdAt": "2026-05-18T11:55:37Z",
-          "body_hash": "bfda21a42bc40001",
-          "classification": "closed-upstream",
-          "cache_audit_note": "CLOSED upstream as of 2026-05-26 poll — P010 fixed by 56bae5f (released risk-scorer 0.11.0, mirrored locally as P198) and P007 fixed by 3c732ba (released risk-scorer 0.11.0, mirrored as P286). No pipeline action needed."
-        },
-        {
-          "number": 202,
-          "title": "[problem] /wr-itil:capture-problem lacks a premise-triage gate; lands phantom tickets when description is wrong",
-          "author": "tompahoward",
-          "createdAt": "2026-06-02T06:42:34Z",
-          "body_hash": "c59835c3eb8a4067",
-          "classification": "matched-local-ticket",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-10",
-          "matched_local_ticket": "P434"
-        },
-        {
-          "number": 217,
-          "title": "[problem] external-comms gate marker hash invalidated by commit-message body changes (Co-Authored-By trailer, body re-wording, -m vs HEREDOC); forces re-review on every retry",
-          "author": "tompahoward",
-          "createdAt": "2026-06-03T02:43:37Z",
-          "body_hash": "69328d64eb577caf",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-10"
-        },
-        {
-          "number": 218,
-          "title": "[problem] P165 README-refresh-discipline hook over-fires on non-ranking-bearing problem-ticket edits",
-          "author": "tompahoward",
-          "createdAt": "2026-06-03T02:45:35Z",
-          "body_hash": "d28a52eb4d6ee985",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-10",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 219,
-          "title": "[problem] wr-architect-generate-decisions-compendium emits em-dashes (U+2014) that violate adopter no-em-dash policies; forces 43-instance manual scrub on every regen",
-          "author": "tompahoward",
-          "createdAt": "2026-06-03T02:46:45Z",
-          "body_hash": "15edd73eb63100be",
-          "classification": "matched-local-ticket",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-10",
-          "matched_local_ticket": "P424"
-        },
-        {
-          "number": 236,
-          "title": "[problem] wr-risk-scorer:external-comms gate fires on private-repo git commit messages — git commits aren't external comms on private repos",
-          "author": "tompahoward",
-          "createdAt": "2026-06-08T04:22:53Z",
-          "body_hash": "0a7ed3e9c3154667",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-10",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 241,
-          "title": "[problem] @windyroad/risk-scorer@0.12.7 — appetite-from-policy parser regex too narrow + subagent prompt hardcodes ≤4 with false RISK-POLICY citation (follow-up to closed #149)",
-          "author": "tompahoward",
-          "createdAt": "2026-06-08T11:54:20Z",
-          "body_hash": "d740c14bfea5bd3c",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-06-10"
-        },
-        {
-          "number": 188,
-          "title": "[problem] staging-trap recovery contract re-stages only trapped file; co-staged sibling files dropped, splits ADR-014 single-commit grain",
-          "author": "tompahoward",
-          "createdAt": "2026-05-31T03:15:17Z",
-          "body_hash": "633d11ea3d9e4bed",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments); new this pass 2026-05-31"
-        },
-        {
-          "number": 187,
-          "title": "[problem] transition-problem + review-problems + run-retro lack sibling-family completeness scan before close; friction-class tickets recur",
-          "author": "tompahoward",
-          "createdAt": "2026-05-31T03:12:45Z",
-          "body_hash": "c13abd2f39c3c9f7",
-          "classification": "matched-local-ticket",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31",
-          "matched_local_ticket": "P433"
-        },
-        {
-          "number": 186,
-          "title": "[problem] P186 evidence-cell canonical wire format uses U+2014 separator; blocks adopters with no-em-dash hook",
-          "author": "tompahoward",
-          "createdAt": "2026-05-31T03:10:19Z",
-          "body_hash": "21eeb6fd674bc133",
-          "classification": "matched-local-ticket",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31",
-          "matched_local_ticket": "P424"
-        },
-        {
-          "number": 185,
-          "title": "[problem] capture-adr SKILL.md template literals carry U+2014 long-dashes; first Write blocked on adopters with no-em-dash hook",
-          "author": "tompahoward",
-          "createdAt": "2026-05-31T03:08:09Z",
-          "body_hash": "45f9dad56e1818f1",
-          "classification": "matched-local-ticket",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31",
-          "matched_local_ticket": "P424"
-        },
-        {
-          "number": 184,
-          "title": "[problem] reconcile-readme.sh section-end fallback-chain produces false-positive STALE when Parked section sits between WSJF Rankings and Verification Queue",
-          "author": "tompahoward",
-          "createdAt": "2026-05-31T03:06:08Z",
-          "body_hash": "dc63199cd381ca8d",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31"
-        },
-        {
-          "number": 183,
-          "title": "[problem] jtbd-enforce-edit hook uses relative docs/jtbd path; fails when cwd is not project root",
-          "author": "tompahoward",
-          "createdAt": "2026-05-31T00:26:30Z",
-          "body_hash": "e2cca93fdefc6a5f",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 181,
-          "title": "[problem] wr-itil gate-marker UX + AFK orchestrator robustness follow-on (composed P035+P037+P041)",
-          "author": "tompahoward",
-          "createdAt": "2026-05-30T10:37:19Z",
-          "body_hash": "bf42a1e4668d406d",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31"
-        },
-        {
-          "number": 180,
-          "title": "[problem] wr-itil / wr-architect / wr-jtbd gate-marker friction (composed P036+P038+P044)",
-          "author": "tompahoward",
-          "createdAt": "2026-05-30T10:01:11Z",
-          "body_hash": "ca680bcd39e2f2b1",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction; new this pass 2026-05-31"
-        },
-        {
-          "number": 139,
-          "title": "[problem] migrate-problems-layout.sh helper uses bashisms but /wr-itil:work-problems Step 0a SKILL.md does not specify bash — sourcing fails under zsh",
-          "author": "tompahoward",
-          "createdAt": "2026-05-17T20:51:10Z",
-          "body_hash": "c8c72e9ff6777486",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction (external-comms-gate sha-bug bottleneck on per-report ack comments)"
-        },
-        {
-          "number": 138,
-          "title": "[problem] /wr-itil:work-problems assistant defers actionable items to 'next session' when user is observably present",
-          "author": "tompahoward",
-          "createdAt": "2026-05-17T12:15:40Z",
-          "body_hash": "51834706a0730459",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction"
-        },
-        {
-          "number": 137,
-          "title": "[problem] manage-problem SKILL.md commit-message convention fails @commitlint/config-conventional subject-case rule",
-          "author": "tompahoward",
-          "createdAt": "2026-05-17T12:13:47Z",
-          "body_hash": "77c4a27573b95b29",
-          "classification": "matched-local-ticket",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "matched_local_ticket": "P429"
-        },
-        {
-          "number": 126,
-          "title": "[problem] capture-problem → manage-problem same-session halts at Step 0 reconcile (HALT_ROUTE_RECONCILE on deferred-refresh seam)",
-          "author": "tompahoward",
-          "createdAt": "2026-05-13T20:13:45Z",
-          "body_hash": "43eeab2af47e1acb",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 125,
-          "title": "[problem] external-comms gate marker key cannot be computed by the reviewer agent (Read/Glob/Grep tool surface — no shasum); hash-scope ambiguity adds three recurrences",
-          "author": "tompahoward",
-          "createdAt": "2026-05-13T20:12:24Z",
-          "body_hash": "8e2fa16bdf660e46",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 124,
-          "title": "[problem] wr-voice-tone:agent returns blanket FAIL when docs/VOICE-AND-TONE.md is missing",
-          "author": "tompahoward",
-          "createdAt": "2026-05-13T13:12:54Z",
-          "body_hash": "10996f5c68dbb795",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 123,
-          "title": "[problem] @windyroad/tdd hook only recognises same-dir or __tests__/ test associations",
-          "author": "tompahoward",
-          "createdAt": "2026-05-13T13:12:00Z",
-          "body_hash": "f4b976746da40578",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 121,
-          "title": "[problem] wr-risk-scorer:pipeline treats changesets as queued when introducing commits are already on origin",
-          "author": "tompahoward",
-          "createdAt": "2026-05-13T07:58:34Z",
-          "body_hash": "32305e86135390bf",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 120,
-          "title": "[problem] architect-enforce-edit + jtbd-enforce-edit hooks should add docs/retros/ to the exclusion list",
-          "author": "tompahoward",
-          "createdAt": "2026-05-13T07:55:22Z",
-          "body_hash": "e733d89ac41027d7",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 117,
-          "title": "[problem] No /wr-retrospective:migrate-briefing skill — legacy docs/BRIEFING.md → docs/briefing/ topic-tree migration is manual per-adopter",
-          "author": "tompahoward",
-          "createdAt": "2026-05-10T20:10:01Z",
-          "body_hash": "1761465715adefe1",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 110,
-          "title": "[problem] wr-risk-scorer:assess-release SKILL.md step 5 prose says \"Skill tool\" but provides Agent-tool parameter",
-          "author": "tompahoward",
-          "createdAt": "2026-05-03T05:04:36Z",
-          "body_hash": "e6858e0229de550e",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 98,
-          "title": "[problem] work-problems iter workers don't add changesets — fix commits accumulate without release path",
-          "author": "tompahoward",
-          "createdAt": "2026-04-28T02:31:57Z",
-          "body_hash": "b2c16163511e0421",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 97,
-          "title": "[problem] work-problems orchestrator carries prior-ticket Fix Strategy text into iter dispatch without re-grounding in design intent",
-          "author": "tompahoward",
-          "createdAt": "2026-04-28T02:31:22Z",
-          "body_hash": "56ae9180570cc656",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 87,
-          "title": "[problem] report-upstream SKILL.md Step 5 example uses --label flag that fails when upstream repo hasn't pre-created the label",
-          "author": "tompahoward",
-          "createdAt": "2026-04-27T04:04:16Z",
-          "body_hash": "0404f2ade77d5ef7",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 86,
-          "title": "[problem] git-push-gate.sh does not check CI status on push/release before scoring risk",
-          "author": "tompahoward",
-          "createdAt": "2026-04-27T03:50:15Z",
-          "body_hash": "52723fd380617eb7",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 85,
-          "title": "[problem] manage-problem Step 0 reconcile-readme.sh hits exit 127 on marketplace consumers; script only on disk for vendored installs",
-          "author": "tompahoward",
-          "createdAt": "2026-04-26T22:56:18Z",
-          "body_hash": "ad27ab6902636a54",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 84,
-          "title": "[problem] work-problems SKILL.md AFK-fallback marker wording uses em-dash, forces consumer-side whitelist",
-          "author": "tompahoward",
-          "createdAt": "2026-04-26T22:55:02Z",
-          "body_hash": "4050a0ab7c86e6df",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 83,
-          "title": "[problem] work-problems iteration boundary leaves run-retro BRIEFING.md edits uncommitted",
-          "author": "tompahoward",
-          "createdAt": "2026-04-26T22:53:33Z",
-          "body_hash": "8a11e12c7cf209ef",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 82,
-          "title": "[problem] risk-scorer 30-min TTL expired during long-running orchestrator turns",
-          "author": "tompahoward",
-          "createdAt": "2026-04-26T22:52:22Z",
-          "body_hash": "7050cd894bc13771",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 81,
-          "title": "[problem] work-problems Step 5 exit-code rule does not handle is_error:true transient API failures (529 Overloaded)",
-          "author": "tompahoward",
-          "createdAt": "2026-04-26T22:51:15Z",
-          "body_hash": "e47f49a05811005d",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 80,
-          "title": "[problem] architect-gate drift detection rm's marker without offering recovery path",
-          "author": "tompahoward",
-          "createdAt": "2026-04-26T22:50:09Z",
-          "body_hash": "c655a2c4bab5a4d6",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 79,
-          "title": "[problem] architect-refresh-hash.sh only refreshes hash on docs/decisions/* writes, leaving cross-session drift on other gated paths",
-          "author": "tompahoward",
-          "createdAt": "2026-04-26T22:48:55Z",
-          "body_hash": "698160ca31f76ec6",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 78,
-          "title": "[problem] architect-mark-reviewed.sh strict-verdict-string parsing under-counts affirmative ISSUES FOUND verdicts as FAIL",
-          "author": "tompahoward",
-          "createdAt": "2026-04-26T22:47:24Z",
-          "body_hash": "3d7151ba72e89323",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 77,
-          "title": "[problem] manage-problem SKILL.md doesn't explain how to obtain the actual session UUID for the P119 marker",
-          "author": "tompahoward",
-          "createdAt": "2026-04-26T20:58:59Z",
-          "body_hash": "7b972d19f2d2a4c0",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 76,
-          "title": "[problem] manage-problem SKILL.md uses repo-relative script path that fails for plugin-installed users",
-          "author": "tompahoward",
-          "createdAt": "2026-04-26T20:58:23Z",
-          "body_hash": "702f7b8aaea70578",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 63,
-          "title": "[problem] manage-problem has no cadence for checking upstream-bound tickets",
-          "author": "tompahoward",
-          "createdAt": "2026-04-24T00:04:58Z",
-          "body_hash": "4387d60dbaf303df",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 62,
-          "title": "[problem] work-problems Step 6.5 lacks baseline CI health check before drain",
-          "author": "tompahoward",
-          "createdAt": "2026-04-24T00:02:30Z",
-          "body_hash": "256fe774ce03fbc4",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 61,
-          "title": "[problem] manage-problem skill should auto-commit ticket file changes",
-          "author": "tompahoward",
-          "createdAt": "2026-04-24T00:02:29Z",
-          "body_hash": "f0f4b8475e2317db",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 60,
-          "title": "[problem] Risk scorer ignores release-risk accumulation across commits",
-          "author": "tompahoward",
-          "createdAt": "2026-04-24T00:02:27Z",
-          "body_hash": "bae46e8f3cc60865",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 59,
-          "title": "[problem] Risk-scorer agent does not write numeric score to gate files",
-          "author": "tompahoward",
-          "createdAt": "2026-04-24T00:02:25Z",
-          "body_hash": "a807b7dae1004900",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 58,
-          "title": "[problem] Docs-only changes should not invoke risk scorer or trigger drift detection",
-          "author": "tompahoward",
-          "createdAt": "2026-04-24T00:02:24Z",
-          "body_hash": "6ccd5e56a7531244",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 57,
-          "title": "[problem] Review-marker TTL forces repeated re-review cycles on multi-file work",
-          "author": "tompahoward",
-          "createdAt": "2026-04-24T00:02:22Z",
-          "body_hash": "2062a14e3aaf4944",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 56,
-          "title": "[problem] Risk scorer credits monitoring/post-release activities as residual-risk reducers",
-          "author": "tompahoward",
-          "createdAt": "2026-04-24T00:02:16Z",
-          "body_hash": "7c1c3eac26e80d90",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 42,
-          "title": "[problem] ADR-022 .known-error.md → .verifying.md transition not happening consistently at release time",
-          "author": "tompahoward",
-          "createdAt": "2026-04-21T00:20:36Z",
-          "body_hash": "b66ba6368d1d0dae",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "discovery-only; pipeline-classification deferred per 2026-05-15 user direction",
-          "upstream_state": "closed"
-        },
-        {
-          "number": 273,
-          "title": "wr-risk-scorer bootstrap-catalog: ID allocation fails once R008+ exists; README hardcodes the suite name",
-          "author": "tompahoward",
-          "createdAt": "2026-06-21T10:38:33Z",
-          "body_hash": "f77ce3edb76d3a11",
-          "classification": "safe-and-valid-local-ticket-created",
-          "matched_local_ticket": "P164, P374",
-          "cache_audit_note": "discovered 2026-06-21 manually after channel filter missed it (P373 captures the filter defect); routed by user direction: octal eval bug → P164 Phase 2 reopen V→KE; hardcoded suite name → P374 new ticket; #273 ack comment posted with cross-references. Title prefix '[problem]' absent — would have been missed by the title_prefix filter; surfaces P373 as the filter-too-narrow class.",
-          "discovered_at": "2026-06-21T13:26:29Z",
-          "upstream_state": "closed"
-        },
-        {
           "number": 296,
           "title": "[problem] manage-problem per-session create-gate marker lets bulk-Write paths bypass per-ticket P094 README refresh",
           "author": "tompahoward",
@@ -573,7 +705,8 @@
           "body_hash": "51257033ab9accb6",
           "classification": "pending-pipeline-processing",
           "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-02 (TTL-expiry auto-recheck, cache 6d stale); discovery-only (maintainer self-filed in own repo); semantic match against existing local backlog pending interactive triage; no ack posted, no local ticket auto-created (AFK safe-default per ADR-013 Rule 6 - avoids duplicating overlapping existing tickets)"
+          "cache_audit_note": "discovered 2026-07-02 (TTL-expiry auto-recheck, cache 6d stale); discovery-only (maintainer self-filed in own repo); semantic match against existing local backlog pending interactive triage; no ack posted, no local ticket auto-created (AFK safe-default per ADR-013 Rule 6 - avoids duplicating overlapping existing tickets)",
+          "upstream_state": "open"
         },
         {
           "number": 304,
@@ -583,7 +716,8 @@
           "body_hash": "f277e585cc535930",
           "classification": "pending-pipeline-processing",
           "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-02 (TTL-expiry auto-recheck, cache 6d stale); discovery-only (maintainer self-filed in own repo); semantic match against existing local backlog pending interactive triage; no ack posted, no local ticket auto-created (AFK safe-default per ADR-013 Rule 6 - avoids duplicating overlapping existing tickets)"
+          "cache_audit_note": "discovered 2026-07-02 (TTL-expiry auto-recheck, cache 6d stale); discovery-only (maintainer self-filed in own repo); semantic match against existing local backlog pending interactive triage; no ack posted, no local ticket auto-created (AFK safe-default per ADR-013 Rule 6 - avoids duplicating overlapping existing tickets)",
+          "upstream_state": "open"
         },
         {
           "number": 306,
@@ -593,7 +727,8 @@
           "body_hash": "266e60c7ddd5ab33",
           "classification": "pending-pipeline-processing",
           "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-02 (TTL-expiry auto-recheck, cache 6d stale); discovery-only (maintainer self-filed in own repo); semantic match against existing local backlog pending interactive triage; no ack posted, no local ticket auto-created (AFK safe-default per ADR-013 Rule 6 - avoids duplicating overlapping existing tickets)"
+          "cache_audit_note": "discovered 2026-07-02 (TTL-expiry auto-recheck, cache 6d stale); discovery-only (maintainer self-filed in own repo); semantic match against existing local backlog pending interactive triage; no ack posted, no local ticket auto-created (AFK safe-default per ADR-013 Rule 6 - avoids duplicating overlapping existing tickets)",
+          "upstream_state": "open"
         },
         {
           "number": 307,
@@ -603,127 +738,8 @@
           "body_hash": "66503e1fdb0aebcc",
           "classification": "pending-pipeline-processing",
           "matched_local_ticket": null,
-          "cache_audit_note": "discovered 2026-07-02 (TTL-expiry auto-recheck, cache 6d stale); discovery-only (maintainer self-filed in own repo); semantic match against existing local backlog pending interactive triage; no ack posted, no local ticket auto-created (AFK safe-default per ADR-013 Rule 6 - avoids duplicating overlapping existing tickets)"
-        },
-        {
-          "number": 349,
-          "title": "wr-itil: downstream verification of an upstream fix is not confirmed back upstream",
-          "createdAt": "2026-07-06",
-          "author": "tompahoward",
-          "classification": "matched-local-ticket",
-          "matched_local_ticket": "P376",
-          "cache_audit_note": "triaged 2026-07-15: absorbed into P376 Gap 2 (ratified outbound rework use case b); P376 Origin flipped to inbound-reported",
-          "body_hash": "7bf408182118693d"
-        },
-        {
-          "number": 348,
-          "title": "wr-retrospective/wr-itil: new upstream-relevant evidence is not routed upstream",
-          "createdAt": "2026-07-05",
-          "author": "tompahoward",
-          "classification": "safe-and-valid-local-ticket-created",
-          "matched_local_ticket": "P455",
-          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW",
-          "body_hash": "bcb8e40b89bda590"
-        },
-        {
-          "number": 344,
-          "title": "wr-risk-scorer: restage-commit helper sweeps the whole index/working tree",
-          "createdAt": "2026-07-05",
-          "author": "tompahoward",
-          "classification": "safe-and-valid-local-ticket-created",
-          "matched_local_ticket": "P454",
-          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW; defect verified at restage-commit.sh:121; P326 lineage",
-          "body_hash": "926f12c41d87f1a8"
-        },
-        {
-          "number": 340,
-          "title": "wr-jtbd: edit-gate marker invalidated by the reviewer's own required doc-sync edits",
-          "createdAt": "2026-07-05",
-          "author": "tompahoward",
-          "classification": "safe-and-valid-local-ticket-created",
-          "matched_local_ticket": "P453",
-          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW; sibling P419 cluster flagged",
-          "body_hash": "1244e2ee1f44fcd1"
-        },
-        {
-          "number": 338,
-          "title": "wr-itil: outstanding_questions queue entries carry no decision-revision pin",
-          "createdAt": "2026-07-05",
-          "author": "tompahoward",
-          "classification": "safe-and-valid-local-ticket-created",
-          "matched_local_ticket": "P452",
-          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW; sibling P416 cluster flagged",
-          "body_hash": "b6cc82a80abce07b"
-        },
-        {
-          "number": 327,
-          "title": "work-problems Step 5 dispatch exceeds the interactive-harness 10min foreground timeout",
-          "createdAt": "2026-07-03",
-          "author": "tompahoward",
-          "classification": "safe-and-valid-local-ticket-created",
-          "matched_local_ticket": "P451",
-          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW",
-          "body_hash": "358023dec73c5cdb"
-        },
-        {
-          "number": 323,
-          "title": "Verification Queue evidence cells never populated from subsequent-session exercises",
-          "createdAt": "2026-07-03",
-          "author": "tompahoward",
-          "classification": "safe-and-valid-local-ticket-created",
-          "matched_local_ticket": "P450",
-          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW",
-          "body_hash": "12d17b600619b178"
-        },
-        {
-          "number": 321,
-          "title": "I13 RFC-trace predicate + manage-problem I13 gate are not adopter-aware",
-          "createdAt": "2026-07-03",
-          "author": "tompahoward",
-          "classification": "safe-and-valid-local-ticket-created",
-          "matched_local_ticket": "P449",
-          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW; policy tension with P412 recorded on ticket",
-          "body_hash": "d6d30e3c73f4c45b"
-        },
-        {
-          "number": 320,
-          "title": "work-problems Step 6.5 post-release K->V has no vehicle for repo-local scripts",
-          "createdAt": "2026-07-03",
-          "author": "tompahoward",
-          "classification": "safe-and-valid-local-ticket-created",
-          "matched_local_ticket": "P448",
-          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW per hang-off arbitration",
-          "body_hash": "75b2d035f03aaada"
-        },
-        {
-          "number": 317,
-          "title": "architect edit-gate session-ID mismatch under AFK subprocess",
-          "createdAt": "2026-07-03",
-          "author": "tompahoward",
-          "classification": "matched-local-ticket",
-          "matched_local_ticket": "P368",
-          "cache_audit_note": "discovered 2026-07-15; semantic-comparator hit: P368 (wr-architect-mark-oversight-confirmed cannot discover session id) — verifying; ack deferred (maintainer self-filed, discovery-only per 2026-05-15 direction)",
-          "body_hash": "6c2866e1ceb47511"
-        },
-        {
-          "number": 315,
-          "title": "work-problems orchestrator WSJF ranking does not factor placement-authority",
-          "createdAt": "2026-07-03",
-          "author": "tompahoward",
-          "classification": "matched-local-ticket",
-          "matched_local_ticket": "P441",
-          "cache_audit_note": "triaged 2026-07-15: absorbed as P441 third excluded-state class (upstream-blocked/placement-authority)",
-          "body_hash": "e79c966b1f3b093f"
-        },
-        {
-          "number": 313,
-          "title": "AFK iter subprocess Stream idle timeout API errors recur at high rate",
-          "createdAt": "2026-07-03",
-          "author": "tompahoward",
-          "classification": "matched-local-ticket",
-          "matched_local_ticket": "P261",
-          "cache_audit_note": "triaged 2026-07-15: pre-fix evidence datum absorbed into P261 Impact Assessment + P214 Phase 2 retry facet; NOT verification evidence",
-          "body_hash": "e990eb6ce5a3f171"
+          "cache_audit_note": "discovered 2026-07-02 (TTL-expiry auto-recheck, cache 6d stale); discovery-only (maintainer self-filed in own repo); semantic match against existing local backlog pending interactive triage; no ack posted, no local ticket auto-created (AFK safe-default per ADR-013 Rule 6 - avoids duplicating overlapping existing tickets)",
+          "upstream_state": "open"
         },
         {
           "number": 312,
@@ -733,7 +749,30 @@
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P441",
           "cache_audit_note": "discovered 2026-07-15; matched at capture 2026-07-06 (P441 cites #312); recorded for completeness",
-          "body_hash": "cf3ab3efa68e780b"
+          "body_hash": "cf3ab3efa68e780b",
+          "upstream_state": "open"
+        },
+        {
+          "number": 313,
+          "title": "AFK iter subprocess Stream idle timeout API errors recur at high rate",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P261",
+          "cache_audit_note": "triaged 2026-07-15: pre-fix evidence datum absorbed into P261 Impact Assessment + P214 Phase 2 retry facet; NOT verification evidence",
+          "body_hash": "e990eb6ce5a3f171",
+          "upstream_state": "open"
+        },
+        {
+          "number": 315,
+          "title": "work-problems orchestrator WSJF ranking does not factor placement-authority",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P441",
+          "cache_audit_note": "triaged 2026-07-15: absorbed as P441 third excluded-state class (upstream-blocked/placement-authority)",
+          "body_hash": "e79c966b1f3b093f",
+          "upstream_state": "open"
         },
         {
           "number": 316,
@@ -743,7 +782,19 @@
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P440",
           "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass",
-          "body_hash": "8310b0c969fa5a0f"
+          "body_hash": "8310b0c969fa5a0f",
+          "upstream_state": "open"
+        },
+        {
+          "number": 317,
+          "title": "architect edit-gate session-ID mismatch under AFK subprocess",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P368",
+          "cache_audit_note": "discovered 2026-07-15; semantic-comparator hit: P368 (wr-architect-mark-oversight-confirmed cannot discover session id) — verifying; ack deferred (maintainer self-filed, discovery-only per 2026-05-15 direction)",
+          "body_hash": "6c2866e1ceb47511",
+          "upstream_state": "open"
         },
         {
           "number": 318,
@@ -753,7 +804,8 @@
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P441",
           "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass",
-          "body_hash": "46aa5a2e5a32f278"
+          "body_hash": "46aa5a2e5a32f278",
+          "upstream_state": "open"
         },
         {
           "number": 319,
@@ -763,7 +815,41 @@
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P424",
           "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass",
-          "body_hash": "ed0bb12d590b6c02"
+          "body_hash": "ed0bb12d590b6c02",
+          "upstream_state": "open"
+        },
+        {
+          "number": 320,
+          "title": "work-problems Step 6.5 post-release K->V has no vehicle for repo-local scripts",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P448",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW per hang-off arbitration",
+          "body_hash": "75b2d035f03aaada",
+          "upstream_state": "open"
+        },
+        {
+          "number": 321,
+          "title": "I13 RFC-trace predicate + manage-problem I13 gate are not adopter-aware",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P449",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW; policy tension with P412 recorded on ticket",
+          "body_hash": "d6d30e3c73f4c45b",
+          "upstream_state": "open"
+        },
+        {
+          "number": 323,
+          "title": "Verification Queue evidence cells never populated from subsequent-session exercises",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P450",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW",
+          "body_hash": "12d17b600619b178",
+          "upstream_state": "open"
         },
         {
           "number": 324,
@@ -773,7 +859,8 @@
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P438",
           "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass",
-          "body_hash": "71242f38c8e190aa"
+          "body_hash": "71242f38c8e190aa",
+          "upstream_state": "open"
         },
         {
           "number": 325,
@@ -783,7 +870,8 @@
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P437",
           "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass",
-          "body_hash": "f8adc20ba4223360"
+          "body_hash": "f8adc20ba4223360",
+          "upstream_state": "open"
         },
         {
           "number": 326,
@@ -793,7 +881,30 @@
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P439",
           "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass",
-          "body_hash": "f6bb64a12ade403b"
+          "body_hash": "f6bb64a12ade403b",
+          "upstream_state": "open"
+        },
+        {
+          "number": 327,
+          "title": "work-problems Step 5 dispatch exceeds the interactive-harness 10min foreground timeout",
+          "createdAt": "2026-07-03",
+          "author": "tompahoward",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P451",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW",
+          "body_hash": "358023dec73c5cdb",
+          "upstream_state": "open"
+        },
+        {
+          "number": 338,
+          "title": "wr-itil: outstanding_questions queue entries carry no decision-revision pin",
+          "createdAt": "2026-07-05",
+          "author": "tompahoward",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P452",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW; sibling P416 cluster flagged",
+          "body_hash": "b6cc82a80abce07b",
+          "upstream_state": "open"
         },
         {
           "number": 339,
@@ -803,7 +914,19 @@
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P434",
           "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass",
-          "body_hash": "bdbd926f70f825c7"
+          "body_hash": "bdbd926f70f825c7",
+          "upstream_state": "open"
+        },
+        {
+          "number": 340,
+          "title": "wr-jtbd: edit-gate marker invalidated by the reviewer's own required doc-sync edits",
+          "createdAt": "2026-07-05",
+          "author": "tompahoward",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P453",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW; sibling P419 cluster flagged",
+          "body_hash": "1244e2ee1f44fcd1",
+          "upstream_state": "open"
         },
         {
           "number": 341,
@@ -813,7 +936,8 @@
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P431",
           "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass",
-          "body_hash": "5c03734eecdb3122"
+          "body_hash": "5c03734eecdb3122",
+          "upstream_state": "open"
         },
         {
           "number": 342,
@@ -823,7 +947,8 @@
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P425",
           "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass",
-          "body_hash": "f49bbff70e74636f"
+          "body_hash": "f49bbff70e74636f",
+          "upstream_state": "open"
         },
         {
           "number": 343,
@@ -833,7 +958,19 @@
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P427",
           "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass",
-          "body_hash": "0fefcb231f303ff6"
+          "body_hash": "0fefcb231f303ff6",
+          "upstream_state": "open"
+        },
+        {
+          "number": 344,
+          "title": "wr-risk-scorer: restage-commit helper sweeps the whole index/working tree",
+          "createdAt": "2026-07-05",
+          "author": "tompahoward",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P454",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW; defect verified at restage-commit.sh:121; P326 lineage",
+          "body_hash": "926f12c41d87f1a8",
+          "upstream_state": "open"
         },
         {
           "number": 345,
@@ -843,7 +980,8 @@
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P428",
           "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass",
-          "body_hash": "4b3a58909fb8b42e"
+          "body_hash": "4b3a58909fb8b42e",
+          "upstream_state": "open"
         },
         {
           "number": 347,
@@ -853,133 +991,30 @@
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P432",
           "cache_audit_note": "matched at 2026-07-06 capture batch (local ticket cites this issue); recorded in cache at 2026-07-15 review pass",
-          "body_hash": "6e2e7df41036532a"
+          "body_hash": "6e2e7df41036532a",
+          "upstream_state": "open"
         },
         {
-          "number": 394,
-          "title": "[problem] wr-itil stale-ticket surfaces all miss the incidental-fix shape, where a ticket's fix ships inside another work item's commit",
+          "number": 348,
+          "title": "wr-retrospective/wr-itil: new upstream-relevant evidence is not routed upstream",
+          "createdAt": "2026-07-05",
           "author": "tompahoward",
-          "createdAt": "2026-07-25T20:33:50Z",
-          "body_hash": "220f222eab484f4a",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P455",
+          "cache_audit_note": "triaged 2026-07-15: PROCEED_NEW",
+          "body_hash": "bcb8e40b89bda590",
+          "upstream_state": "open"
         },
         {
-          "number": 393,
-          "title": "[problem] wr-architect mark-oversight-confirmed writes unmatchable markers: hashes the path as given, and misses the main session ID in multi-agent sessions",
+          "number": 349,
+          "title": "wr-itil: downstream verification of an upstream fix is not confirmed back upstream",
+          "createdAt": "2026-07-06",
           "author": "tompahoward",
-          "createdAt": "2026-07-25T12:16:48Z",
-          "body_hash": "99838c99921ef6ae",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
-        },
-        {
-          "number": 392,
-          "title": "[problem] work-problems iter briefing carries another ticket's relevance-evaluator caveat",
-          "author": "tompahoward",
-          "createdAt": "2026-07-25T12:16:29Z",
-          "body_hash": "be6167970298324a",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
-        },
-        {
-          "number": 391,
-          "title": "[problem] wr-itil evaluate-relevance has no evidence shape for RCA pinned to a platform version the stack no longer runs",
-          "author": "tompahoward",
-          "createdAt": "2026-07-25T12:16:10Z",
-          "body_hash": "f1e7bf93a3c3b451",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
-        },
-        {
-          "number": 370,
-          "title": "[problem] Fix-time RFC authoring contract skew: manage-problem I13 says Scope + Tasks; capture-rfc --fix-time says stories on a story map (ADR-089)",
-          "author": "tompahoward",
-          "createdAt": "2026-07-20T10:28:25Z",
-          "body_hash": "7bf28c235bf22ed4",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
-        },
-        {
-          "number": 369,
-          "title": "[problem] wr-itil: update-upstream O->KE lifecycle comment restates the issue body already communicated at filing",
-          "author": "tompahoward",
-          "createdAt": "2026-07-19T06:59:09Z",
-          "body_hash": "666596dfbb6a92ec",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
-        },
-        {
-          "number": 368,
-          "title": "[problem] wr-risk-scorer: commits made via wr-risk-scorer-restage-commit bypass the external-comms commit-message gate",
-          "author": "tompahoward",
-          "createdAt": "2026-07-19T06:13:04Z",
-          "body_hash": "d7d19cdfb1980da7",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
-        },
-        {
-          "number": 367,
-          "title": "[problem] wr-itil: work-problems/SKILL.md is 245KB (5x the P097 50KB anchor) — largest skills breach the ADR-054 runtime-budget policy",
-          "author": "tompahoward",
-          "createdAt": "2026-07-18T22:50:54Z",
-          "body_hash": "9c971671c850f81b",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
-        },
-        {
-          "number": 366,
-          "title": "[problem] wr-risk-scorer: label bands disagree across the plugin — update-policy skill cites ADR-086 3-5 Low / 6-9 Medium, policy-validator accepts 5-9 Medium",
-          "author": "tompahoward",
-          "createdAt": "2026-07-18T11:21:52Z",
-          "body_hash": "4b57fac345765ba4",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
-        },
-        {
-          "number": 365,
-          "title": "[problem] wr-risk-scorer: pipeline scorer defers to RISK-POLICY.md prose over the gate numeric, so adopter \"N or above\" wording STOPs at N while the gate passes N",
-          "author": "tompahoward",
-          "createdAt": "2026-07-18T11:20:49Z",
-          "body_hash": "6c78c96902e24d87",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
-        },
-        {
-          "number": 364,
-          "title": "[problem] wr-architect: create-adr does not delegate to architect/jtbd edit-gate agents before Write, so the first write is blocked",
-          "author": "tompahoward",
-          "createdAt": "2026-07-18T08:28:53Z",
-          "body_hash": "9404a7a4433b1a68",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
-        },
-        {
-          "number": 363,
-          "title": "[problem] wr-itil: capture-problem Step 0 halts on pre-existing committed README drift instead of capturing",
-          "author": "tompahoward",
-          "createdAt": "2026-07-18T08:27:54Z",
-          "body_hash": "37129690e7fce58f",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
-        },
-        {
-          "number": 362,
-          "title": "[problem] wr-retrospective: run-retro references three scripts repo-relative with no bin shims (adopter repos cannot run them)",
-          "author": "tompahoward",
-          "createdAt": "2026-07-18T08:26:48Z",
-          "body_hash": "008f974b50da4ed7",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
-        },
-        {
-          "number": 361,
-          "title": "[problem] wr-risk-scorer: external-comms marker hash-exactness forces re-review round-trips (commit trailers + gh-issue shell-escaping)",
-          "author": "tompahoward",
-          "createdAt": "2026-07-18T08:14:25Z",
-          "body_hash": "8cba923d7c843108",
-          "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
+          "classification": "matched-local-ticket",
+          "matched_local_ticket": "P376",
+          "cache_audit_note": "triaged 2026-07-15: absorbed into P376 Gap 2 (ratified outbound rework use case b); P376 Origin flipped to inbound-reported",
+          "body_hash": "7bf408182118693d",
+          "upstream_state": "open"
         },
         {
           "number": 360,
@@ -988,111 +1023,148 @@
           "createdAt": "2026-07-18T08:06:04Z",
           "body_hash": "eb940b244fe2b16f",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
         },
         {
-          "number": 258,
-          "title": "wr-voice-tone:agent is told to write a verdict file but has no Bash/Write tool (marker never lands)",
+          "number": 361,
+          "title": "[problem] wr-risk-scorer: external-comms marker hash-exactness forces re-review round-trips (commit trailers + gh-issue shell-escaping)",
           "author": "tompahoward",
-          "createdAt": "2026-06-16T01:51:46Z",
-          "body_hash": "66b8fd8cb0cbd970",
+          "createdAt": "2026-07-18T08:14:25Z",
+          "body_hash": "8cba923d7c843108",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
         },
         {
-          "number": 253,
-          "title": "wr-risk-scorer:external-comms misses static-site / deck content edits — factual-claim risk goes ungated",
+          "number": 362,
+          "title": "[problem] wr-retrospective: run-retro references three scripts repo-relative with no bin shims (adopter repos cannot run them)",
           "author": "tompahoward",
-          "createdAt": "2026-06-08T21:45:02Z",
-          "body_hash": "930d999530b9a560",
-          "classification": "matched-local-ticket",
-          "matched_local_ticket": "P435",
-          "cache_audit_note": "2026-07-26 discovery pass: semantic-comparator hit via on-ticket Origin/Reported-Upstream backlink (P435, open). Maintainer self-filed (outbound mirror) — no reporter-facing ack posted per the 2026-05-15 discovery-only direction."
-        },
-        {
-          "number": 235,
-          "title": "wr-risk-scorer git-push-gate: blocks `git push` without guidance when `npm run push:watch` doesn't exist; also fires on non-npm projects",
-          "author": "tompahoward",
-          "createdAt": "2026-06-07T17:36:37Z",
-          "body_hash": "426b731506fbefb4",
-          "classification": "matched-local-ticket",
-          "matched_local_ticket": "P435",
-          "cache_audit_note": "2026-07-26 discovery pass: semantic-comparator hit via on-ticket Origin/Reported-Upstream backlink (P435, open). Maintainer self-filed (outbound mirror) — no reporter-facing ack posted per the 2026-05-15 discovery-only direction."
-        },
-        {
-          "number": 223,
-          "title": "architect ADR tooling (capture-adr template + compendium generator) emits em-dashes, blocks no-em-dash consumer projects",
-          "author": "tompahoward",
-          "createdAt": "2026-06-04T04:36:24Z",
-          "body_hash": "124db7ac184c182c",
-          "classification": "matched-local-ticket",
-          "matched_local_ticket": "P424",
-          "cache_audit_note": "2026-07-26 discovery pass: semantic-comparator hit via on-ticket Origin/Reported-Upstream backlink (P424, open). Maintainer self-filed (outbound mirror) — no reporter-facing ack posted per the 2026-05-15 discovery-only direction."
-        },
-        {
-          "number": 222,
-          "title": "work-problems Step 4 classifier does not pre-detect ADR-074 substance-gate likelihood before dispatch",
-          "author": "tompahoward",
-          "createdAt": "2026-06-04T04:36:02Z",
-          "body_hash": "9760bb165fca19e6",
+          "createdAt": "2026-07-18T08:26:48Z",
+          "body_hash": "008f974b50da4ed7",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
         },
         {
-          "number": 221,
-          "title": "wr-jtbd:agent returns files-only output without textual PASS/ISSUES verdict",
+          "number": 363,
+          "title": "[problem] wr-itil: capture-problem Step 0 halts on pre-existing committed README drift instead of capturing",
           "author": "tompahoward",
-          "createdAt": "2026-06-04T04:35:43Z",
-          "body_hash": "15a1abf321410102",
+          "createdAt": "2026-07-18T08:27:54Z",
+          "body_hash": "37129690e7fce58f",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
         },
         {
-          "number": 197,
-          "title": "wr-risk-scorer: agents/pipeline.md hardcoded RISK-POLICY citations drift from actual policy text",
+          "number": 364,
+          "title": "[problem] wr-architect: create-adr does not delegate to architect/jtbd edit-gate agents before Write, so the first write is blocked",
           "author": "tompahoward",
-          "createdAt": "2026-06-01T11:05:19Z",
-          "body_hash": "6a24343f8007d971",
+          "createdAt": "2026-07-18T08:28:53Z",
+          "body_hash": "9404a7a4433b1a68",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
         },
         {
-          "number": 196,
-          "title": "wr-risk-scorer: gate-library parser-tolerance gap -- RISK-POLICY.md format too rich for fixed regex",
+          "number": 365,
+          "title": "[problem] wr-risk-scorer: pipeline scorer defers to RISK-POLICY.md prose over the gate numeric, so adopter \"N or above\" wording STOPs at N while the gate passes N",
           "author": "tompahoward",
-          "createdAt": "2026-06-01T11:05:17Z",
-          "body_hash": "cb2884e2f6057b98",
+          "createdAt": "2026-07-18T11:20:49Z",
+          "body_hash": "6c78c96902e24d87",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
         },
         {
-          "number": 194,
-          "title": "wr-itil: reconcile-readme script extends VQ slice across Parked when Closed appears after Parked",
+          "number": 366,
+          "title": "[problem] wr-risk-scorer: label bands disagree across the plugin — update-policy skill cites ADR-086 3-5 Low / 6-9 Medium, policy-validator accepts 5-9 Medium",
           "author": "tompahoward",
-          "createdAt": "2026-06-01T11:04:39Z",
-          "body_hash": "478c9d86565fe809",
+          "createdAt": "2026-07-18T11:21:52Z",
+          "body_hash": "4b57fac345765ba4",
           "classification": "pending-pipeline-processing",
-          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review."
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
         },
         {
-          "number": 170,
-          "title": "Issue templates declare labels ('problem', 'needs-triage') that don't exist in the repo",
+          "number": 367,
+          "title": "[problem] wr-itil: work-problems/SKILL.md is 245KB (5x the P097 50KB anchor) — largest skills breach the ADR-054 runtime-budget policy",
           "author": "tompahoward",
-          "createdAt": "2026-05-28T01:13:43Z",
-          "body_hash": "dfd0786fa5d7657d",
-          "classification": "matched-local-ticket",
-          "matched_local_ticket": "P436",
-          "cache_audit_note": "2026-07-26 discovery pass: semantic-comparator hit via on-ticket Origin/Reported-Upstream backlink (P436, open). Maintainer self-filed (outbound mirror) — no reporter-facing ack posted per the 2026-05-15 discovery-only direction."
+          "createdAt": "2026-07-18T22:50:54Z",
+          "body_hash": "9c971671c850f81b",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
         },
         {
-          "number": 169,
-          "title": "wr-architect: add a standing 'first-match on a non-unique collection' review heuristic (two identity/binding footguns passed review)",
+          "number": 368,
+          "title": "[problem] wr-risk-scorer: commits made via wr-risk-scorer-restage-commit bypass the external-comms commit-message gate",
           "author": "tompahoward",
-          "createdAt": "2026-05-28T01:03:11Z",
-          "body_hash": "619a60cb5a76a107",
-          "classification": "matched-local-ticket",
-          "matched_local_ticket": "P426",
-          "cache_audit_note": "2026-07-26 discovery pass: semantic-comparator hit via on-ticket Origin/Reported-Upstream backlink (P426, known-error). Maintainer self-filed (outbound mirror) — no reporter-facing ack posted per the 2026-05-15 discovery-only direction."
+          "createdAt": "2026-07-19T06:13:04Z",
+          "body_hash": "d7d19cdfb1980da7",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 369,
+          "title": "[problem] wr-itil: update-upstream O->KE lifecycle comment restates the issue body already communicated at filing",
+          "author": "tompahoward",
+          "createdAt": "2026-07-19T06:59:09Z",
+          "body_hash": "666596dfbb6a92ec",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 370,
+          "title": "[problem] Fix-time RFC authoring contract skew: manage-problem I13 says Scope + Tasks; capture-rfc --fix-time says stories on a story map (ADR-089)",
+          "author": "tompahoward",
+          "createdAt": "2026-07-20T10:28:25Z",
+          "body_hash": "7bf28c235bf22ed4",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 391,
+          "title": "[problem] wr-itil evaluate-relevance has no evidence shape for RCA pinned to a platform version the stack no longer runs",
+          "author": "tompahoward",
+          "createdAt": "2026-07-25T12:16:10Z",
+          "body_hash": "f1e7bf93a3c3b451",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 392,
+          "title": "[problem] work-problems iter briefing carries another ticket's relevance-evaluator caveat",
+          "author": "tompahoward",
+          "createdAt": "2026-07-25T12:16:29Z",
+          "body_hash": "be6167970298324a",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 393,
+          "title": "[problem] wr-architect mark-oversight-confirmed writes unmatchable markers: hashes the path as given, and misses the main session ID in multi-agent sessions",
+          "author": "tompahoward",
+          "createdAt": "2026-07-25T12:16:48Z",
+          "body_hash": "99838c99921ef6ae",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 394,
+          "title": "[problem] wr-itil stale-ticket surfaces all miss the incidental-fix shape, where a ticket's fix ships inside another work item's commit",
+          "author": "tompahoward",
+          "createdAt": "2026-07-25T20:33:50Z",
+          "body_hash": "220f222eab484f4a",
+          "classification": "pending-pipeline-processing",
+          "cache_audit_note": "2026-07-26 discovery pass: maintainer self-filed, no semantic-comparator hit against the local corpus. Discovery-only per the 2026-05-15 direction + AFK safe-default (ADR-013 Rule 6): no ack posted, no local ticket auto-created. Route through the assessment pipeline at the next interactive review.",
+          "upstream_state": "open"
         },
         {
           "number": 395,
@@ -1102,7 +1174,8 @@
           "body_hash": "2253677301",
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P415",
-          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply."
+          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply.",
+          "upstream_state": "open"
         },
         {
           "number": 396,
@@ -1112,7 +1185,8 @@
           "body_hash": "2127917550",
           "classification": "audit-flagged",
           "matched_local_ticket": null,
-          "cache_audit_note": "maintainer-authored, no matching local ticket. Carried forward from the 2026-08-21 pass unresolved. Either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Needs an interactive review to back-link or capture; this 2026-08-24 pass was AFK and did not disambiguate."
+          "cache_audit_note": "maintainer-authored, no matching local ticket. Carried forward from the 2026-08-21 pass unresolved. Either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Needs an interactive review to back-link or capture; this 2026-08-24 pass was AFK and did not disambiguate.",
+          "upstream_state": "open"
         },
         {
           "number": 397,
@@ -1122,7 +1196,8 @@
           "body_hash": "4291321290",
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P089",
-          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply."
+          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply.",
+          "upstream_state": "open"
         },
         {
           "number": 398,
@@ -1132,7 +1207,8 @@
           "body_hash": "1597026408",
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P201",
-          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply."
+          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply.",
+          "upstream_state": "open"
         },
         {
           "number": 399,
@@ -1142,7 +1218,8 @@
           "body_hash": "657590079",
           "classification": "audit-flagged",
           "matched_local_ticket": null,
-          "cache_audit_note": "maintainer-authored, no matching local ticket. Carried forward from the 2026-08-21 pass unresolved. Either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Needs an interactive review to back-link or capture; this 2026-08-24 pass was AFK and did not disambiguate."
+          "cache_audit_note": "maintainer-authored, no matching local ticket. Carried forward from the 2026-08-21 pass unresolved. Either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Needs an interactive review to back-link or capture; this 2026-08-24 pass was AFK and did not disambiguate.",
+          "upstream_state": "open"
         },
         {
           "number": 400,
@@ -1152,7 +1229,8 @@
           "body_hash": "3851024758",
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P402",
-          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply."
+          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply.",
+          "upstream_state": "open"
         },
         {
           "number": 401,
@@ -1162,7 +1240,8 @@
           "body_hash": "4173811254",
           "classification": "audit-flagged",
           "matched_local_ticket": null,
-          "cache_audit_note": "maintainer-authored, no matching local ticket. Carried forward from the 2026-08-21 pass unresolved. Either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Needs an interactive review to back-link or capture; this 2026-08-24 pass was AFK and did not disambiguate."
+          "cache_audit_note": "maintainer-authored, no matching local ticket. Carried forward from the 2026-08-21 pass unresolved. Either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Needs an interactive review to back-link or capture; this 2026-08-24 pass was AFK and did not disambiguate.",
+          "upstream_state": "open"
         },
         {
           "number": 407,
@@ -1172,7 +1251,8 @@
           "body_hash": "4193023961",
           "classification": "audit-flagged",
           "matched_local_ticket": null,
-          "cache_audit_note": "maintainer-authored, no matching local ticket. Carried forward from the 2026-08-21 pass unresolved. Either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Needs an interactive review to back-link or capture; this 2026-08-24 pass was AFK and did not disambiguate."
+          "cache_audit_note": "maintainer-authored, no matching local ticket. Carried forward from the 2026-08-21 pass unresolved. Either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Needs an interactive review to back-link or capture; this 2026-08-24 pass was AFK and did not disambiguate.",
+          "upstream_state": "open"
         },
         {
           "number": 408,
@@ -1182,7 +1262,8 @@
           "body_hash": "4176661989",
           "classification": "audit-flagged",
           "matched_local_ticket": null,
-          "cache_audit_note": "maintainer-authored, no matching local ticket. Carried forward from the 2026-08-21 pass unresolved. Either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Needs an interactive review to back-link or capture; this 2026-08-24 pass was AFK and did not disambiguate."
+          "cache_audit_note": "maintainer-authored, no matching local ticket. Carried forward from the 2026-08-21 pass unresolved. Either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Needs an interactive review to back-link or capture; this 2026-08-24 pass was AFK and did not disambiguate.",
+          "upstream_state": "open"
         },
         {
           "number": 410,
@@ -1192,7 +1273,8 @@
           "body_hash": "1132854267",
           "classification": "audit-flagged",
           "matched_local_ticket": null,
-          "cache_audit_note": "maintainer-authored, no matching local ticket. Carried forward from the 2026-08-21 pass unresolved. Either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Needs an interactive review to back-link or capture; this 2026-08-24 pass was AFK and did not disambiguate."
+          "cache_audit_note": "maintainer-authored, no matching local ticket. Carried forward from the 2026-08-21 pass unresolved. Either an outbound filing whose local ticket closed without a back-link, or an upstream-only report that never got a local ticket. Needs an interactive review to back-link or capture; this 2026-08-24 pass was AFK and did not disambiguate.",
+          "upstream_state": "open"
         },
         {
           "number": 412,
@@ -1202,7 +1284,8 @@
           "body_hash": "2974456149",
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P503",
-          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply."
+          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply.",
+          "upstream_state": "open"
         },
         {
           "number": 414,
@@ -1212,7 +1295,8 @@
           "body_hash": "4292561481",
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P463",
-          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply."
+          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply.",
+          "upstream_state": "open"
         },
         {
           "number": 416,
@@ -1222,7 +1306,8 @@
           "body_hash": "1960012117",
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P497",
-          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply."
+          "cache_audit_note": "maintainer-authored outbound filing; matched by semantic comparison during the 2026-08-21 pass and stamped **Origin**: inbound-reported on the local ticket. Recorded as a report entry 2026-08-24 (the 2026-08-21 pass left it in prose only). No JTBD-301 ack comment: maintainer-filed, so the reporter-acknowledgement contract does not apply.",
+          "upstream_state": "open"
         },
         {
           "number": 444,
@@ -1232,7 +1317,8 @@
           "body_hash": "739581265",
           "classification": "matched-local-ticket",
           "matched_local_ticket": "P466",
-          "cache_audit_note": "Duplicate of P466 defect 4 (reference links distinguished by colour alone). Already fixed and released in @windyroad/itil@1.1.2 on 2026-08-21 via changeset itil-story-map-link-and-focus-cues.md; the reporter's exact suggested rule is live at story-map.css:59 (`a { color: var(--focus); text-decoration: underline; }`), verified this pass in both packages/itil/templates/story-map.css and docs/story-maps/story-map.css. Issue filed 07:19Z the same day the fix landed. No ack comment: maintainer-filed."
+          "cache_audit_note": "Duplicate of P466 defect 4 (reference links distinguished by colour alone). Already fixed and released in @windyroad/itil@1.1.2 on 2026-08-21 via changeset itil-story-map-link-and-focus-cues.md; the reporter's exact suggested rule is live at story-map.css:59 (`a { color: var(--focus); text-decoration: underline; }`), verified this pass in both packages/itil/templates/story-map.css and docs/story-maps/story-map.css. Issue filed 07:19Z the same day the fix landed. No ack comment: maintainer-filed.",
+          "upstream_state": "open"
         },
         {
           "number": 445,
@@ -1242,7 +1328,8 @@
           "body_hash": "3895372550",
           "classification": "safe-and-valid-local-ticket-created",
           "matched_local_ticket": "P518",
-          "cache_audit_note": "No semantic-comparator hit against the live or closed corpus. Verified live this pass: render-story-map.mjs:718 and :792 both pass `esc(id)` as the link text through the shared `link()` helper at :561. Local ticket P518 created 2026-08-24. No ack comment: maintainer-filed, so the JTBD-301 reporter-acknowledgement contract does not apply (same convention as the 2026-08-21 pass)."
+          "cache_audit_note": "No semantic-comparator hit against the live or closed corpus. Verified live this pass: render-story-map.mjs:718 and :792 both pass `esc(id)` as the link text through the shared `link()` helper at :561. Local ticket P518 created 2026-08-24. No ack comment: maintainer-filed, so the JTBD-301 reporter-acknowledgement contract does not apply (same convention as the 2026-08-21 pass).",
+          "upstream_state": "open"
         },
         {
           "number": 453,
@@ -1252,19 +1339,30 @@
           "body_hash": "540796369",
           "classification": "safe-and-valid-local-ticket-created",
           "matched_local_ticket": "P530",
-          "cache_audit_note": "Inbound risk PASS (safe-low-fix-risk); JTBD classified aligned-with-new-JTBD-for-existing-persona; hang-off PROCEED_NEW; local ticket P530 created. Reporter acknowledgement not posted: risk review passed, but the required voice-tone compatibility marker could not be persisted in the parent Codex session, so the external action remained fail-closed."
+          "cache_audit_note": "Inbound risk PASS (safe-low-fix-risk); JTBD classified aligned-with-new-JTBD-for-existing-persona; hang-off PROCEED_NEW; local ticket P530 created. Reporter acknowledgement not posted: risk review passed, but the required voice-tone compatibility marker could not be persisted in the parent Codex session, so the external action remained fail-closed.",
+          "upstream_state": "open"
+        },
+        {
+          "number": 473,
+          "title": "[problem] Briefing topic-file entries decay toward deletion because they are never loaded — Step 1.5 cannot tell \"not useful\" from \"not delivered\"",
+          "author": "tompahoward",
+          "createdAt": "2026-09-04T10:50:22Z",
+          "body_hash": "9a3ec17223f9b141",
+          "classification": "safe-and-valid-local-ticket-created",
+          "matched_local_ticket": "P544",
+          "cache_audit_note": "new-jtbd-flag (JTBD-alignment returned aligned-with-new-JTBD-for-existing-persona for the ratified developer persona; elicitation queued for the next /wr-jtbd:confirm-jobs-and-personas drain); phase1-version-missing (report body carries no ## Versions section — reporter version read from prose 'Observed on wr-retrospective 0.25.0'); hang-off arbiter returned PROCEED_NEW against P535/P507/P414/P105/P235",
+          "upstream_state": "open"
         }
       ]
     },
     "github-discussions:windyroad/agent-plugins": {
-      "fetched_at": "2026-08-30T02:02:26Z",
-      "status": "skipped-failsoft",
-      "skip_reason": "HTTP 410 - Discussions are disabled for this repo (P406); fail-soft skip per Step 4.5 contract",
-      "reports": [],
-      "cache_audit_note": "channel polled and skipped: HTTP 410 (P406 known error - Discussions disabled on repo)"
+      "fetched_at": "2026-09-18T21:29:51Z",
+      "status": "error",
+      "error": "HTTP 410 — Discussions are disabled for this repo (known: P406)",
+      "reports": []
     },
     "github-security-advisories:windyroad/agent-plugins": {
-      "fetched_at": "2026-08-30T02:02:26Z",
+      "fetched_at": "2026-09-18T21:29:51Z",
       "status": "ok",
       "reports": []
     }

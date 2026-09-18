@@ -1,6 +1,6 @@
 # Problem 450: Verification Queue evidence cells are never populated from subsequent-session exercises, so the run-retro Step 4a auto-drain never fires
 
-**Status**: Known Error
+**Status**: Closed
 **Reported**: 2026-07-15
 **Priority**: 12 (High) — Impact: 3 (Moderate — the verification pipeline's automated drain is structurally starved; downstream queue grew to 47 tickets requiring a manual 4-agent triage to close 30; this repo's queue sits at ~190 with the same dynamic) × Likelihood: 4 (Likely — continuous: every verifying fix exercised in a later session fails to get its cell updated) — derived at capture per Step 4a
 **Origin**: inbound-reported (#323)
@@ -170,3 +170,13 @@ The persist → next-session-drain chain does **not** expand the agent's judgmen
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-055 | proposed | Verification-evidence write path for the run-retro Step 4a prior-session drain |
+
+
+## Closed as no longer relevant
+
+- **Evidence shape**: ADR-shipped-confirmed, named-skill-or-feature-exists, driver-child-ticket-closed (ADR-079 Phase 1 + Phase 2)
+- **Closed on**: 2026-09-18
+- **Closed by**: /wr-itil:review-problems Step 4.6 relevance-close pass
+- **Cite (per-shape evidence)**: ADRs human-oversight-confirmed: ADR-022 (docs/decisions/022-problem-lifecycle-verification-pending-status.proposed.md), ADR-026 (docs/decisions/026-agent-output-grounding.proposed.md), ADR-029 (docs/decisions/029-diagnose-before-implement.proposed.md), ADR-031 (docs/decisions/031-problem-ticket-directory-layout.accepted.md), ADR-044 (docs/decisions/044-decision-delegation-contract.proposed.md), ADR-052 (docs/decisions/052-behavioural-tests-default-for-skill-testing.proposed.md), ADR-071 (docs/decisions/071-every-fix-goes-through-an-rfc.proposed.md), ADR-073 (docs/decisions/073-fix-time-gate-auto-creates-missing-rfc.proposed.md), ADR-085 (docs/decisions/085-rfc-commits-section-is-a-git-log-derived-view.proposed.md), ADR-089 (docs/decisions/089-every-rfc-has-at-least-one-story.proposed.md), ADR-090 (docs/decisions/090-story-map-and-story-human-oversight.proposed.md), ADR-095 (docs/decisions/095-story-map-membership-enforced-at-capture.proposed.md), ADR-096 (docs/decisions/096-no-implement-while-draft.proposed.md); feature surfaces exist: packages/retrospective/skills/run-retro/SKILL.md; drivers closed: P063 (docs/problems/closed/063-manage-problem-does-not-trigger-report-upstream-for-external-root-cause.md), P106 (docs/problems/closed/106-install-updates-step-7-uses-install-not-update-updates-silently-no-op.md)
+- **Persist**: this section is committed in the ticket file itself; the script body at `packages/itil/scripts/evaluate-relevance.sh` is the re-runnable verdict source per ADR-026
+- **Uncertainty / reversibility**: verdict is deterministic given the body + git state. False-positive remediation: `git revert` the relevance-close commit OR `git mv` the ticket back to its prior state. The >=7-day age gate + Phase 1 false-positive fixes (state-suffix / sibling-file / rename) + shape-cumulative annotation guard against premature evaluation.
