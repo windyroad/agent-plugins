@@ -89,6 +89,18 @@ P105 (the ticket that introduced the signal-vs-noise pass) recorded this as an u
 
 **Composes with**: P535
 
+### Second witness, in this repository (2026-09-19, P463 iter retro)
+
+The mechanism the inbound report describes fired here, on the entry that saved the iteration.
+
+`docs/briefing/governance-workflow.md` carries an entry stating that a ratified decision's body is immutable and changes only by supersession (ADR-116). The 2026-09-19 iteration working P463 turned entirely on that rule: the work was to record a decision superseding ADR-079 in part, and the entry is what says the old body must not be edited and the old filename must not change. It was cited and acted on throughout.
+
+Its score going in was `-4` (last classified 2026-08-30). Step 1.5's arithmetic for the session: signal `+2`, decay `-1`, net `+1` — landing at `-3`, which is the delete-queue band. The single most load-bearing entry in the file, on the session that proved it load-bearing, scored into deletion. The in-band action taken was `trim` rather than `remove`, which preserved the substance, but that was a judgement call available only because the band permits "removes / trims"; a stricter reading deletes it.
+
+This sharpens the report's claim in one respect: the entry is not merely undeliverable, it is **uncatchable**. Maximum single-cycle gain is `+1`, so an entry at `-4` needs four consecutive cited sessions to climb out of the band, while a single uncited cycle costs `-2`. From any deeply negative base the score cannot recover faster than it falls, regardless of how valuable the entry proves.
+
+The sibling entry in the same file (a confirmed ADR's own "lands as an amendment here" instruction is unfollowable) scored `-6` on the same pass and was removed. That one was genuinely not exercised, so the removal is defensible — but it was filed at `-4` for the same structural reason, not because anyone had judged it stale.
+
 ## Related
 
 - **P535** (`docs/problems/open/535-critical-points-outgrew-its-budget-so-the-session-start-hook-truncates-it.md`) — the mirror-image sibling on the Tier 1 surface. P535: entries only ever *enter* the roll-up, because the roll-up carries no per-entry scores and nothing ever falls out. This ticket: entries only ever *fall out* of the topic tree, because nothing ever loads them so nothing can score them up. Both are surfaces of a common premise neither ticket owns — the signal-score model assumes the scored entries are in context, which holds for neither tier as currently wired. Flagged as a cluster candidate for the next `/wr-itil:review-problems` pass.
