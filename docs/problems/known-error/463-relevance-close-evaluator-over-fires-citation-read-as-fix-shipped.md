@@ -81,6 +81,16 @@ Architect's advisory lean is a composed **A + C**: A fixes the wrong-region defe
 The evaluator scans **open and known-error** tickets, and `## Fix Released` is machine-written only at the Known Error → Verification Pending transition — so on the population actually being scanned that arm is near-inert, and the case worth catching (a fix that shipped without anyone transitioning the ticket) falls entirely to the ticked-`- [x]` arm. Under the persona constraint *"does not trust the agent to make judgment calls"* the trade is the right way round — a missed close queues for a human, a wrong close is data loss — but the checkbox arm must carry that weight explicitly and be covered behaviourally, and the reconcile-the-~4.2%-expectation task below should land on a measured number rather than on "we turned two shapes off". No new documentation burden: `## Fix Released` is machine-written and the checkboxes come from the ticket template.
 
 
+## Direction (confirmed 2026-09-19)
+
+**Chosen: Only shipped-and-released evidence.**
+
+Narrow the evaluator's fix-evidence set to released/resolution sections and completed task checkboxes. Decision-record and skill citations are REMOVED as evidence — a citation proves the decision exists, not that a fix shipped, which is the over-fire this ticket reports. This is the strictest of the options considered (the others were: drop decision citations only; require two corroborating signals; keep all signals but never auto-close).
+
+Confirmed by the maintainer via a batched direction surface on 2026-09-19, draining the queue accumulated by the prior AFK loop.
+
+**What this does and does not unblock.** It pins the substance for the decision that supersedes ADR-079 in part — it is NOT that decision, and it is NOT ratification of any decision-record body. The `Blocked by` line above still stands: the superseding decision must be recorded and ratified through its own surface before implementation. The next step is to draft it carrying this substance, not to start building.
+
 ## Dependencies
 
 - **Blocks**: (none)

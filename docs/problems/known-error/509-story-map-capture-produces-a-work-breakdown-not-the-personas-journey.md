@@ -93,6 +93,16 @@ Symptoms 1 and 3 are implemented through the shared journey-derivation contract 
 
 **Outstanding governance decision — symptom 2:** choose either a narrowly evidenced exception to the closed `preRfc` rule for genuinely pre-existing capability, or a different carrier for already-working capability. No choice was made or ratified in this iteration; the existing `preRfc` rule remains verbatim and an ADR is still required before implementation.
 
+## Direction (confirmed 2026-09-19)
+
+**Chosen: Supersede the decision with a narrow exception.**
+
+Write a superseding decision carrying a tightly evidenced exception, rather than preserving the closed historical set and introducing a new carrier for already-working capability (which was the recommendation). Per the immutability rule, the superseded decision's body is not edited — a new decision supersedes it in part. Keep the exception narrowly evidenced so the supersession chain stays readable.
+
+Confirmed by the maintainer via a batched direction surface on 2026-09-19, draining the queue accumulated by the prior AFK loop.
+
+**What this does and does not unblock.** It pins the substance for the superseding decision — it is NOT that decision. Symptom 2 stays blocked on the `preRfc` adjudication until a decision superseding ADR-107 in part is recorded and ratified through its own surface. Symptoms 1 and 3 remain unblocked independently of this.
+
 ## Dependencies
 
 - **Blocks**: (none)

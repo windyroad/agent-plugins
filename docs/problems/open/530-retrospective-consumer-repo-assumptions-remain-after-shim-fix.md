@@ -116,6 +116,16 @@ The two surfaces bypass the installed-plugin boundary in different ways: the cur
 - [ ] Replace the Step 0 repo-relative executable guard with a shim lookup.
 - [ ] Add focused checks for absent inventory, empty inventory, unreadable inventory, and consumer-repo shim discovery.
 
+## Direction (confirmed 2026-09-19)
+
+**Chosen: New job, and re-ratify the persona.**
+
+Anchor to a NEW job, and re-ratify the persona in the same pass because its scope shifts. Proposed job statement: when I use an installed Windy Road plugin in my own repository, I want its checks and skills to resolve their bundled assets and interpret absent source-only directories as normal, so diagnostics remain accurate without requiring a monorepo checkout. Creating a new job/persona needs human ratification via the jobs-and-personas drain before dependent work builds on it. Alternatives declined: new job without re-ratifying the persona; stretching the partially-overlapping existing job.
+
+Confirmed by the maintainer via a batched direction surface on 2026-09-19, draining the queue accumulated by the prior AFK loop.
+
+**What this does and does not unblock.** It pins the anchoring substance — the new job's statement and the decision to re-ratify the persona alongside it. Creating a job or persona still requires human ratification through `/wr-jtbd:update-guide` then `/wr-jtbd:confirm-jobs-and-personas` before dependent work builds on it, so the `Blocked by` line above stands until that drain runs.
+
 ## Dependencies
 
 - **Blocks**: (none)

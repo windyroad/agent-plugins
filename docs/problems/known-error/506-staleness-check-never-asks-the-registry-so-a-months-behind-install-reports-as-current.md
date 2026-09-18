@@ -109,6 +109,16 @@ Per **ADR-119**, once ADR-120 ratifies the implementation is proposed as a **rel
 
 Implementation is held under the **ADR-074 / P315 substance-confirm-before-build guard**: a fix must not be built on a decision whose substance is unconfirmed, because a born-proposed decision the maintainer later rejects produces rework (the P314 shape). The guard sits *before* the I13 RFC-trace gate in `manage-problem` SKILL.md, so it short-circuits first — fix-time is never reached.
 
+## Direction (confirmed 2026-09-19)
+
+**Chosen: Ask the registry directly.**
+
+Ship a registry lookup that compares the installed version against the published one. Chosen over the network-free local-clone-age option that was recommended: exactness won over offline-safety. Two consequences follow and must be designed for — this path currently makes no network call, so it needs an explicit offline/failure story, and it becomes rate-limit and auth sensitive. Alternatives declined: local marketplace clone age with a 30-day threshold; marketplace-remote comparison; a separate cadenced check.
+
+Confirmed by the maintainer via a batched direction surface on 2026-09-19, draining the queue accumulated by the prior AFK loop.
+
+**This ticket remains Held.** The `**Held**` line, the `Blocked by: ratification of ADR-120` line and the "No approach is pinned" note above all still stand, and an AFK iteration selecting this ticket should still hold. Note the chosen option is NOT ADR-120's recorded recommendation — that ADR recommends the network-free local-clone-age signal, and the maintainer chose the registry lookup instead. So ADR-120 cannot simply be ratified as drafted: its Decision Outcome has to be re-drafted to the chosen option first, then ratified through `/wr-architect:review-decisions`. Recording the maintainer's option choice here is direction, not the propose-fix act and not ratification.
+
 ## Dependencies
 
 - **Blocks**: (none)
