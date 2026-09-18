@@ -86,18 +86,17 @@ Surfaced live 2026-07-13: `/wr-cruise:status` sat "Waiting…" for 2m+ because t
 The fix shipped through RFC-046's `@windyroad/cruise` vehicle across two patch releases: 0.3.4 (deficit-aware position gate — brake only when over-rate AND at/over the linear pace line; plus the `/wr-cruise:status` position-label fix) and 0.3.5 (asymmetric instant recovery — `cur_s` drops to 0 the moment a window is behind pace; re-baseline/too-soon paths respect the position gate). The feedback controller replacing the fixed-cap one-shot formula landed in the same series. ADR-093 amendment recording all three mechanics: commit 4ca91d5e (2026-07-13).
 
 **Release vehicle**: .changeset/cruise-instant-recovery.md (drained at the 0.3.5 publish; sibling .changeset/cruise-deficit-aware-throttle.md drained at 0.3.4)
-
-## Stories
-
-| ID | Title | Status |
-|----|-------|--------|
-| STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | in-progress |
-
 ## RFCs
 
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-046 | verifying | Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` |
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | done |
 
 ## Fix Released
 
@@ -131,3 +130,4 @@ Observed during the 2026-07-15 work-problems loop: a **5-hour-window session lim
 3. **Documented residual**: sustained multi-session burn is the "no sleep-based throttle can fix it" case recorded at fix time (deny/block declined 2026-07-10).
 
 Impact was the benign case: 22 minutes of stall (one iter died pre-work, $2.44, retried clean), not the lost-week weekly-window case. Disposition: this is verification-period evidence, NOT a regression of the three shipped dimensions (each behaved as designed). The concurrency gap is uncovered scope — route at the next interactive review: absorb into this ticket as a fourth dimension pre-close, or capture as a sibling (the P448/P389/P361-style cluster call).
+

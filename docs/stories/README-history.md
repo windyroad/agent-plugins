@@ -85,3 +85,6 @@
 > Last reviewed: 2026-09-14 **STORY-089 accepted** — I7, I8, I10, and map-derived approval pass for the P539 shared completion-transport slice.
 
 > Last reviewed: 2026-09-14 **STORY-089 in progress** — canonical native completion decoding and packed reviewer coverage are implemented; publication verification remains.
+
+## 2026-09-19
+> Last reviewed: 2026-09-17 **STORY-090 done** — @windyroad/voice-tone@0.9.0 shipped assistant-response voice guidance and fresh-install smoke checks passed.

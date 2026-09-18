@@ -83,7 +83,7 @@ The fix is a new pacing surface, not a tweak to an existing one. Open design que
 ### Investigation Tasks
 
 - [x] Architect review — Q1–Q4 resolved by ADR-093 (born `human-oversight: unconfirmed`, ratification pending): Q1 plugin-home = shared hook synced across all 7 plugins (`packages/shared/hooks/`); Q2 read-surface = the statusline-written cache `~/.claude/quota-state.json` (option b — the ONLY surface Claude Code passes `.rate_limits.{five_hour,seven_day}` to; PreToolUse hooks don't receive it directly); Q3 enforcement = mechanical calculated-sleep (NOT advisory — per the 2026-07-05 correction); Q4 schema = inline headroom constants (5pp weekly, 60s/firing cap), no separate QUOTA-POLICY.md needed for the first slice.
-- [x] JTBD review — serves JTBD-001 (governance must not starve the user of tokens) + JTBD-006 (AFK loops self-throttle to land at reset with headroom, so "set a loop and walk away" holds) + JTBD-302 (adopters get the same pacing via the synced hook + `QUOTA-THROTTLE-SETUP.md`).
+- [x] JTBD review — **re-anchored 2026-09-19** to **JTBD-010** (*Sustain my token quota across the week and across surfaces*, `developer` persona), the grounding job authored by the P443 lineage repair. JTBD-001 (governance must not starve the user of tokens) and JTBD-006 (AFK loops self-throttle to land at reset with headroom, so "set a loop and walk away" holds) remain adjacent anchors per JTBD-010's own Related section. The adopter axis is JTBD-010 outcome #7 ("no invisible one-time setup step whose absence silently disables it"), now served by the cruise plugin's **self-installing producer** (STORY-043, `packages/cruise/hooks/quota-state-producer-install.sh`) plus the **status skill's loud stale-cache flag** (STORY-044). The former trace named JTBD-302 and the mechanism "synced hook + `QUOTA-THROTTLE-SETUP.md`" — both are superseded: the synced copies were removed by STORY-042 and `QUOTA-THROTTLE-SETUP.md` no longer exists in the repo. JTBD-302 is dropped as redundant (JTBD-010 outcome #7 already carries the adopter-inert axis as a first-class outcome for the ratified `developer` persona, and JTBD-302 + the `plugin-user` persona are both still `human-oversight: unconfirmed` — a P288-drain residual this ticket should not build on).
 - [x] Investigate `~/.claude/statusline-command.sh` — done: it is the only surface Claude Code passes rate-limit percentages + `resets_at` to. Wired it to write `~/.claude/quota-state.json` as the throttle's read source (Q2 option b).
 - [x] Investigate Anthropic upstream surface — done: no `Anthropic-Account-Quota` header / `claude usage` CLI / account endpoint is available to a PreToolUse hook; the statusline is the only rate-limit-bearing surface, hence the statusline-cache design.
 - [ ] `/wr-itil:report-upstream` to Claude Code with a native-quota-pacing feature request (follow-on; does NOT block verification — the downstream throttle already ships).
@@ -91,8 +91,10 @@ The fix is a new pacing surface, not a tweak to an existing one. Open design que
 - [x] ~~Wire AFK orchestrator between-iter integration (Q5)~~ — SUPERSEDED by Correction 2: the throttle is a **frequently-firing PreToolUse hook across ALL work** (interactive + AFK), which subsumes the narrower between-iter checkpoint.
 - [x] Behavioural bats — SHIPPED: `packages/shared/test/quota-pace-throttle.bats`, 8/8 green (ahead-of-pace sleeps capped; behind-pace fast no-op; tighter-window-wins; weekly-headroom; fail-open on missing/malformed cache; recent-check no-op; never emits deny).
 - [ ] Document in BRIEFING.md as the token-budget analogue of ADR-038's context budget (follow-on; does NOT block verification).
-- [ ] **Adopter-inert producer gap (folded from user audit 2026-07-07).** The throttle ships the CONSUMER (`quota-pace-throttle.sh` hook, synced ×7) but NOT the PRODUCER of its data source. `~/.claude/quota-state.json` is written ONLY by the user's statusline (`~/.claude/statusline-command.sh`, lines 223-226) — Claude Code passes `.rate_limits` to no other surface. The producer exists only as a copy-paste snippet in `QUOTA-THROTTLE-SETUP.md`; there is no first-run nudge, no plugin-contributed statusline, and no staleness guard. **Out of the box an adopter's hook fail-opens forever → zero throttling.** It works for the maintainer solely because the statusline was hand-wired. Fix options: ship a plugin-contributed statusLine, OR a SessionStart absent-cache nudge (already a deferred RFC-046 slice), OR both. This is the "solved only for me" gap.
-- [ ] **Own-plugin extraction (folded from user audit 2026-07-07).** Quota-pacing is a cross-cutting, general-purpose capability with nothing to do with governance, yet it ships as a hook synced verbatim across 7 governance plugins whose canonical home (`packages/shared/`) is not itself installable. A proper JTBD/USM (see P443) shows it is independent of the other user-story-maps → it belongs in its **own** plugin. **RATIFIED 2026-07-07: extract to `@windyroad/cruise`** (user confirmed — the USM shares no backbone with the two existing JTBD-008 decompose-a-fix maps). An adopter who wants only quota-pacing should not have to install a governance plugin, and the capability should not be maintained as 7 synced copies.
+- [x] **Adopter-inert producer gap (folded from user audit 2026-07-07)** — **CLOSED 2026-09-19 to the achievable ceiling** by STORY-043. The producer now self-installs: `packages/cruise/hooks/quota-state-producer-install.sh` (SessionStart) creates or wires the statusline and writes the quota cache, released in **`@windyroad/cruise` 0.4.11** (published on npm). An absent or non-producing statusline is created and made executable; an existing non-producer statusline is never blindly appended to — it raises an at-most-once agent-merge nudge; a malformed `settings.json` is never clobbered. Where the platform ceiling still bites (the statusLine remains the only surface exposed to `.rate_limits`, and a plugin cannot ship that settings key — see § Producer constraint), the residue is surfaced rather than silent: `/wr-cruise:status` (STORY-044) flags a stale or absent cache loudly as an inert/fail-open throttle. Per JTBD-010 outcome #7 this is closure to *"surfaced and nudged, never silently inert"*, not unqualified "works with zero setup" — that stronger goal is platform-blocked. Evidenced by `packages/cruise/test/quota-state-producer-install.bats` (part of the 79/79-green cruise suite, run 2026-09-19). Original gap text follows for the audit trail:
+- ~~The throttle ships the CONSUMER~~ (`quota-pace-throttle.sh` hook, synced ×7) but NOT the PRODUCER of its data source. `~/.claude/quota-state.json` is written ONLY by the user's statusline (`~/.claude/statusline-command.sh`, lines 223-226) — Claude Code passes `.rate_limits` to no other surface. The producer exists only as a copy-paste snippet in `QUOTA-THROTTLE-SETUP.md`; there is no first-run nudge, no plugin-contributed statusline, and no staleness guard. **Out of the box an adopter's hook fail-opens forever → zero throttling.** It works for the maintainer solely because the statusline was hand-wired. Fix options: ship a plugin-contributed statusLine, OR a SessionStart absent-cache nudge (already a deferred RFC-046 slice), OR both. This is the "solved only for me" gap.
+- [x] **Own-plugin extraction (folded from user audit 2026-07-07)** — **CLOSED 2026-09-19** by STORY-042. Quota-pacing now lives in its own installable plugin, **`@windyroad/cruise`** (`packages/cruise/`, published at 0.4.11), carrying the throttle hook, the producer-install hook, the `status` skill, the `wr-cruise-status` PATH shim and its own test suite. Verified 2026-09-19: `packages/cruise/hooks/quota-pace-throttle.sh` is the **only** copy in the tree — the hook is gone from `packages/shared/hooks/` and from all 7 governance plugins, so the 7-way sync is retired, not merely duplicated. An adopter who wants only quota-pacing installs `@windyroad/cruise` and no governance plugin. Original gap text follows for the audit trail:
+- ~~Quota-pacing is a cross-cutting, general-purpose capability with nothing to do with governance, yet it ships as a hook synced verbatim across 7 governance plugins~~ whose canonical home (`packages/shared/`) is not itself installable. A proper JTBD/USM (see P443) shows it is independent of the other user-story-maps → it belongs in its **own** plugin. **RATIFIED 2026-07-07: extract to `@windyroad/cruise`** (user confirmed — the USM shares no backbone with the two existing JTBD-008 decompose-a-fix maps). An adopter who wants only quota-pacing should not have to install a governance plugin, and the capability should not be maintained as 7 synced copies.
 
 ## Dependencies
 
@@ -176,6 +178,11 @@ Shipped: `packages/shared/hooks/quota-pace-throttle.sh` glide-path rewrite + `pa
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-MAP-003 | STORY-MAP-003: Sustain my token quota across the week and across surfaces | draft |
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-046 | verifying | Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` |
 
 ## Stories
 
@@ -184,13 +191,7 @@ Shipped: `packages/shared/hooks/quota-pace-throttle.sh` glide-path rewrite + `pa
 | STORY-039 | STORY-039: Throttle token burn against the quota windows | archived |
 | STORY-042 | STORY-042: Extract quota-pacing into its own plugin | done |
 | STORY-043 | STORY-043: Self-install the quota-state producer | done |
-| STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | in-progress |
-
-## RFCs
-
-| RFC | Status | Title |
-|-----|--------|-------|
-| RFC-046 | verifying | Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` |
+| STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | done |
 
 ## Fix Released — code slice (2026-07-06)
 
@@ -233,3 +234,45 @@ After installing Cruise and restarting Codex, an affected Codex profile still ha
 ### Producer constraint (research 2026-07-07 — reshapes the adopter fix)
 
 Authoritative Claude Code v2.1.x finding: **the statusLine is the ONLY surface exposed to `.rate_limits`.** No hook event receives it; there is no `claude usage` CLI / native quota file / env var / API a hook can reach; and **a plugin CANNOT contribute the main `statusLine`** (only the `agent` + `subagentStatusLine` settings keys exist). `.rate_limits` also only appears for Pro/Max subscribers after the first API response. Consequence: the producer (`~/.claude/quota-state.json` writer) is unavoidably **user-owned config the plugin cannot ship**. The "works fully out-of-the-box" goal is therefore **not achievable**; the honest ceiling is *"the one-time statusline setup is surfaced/nudged, never silently inert"* — closed by (a) a **SessionStart absent-cache nudge** + (b) a **ready-made statusline snippet / opt-in installer**. The earlier "plugin-contributed statusLine" option is struck (impossible).
+
+### Delivery status 2026-09-19 — all RFC-046 stories complete; HELD at Known Error on the lineage gate
+
+Every story under RFC-046 is now terminal: **STORY-039** archived, **STORY-042** done (own-plugin
+extraction), **STORY-043** done (self-installing producer), and **STORY-044** transitioned
+`in-progress → done` this iteration (the `/wr-cruise:status` legibility skill — all eight acceptance
+criteria ticked and verified shipped: `packages/cruise/skills/status/`, `scripts/cruise-status.sh`,
+the `bin/wr-cruise-status` PATH shim per ADR-049, and `test/cruise-status.bats`). The full cruise
+suite runs **79/79 green** (2026-09-19) and `@windyroad/cruise` is published at **0.4.11**.
+
+Two of the three close-gates recorded in § Verification inadequate are therefore **met**: (b) the
+adopter-inert producer gap and (c) the own-plugin extraction, both evidenced inline in the
+Investigation Tasks above.
+
+**Why this ticket does NOT move to Verification Pending yet.** Gate (a) — P443's lineage repair — is
+still open, and Verification Pending means *dev work complete, user verification outstanding*
+(ADR-022). Named residue, so this hold is checkable rather than open-ended:
+
+- **STORY-MAP-003 is still `draft`** (`docs/story-maps/draft/STORY-MAP-003-sustain-token-quota.html`).
+  Under ADR-103 the map is the approval surface, so an unratified map is a real, specific gap — and
+  ratification requires an interactive `AskUserQuestion`, unavailable in this AFK run.
+- **JTBD-010 has no desired outcome covering the legibility capability STORY-044 actually shipped.**
+  The JTBD gate flagged this: outcome #7 covers the inert-throttle health check, but the
+  pace/projection/current-sleep half of `/wr-cruise:status` maps to no documented outcome, and sits in
+  tension with outcome #6 ("silent — no status-line glance"). The amendment needed is to add a
+  "*confirm on demand that pacing is live and working*" outcome and to scope-qualify #6 so "silent"
+  binds the **mechanism** (no push nudge, no decision demanded) and not an on-demand pull surface.
+  JTBD-010 is `human-oversight: confirmed`, so this is NOT self-applied under AFK — it is folded into
+  **P443** and queued for `/wr-jtbd:confirm-jobs-and-personas` at the next interactive drain
+  (P357 / ADR-066).
+
+P443's other five recorded defects do appear closed on disk (grounding job JTBD-010 exists under the
+ratified `developer` persona; STORY-039 is no longer orphaned; STORY-MAP-003 exists; the RFC-046 /
+P160 lifecycle inversion is resolved — RFC-046 is `verifying`; the 7-plugin mis-placement is closed by
+STORY-042). Assessing and transitioning P443 is out of scope for this iteration and has its own gate.
+
+Note on shape: this ticket sits in `known-error/` while carrying a `## Fix Released` section, which
+reads against ADR-022's Confirmation item 3. That tension is **deliberate and pre-existing** — it was
+created by the user-ratified `verifying → known-error` reopen of 2026-07-07, where the code slice was
+genuinely released but the delivery was judged inadequate on the lineage and adopter axes. It is not
+drift.
+

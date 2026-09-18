@@ -70,6 +70,14 @@ The mechanical quota-pace throttle (ADR-093): a matcher-less `PreToolUse` hook t
 - **JTBD-010** (Sustain My Token Quota Across the Week and Across Surfaces — the driver, ratified).
 - **JTBD-006** (Progress the Backlog While I'm Away) — the AFK-only job this was originally *mis-anchored* to (P443); related but not the driver, since the throttle fires on interactive work too. JTBD-001 / JTBD-302 — adjacent.
 - `~/.claude/statusline-command.sh` — the diagnostic read surface / cache-writer host (self-installed per STORY-043).
+## Story Maps
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-MAP-003 | STORY-MAP-003: Sustain my token quota across the week and across surfaces | draft |
+| STORY-MAP-008 | STORY-MAP-008: Have a plugin behave like a guest in my repository | draft |
+
+
 ## Stories
 
 | ID | Title | Status |
@@ -77,12 +85,4 @@ The mechanical quota-pace throttle (ADR-093): a matcher-less `PreToolUse` hook t
 | STORY-039 | STORY-039: Throttle token burn against the quota windows | archived |
 | STORY-042 | STORY-042: Extract quota-pacing into its own plugin | done |
 | STORY-043 | STORY-043: Self-install the quota-state producer | done |
-| STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | in-progress |
-
-
-## Story Maps
-
-| ID | Title | Status |
-|----|-------|--------|
-| STORY-MAP-003 | STORY-MAP-003: Sustain my token quota across the week and across surfaces | draft |
-| STORY-MAP-008 | STORY-MAP-008: Have a plugin behave like a guest in my repository | draft |
+| STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | done |

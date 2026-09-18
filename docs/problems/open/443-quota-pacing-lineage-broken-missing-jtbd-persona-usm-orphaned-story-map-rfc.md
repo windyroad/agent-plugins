@@ -60,6 +60,10 @@ The JTBD + USM discipline (problem → correct JTBD/persona → user-story-map �
 - [ ] Author the real **STORY-039** (or renumber to the correct next story id) with problem + JTBD trace per ADR-060 I6/I9; wire it into the story map.
 - [ ] Author / correct the **story-map** reference (STORY-MAP-003 or correct id); add the story-map trace to RFC-046 frontmatter.
 - [ ] Resolve the **lifecycle inversion**: transition RFC-046 `proposed → accepted` (with the ratified scope) so P160's `verifying`/`Fix Released` no longer hangs off an unaccepted RFC — OR reset P160 out of `verifying` until the lineage is sound (see P160).
+- [ ] **Amend JTBD-010's Desired Outcomes to cover the legibility capability STORY-044 shipped** (folded 2026-09-19 from the JTBD gate during the P160 iteration). `/wr-cruise:status` reports position against both windows, the brake currently being applied, and a glide-to-reset projection. Only the *health-check* half of that traces to a documented outcome (#7, "no invisible one-time setup step whose absence silently disables it"); the pace/projection/current-sleep half maps to **no** documented outcome and sits in tension with outcome #6, which reads "**silent** — no status-line glance, no 'you're burning fast' nudge, no decision for me to make". STORY-044's own JTBD trace anchors to a *persona constraint* rather than an outcome, which is the tell. Two edits needed: (1) add an outcome along the lines of *"I can confirm on demand that pacing is live and working — current position against both windows, the brake being applied right now, and whether the projection glides to reset — because a silent automatic throttle is only trustworthy if its correct operation is checkable"*; (2) scope-qualify outcome #6 so "silent" binds the **mechanism** (no push nudge, no decision demanded) and not an on-demand pull surface. **Ratification-gated — JTBD-010 carries `human-oversight: confirmed`, so this must NOT be self-applied under AFK** (rewriting it to `unconfirmed` would trip the build-upon guard against the very work it describes). Route through `/wr-jtbd:confirm-jobs-and-personas` at the next interactive drain per P357 / ADR-066.
+- [ ] **Ratify STORY-MAP-003** (`docs/story-maps/draft/STORY-MAP-003-sustain-token-quota.html`, still `draft`). Under ADR-103 the map is the approval surface, so an unratified map is a live gap. Identified 2026-09-19 as the concrete residue holding P160 at Known Error. **Ratification-gated — requires an interactive `AskUserQuestion` via `/wr-itil:manage-story-map 003 ratify`; unavailable under AFK.**
+
+**Status note 2026-09-19** (recorded during the P160 iteration; no re-score applied here): five of the six recorded defects now appear closed on disk — JTBD-010 exists under the ratified `developer` persona, STORY-039 is no longer orphaned (`docs/stories/archived/`), STORY-MAP-003 exists, the lifecycle inversion is resolved (RFC-046 is `verifying`, P160 is `known-error`), and the 7-plugin mis-placement is closed by STORY-042. The live residue is the two ratification-gated items added above. P443 is the sole remaining close-gate on P160, so it is worth an early interactive drain.
 
 ## Dependencies
 
@@ -77,15 +81,6 @@ The JTBD + USM discipline (problem → correct JTBD/persona → user-story-map �
 - **JTBD-006** (`docs/jtbd/developer/JTBD-006-work-backlog-afk.proposed.md`) — the wrong/narrow anchor (AFK-only).
 - Hang-off consideration (capture Step 2b): mechanical pre-filter surfaced P160 + P390 as signal-sharing candidates; **PROCEED_NEW per explicit user direction** ("we need problems for all of these"; meta issue kept distinct from P160). Recorded per ADR-026 audit-trail.
 - User correction 2026-07-07 (verbatim excerpts in Description) — the driver.
-
-## Stories
-
-| ID | Title | Status |
-|----|-------|--------|
-| STORY-039 | STORY-039: Throttle token burn against the quota windows | archived |
-| STORY-042 | STORY-042: Extract quota-pacing into its own plugin | in-progress |
-| STORY-043 | STORY-043: Self-install the quota-state producer | in-progress |
-
 ## Story Maps
 
 | ID | Title | Status |
@@ -97,3 +92,12 @@ The JTBD + USM discipline (problem → correct JTBD/persona → user-story-map �
 | RFC | Status | Title |
 |-----|--------|-------|
 | RFC-046 | verifying | Quota-pace throttle — mechanical PreToolUse pacing, extracted into `@windyroad/cruise` |
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-039 | STORY-039: Throttle token burn against the quota windows | archived |
+| STORY-042 | STORY-042: Extract quota-pacing into its own plugin | done |
+| STORY-043 | STORY-043: Self-install the quota-state producer | done |

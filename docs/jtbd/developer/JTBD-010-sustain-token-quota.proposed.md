@@ -59,4 +59,4 @@ When I work with Claude across a whole week — in Claude Code and also in chat 
 | STORY-039 | STORY-039: Throttle token burn against the quota windows | archived |
 | STORY-042 | STORY-042: Extract quota-pacing into its own plugin | done |
 | STORY-043 | STORY-043: Self-install the quota-state producer | done |
-| STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | in-progress |
+| STORY-044 | STORY-044: See what cruise is doing — a status/telemetry skill | done |

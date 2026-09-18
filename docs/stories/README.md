@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-09-17 **STORY-090 done** — @windyroad/voice-tone@0.9.0 shipped assistant-response voice guidance and fresh-install smoke checks passed.
+> Last reviewed: 2026-09-19 **STORY-044 done** — @windyroad/cruise@0.4.11 ships the `/wr-cruise:status` pacing-telemetry skill; cruise suite 79/79 green, closing the last open story under RFC-046.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -113,7 +113,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 
 | Status | ID | Title | Effort | Problems | RFCs | Story Map |
 |--------|-----|-------|--------|----------|------|-----------|
-| in-progress | STORY-044 | See what cruise is doing — status/telemetry skill | M | P160, P446 | RFC-046 | STORY-MAP-003 |
 | draft | STORY-045 | Outbound lifecycle comments generated from real issue context | M | P376 | RFC-028 | STORY-MAP-004 |
 | accepted | STORY-047 | Gate the correction nudge on prompt authorship | S | P430 | RFC-050 | STORY-MAP-005 |
 | draft | STORY-048 | Gate the inbound-discovery pre-flight on the channel list | S | P431 | RFC-051 | STORY-MAP-006 |
@@ -179,6 +178,7 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-044 | See what cruise is doing — status/telemetry skill | 2026-09-19 | P160, P446 |
 | STORY-090 | Keep assistant responses in my chosen voice | 2026-09-17 | P540 |
 | STORY-089 | I can continue after a reviewer passes, without plugin-specific recovery | 2026-09-14 | P539 |
 | STORY-088 | Capture a problem when its index is missing | 2026-09-11 | P538 |
