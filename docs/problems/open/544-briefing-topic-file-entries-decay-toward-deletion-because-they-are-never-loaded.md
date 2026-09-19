@@ -85,6 +85,40 @@ P105 (the ticket that introduced the signal-vs-noise pass) recorded this as an u
 - [ ] Reconcile with P535 — the two tickets are mirror images on the two tiers and may share a fix.
 - [ ] Decide whether hand-promotion should reset or carry forward the recorded score, so placement and score stop contradicting each other.
 
+### Evidence 2026-09-19 — the decay this ticket describes is not actually running on most entries
+
+Observed during the P530 iteration retro, in this repository, against `@windyroad/retrospective@0.28.1`.
+
+This ticket's model is that a topic-file entry cannot earn signal while decay debits it every cycle, so its score falls monotonically toward the delete queue. Measurement says the debit half is largely not happening:
+
+```text
+$ grep -roh 'last-classified: [0-9-]*' docs/briefing/*.md | sort | uniq -c | sort -rn
+    165 last-classified: 2026-08-30
+     20 last-classified: 2026-09-19
+     18 last-classified: 2026-05-25
+      5 last-classified: 2026-08-31
+      4 last-classified: 2026-09-04
+      4 last-classified: 2026-05-26
+      3 last-classified: 2026-06-17
+
+$ grep -rc 'signal-score:' docs/briefing/*.md | awk -F: '{s+=$2} END {print s}'
+219
+```
+
+Six retros ran on 2026-09-19 alone (`docs/retros/2026-09-19-ask-hygiene.md`, `-p160-`, `-p429-`, `-p437-`, `-p463-`, `-p503-`). Across all six, 20 of 219 scored entries advanced their `last-classified` date. 165 are still frozen at 2026-08-30. The SKILL says decay is "applied to **all** entries every retro cycle"; in practice each retro rewrites only the handful of entries it classified as signal or noise, and leaves the rest untouched.
+
+**Why this matters for this ticket's fix.** Two things follow, and they pull in opposite directions:
+
+1. The monotonic slide toward the delete queue is currently *masked*. Frozen entries are not sliding, so the silent deletions this ticket predicts have largely not fired yet. The harm is latent, not absent.
+2. Any remedy that works by adjusting the scoring table — a `rediscovered` classification, a decay exemption, a revised threshold — lands on a pass that is not visiting most of the corpus. Fixing what decay *measures* while the decay pass still reaches under 10% of entries per cycle would leave the scores as stale afterwards as before, and would read as fixed while nothing changed.
+
+So the execution gap is a precondition for this ticket's remedy, not a separate concern to hand off. Whatever shape the scoring fix takes, it needs the pass to actually visit every entry — or the fix needs to stop depending on per-entry persistence altogether.
+
+**Not separately ticketed.** Per the capture-time hang-off discipline, this belongs to this ticket rather than beside it: same mechanism, same file surface, same remedy. Recorded here as an Investigation Task rather than as a sibling ticket.
+
+- [ ] Establish whether Step 1.5's per-entry persistence is meant to rewrite all entries each cycle or only the classified subset, and make the SKILL and the observed behaviour agree.
+- [ ] Re-check the scoring remedy against an unfrozen corpus — a fix validated only on the ~9% of entries a retro currently touches has not been validated.
+
 ## Dependencies
 
 **Composes with**: P535
