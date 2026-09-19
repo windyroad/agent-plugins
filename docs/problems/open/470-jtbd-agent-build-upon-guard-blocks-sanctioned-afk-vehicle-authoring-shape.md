@@ -53,6 +53,40 @@ implementation. Co-authored artefacts quarantined in the same drain queue are no
 - Two or more jtbd spawns per vehicle-authoring iteration, where one should do.
 - The gate marker stays unwritten across the wasted spawns, so the writes stay blocked.
 
+## Second witness (P436 AFK iter, 2026-09-19) — the over-reach is factual, not just procedural
+
+Same agent, same AFK vehicle-authoring path, new failure shape: this time the reviewer asserted
+a **governance-mechanics fact** that is outside its domain and wrong on the framework's own
+terms, then prescribed the same AFK-impossible remedy.
+
+Reviewing a plan to draw release row RFC-096 plus one story card on STORY-MAP-004 (a map
+carrying `human-oversight: confirmed`), `wr-jtbd:agent` returned:
+
+> "Item 2 adds a release row and a story card — a substance change that invalidates that marker.
+> Under AFK the map must drop to `unconfirmed` with the post-change ratification queued. Landing
+> item 2 while leaving `confirmed` in place would be a hollow marker."
+
+`wr-architect:agent`, reviewing the same plan in the same turn, said the opposite and cited
+ADR-103: drawing a release row and adding a story to a row are both outside the map's drift
+basis, so the `oversight-hash` does not move and the map stays ratified.
+
+Settled empirically rather than by picking a reviewer. The hash was captured before and after
+the two `story-map-edit.mjs` operations and is byte-identical
+(`e309468b99c8eaa55873df0630180f19b23d9efd84f6f1c7d4e87a6adce71cd7`). The architect was right;
+the JTBD reviewer's claim was false. The briefing already records this — the Critical Points
+roll-up states "adding it to the map no longer drifts the map's fingerprint" — so the agent
+contradicted a briefed, script-verifiable fact.
+
+Had the prescription been followed, a correctly ratified map would have been downgraded to
+`unconfirmed` for no reason, manufacturing exactly the ratification debt the reviewer was
+warning about, and — since ratification has no AFK path — stranding every other story on that
+map behind a needless re-confirm.
+
+Widens the fix from "teach the agent the same-drain carve-out" to also bounding its authority:
+the reviewer should not issue marker-lifecycle verdicts at all. Whether a given edit moves a
+map's fingerprint is determined by the shipped renderer, not by a JTBD reviewer's reading, and
+the cheap check (read the hash, apply the edit, read it again) is available to any caller.
+
 ## Workaround
 
 Put the carve-out in the first jtbd prompt: cite work-problems SKILL.md line 382, capture-story
