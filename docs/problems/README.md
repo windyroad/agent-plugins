@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-19 **P549 captured** — the tarball shim-integrity detector parses `npm pack --json` output that two packages prefix with lifecycle-script prose, so it silently skips `architect` and `risk-scorer`, the two carrying the most shims, and a blind walk looks identical to a clean one (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-09-19 **P432 known error** — conversion closes the reporter's loop only as a side effect of one branch of the GitHub discovery pipeline, so 41 of 53 converted reports have never been answered and the one durable conversion record is a bare number that cannot name a non-GitHub channel.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -19,6 +19,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
 | 16 | P503 | Edit gates are bound to the Edit\|Write matcher, so Bash-routed writes pass ungated and leave a stale hash | 16 (High) | Known Error | M | 2026-08-20 | inbound-reported (#412) — stamped 2026-08-21 review from the upstream poll; upstream filing `wr-architect: edit gate binds to the Edit/Write tool, so Bash-routed edits of governed files bypass it` |
 | 10 | P530 | Retrospective consumer-repo assumptions remain after shim fix | 10 (High) | Open | S | 2026-08-28 | inbound-reported (#453) |
+| 9.0 | P432 | Assistant does not auto-close the feedback loop on inbound-feedback conversion (channel-agnostic) | 9 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#347) |
 | 9 | P454 | wr-risk-scorer restage-commit helper sweeps the whole index/working tree into the commit instead of pathspec-scoping to the supplied paths | 9 (Medium) | Open | S | 2026-07-15 | inbound-reported (#344) |
 | 8 | P513 | The JTBD corpus has no index or persona currency check, unlike the decision corpus | 8 (Medium) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P111) |
 | 8 | P518 | `render-story-map` emits bare identifiers as link text, so every reference link announces as "P033" | 8 (Medium) | Open | S | 2026-08-24 | inbound-reported (#445) |
@@ -26,7 +27,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P436 | Issue templates declare labels ('problem', 'needs-triage') that don't exist; scaffold-intake should provision declared labels | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#170) |
 | 6 | P486 | The policy validator checks a policy's shape, never whether it contradicts itself | 12 (High) | Open | M | 2026-08-09 | inbound-reported |
 | 6 | P521 | Governance tools exit 0 over output they never validated | 12 (High) | Open | M | 2026-08-25 | inbound-reported (adopter-repo P224) |
-| 4.5 | P432 | Assistant does not auto-close the feedback loop on inbound-feedback conversion (channel-agnostic) | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#347) |
 | 4.5 | P435 | wr-risk-scorer gates hardcoded to home-repo shape — push-gate over-fires on non-npm repos, external-comms under-fires on static-site/deck content | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#235, #253) |
 | 4.5 | P441 | work-problems pre-dispatch selection filter misses committed-but-unpushed KE (#312) and direction-blocked / interactive-only-skill (#318) states | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#312, #315, #318) |
 | 4.5 | P448 | work-problems post-release K→V auto-transition has no release-vehicle class for repo-local fixes in consumer repos (no npm release) | 9 (Medium) | Open | M | 2026-07-15 | inbound-reported (#320) |
