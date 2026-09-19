@@ -66,3 +66,11 @@ A Tier-A `not-contains: '2.25'` assertion rejected a correct response that expla
 ### Prove a prose eval RED out-of-tree when the SKILL sits behind an edit gate (2026-09-19)
 
 A promptfoo case that has only ever been green is not evidence — but reverting the SKILL in place to prove RED trips the architect and JTBD edit gates, and a reverse-trace refresh earlier in the same iteration can have already invalidated the marker. Build the fixture outside the repo instead: `mkdir -p <scratch>/<skill>/eval`, write `git show HEAD:packages/<plugin>/skills/<skill>/SKILL.md` to `<scratch>/<skill>/SKILL.md`, copy `run-skill-eval.sh`, `grade-llm-rubric.sh` and `promptfooconfig.yaml` into the sibling `eval/`, and point `-c` at that config. The provider resolves `SCRIPT_DIR/../SKILL.md`, so mirroring those two directory levels is the whole trick; `REPO_ROOT` is only read on the Codex branch. P543's case went 0-passed/1-failed against HEAD prose and 1-passed/0-failed against the fix, both `--no-cache`. The filter flag is `--filter-pattern`, not `--filter-description` — the wrong name prints the help text, exits 0, and looks like a clean run. <!-- signal-score: 2 | last-classified: 2026-09-19 | first-written: 2026-09-19 -->
+
+## Archived 2026-09-19 — Tier 3 split-by-date, P472 iter
+
+### An inline `(?i)` in a Tier-A regex errors instead of asserting, and every test reads as a content failure (2026-09-19)
+
+JavaScript regular expressions have no inline flag syntax, so `value: '(?i)(foo|bar)'` on a `regex` or `not-regex` assertion does not compile. promptfoo reports `Invalid regex pattern: Invalid regular expression: /(?i)(foo|bar)/: Invalid group` **as an assertion failure**, and the summary line counts it among the failures with no separate error tally. Every test carrying the pattern goes red at once while the model output is visibly correct, which reads as the prose being wrong rather than the assertion being unparseable. Write the case into the character class (`[Pp]lugins?`) or match the literal casing; paths and command names are lowercase in practice. Check `gradingResult.componentResults[].reason` on a confusing red — `Invalid regex pattern` there is the tell, and it is not visible in the table view.
+
+<!-- signal-score: 2 | last-classified: 2026-09-19 | first-written: 2026-09-19 -->
