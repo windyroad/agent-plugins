@@ -113,3 +113,10 @@ by silencing the class.
 - **P417** (`docs/problems/known-error/417-stories-readme-rankings-done-never-reconciled.md`) — adjacent: the same script's rankings/Done render never being reconciled. Distinct concern (the render vs the reverse-trace predicate), but the two share a fix surface and a reviewer may prefer to fold this in as a second phase there.
 - Captured via `/wr-itil:capture-problem` during the `/wr-retrospective:run-retro` Step 2b pipeline-instability scan of the P434 iteration (2026-07-26).
 - **Hang-off-check not dispatched**: the Step 2b mechanical pre-filter surfaced **7** candidates sharing ≥1 signal (ADR-090 / RFC-056 / RFC-057 / STORY-052 / STORY-053 / `docs/stories`), above the ≤5 latency cap, so the fresh-context arbiter was skipped per the SKILL's candidate-cap short-circuit. The two candidates worth a human read are named above (P312, P417); re-evaluate the absorb-vs-sibling call at the next `/wr-itil:review-problems`.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-099 | STORY-099: A clean reconciler result means the tier really is clean | accepted |

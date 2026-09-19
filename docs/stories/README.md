@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-09-19 **STORY-098 in progress** — all five criteria met: the loop now leaves only through an ending it names, an announcement of absence keeps it dispatching, and the paired eval fails against the old prose and passes against the new. Prior: **STORY-098 accepted** — RFC-099 draws the row that closes P543.
+> Last reviewed: 2026-09-19 **STORY-099 accepted** — the story reconciler demands a reverse-trace row that the ratified-stories rule forbids, so it reports correct work as drift; RFC-100 draws the row on the problem-to-resolution map that narrows the demand to the population the rule covers and makes the tool say which population it checked. Prior: **STORY-098 in progress** — all five criteria met: the loop now leaves only through an ending it names.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -176,6 +176,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-096 | The loop leaves a ticket alone while it is waiting on someone upstream | S | P441 | RFC-098 | STORY-MAP-011 |
 | draft | STORY-097 | When I come back I can see what is held, who owes it, and what would unstick it | S | P441 | RFC-098 | STORY-MAP-011 |
 | in-progress | STORY-098 | The loop I left running is still running when I get back | S | P543 | RFC-099 | STORY-MAP-011 |
+| accepted | STORY-099 | A clean reconciler result means the tier really is clean | M | P472 | RFC-100 | STORY-MAP-002 |
 | draft | STORY-091 | Invoke the Wardley map converter by a name that survives every upgrade | S | P437 | RFC-095 | STORY-MAP-008 |
 | draft | STORY-093 | Every conversion tells the reporter it landed | M | P432 | RFC-097 | STORY-MAP-004 |
 
