@@ -70,6 +70,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8 | P536 | Governance gate state binds to the physical worktree, blocking commits from a linked worktree and silently disabling the WIP gate inside one | 16 (High) | Open | M | 2026-09-08 | internal |
 | 8 | P542 | The oversight-marker shim silently writes nothing when the command is not a bare two-word invocation | 16 (High) | Open | M | 2026-09-19 | internal |
 | 7.5 | P444 | Agent buries granular design decisions in artefacts — default values, thresholds, and policy choices pass artefact-level ratification unsurfaced, escaping real oversight | 15 (High) | Open | M | 2026-07-08 | internal |
+| 7.5 | P541 | Release verification fails good releases — propagation window too short, and per-package nesting makes widening worse | 15 (High) | Open | M | 2026-09-18 | internal |
 | 6 | P284 | Release pipeline halts — `changeset publish` E404 on a new version of an existing scoped package (@windyroad/architect@0.8.0) | 3 (Low) | Known Error | S | 2026-05-23 | internal |
 | 6 | P305 | Post-Edit silent revert of working-tree files before commit — potential silent-work-loss hazard | 6 (Medium) | Known Error | M | 2026-05-26 | internal |
 | 6 | P409 | Back-fill legacy RFCs still carrying empty `stories: []` | 6 (Medium) | Known Error | M | 2026-07-03 | internal |
@@ -92,7 +93,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P524 | External adopter handles are public across the committed ticket corpus | 12 (High) | Open | M | 2026-08-25 | internal |
 | 6 | P531 | ADR compendium regeneration drops Amends relationships from summaries | 12 (High) | Open | M | 2026-08-31 | internal (user-supplied screenshot) |
 | 6 | P535 | Critical Points outgrew its budget, so the session-start hook truncates the surface it exists to provide | 12 (High) | Open | M | 2026-09-04 | internal |
-| 6 | P541 | Release verification fails good releases — propagation window too short, and per-package nesting makes widening worse | 12 (High) | Open | M | 2026-09-18 | internal |
 | 6 | P545 | The verification-close drain has no state assertion, and the do-not-close guard green-lights tickets that are already closed | 12 (High) | Open | M | 2026-09-19 | internal |
 | 6 | P547 | A per-iter constraints file carried another ticket's confirmed direction verbatim, pinning the wrong fix substance onto the dispatched ticket | 12 (High) | Open | M | 2026-09-19 | internal |
 | 5 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 (Low) | Open | S | 2026-07-02 | internal |

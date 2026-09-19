@@ -2,10 +2,10 @@
 
 **Status**: Open
 **Reported**: 2026-09-18
-**Priority**: 12 (High) — Impact: 3 × Likelihood: 4 — derived at capture from the description per Step 4a
+**Priority**: 15 (High) — Impact: 3 × Likelihood: 5 — re-rated 2026-09-19 from three consecutive observed failures; the capture-time Likelihood of 4 assumed propagation above 30s was occasional, and it is not
 **Origin**: internal
 **Effort**: M — derived at capture per Step 4a
-**WSJF**: 6 — (12 × 1.0) / 2 (added 2026-09-18 review — capture wrote no WSJF line)
+**WSJF**: 7.5 — (15 × 1.0) / 2 (re-rated 2026-09-19 on the third consecutive witness; was 6 from Severity 12)
 **JTBD**: JTBD-001, JTBD-007
 **Persona**: developer
 
@@ -61,9 +61,22 @@ The defect recurred on the very next release, under 17 hours after the first, co
 
 Same mechanism as the first witness: the publish landed, the 30-second post-publish window expired before the registry exposed the version, and the job failed a correct release. The version-packages PR (#485) merged, the git tag pushed, and npm served the new version — only the verification step failed.
 
-**Bearing on the rating.** The Likelihood was captured at 4 from a single occurrence with the note "propagation above 30s is not unusual". Two occurrences in two consecutive releases is stronger evidence: the failure appears to track normal npm propagation rather than an unusual spike, which puts it closer to almost-certain for any release where propagation exceeds the window. Worth re-scoring at the next review pass rather than here, since WSJF re-ranking wants the whole backlog in view.
+**Bearing on the rating.** The Likelihood was captured at 4 from a single occurrence with the note "propagation above 30s is not unusual". Two occurrences in two consecutive releases is stronger evidence: the failure appears to track normal npm propagation rather than an unusual spike, which puts it closer to almost-certain for any release where propagation exceeds the window. (Superseded by the third witness below: the re-score was applied on 2026-09-19 rather than deferred again.)
 
 **Second-order cost, now observed twice.** Each false negative leaves main's latest run red, which the release gate reads as blocking, so the next release cannot start until an unrelated green run lands. On this occasion the recovery was a rebase onto the release commits plus this very edit — meaning the defect's cost includes the work required to clear the deadlock it creates.
+
+### Third witness, 2026-09-19 — three releases today, three failures
+
+| Release | Verifier said | Registry truth |
+|---|---|---|
+| `@windyroad/wardley@0.3.0` | published without latest (latest: 0.2.1) | `latest = 0.3.0`, published 06:34:49.618Z |
+| `@windyroad/itil@2.4.1` | published without latest (latest: 2.4.0) | `latest = 2.4.1`, published 10:16:56.183Z |
+
+With the 2026-09-18 first witness, that is **three consecutive releases, three false negatives, zero true positives**. Every publish succeeded; every verification failed.
+
+**Rating corrected here rather than deferred again.** The capture-time Likelihood of 4 rested on "propagation above 30s is not unusual". Three for three says propagation reliably exceeds the 30-second window, so the honest Likelihood is 5 and Severity is 15. This is a correction of a number the evidence had already overtaken, not a re-rank — the second witness flagged it for the next review pass, and a third occurrence in the same day makes deferring it the wrong call.
+
+**Cumulative cost now observed three times.** Each false negative leaves main red, the release gate reads that as blocking, and the next release cannot start until an unrelated green run lands. Today that cost two rebases onto release commits plus two corrective commits — work created solely by the defect, on top of the diagnosis it misdirects.
 
 ## Symptoms
 
@@ -78,7 +91,7 @@ Wait for propagation, confirm `npm view <pkg> dist-tags` shows the expected `lat
 ## Impact Assessment
 
 - **Who is affected**: the maintainer running releases; anyone blocked behind a stuck release pipeline.
-- **Frequency**: every release where npm propagation exceeds 30 seconds. Observed once on 2026-09-18; propagation above 30s is not unusual.
+- **Frequency**: every release. Three releases were attempted on 2026-09-18/19 and the verifier failed all three while every publish succeeded — propagation reliably exceeds the 30-second window rather than occasionally.
 - **Severity**: blocks releasing until a separate green run lands, and actively misleads diagnosis.
 - **Analytics**: not instrumented.
 
