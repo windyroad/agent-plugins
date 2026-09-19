@@ -1510,6 +1510,9 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 ## 2026-09-19
 
+> Last reviewed: 2026-09-19 **P441 known error** — selection and dispatch-eligibility are the same axis, so the loop only ever asks which ticket is most valuable, never whether anything can be done with it; the ranking then rewards a stuck ticket by raising its score on the Known-Error multiplier
+
+
 > Last reviewed: 2026-09-19 **P550 captured** — the propose-fix trace predicate checks that a fix vehicle exists, not that a card on it covers the scope about to be implemented (lightweight aside via /wr-itil:capture-problem)
 
 

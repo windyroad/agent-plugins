@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-19 **P441 known error** — selection and dispatch-eligibility are the same axis, so the loop only ever asks which ticket is most valuable, never whether anything can be done with it; the ranking then rewards a stuck ticket by raising its score on the Known-Error multiplier
+> Last reviewed: 2026-09-19 **P551 captured** — an edit gate that only unlocks on a PASS deadlocks on a new file under a gated path: the reviewer has no artefact to read, judges a lossy prose proxy, and returns ISSUES FOUND, so every gated new file costs an extra reviewer round (lightweight aside via /wr-itil:capture-problem)
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -65,6 +65,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8 | P472 | reconcile-stories reports permanent false MISSING_REVERSE_TRACE drift against ADR-090's ratified-stories-only rule | 8 (Medium) | Open | S | 2026-07-26 | internal |
 | 8 | P516 | `story-map-edit add-card` omits the `ref` back-link, so a card renders with no Traces line | 8 (Medium) | Open | S | 2026-08-21 | internal |
 | 8 | P546 | The cognitive-accessibility reviewer is tool-less, so dispatching it a file path burns a reviewer spawn | 8 (Medium) | Open | S | 2026-09-19 | internal |
+| 8 | P551 | Edit gate deadlocks on a new file the reviewer cannot read yet, so each gated new file costs an extra reviewer round | 8 (Medium) | Open | S | 2026-09-19 | internal |
 | 8 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 (High) | Open | M | 2026-07-06 | internal |
 | 8 | P536 | Governance gate state binds to the physical worktree, blocking commits from a linked worktree and silently disabling the WIP gate inside one | 16 (High) | Open | M | 2026-09-08 | internal |
 | 8 | P542 | The oversight-marker shim silently writes nothing when the command is not a bare two-word invocation | 16 (High) | Open | M | 2026-09-19 | internal |
