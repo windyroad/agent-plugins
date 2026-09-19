@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-19 **P472 known error** — the story reconciler demands a reverse-trace row that the ratified-stories-only rule forbids, so it reports correct work as drift and the finding can never be cleared by any compliant action; root cause is an unconditional predicate on the RFC leg, and the fix narrows it to the population the rule actually covers while closing the repair helper that would otherwise write the forbidden row back. Prior: **P552 captured** — sending two gate reviewers in one message leaves one of them without a marker, so the next gated edit is refused even though both reviews passed.
+> Last reviewed: 2026-09-19 **P553 captured** — the RFC stories section's recorded contract says it projects the RFC's own story list, the code reverse-indexes each story's RFC claim instead, and nothing checks either; the audit found 8 rows that exist in only one of the two, 10 unratified stories already referenced where the rule forbids it, and 19 of 42 trace pairs that a detector was counting as checked (lightweight aside via /wr-itil:capture-problem). Prior: **P472 known error** — the story reconciler demands a reverse-trace row that the ratified-stories-only rule forbids.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -68,6 +68,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8 | P423 | Agent "fixes" recurring behavioural corrections via project-local memory instead of shipping an adopter-facing plugin surface | 16 (High) | Open | M | 2026-07-06 | internal |
 | 8 | P536 | Governance gate state binds to the physical worktree, blocking commits from a linked worktree and silently disabling the WIP gate inside one | 16 (High) | Open | M | 2026-09-08 | internal |
 | 8 | P542 | The oversight-marker shim silently writes nothing when the command is not a bare two-word invocation | 16 (High) | Open | M | 2026-09-19 | internal |
+| 8 | P553 | The RFC `## Stories` section's recorded contract and its implementation disagree, and nothing checks either | 8 (Medium) | Open | M | 2026-09-19 | internal |
 | 7.5 | P444 | Agent buries granular design decisions in artefacts — default values, thresholds, and policy choices pass artefact-level ratification unsurfaced, escaping real oversight | 15 (High) | Open | M | 2026-07-08 | internal |
 | 7.5 | P541 | Release verification fails good releases — propagation window too short, and per-package nesting makes widening worse | 15 (High) | Open | M | 2026-09-18 | internal |
 | 6 | P284 | Release pipeline halts — `changeset publish` E404 on a new version of an existing scoped package (@windyroad/architect@0.8.0) | 3 (Low) | Known Error | S | 2026-05-23 | internal |
