@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: the-loop-i-left-running-is-still-running-when-i-get-back
 reported: 2026-09-19
 decision-makers: [Tom Howard]
@@ -25,11 +25,11 @@ In order to get back to work that actually happened over the hours I was away, a
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] Asked what it does when the person who started the loop says they are going to bed, the orchestrator dispatches the next iteration. It does not read the announcement as permission to wrap up, and it does not ask whether it should carry on.
-- [ ] Asked whether it may end its turn mid-loop having printed no ending, the orchestrator says it may not: it either names one of the loop's own endings or dispatches the next iteration, and there is no third state.
-- [ ] A closing message that calls the drain parked, says it is ready when I am, or leaves me an instruction for restarting it is named as the defect rather than as an ending. The work of restarting the loop never becomes mine.
-- [ ] The rule is stated where the loop is entered, not only where it ends, so an orchestrator that never reaches the ending gate is still covered by it. The ending it may name is the one the loop already publishes, not a second list that can drift from it.
-- [ ] The rule speaks about the orchestrator's own session and leaves an iteration's endings alone.
+- [x] Asked what it does when the person who started the loop says they are going to bed, the orchestrator dispatches the next iteration. It does not read the announcement as permission to wrap up, and it does not ask whether it should carry on.
+- [x] Asked whether it may end its turn mid-loop having printed no ending, the orchestrator says it may not: it either names one of the loop's own endings or dispatches the next iteration, and there is no third state.
+- [x] A closing message that calls the drain parked, says it is ready when I am, or leaves me an instruction for restarting it is named as the defect rather than as an ending. The work of restarting the loop never becomes mine.
+- [x] The rule is stated where the loop is entered, not only where it ends, so an orchestrator that never reaches the ending gate is still covered by it. The ending it may name is the one the loop already publishes, not a second list that can drift from it.
+- [x] The rule speaks about the orchestrator's own session and leaves an iteration's endings alone.
 
 ## Driving problem trace (required — I6 invariant)
 

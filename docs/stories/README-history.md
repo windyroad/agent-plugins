@@ -92,3 +92,7 @@
 ## 2026-09-19
 
 > Last reviewed: 2026-09-19 **RFC-098 row drawn** — four stories cover P441's three reported faces and its four held classes, so a ticket waiting on a person stops competing for a dispatch slot without losing its rank. Prior: **STORY-044 done** — @windyroad/cruise@0.4.11 ships the `/wr-cruise:status` pacing-telemetry skill; cruise suite 79/79 green, closing the last open story under RFC-046.
+
+## 2026-09-19
+
+> Last reviewed: 2026-09-19 **STORY-098 accepted** — RFC-099 draws the row that closes P543: telling the loop you are going to bed keeps it working, and it cannot end the session by quietly not continuing. Prior: **RFC-098 row drawn** — four stories cover P441's three reported faces and its four held classes, so a ticket waiting on a person stops competing for a dispatch slot without losing its rank.
