@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-19 **P543 known error** — the AFK loop can no longer end by simply going quiet, and being told you are going to bed now keeps it working instead of stopping it; the liveness-across-a-detour contract stays open for the maintainer. Prior: **P551 captured** — an edit gate that only unlocks on a PASS deadlocks on a new file under a gated path: the reviewer has no artefact to read, judges a lossy prose proxy, and returns ISSUES FOUND, so every gated new file costs an extra reviewer round.
+> Last reviewed: 2026-09-19 **P552 captured** — sending two gate reviewers in one message leaves one of them without a marker, so the next gated edit is refused even though both reviews passed; the workaround (dispatch them separately) is the opposite of the general advice to batch independent agent calls. Prior: **P543 known error** — the AFK loop can no longer end by simply going quiet, and being told you are going to bed now keeps it working instead of stopping it; the liveness-across-a-detour contract stays open for the maintainer.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -122,6 +122,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3 | P421 | Reference-section awk helpers destructively truncate governance files containing invalid UTF-8 | 6 (Medium) | Open | M | 2026-07-05 | internal |
 | 3 | P496 | Nine story maps carry the superseded stacked encoding, and two more use bespoke encodings, all needing migration to the rendered grid | 6 (Medium) | Open | M | 2026-08-05 | found while fixing the shipped template (ADR-102) |
 | 3 | P550 | The propose-fix trace predicate checks that a vehicle exists, not that a card covers the scope | 6 (Medium) | Open | M | 2026-09-19 | internal |
+| 3 | P552 | A reviewer marker hook services only one Agent completion per assistant message, so parallel gate reviewers lose a marker | 6 (Medium) | Open | M | 2026-09-19 | internal |
 | 3 | P045 | Auto plugin install on user's machine after governance release | 12 (High) | Open | L | 2026-04-19 | internal |
 | 3 | P460 | Agent surfaces ticket-worthy findings and obvious next-actions as recommendations instead of autonomously capturing or acting | 12 (High) | Open | L | 2026-07-25 | internal |
 | 3 | P473 | Story maps are authored as per-fix 1-card stubs, not user journeys — below the STORY-MAP-003 quality bar | 12 (High) | Open | L | 2026-07-27 | corrective-feedback (user, 2026-07-27) |

@@ -1510,6 +1510,9 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 ## 2026-09-19
 
+> Last reviewed: 2026-09-19 **P543 known error** — the AFK loop can no longer end by simply going quiet, and being told you are going to bed now keeps it working instead of stopping it; the liveness-across-a-detour contract stays open for the maintainer. Prior: **P551 captured** — an edit gate that only unlocks on a PASS deadlocks on a new file under a gated path: the reviewer has no artefact to read, judges a lossy prose proxy, and returns ISSUES FOUND, so every gated new file costs an extra reviewer round.
+
+
 > Last reviewed: 2026-09-19 **P441 known error** — selection and dispatch-eligibility are the same axis, so the loop only ever asks which ticket is most valuable, never whether anything can be done with it; the ranking then rewards a stuck ticket by raising its score on the Known-Error multiplier
 
 
