@@ -58,10 +58,12 @@ Fix landed 2026-06-08 by amending both reviewer prompts (`packages/architect/age
 - Sets the safer fail-mode default: when mode is ambiguous, treat as pre-edit (a true post-edit drift still surfaces on substance; a true pre-edit proposal mis-classified as post-edit fires the catch-22).
 - Constraints on the carve-out scope: pre-edit mode does NOT relax any substantive check (Decision Compliance / Confirmation Criteria / Unratified Dependency / Needs Direction / Job Alignment / Persona Fit). It constrains only the verdict-grammar around not-yet-applied baseline.
 
-Structural bats guards (P176 / ADR-052 Surface 2 pattern, marked `tdd-review: structural-permitted` per the existing `architect-needs-direction-verdict.bats` precedent):
+Structural bats guards shipped with the original fix (P176 / ADR-052 Surface 2 pattern, marked `tdd-review: structural-permitted` per the then-current `architect-needs-direction-verdict.bats` precedent) — **both retired 2026-09-19 under P290, do not look for them**:
 
-- `packages/architect/agents/test/architect-pre-edit-review-mode.bats` — 5 assertions on the heading + verbatim core sentence + P313 cite.
-- `packages/jtbd/agents/test/jtbd-pre-edit-review-mode.bats` — same shape for the JTBD agent.
+- ~~`packages/architect/agents/test/architect-pre-edit-review-mode.bats`~~ — 5 assertions on the heading + verbatim core sentence + P313 cite.
+- ~~`packages/jtbd/agents/test/jtbd-pre-edit-review-mode.bats`~~ — same shape for the JTBD agent.
+
+Both were prose greps over `agent.md`, which ADR-052's ratified behavioural-only amendment no longer permits under any justification. **Where the carve-out is asserted now**: behaviourally, by the promptfoo fixtures the merge-blocking `eval-agents` job in `.github/workflows/ci.yml` runs on every change under `packages/*/agents/`. Each fixture frames its prompt as a PROPOSED change that is not yet applied and grades the verdict that comes back, so a P313 regression — mis-classifying not-yet-applied state as ISSUES FOUND — turns the fixture red rather than passing a grep. The covering fixtures are, in `packages/jtbd/agents/eval/promptfooconfig.yaml`, "ISSUES FOUND on a proposal explicitly citing unratified JTBD-011" and "Over-fire guard — ambient change, no explicit cite, no [Unratified Dependency]"; and in `packages/architect/agents/eval/promptfooconfig.yaml`, fixtures 1, 2 and 4. This is a stronger guard than the greps it replaces: it exercises the agent instead of reading its prose.
 
 Composes with P181 (verdict-grep fragility — orthogonal: P181 lives in the hook surface, P313 in the agent surface) and P303 (multi-decision-file deadlock — orthogonal: P303 is hash-drift re-locking, P313 is verdict-substance mis-classification).
 
