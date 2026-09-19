@@ -22,6 +22,7 @@ Fix direction: commit only the supplied paths (`git commit -- <paths>` pathspec 
 - Two-commit plan collapses to one commit.
 - Second restage-commit call errors with an empty-index-diff after the first consumed its paths.
 - Unstaged working-tree files swept into an unrelated capture commit.
+- **2026-09-19 (P437 iter) — a deleted path passed explicitly aborts the whole commit.** The commit folded an Open to Known Error rename, so `docs/problems/open/437-...md` was a deletion already staged in the index. Passing it in the helper's path list produced `fatal: pathspec 'docs/problems/open/437-...md' did not match any files` and no commit. The helper re-adds supplied paths with what behaves as a plain `git add`, which resolves a pathspec against the working tree, where a renamed-away file no longer is. Naming every path the commit touches is the discipline this helper exists to enforce, and it is exactly what fails on any commit carrying a rename. Workaround used: fall back to directory pathspecs (`docs/problems`), which reintroduces the over-broad staging this ticket is about.
 
 ## Workaround
 

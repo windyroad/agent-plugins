@@ -26,6 +26,7 @@ Maintainer direction 2026-08-20, verbatim: *"The fix proposal is supposed to be 
 - Every RFC-less Known Error that reaches propose-fix mints a standalone RFC document rather than a row.
 - Those documents are born `human-oversight: unconfirmed` and ratified at `manage-rfc accepted` — a second approval surface competing with the map that ADR-103 designated as *the* approval surface.
 - 54 RFCs currently lack human oversight (SessionStart nudge, 2026-08-20). Some unknown fraction are this mechanism's output.
+- **2026-09-19 (P437 iter) — the belief survives in the architect reviewer, not just the skill path.** With the row already drawn and the propose-fix predicate returning clean, `wr-architect:agent` returned ISSUES FOUND on the grounds that *"the RFC this fix implements does not exist... there is no `docs/rfcs/RFC-095-*.md`"*, citing ADR-071, ADR-072 and ADR-073, and asked for the document to be authored before the fix could land. Given the ADR-103 citation on a follow-up pass it withdrew the finding itself — *"I was reasoning from the pre-ADR-103 corpus"* — and confirmed the row satisfies ADR-073. So the corpus does resolve it correctly; the reviewer just does not reach ADR-103 from ADR-071/072/073 unprompted. Cost: one extra review round-trip. Worth noting for this ticket's fix scope: repointing the skill path alone leaves the reviewer still asking for documents, and the reviewer's ask is the one that blocks a commit.
 
 ## Workaround
 
