@@ -12,10 +12,20 @@ Sibling to `/wr-itil:reconcile-readme` (P118 / ADR-014) and `/wr-itil:reconcile-
 
 **Reverse-trace pass** — when the parent directories exist, the reconciler checks auto-maintained `## Stories` sections on problem, JTBD and legacy RFC files. For an ADR-103 row-backed RFC, it checks the map row instead: the RFC must resolve and the row must contain the story card.
 - `MISSING_REVERSE_TRACE STORY-NNN in <PARENT-ID> ## Stories` — story claims parent but parent's `## Stories` table doesn't list the story
-- `STALE_REVERSE_TRACE STORY-NNN in <PARENT-ID> ## Stories` — parent lists the story but story no longer claims the parent
-- `STATUS_MISMATCH STORY-NNN in <PARENT-ID> ## Stories claims=<X> actual=<Y>` — parent's row claims one lifecycle status; story's filesystem subdir is a different state
 - `UNRESOLVED_RFC_TRACE STORY-NNN claims=RFC-NNN` — neither a legacy RFC file nor a story-map release row exists
 - `MISSING_REVERSE_TRACE STORY-NNN in RFC-NNN release row` — the release row exists but does not contain the story card
+
+**Which stories the legacy-RFC leg covers** — only APPROVED ones, and a story is approved when every story map it names is ratified (ADR-103). ADR-090 forbids an RFC from referencing a story whose map is not ratified, so for such a story the `## Stories` row is *correctly absent* — a `MISSING_REVERSE_TRACE` against it would be a finding no compliant action could clear, since satisfying it means breaking the rule it exists to protect (P472 / STORY-099). The problem and JTBD legs are not narrowed; no ratification rule governs those pairs. The release-row leg is not narrowed either: a story card is compelled onto its map at capture (ADR-095) and cards sit outside the map's fingerprint basis (ADR-103), so a card's absence from its row is never correct.
+
+**The run says which population it checked**, on stderr, whether or not there was drift — so a clean result can be read as "checked and clean" rather than "quietly skipped":
+
+```
+reconcile-stories: RFC ## Stories reverse trace checked 15 of 30 story/RFC pairs.
+reconcile-stories:   12 skipped because the story's map is not ratified, so the row is correctly absent.
+reconcile-stories:   3 skipped because the story names no story map at all; that is a corpus defect, not a correct absence.
+```
+
+The two corpus-defect counts — a story naming no map, and a story naming a map id that does not resolve to exactly one file — are reported apart from the correct-absence count on purpose. Folding either in would hide a real defect behind an explanation that does not apply to it.
 
 ## When to invoke
 
@@ -46,9 +56,7 @@ Read `/tmp/wr-itil-stories-drift-$$.txt` line by line. Each line is one of:
 - `DRIFT    STORY-NNN rankings: claims=<X> actual=<Y>` — Story Rankings row has wrong Status; update the row.
 - `STALE    STORY-NNN rankings: actual=<state>` — Story Rankings table is missing a row; add it.
 - `MISMATCH STORY-NNN done: actual=<state>` — Done table has wrong row OR an extra row; remove/adjust.
-- `MISSING_REVERSE_TRACE STORY-NNN in <PARENT-ID> ## Stories` — parent's `## Stories` section needs the story added; call `update-<parent-kind>-references-section.sh <parent-file> "Stories"` to refresh.
-- `STALE_REVERSE_TRACE STORY-NNN in <PARENT-ID> ## Stories` — parent's `## Stories` section needs the story removed; same helper call (idempotent, lazy-empty discipline removes when no traces remain).
-- `STATUS_MISMATCH STORY-NNN in <PARENT-ID> ## Stories claims=<X> actual=<Y>` — same helper call refreshes the status column.
+- `MISSING_REVERSE_TRACE STORY-NNN in <PARENT-ID> ## Stories` — parent's `## Stories` section needs the story added; call `update-<parent-kind>-references-section.sh <parent-file> "Stories"` to refresh. The helper regenerates the whole section and admits only approved stories, so it can never write in a reference ADR-090 forbids. When it withholds one it says so on stderr: the remedy is to **ratify that story's MAP** (ADR-103), never to hand-add the row.
 - `UNRESOLVED_RFC_TRACE` / row `MISSING_REVERSE_TRACE` — repair the map's release row or card through `/wr-itil:manage-story-map`; do not create an empty RFC file.
 
 ### 3. Apply edits
@@ -103,11 +111,14 @@ After commit, report:
 - **ADR-049** — plugin-bundled scripts via `bin/` on `$PATH`. `wr-itil-reconcile-stories` shim follows this grammar.
 - **ADR-014** — single-commit grain. The reconciliation pass is a single coherent action; one commit per pass.
 - **ADR-052** — behavioural-tests default. Bats coverage at `packages/itil/scripts/test/reconcile-stories.bats` (P170 Phase 2 Slice 9).
-- **ADR-040** — diagnose-only advisory-exit contract. `reconcile-stories.sh` is exit-1 on drift, exit-0 on clean, exit-2 on parse error.
+- **Exit-code convention** — exit-1 on drift, exit-0 on clean, exit-2 on parse error. Shared unchanged with `reconcile-readme.sh`, `reconcile-rfcs.sh` and `check-rfc-stories-ratified.sh`; no ADR records it, and none should — a convention with one viable shape, already implemented uniformly, is not decision-bearing. (This line cited ADR-040 until 2026-09-19; ADR-040 is the session-start briefing surface and says nothing about exit codes.)
+- **ADR-090** / **ADR-103** / **ADR-095** — the rules that set the legacy-RFC leg's population: an RFC references only approved stories; approval reaches a story through its map; a story card is on its map from capture.
+- **P472** / **STORY-099** — the narrowing, and the stderr population report that makes a clean result readable.
 - **P118** / `reconcile-readme.sh` — sibling at the problems tier.
 - **ADR-060 Phase 1 item 5** / `reconcile-rfcs.sh` — sibling at the RFC tier.
 - **Slice 2a/2b helpers** — `update-problem-references-section.sh`, `update-rfc-references-section.sh`, `update-jtbd-references-section.sh` are the load-bearing reverse-trace refresh helpers this skill invokes; all three accept `"Stories"` as a section-name token per their lookup tables.
 - **JTBD-001** — Enforce Governance Without Slowing Down. Drift detection is an automated governance enforcement surface; mechanical repair preserves the spirit while removing manual toil.
+- **JTBD-006** — Progress the Backlog While I'm Away. The legacy-RFC-leg narrowing (P472 / STORY-099) exists so an unattended loop can read a clean result as "checked and clean" rather than "quietly skipped", and so no finding demands an action the ratified-stories rule forbids.
 - **JTBD-008** — Decompose a Fix Into Coordinated Changes. Story tier reverse-trace integrity is load-bearing for the working-the-problem flow's per-story dispatch (Slice 13 traversal).
 
 $ARGUMENTS

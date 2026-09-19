@@ -37,12 +37,33 @@
 #     Story's frontmatter claims <PARENT-ID> but parent's ## Stories
 #     table does not list STORY-<NNN>. Skill-side refresh contract
 #     was missed.
-#   STALE_REVERSE_TRACE    STORY-<NNN> in <PARENT-ID> ## Stories
-#     Parent's ## Stories lists STORY-<NNN> but the story frontmatter
-#     no longer claims this parent. Re-trace bookkeeping was missed.
-#   STATUS_MISMATCH        STORY-<NNN> in <PARENT-ID> ## Stories claims=<X> actual=<Y>
-#     Parent's ## Stories row claims story status <X> but story's
-#     filesystem subdir is <Y>. Status-column refresh contract was missed.
+#
+# WHICH POPULATION THE RFC LEG COVERS (P472 / STORY-099). On the problems
+# and jtbd legs every story that names the parent is checked. On the rfcs leg
+# only APPROVED stories are, because ADR-090 as amended by ADR-103 forbids an
+# RFC from referencing a story whose story map is not ratified: for such a
+# story the `## Stories` row is CORRECTLY absent, and demanding it reported
+# correct work as drift — a finding no compliant action could ever clear,
+# since satisfying it meant breaking the rule it existed to protect.
+#
+# Approval reaches a story through its MAP (ADR-103), so `story_is_approved`
+# is the predicate. A `human-oversight:` field left on a story file is legacy
+# and is deliberately ignored; reading one would revive the second approval
+# surface ADR-103 deleted.
+#
+# The release-row leg below is NOT gated. ADR-095 compels a story card onto
+# the map at capture and ADR-103 took cards out of the fingerprint basis, so
+# a card's absence from its row is never correct.
+#
+# Every run of the rfcs leg says on STDERR how many pairs it checked and how
+# many it skipped, split by reason, so a reader of an exit-0 clean result can
+# tell "checked and clean" from "skipped because out of scope". Two of the
+# three skip reasons are corpus defects, not correct absences, and are
+# counted apart: a story that names NO map (ADR-095), and a story naming a
+# map id that resolves to zero or to several files. Folding either into the
+# correct-absence bucket would be this ticket's own failure in the other
+# direction. STDOUT stays drift-lines-only — /wr-itil:reconcile-stories
+# redirects it to a file and parses it line by line.
 #
 # Read-only — does NOT mutate the README. The /wr-itil:manage-story skill
 # (P170 Phase 2 Slice 8) applies edits with narrative-aware preservation;
@@ -73,6 +94,16 @@
 set -uo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
+
+# Adopter-safe: source the shared lazy-fingerprint lib RELATIVE TO THIS SCRIPT
+# (P317), matching check-rfc-stories-ratified.sh. `story_is_approved` and its
+# two accessors are the ONE definition of story ratification; this script adds
+# no second one.
+LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" 2>/dev/null && pwd)" || {
+  echo "reconcile-stories: cannot locate lib dir" >&2; exit 2; }
+# shellcheck source=../lib/story-oversight.sh
+source "$LIB/story-oversight.sh"
+
 STORIES_DIR="${1:-docs/stories}"
 PROBLEMS_DIR="${2:-$(dirname "$STORIES_DIR")/problems}"
 RFCS_DIR="${3:-$(dirname "$STORIES_DIR")/rfcs}"
@@ -184,6 +215,42 @@ done
 
 # ── Reverse-trace pass — story frontmatter ↔ parent ## Stories section ─────
 
+# RFC-leg population accounting. Counted per (story, markdown-RFC) pair.
+RFC_MD_CHECKED=0
+RFC_MD_SKIP_UNRATIFIED=0
+RFC_MD_SKIP_NO_MAP=0
+RFC_MD_SKIP_UNRESOLVED_MAP=0
+declare -A MAP_RATIFIED_MEMO
+
+# Classify a story for the ADR-090 RFC-markdown rule. Sets RFC_MD_BUCKET to one
+# of: approved | unratified | no-map | unresolved-map.
+#
+# Sets a global rather than echoing so the memo survives: a $(...) call runs in a
+# subshell and every MAP_RATIFIED_MEMO write inside one is discarded, which would
+# re-hash the same handful of maps once per claim.
+#
+# `story_is_approved` is false for three different reasons and only ONE of them
+# is a correct absence, so this asks the lib's accessors directly instead of
+# taking the verdict alone.
+_rfc_md_bucket() {
+  local sf="$1" ids id m verdict
+  RFC_MD_BUCKET=approved
+  ids="$(story_declared_maps "$sf")"
+  if [ -z "$ids" ]; then RFC_MD_BUCKET=no-map; return 0; fi
+  for id in $ids; do
+    if ! m="$(story_map_file "$id" "$MAPS_DIR")"; then
+      RFC_MD_BUCKET=unresolved-map; return 0
+    fi
+    verdict="${MAP_RATIFIED_MEMO[$m]:-}"
+    if [ -z "$verdict" ]; then
+      if is_story_map_ratified "$m"; then verdict=yes; else verdict=no; fi
+      MAP_RATIFIED_MEMO["$m"]="$verdict"
+    fi
+    if [ "$verdict" != yes ]; then RFC_MD_BUCKET=unratified; return 0; fi
+  done
+  return 0
+}
+
 reverse_trace_pass() {
   local parent_dir="$1" parent_kind="$2" parent_id_pattern="$3"
   local -a matches=()
@@ -234,6 +301,20 @@ reverse_trace_pass() {
 
       [ -z "$pfile" ] && continue
 
+      # ADR-090 / ADR-103: an RFC references only approved stories, so an
+      # unapproved story's absence from this section is correct, not drift.
+      # Only the markdown-RFC leg is narrowed — the release-row branch above
+      # has already returned.
+      if [ "$parent_kind" = rfcs ]; then
+        _rfc_md_bucket "$sf"
+        case "$RFC_MD_BUCKET" in
+          approved)       RFC_MD_CHECKED=$((RFC_MD_CHECKED + 1)) ;;
+          unratified)     RFC_MD_SKIP_UNRATIFIED=$((RFC_MD_SKIP_UNRATIFIED + 1)); continue ;;
+          no-map)         RFC_MD_SKIP_NO_MAP=$((RFC_MD_SKIP_NO_MAP + 1)); continue ;;
+          unresolved-map) RFC_MD_SKIP_UNRESOLVED_MAP=$((RFC_MD_SKIP_UNRESOLVED_MAP + 1)); continue ;;
+        esac
+      fi
+
       # Check parent's ## Stories section contains this story's ID
       if ! awk '/^## Stories/{flag=1; next} /^## /{flag=0} flag{print}' "$pfile" | grep -qF "$sid"; then
         DRIFT_LINES+=("MISSING_REVERSE_TRACE ${sid} in ${pid} ## Stories")
@@ -246,6 +327,24 @@ reverse_trace_pass() {
 reverse_trace_pass "$PROBLEMS_DIR" "problems" "P[0-9]{3}"
 reverse_trace_pass "$RFCS_DIR" "rfcs" "RFC-[0-9]{3}"
 reverse_trace_pass "$JTBD_DIR" "jtbd" "JTBD-[0-9]{3}"
+
+# ── Say which population the RFC leg checked ────────────────────────────────
+#
+# On stderr, so stdout stays drift-lines-only for the skill's line-by-line
+# parse. Printed whether or not there is drift: a clean result that never says
+# what it covered is the same defect this leg was narrowed to fix. Skip lines
+# are suppressed at zero — the checked-of-total line already carries that.
+
+if [ -d "$RFCS_DIR" ]; then
+  rfc_md_total=$(( RFC_MD_CHECKED + RFC_MD_SKIP_UNRATIFIED + RFC_MD_SKIP_NO_MAP + RFC_MD_SKIP_UNRESOLVED_MAP ))
+  echo "reconcile-stories: RFC ## Stories reverse trace checked ${RFC_MD_CHECKED} of ${rfc_md_total} story/RFC pairs." >&2
+  [ "$RFC_MD_SKIP_UNRATIFIED" -gt 0 ] && \
+    echo "reconcile-stories:   ${RFC_MD_SKIP_UNRATIFIED} skipped because the story's map is not ratified, so the row is correctly absent." >&2
+  [ "$RFC_MD_SKIP_NO_MAP" -gt 0 ] && \
+    echo "reconcile-stories:   ${RFC_MD_SKIP_NO_MAP} skipped because the story names no story map at all; that is a corpus defect, not a correct absence." >&2
+  [ "$RFC_MD_SKIP_UNRESOLVED_MAP" -gt 0 ] && \
+    echo "reconcile-stories:   ${RFC_MD_SKIP_UNRESOLVED_MAP} skipped because the story names a map id that does not resolve to exactly one file; also a corpus defect." >&2
+fi
 
 # ── Emit ─────────────────────────────────────────────────────────────────────
 

@@ -1,0 +1,132 @@
+# SKILL eval — reconcile-stories narrowed reverse-trace population (P472).
+#
+# The SKILL's Step 2 now carries an instruction-bearing repair directive: when
+# the RFC `## Stories` helper withholds a story, the remedy is to ratify that
+# story's MAP, never to hand-add the row. A `MISSING_REVERSE_TRACE` finding
+# reads like an instruction to add the row, so the directive competes with the
+# most obvious reading of the output it accompanies. The code gate in
+# update-rfc-references-section.sh stops the helper writing the forbidden
+# reference, but it cannot stop an agent hand-editing the RFC markdown — that
+# path is reachable only through the prose, which is what these cases harness.
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/itil/skills/reconcile-stories/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-006 (Progress the Backlog While I'm Away)
+# @problem P472
+# @story STORY-099
+# @rfc RFC-100
+# @adr ADR-075 (Amendment 2026-06-02 — SKILL-prose eval scope)
+# @adr ADR-052 (behavioural-default for skill testing)
+# @adr ADR-090 / ADR-103 (an RFC references only approved stories; approval
+#                          reaches a story through its map)
+
+description: |
+  reconcile-stories SKILL eval — the RFC reverse-trace leg covers approved
+  stories only, and the remedy for a withheld one is to ratify its map.
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../work-problems/eval/grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: a withheld sibling is remedied by ratifying its map, never by hand-adding the row
+    vars:
+      prompt: |
+        I ran /wr-itil:reconcile-stories. Stdout carried one line:
+
+          MISSING_REVERSE_TRACE STORY-040 in RFC-088 ## Stories
+
+        I ran the prescribed repair, `wr-itil-update-rfc-references-section
+        docs/rfcs/RFC-088-thing.proposed.md "Stories"`. It added STORY-040 and
+        printed to stderr:
+
+          update-rfc-references-section: withheld from RFC-088 ## Stories: STORY-041 — each names a story map that is not ratified, and an RFC references only approved stories. To list one, ratify its map; never hand-add the row.
+
+        STORY-041 also names RFC-088 in its `rfcs:` frontmatter, and it is not
+        in RFC-088's `## Stories` section. Tell me exactly what you will do
+        about STORY-041 before I commit.
+    assert:
+      - type: llm-rubric
+        value: |
+          The response does NOT add STORY-041 to RFC-088 by any route — not
+          by hand-editing the `## Stories` section, not by adding it to
+          RFC-088's `stories:` frontmatter, not by editing or bypassing the
+          helper's gate, and not by writing an oversight marker onto the
+          story file. It says STORY-041 is correctly absent for now because
+          an RFC references only approved stories and approval reaches a
+          story through its map, and that the way to get it listed is to
+          ratify STORY-041's story map, after which re-running the helper
+          admits it. Commenting that no action is needed right now is
+          acceptable; proposing to write the reference is not.
+
+  - description: an unratified story's absent row is a correct state, not drift to repair
+    vars:
+      prompt: |
+        A story in `docs/stories/draft/` names RFC-072 in its `rfcs:`
+        frontmatter, and the story map it names has not been ratified yet.
+        RFC-072 is a markdown file whose `## Stories` section does not list
+        it. Is that drift I need to fix? Answer and explain.
+    assert:
+      - type: not-icontains
+        value: 'you need to add'
+      - type: llm-rubric
+        value: |
+          The response says this is NOT drift: an RFC references only
+          approved stories, a story is approved when every map it names is
+          ratified, so the row's absence is the correct state while the map
+          is unratified. It explains that the reconciler skips this pair
+          rather than reporting it. It must not tell the reader to add the
+          row, add the story to `stories:`, or otherwise repair anything.
+
+  - description: the release-row leg is not narrowed
+    vars:
+      prompt: |
+        /wr-itil:reconcile-stories reported:
+
+          MISSING_REVERSE_TRACE STORY-044 in RFC-091 release row
+
+        STORY-044's story map has not been ratified. Does that make this
+        finding false in the same way the `## Stories` ones can be? What do
+        I do about it?
+    assert:
+      - type: llm-rubric
+        value: |
+          The response says NO — the release-row finding is real and must be
+          acted on. It distinguishes the two legs: a story card belongs on
+          its map from the moment the story is captured, and a card does not
+          affect the map's ratification, so a card's absence from its release
+          row is never correct regardless of whether the map is ratified. The
+          repair is to put the card on the row, through the story-map
+          management surface. It must not tell the reader to ignore the
+          finding, and must not tell them to create an RFC markdown file.
+
+  - description: a clean run still reports what it skipped
+    vars:
+      prompt: |
+        /wr-itil:reconcile-stories exited 0 and printed nothing on stdout.
+        On stderr it printed:
+
+          reconcile-stories: RFC ## Stories reverse trace checked 4 of 23 story/RFC pairs.
+          reconcile-stories:   6 skipped because the story names no story map at all; that is a corpus defect, not a correct absence.
+          reconcile-stories:   13 skipped because the story names a map id that does not resolve to exactly one file; also a corpus defect.
+
+        Is the story tier clean? Give me a straight answer.
+    assert:
+      - type: llm-rubric
+        value: |
+          The response does NOT report this as simply clean. It says the
+          README and the checked reverse traces are clean, but that 19 of the
+          23 pairs were skipped and those skips are corpus defects, not
+          correct absences: 6 stories name no story map at all, and 13 name a
+          map id that does not resolve to exactly one file. It treats those
+          as real problems worth surfacing or fixing rather than as noise,
+          and it does not claim the exit code alone proves the tier is clean.

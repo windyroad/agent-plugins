@@ -204,39 +204,61 @@ is_story_map_ratified() {
 #
 # A story naming no map is NOT approved — otherwise dropping the `story-maps:`
 # field would be a way to self-approve.
-story_is_approved() {
-  local story="$1" maps_root="${2:-docs/story-maps}" line ids id f found=0
-
-  # `story-maps:` in inline `[A, B]` or block `- A` form.
+# The map ids a story DECLARES, one per line, empty output when it declares
+# none. Both frontmatter forms — inline `story-maps: [A, B]` and a block list of
+# `- A` continuation lines — are read here and nowhere else. A consumer that
+# wants to tell "declares no map" apart from "declares a map that is not
+# ratified" needs the ids, not just the verdict; parsing them again at the call
+# site would start the second enumeration this lib's header warns about, and a
+# copy covering only the inline form would silently file every block-form story
+# under "no map".
+story_declared_maps() {
+  local story="$1" line ids
   line="$(awk '/^story-maps:/{print; exit}' "$story")"
   ids="$(printf '%s' "$line" | grep -oE 'STORY-MAP-[0-9]+' || true)"
   [ -n "$ids" ] || ids="$(awk '/^story-maps:/{g=1;next} g&&/^[[:space:]]*-/{print} g&&/^[^[:space:]-]/{exit}' "$story" \
     | grep -oE 'STORY-MAP-[0-9]+' || true)"
+  [ -n "$ids" ] && printf '%s\n' $ids
+  return 0
+}
+
+# Echo the ONE map file an id resolves to; non-zero when it resolves to zero
+# files or to more than one.
+#
+# Exactly one, never first-match. This USED to be `ls ... | head -1`, which
+# arbitrary-picks when an id resolves in more than one lifecycle directory —
+# silently, and in the permissive direction: the one branch in the approval
+# predicate that could grant an approval nobody gave. Which copy wins is just
+# glob sort order, so whether it lands on the live map or a stale one is luck.
+# An ambiguous id is a corpus defect; deny and let it surface.
+#
+# Known gap, pre-existing and unreachable today (no map sits at the top level of
+# docs/story-maps/): the detector walks BOTH "$MAPS_DIR"/*.html and
+# "$MAPS_DIR"/*/*.html, so a top-level map is visible to it but invisible here,
+# and a story naming one would read unapproved forever.
+#
+# No `shopt nullglob` here on purpose. This function is sourced, so toggling it
+# would mutate the CALLER's shell — and one caller
+# (detect-unratified-stories-maps.sh) sets nullglob once at the top and relies on
+# it for a later glob. The `-e` test does the same job locally: an unmatched glob
+# stays literal, and a literal path does not exist.
+story_map_file() {
+  local id="$1" maps_root="${2:-docs/story-maps}" cand n=0 m=""
+  for cand in "$maps_root"/*/"${id}"-*.html; do
+    [ -e "$cand" ] || continue
+    n=$((n + 1)); m="$cand"
+  done
+  [ "$n" -eq 1 ] || return 1
+  printf '%s' "$m"
+}
+
+story_is_approved() {
+  local story="$1" maps_root="${2:-docs/story-maps}" ids id m found=0
+
+  ids="$(story_declared_maps "$story")"
 
   for id in $ids; do
-    # Exactly one file must match under a lifecycle directory. This USED to be
-    # `ls ... | head -1`, which arbitrary-picks when an id resolves in more than
-    # one of them — silently, and in the permissive direction: the one branch in
-    # this predicate that could grant an approval nobody gave. Which copy wins is
-    # just glob sort order, so whether it lands on the live map or a stale one is
-    # luck. An ambiguous id is a corpus defect; deny and let it surface.
-    #
-    # Known gap, pre-existing and unreachable today (no map sits at the top
-    # level of docs/story-maps/): the detector walks BOTH "$MAPS_DIR"/*.html and
-    # "$MAPS_DIR"/*/*.html, so a top-level map is visible to it but invisible
-    # here, and a story naming one would read unapproved forever.
-    #
-    # No `shopt nullglob` here on purpose. This function is sourced, so toggling
-    # it would mutate the CALLER's shell — and one caller
-    # (detect-unratified-stories-maps.sh) sets nullglob once at the top and
-    # relies on it for a later glob. The `-e` test does the same job locally: an
-    # unmatched glob stays literal, and a literal path does not exist.
-    local cand n=0 m=""
-    for cand in "$maps_root"/*/"${id}"-*.html; do
-      [ -e "$cand" ] || continue
-      n=$((n + 1)); m="$cand"
-    done
-    [ "$n" -eq 1 ] || return 1
+    m="$(story_map_file "$id" "$maps_root")" || return 1
     is_story_map_ratified "$m" || return 1
     found=1
   done

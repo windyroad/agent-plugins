@@ -5,12 +5,35 @@
 # update-problem-references-section.sh with the lookup table tuned for
 # RFC-on-RFC reverse traces:
 #   - ## Story Maps : sources docs/story-maps/*/*.html via data attributes
-#   - ## Stories    : forward-trace from RFC's own frontmatter `stories:`
+#   - ## Stories    : sources docs/stories/*/STORY-*.md by each story's `rfcs:`
 #
 # Per ADR-060 § Phase 2 encoding amendment 2026-05-12 architect finding 4:
-# no per-section-name branching in body; lookup-table-driven dispatch.
+# no per-section-name branching in body; lookup-table-driven dispatch. The
+# approval gate below rides that table rather than a branch, for the same
+# reason.
 #
-# Usage: update-rfc-references-section.sh <rfc-file> <section-name>
+# APPROVAL GATE ON `## Stories` (P472 / STORY-099). ADR-090 as amended by
+# ADR-103 forbids an RFC from referencing a story whose story map is not
+# ratified. This helper regenerates the WHOLE section from a reverse index over
+# every story claiming the RFC, and it is the prescribed repair for a
+# MISSING_REVERSE_TRACE finding — so ungated, repairing one legitimate finding
+# swept every unapproved sibling in with it, writing exactly the reference the
+# rule forbids. The narrowed detector in reconcile-stories.sh would then report
+# clean over it: a loud false positive traded for a silent true negative, which
+# is strictly worse. A withheld story is named on stderr, because a section
+# that silently shrinks is its own kind of unreadable.
+#
+# KNOWN DIVERGENCE, recorded on P472 and deliberately not fixed here. ADR-060
+# line 288 and this header used to say `## Stories` is a FORWARD trace
+# projecting the RFC's own `stories:` array. The implementation has always
+# reverse-indexed story frontmatter instead. Projecting `stories:` was
+# considered: a corpus audit found 8 of 23 approved (story → markdown-RFC)
+# claims present in the RFC's `## Stories` but absent from its `stories:`, so
+# the projection would drop those rows and the reconciler would report
+# MISSING_REVERSE_TRACE on them with no mechanical repair — P472 re-created in
+# the other direction. The header now states what the code does.
+#
+# Usage: update-rfc-references-section.sh <rfc-file> <section-name> [<story-maps-dir>]
 #
 # @adr ADR-060 (Phase 2 encoding amendment 2026-05-12)
 # @problem P170 (Phase 2 Slice 2b)
@@ -19,6 +42,14 @@ set -uo pipefail
 
 RFC_FILE="${1:-}"
 SECTION_NAME="${2:-}"
+MAPS_DIR="${3:-docs/story-maps}"
+
+# Adopter-safe: source the shared ratification lib RELATIVE TO THIS SCRIPT
+# (P317), matching check-rfc-stories-ratified.sh.
+LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" 2>/dev/null && pwd)" || {
+  echo "ERROR: cannot locate lib dir" >&2; exit 1; }
+# shellcheck source=../lib/story-oversight.sh
+source "$LIB/story-oversight.sh"
 
 if [ -z "$RFC_FILE" ]; then
   echo "ERROR: missing rfc-file argument" >&2
@@ -33,19 +64,26 @@ if [ ! -f "$RFC_FILE" ]; then
   exit 1
 fi
 
-declare -A SECTION_GLOB SECTION_MODE SECTION_ID_PATTERN
+declare -A SECTION_GLOB SECTION_MODE SECTION_ID_PATTERN SECTION_ADMIT
+
+# A story is APPROVED when every story map it names is ratified (ADR-103). Any
+# `human-oversight:` field left on the story file is legacy and is ignored.
+admit_if_story_approved() { story_is_approved "$1" "$MAPS_DIR"; }
 
 SECTION_GLOB["Story Maps"]="docs/story-maps/*/STORY-MAP-*.html"
 SECTION_MODE["Story Maps"]="html-data-attribute-rfc"
 SECTION_ID_PATTERN["Story Maps"]="STORY-MAP-[0-9]+"
+SECTION_ADMIT["Story Maps"]=""
 
 SECTION_GLOB["Stories"]="docs/stories/*/STORY-*.md"
 SECTION_MODE["Stories"]="markdown-frontmatter-rfc"
 SECTION_ID_PATTERN["Stories"]="STORY-[0-9]+"
+SECTION_ADMIT["Stories"]="admit_if_story_approved"
 
 glob_pattern="${SECTION_GLOB[$SECTION_NAME]:-}"
 extraction_mode="${SECTION_MODE[$SECTION_NAME]:-}"
 id_pattern="${SECTION_ID_PATTERN[$SECTION_NAME]:-}"
+admit_filter="${SECTION_ADMIT[$SECTION_NAME]:-}"
 
 if [ -z "$glob_pattern" ]; then
   echo "ERROR: unknown section-name '$SECTION_NAME'. Supported: Story Maps, Stories" >&2
@@ -60,7 +98,7 @@ if [ -z "$rfc_id" ]; then
   exit 1
 fi
 
-declare -a matched_ids=() matched_titles=() matched_statuses=()
+declare -a matched_ids=() matched_titles=() matched_statuses=() withheld_ids=()
 
 extract_from_html_rfcs_meta() {
   local file="$1"
@@ -107,12 +145,20 @@ for artefact in $glob_pattern; do
   if "$extract_match" "$artefact"; then
     aid=$(extract_id_from_filename "$artefact")
     [ -n "$aid" ] || continue
+    if [ -n "$admit_filter" ] && ! "$admit_filter" "$artefact"; then
+      withheld_ids+=("$aid")
+      continue
+    fi
     matched_ids+=("$aid")
     matched_titles+=("$("$extract_title" "$artefact" 2>/dev/null || echo "")")
     matched_statuses+=("$("$extract_status" "$artefact" 2>/dev/null || echo "unknown")")
   fi
 done
 shopt -u nullglob
+
+if [ ${#withheld_ids[@]} -gt 0 ]; then
+  echo "update-rfc-references-section: withheld from ${rfc_id} ## ${SECTION_NAME}: ${withheld_ids[*]} — each names a story map that is not ratified, and an RFC references only approved stories. To list one, ratify its map; never hand-add the row." >&2
+fi
 
 new_section=""
 if [ ${#matched_ids[@]} -gt 0 ]; then

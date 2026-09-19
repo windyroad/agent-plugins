@@ -228,3 +228,120 @@ EOF
   run grep -E '^name: wr-itil:reconcile-stories$' "$SKILL_FILE"
   [ "$status" -eq 0 ]
 }
+
+# ---------------------------------------------------------------------------
+# Surface 6: the RFC-markdown reverse-trace leg covers ratified stories only
+# (P472 / STORY-099). ADR-090 as amended by ADR-103 forbids an RFC from
+# referencing a story whose map is not ratified, so for such a story the
+# `## Stories` row is CORRECTLY absent and demanding it reports correct work
+# as drift. The ADR-103 release-row leg stays ungated: ADR-095 compels a card
+# onto the map at capture, so its absence there is never correct.
+# ---------------------------------------------------------------------------
+
+# A map with no ADR-102 data island hashes as whole-file bytes, and the
+# fingerprint excludes the two marker lines, so stamping the hash in afterwards
+# does not move it.
+make_map() {
+  local f="$1" confirmed="$2" h
+  mkdir -p "$(dirname "$f")"
+  {
+    printf '<html><head>\n'
+    [ "$confirmed" = confirmed ] && printf '<meta name="human-oversight" content="confirmed">\n'
+    printf '<meta name="oversight-hash" content="OVERSIGHT_HASH_PLACEHOLDER">\n'
+    printf '<title>Map</title>\n</head><body></body></html>\n'
+  } > "$f"
+  h=$(bash -c "source '${REPO_ROOT}/packages/itil/lib/story-oversight.sh'; oversight_content_hash '$f'")
+  sed -e "s/OVERSIGHT_HASH_PLACEHOLDER/${h}/" "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+}
+
+# One draft story claiming RFC-900, and an RFC-900 markdown file whose
+# `## Stories` section lists nothing.
+make_story_tree() {
+  local maps_field="$1"
+  mkdir -p docs/stories/draft docs/problems docs/jtbd docs/rfcs docs/story-maps/draft
+  cat > docs/stories/README.md <<'EOF'
+# Stories
+
+## Story Rankings
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-007 | Foo | draft |
+
+## Done
+EOF
+  cat > docs/stories/draft/STORY-007-foo.md <<EOF
+---
+status: draft
+rfcs: [RFC-900]
+${maps_field}
+---
+# STORY-007: Foo
+EOF
+  cat > docs/rfcs/RFC-900-thing.proposed.md <<'EOF'
+---
+status: proposed
+stories: []
+---
+# RFC-900: Thing
+
+## Stories
+
+No story is listed here: the story this RFC will carry is not ratified yet.
+EOF
+}
+
+run_scope_line() {
+  run bash -c "bash '$SCRIPT' docs/stories docs/problems docs/rfcs docs/jtbd docs/story-maps 2>&1 >/dev/null"
+}
+
+@test "reconcile-stories: no drift when an unratified story's RFC omits it" {
+  make_story_tree 'story-maps: [STORY-MAP-001]'
+  make_map docs/story-maps/draft/STORY-MAP-001-map.html unconfirmed
+
+  run bash "$SCRIPT" docs/stories docs/problems docs/rfcs docs/jtbd docs/story-maps
+  [[ "$output" != *"MISSING_REVERSE_TRACE STORY-007 in RFC-900"* ]]
+  [ "$status" -eq 0 ]
+}
+
+@test "reconcile-stories: a ratified story missing from its RFC Stories section still reports" {
+  make_story_tree 'story-maps: [STORY-MAP-001]'
+  make_map docs/story-maps/draft/STORY-MAP-001-map.html confirmed
+
+  run bash "$SCRIPT" docs/stories docs/problems docs/rfcs docs/jtbd docs/story-maps
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"MISSING_REVERSE_TRACE STORY-007 in RFC-900 ## Stories"* ]]
+}
+
+@test "reconcile-stories: says how many pairs the RFC leg checked" {
+  make_story_tree 'story-maps: [STORY-MAP-001]'
+  make_map docs/story-maps/draft/STORY-MAP-001-map.html confirmed
+
+  run_scope_line
+  [[ "$output" == *"checked 1 of 1"* ]]
+}
+
+@test "reconcile-stories: an unratified story's skip reads as a correct absence" {
+  make_story_tree 'story-maps: [STORY-MAP-001]'
+  make_map docs/story-maps/draft/STORY-MAP-001-map.html unconfirmed
+
+  run_scope_line
+  [[ "$output" == *"checked 0 of 1"* ]]
+  [[ "$output" == *"not ratified"* ]]
+}
+
+@test "reconcile-stories: a story naming no map is counted apart from a correct absence" {
+  make_story_tree ''
+
+  run_scope_line
+  [[ "$output" == *"names no story map"* ]]
+  [[ "$output" != *"not ratified"* ]]
+}
+
+@test "reconcile-stories: an unresolvable map id is counted apart from a correct absence" {
+  make_story_tree 'story-maps: [STORY-MAP-404]'
+
+  run_scope_line
+  [[ "$output" == *"does not resolve"* ]]
+  [[ "$output" != *"not ratified"* ]]
+}
