@@ -4,7 +4,7 @@
 **Reported**: 2026-07-06
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3
 **Origin**: inbound-reported (#347)
-**Effort**: M — unchanged on the Known Error transition (2026-09-19). Investigation confirmed the shape estimated at capture: the conversion contract gains a channel-qualified source reference, the conversion routes gain a shared close-the-loop call, and one channel adapter (GitHub) is implemented behind it. No new decision record is needed; the reach is wider than one skill but each edit is small.
+**Effort**: M — unchanged on the Known Error transition (2026-09-19). Investigation confirmed the shape estimated at capture: the conversion contract gains a channel-qualified source reference, the conversion routes gain a shared close-the-loop call, and one channel adapter (GitHub) is implemented behind it. The acknowledgement leg needs no new decision record; the channel-qualified origin record does — see `## Fix Strategy`. The reach is wider than one skill but each edit is small.
 **WSJF**: (9 × 2.0) / 2 = **9.0** — re-rated on the Open → Known Error transition 2026-09-19 (status multiplier 1.0 → 2.0 per P498; Priority 9 and Effort M both unchanged)
 **JTBD**: JTBD-301
 **Persona**: plugin-user
@@ -73,6 +73,18 @@ Observed 2026-09-19: `41 of 53 converted reports have no comment`. The single-re
 - [x] Quantify the reporter-visible harm — 41 of 53 conversions unacknowledged; this ticket's own source among them.
 - [ ] Implement: at conversion, record a channel-qualified source reference and mark the source converted, then send the accepted-into-backlog acknowledgement through the existing gate chain — on every conversion route, dispatched by channel. GitHub is the one implemented adapter; an unrecognised channel records and queues rather than failing.
 
+## Fix Strategy
+
+The fix is the release row **RFC-097 — "Every conversion answers the reporter, whatever channel they used"**, drawn on [STORY-MAP-004](../../story-maps/draft/STORY-MAP-004-close-the-loop-with-someone-who-reported-a-problem.html) under its existing "B. Hear it landed" activity, carrying [STORY-093](../../stories/draft/STORY-093-every-conversion-tells-the-reporter-it-landed.md).
+
+The work splits into two legs, and they are not in the same state.
+
+**The acknowledgement leg is already decided and only needs building.** [ADR-062](../../decisions/062-inbound-upstream-report-discovery-assessment-pipeline.proposed.md) decides that a conversion posts an acknowledgement carrying the local ticket reference, that the branch decision is mechanical, and that the body strips maintainer-internal vocabulary; [ADR-028](../../decisions/028-voice-tone-gate-external-comms.proposed.md) supplies the gate chain the comment rides. Moving that acknowledgement from one branch of the discovery pipeline to the conversion event repairs an implementation gap against substance already ratified. No new decision is needed for it.
+
+**The channel-qualified origin record is not decided, and implementation waits on it.** Recording the channel on the ticket changes the `**Origin**` vocabulary [ADR-076](../../decisions/076-inbound-reported-problems-rank-ahead-via-sort-tier.proposed.md) ratified, and it runs into [ADR-121](../../decisions/121-owned-tracker-issues-close-on-evidence.proposed.md), which requires an inbound mutation to resolve to exactly one committed cache record or do nothing. ADR-121 names this exact trigger in its own reassessment criteria ("reassess if the origin field becomes channel-typed"), so the route is a new decision superseding ADR-076 in part rather than an amendment. Three options are on the table — extend the `**Origin**` field in place, add a separate on-ticket field beside it, or keep provenance in the cache and channel-type it there. The choice is the maintainer's and is queued; nothing is implemented on it in the meantime.
+
+Note also that under ADR-121 the routes this ticket wants to cover — a maintainer converting something they were told about — are exactly the ones with no committed cache record, so they fail closed and post nothing today. That is why STORY-093 carries an explicit fail-closed criterion rather than leaving the ambiguous-resolution case to the adapter.
+
 ## Dependencies
 
 - **Composes with**: P363 (fix-released verdict leg — reopened), P270 (file-on-detect leg), P229 (verdict-shaped ack), P080 (outbound bidirectional update). This is the conversion-time leg of the same JTBD-301 close-the-loop family; the channel-agnostic abstraction argues for a standalone ticket.
@@ -81,3 +93,10 @@ Observed 2026-09-19: `41 of 53 converted reports have no comment`. The single-re
 
 - Inbound issue #347 — the source report, still unacknowledged. It is both this ticket's origin and its live reproduction.
 - **Upstream report pending** -- false positive; detection misfire. The words "upstream" and "external" appear throughout the root cause because the subject matter is this project's own inbound/outbound machinery (`docs/problems/.upstream-cache.json`, `/wr-itil:update-upstream`). Every finding is internal to this repo's skills; nothing here needs reporting to anyone else.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-093 | STORY-093: Every conversion tells the reporter it landed | draft |
