@@ -6,8 +6,8 @@
 **Origin**: inbound-reported (#453)
 **Effort**: S — two narrow fixes in one package plus focused behavioural checks
 **WSJF**: 10 — (10 × 1.0) / 1
-**JTBD**: (unconfirmed — elicitation queued)
-**Persona**: (unconfirmed — elicitation queued)
+**JTBD**: JTBD-304 (Get Accurate Diagnostics From an Installed Plugin in My Own Repository) — drafted 2026-09-19, `human-oversight: unconfirmed`; ratification queued
+**Persona**: plugin-user — `human-oversight: unconfirmed`; re-ratification queued, required scope recorded in `docs/jtbd/plugin-user/persona.md`
 
 ## Description
 
@@ -126,10 +126,28 @@ Confirmed by the maintainer via a batched direction surface on 2026-09-19, drain
 
 **What this does and does not unblock.** It pins the anchoring substance — the new job's statement and the decision to re-ratify the persona alongside it. Creating a job or persona still requires human ratification through `/wr-jtbd:update-guide` then `/wr-jtbd:confirm-jobs-and-personas` before dependent work builds on it, so the `Blocked by` line above stands until that drain runs.
 
+## Progress 2026-09-19
+
+The anchoring artefacts are drafted. The fix is not, and deliberately so.
+
+**Done.** `docs/jtbd/plugin-user/JTBD-304-installed-plugin-diagnostics-without-monorepo.proposed.md` carries the maintainer-approved job statement verbatim, plus desired outcomes, persona constraints, and an explicit section distinguishing it from JTBD-301 / 302 / 303 / 007 / 101 so it is not later challenged as redundant. It is born `human-oversight: unconfirmed`. `docs/jtbd/plugin-user/persona.md` gained a `## Pending re-ratification scope` section naming the four things the re-ratification has to settle — chiefly whether this persona absorbs the runtime-consumer scope at all, or whether the runtime consumer is a separate persona that JTBD-304 should re-anchor to.
+
+**Not done, and why.** Neither defect was fixed. The run that drafted these artefacts was unattended and had no confirmation surface, so it could not ratify either artefact, and a fix implemented on an unratified job is exactly the dependent-work-on-unconfirmed-substance failure the guard exists to prevent.
+
+**Is any part of the fix independently landable?** Checked; no. The two defects are the same consumer-repo fix:
+
+- Making the currency check answer `TOTAL packages=0 drift_instances=0` on an absent or empty inventory is a direct expression of the job's second desired outcome ("absence of a source-only directory carries no diagnostic weight"). It is not separable from it.
+- Replacing the `analyze-context` Step 0 guard with a shim lookup is the same outcome on the other surface.
+- The documentation contradiction the reporter found (the script header says exit is "always 0" at lines 17 and 44 while line 45 documents exit 2, and `run-retro` Step 2b carries the same disagreeing pair) looks separable but is not. Correcting either half requires first deciding which behaviour is intended, and that decision *is* the fix. Correcting the prose ahead of the code would simply move the contradiction.
+
+What is genuinely independent of the job is the anchoring work itself, which is what this iteration did.
+
+**Next action.** Run `/wr-jtbd:confirm-jobs-and-personas` with a human present. It should ratify the persona first (item 1 of the recorded scope decides where the job belongs), then JTBD-304. Once both carry a confirmed marker, the fix in `## Investigation Tasks` is unblocked and is still an S.
+
 ## Dependencies
 
 - **Blocks**: (none)
-- **Blocked by**: JTBD/persona anchoring decision queued for human input
+- **Blocked by**: human ratification of JTBD-304 + the plugin-user persona via `/wr-jtbd:confirm-jobs-and-personas`. The anchoring *decision* is settled (maintainer, 2026-09-19); what remains is the ratification event on the two drafted artefacts.
 
 ## Related
 

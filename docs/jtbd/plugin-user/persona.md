@@ -3,7 +3,7 @@ name: plugin-user
 description: Developer using an installed windyroad plugin who encountered a problem and wants to report it
 human-oversight: unconfirmed
 oversight-date: 2026-05-25
-oversight-note: amended 2026-08-29 under P527 without a post-change confirmation; re-ratify via /wr-jtbd:confirm-jobs-and-personas
+oversight-note: amended 2026-08-29 under P527 without a post-change confirmation; scope widened 2026-09-19 under P530 (see '## Pending re-ratification scope'); re-ratify via /wr-jtbd:confirm-jobs-and-personas
 ---
 
 # Plugin User
@@ -30,3 +30,16 @@ Developer who has installed one or more `@windyroad/*` plugins into their own pr
 - **Unacknowledged reports** — filing a report and not knowing whether it was received, categorised, or acted on. No audit trail back to them.
 - **Duplicate rejection** — filing a report that turns out to be a duplicate of an existing ticket, with no way for the intake to have warned them beforehand.
 - **Cross-plugin ambiguity** — observing a problem they can't confidently attribute to one plugin (hook from plugin A interacting with skill from plugin B) and being asked to pick one.
+
+## Pending re-ratification scope
+
+Recorded 2026-09-19 under P530. The maintainer confirmed anchoring that ticket to a new job (JTBD-304) **and** re-ratifying this persona in the same pass, because the new job shifts what this persona covers. This section states what the re-ratification has to decide; it does not decide it. This persona stays `human-oversight: unconfirmed` until `/wr-jtbd:confirm-jobs-and-personas` runs with a human present.
+
+What the re-ratification must cover:
+
+1. **The persona is no longer only a reporter.** Both the `description` and the `## Who` section frame this persona around having hit a problem and wanting to report it. JTBD-304 is about the adopter *running* an installed plugin's checks and skills day to day and reading their output — reporting is downstream of that, and most runs produce no report at all. Confirm whether this persona absorbs the runtime-consumer scope, or whether the runtime consumer is a separate persona and JTBD-304 re-anchors to it.
+2. **"Reporting is incidental, not their job" needs re-reading under the wider scope.** The constraint is correct about reporting. Under the runtime-consumer reading, the incidental thing is the diagnostic output, and the primary thing is their own work — a related but distinct claim, and the one JTBD-304's outcomes actually rest on.
+3. **Whether a trust cost belongs in `## Pain Points`.** The failure mode behind JTBD-304 is a check that fails open and keeps running while giving a wrong answer. Nothing in the current pain-point list covers a plugin that works but cannot be believed; every entry describes something being blocked, missing, or unanswered.
+4. **Whether "low context on repo internals" should say what follows from it.** It already holds. What JTBD-304 adds is the consequence: the adopter cannot distinguish a genuine failure from a source-layout assumption, so any check whose correctness depends on a `packages/` tree is unanswerable in their context.
+
+Confirming JTBD-304 without settling item 1 would leave the job anchored to a persona whose stated scope does not contain it.
