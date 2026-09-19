@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-19 **P552 captured** — sending two gate reviewers in one message leaves one of them without a marker, so the next gated edit is refused even though both reviews passed; the workaround (dispatch them separately) is the opposite of the general advice to batch independent agent calls. Prior: **P543 known error** — the AFK loop can no longer end by simply going quiet, and being told you are going to bed now keeps it working instead of stopping it; the liveness-across-a-detour contract stays open for the maintainer.
+> Last reviewed: 2026-09-19 **P472 known error** — the story reconciler demands a reverse-trace row that the ratified-stories-only rule forbids, so it reports correct work as drift and the finding can never be cleared by any compliant action; root cause is an unconditional predicate on the RFC leg, and the fix narrows it to the population the rule actually covers while closing the repair helper that would otherwise write the forbidden row back. Prior: **P552 captured** — sending two gate reviewers in one message leaves one of them without a marker, so the next gated edit is refused even though both reviews passed.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -59,9 +59,9 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 9 | P549 | The tarball shim-integrity detector silently skips any package whose pack lifecycle prints to stdout, so the two packages carrying the most shims are never checked | 9 (Medium) | Open | S | 2026-09-19 | internal |
 | 8 | P419 | capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the JTBD edit gate mid-session | 8 (Medium) | Known Error | M | 2026-07-05 | internal |
 | 8 | P459 | Agent-Prose Behavioural Eval Flaky — Red-Lines CI on Unrelated Commits | 8 (Medium) | Known Error | M | 2026-07-24 | internal |
+| 8 | P472 | reconcile-stories reports permanent false MISSING_REVERSE_TRACE drift against ADR-090's ratified-stories-only rule | 8 (Medium) | Known Error | M | 2026-07-26 | internal |
 | 8 | P508 | The fix proposal still instantiates a standalone RFC document, after ADR-103 made it a release row | 16 (High) | Known Error | L | 2026-08-20 | internal |
 | 8 | P414 | retro/wrap defers over-threshold briefing Tier-3 rotation as a "run interactive run-retro" recommendation instead of performing the split | 8 (Medium) | Open | S | 2026-07-03 | internal |
-| 8 | P472 | reconcile-stories reports permanent false MISSING_REVERSE_TRACE drift against ADR-090's ratified-stories-only rule | 8 (Medium) | Open | S | 2026-07-26 | internal |
 | 8 | P516 | `story-map-edit add-card` omits the `ref` back-link, so a card renders with no Traces line | 8 (Medium) | Open | S | 2026-08-21 | internal |
 | 8 | P546 | The cognitive-accessibility reviewer is tool-less, so dispatching it a file path burns a reviewer spawn | 8 (Medium) | Open | S | 2026-09-19 | internal |
 | 8 | P551 | Edit gate deadlocks on a new file the reviewer cannot read yet, so each gated new file costs an extra reviewer round | 8 (Medium) | Open | S | 2026-09-19 | internal |

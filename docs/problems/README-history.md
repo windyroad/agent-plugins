@@ -1510,6 +1510,8 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 ## 2026-09-19
 
+> Last reviewed: 2026-09-19 **P552 captured** — sending two gate reviewers in one message leaves one of them without a marker, so the next gated edit is refused even though both reviews passed; the workaround (dispatch them separately) is the opposite of the general advice to batch independent agent calls. Prior: **P543 known error** — the AFK loop can no longer end by simply going quiet, and being told you are going to bed now keeps it working instead of stopping it; the liveness-across-a-detour contract stays open for the maintainer.
+
 > Last reviewed: 2026-09-19 **P543 known error** — the AFK loop can no longer end by simply going quiet, and being told you are going to bed now keeps it working instead of stopping it; the liveness-across-a-detour contract stays open for the maintainer. Prior: **P551 captured** — an edit gate that only unlocks on a PASS deadlocks on a new file under a gated path: the reviewer has no artefact to read, judges a lossy prose proxy, and returns ISSUES FOUND, so every gated new file costs an extra reviewer round.
 
 
