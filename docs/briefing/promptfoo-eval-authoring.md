@@ -4,16 +4,20 @@ Cross-session learnings about authoring `promptfooconfig.yaml` SKILL evals — T
 
 ## What You Need to Know
 
-### Prove a prose eval RED out-of-tree when the SKILL sits behind an edit gate (2026-09-19)
-
-A promptfoo case that has only ever been green is not evidence — but reverting the SKILL in place to prove RED trips the architect and JTBD edit gates, and a reverse-trace refresh earlier in the same iteration can have already invalidated the marker. Build the fixture outside the repo instead: `mkdir -p <scratch>/<skill>/eval`, write `git show HEAD:packages/<plugin>/skills/<skill>/SKILL.md` to `<scratch>/<skill>/SKILL.md`, copy `run-skill-eval.sh`, `grade-llm-rubric.sh` and `promptfooconfig.yaml` into the sibling `eval/`, and point `-c` at that config. The provider resolves `SCRIPT_DIR/../SKILL.md`, so mirroring those two directory levels is the whole trick; `REPO_ROOT` is only read on the Codex branch. P543's case went 0-passed/1-failed against HEAD prose and 1-passed/0-failed against the fix, both `--no-cache`. The filter flag is `--filter-pattern`, not `--filter-description` — the wrong name prints the help text, exits 0, and looks like a clean run. <!-- signal-score: 2 | last-classified: 2026-09-19 | first-written: 2026-09-19 -->
-
-### Bind Promptfoo to the Node ABI used by its installed native dependency (2026-08-31)
-
-`npx promptfoo` can select a different Node runtime from `node` in the same shell. P426 reproduced `better-sqlite3` module 137 versus runtime module 147 even though `node -v` reported Node 24. P459 independently hit the same ABI boundary with Node 26 against a Node 24-built dependency; prefixing the unchanged `npx promptfoo` command with the Node 24 `PATH` let both focused boundary cases run and pass. Invoking `node_modules/promptfoo/dist/src/entrypoint.js` with the explicit matching binary is the equivalent direct form. Treat config validation and direct provider runs as useful diagnostics, but retain the full focused Promptfoo result as the semantic gate. <!-- signal-score: 3 | last-classified: 2026-08-31 | first-written: 2026-08-31 -->
-
 ### An inline `(?i)` in a Tier-A regex errors instead of asserting, and every test reads as a content failure (2026-09-19)
 
 JavaScript regular expressions have no inline flag syntax, so `value: '(?i)(foo|bar)'` on a `regex` or `not-regex` assertion does not compile. promptfoo reports `Invalid regex pattern: Invalid regular expression: /(?i)(foo|bar)/: Invalid group` **as an assertion failure**, and the summary line counts it among the failures with no separate error tally. Every test carrying the pattern goes red at once while the model output is visibly correct, which reads as the prose being wrong rather than the assertion being unparseable. Write the case into the character class (`[Pp]lugins?`) or match the literal casing; paths and command names are lowercase in practice. Check `gradingResult.componentResults[].reason` on a confusing red — `Invalid regex pattern` there is the tell, and it is not visible in the table view.
+
+<!-- signal-score: 2 | last-classified: 2026-09-19 | first-written: 2026-09-19 -->
+
+### A fixture is not portable between the codex and claude runners — they read different corpora (2026-09-19)
+
+`packages/<plugin>/agents/eval/` ships two configs, and the provider behind each reads a different world. `run-codex-agent-eval.sh` copies `fixtures/repo/.` into a temp dir and runs `--cd "$TMP_REPO"`, so the agent sees a two-file synthetic corpus. `run-agent-eval.sh` does `cd "$REPO_ROOT"`, so the agent sees all ~130 live ADRs. Any fixture whose correct verdict depends on what the corpus does or does not contain therefore **inverts** between them. Copying one across is not a port.
+
+Worked example, P290 iter: the codex config's NEEDS DIRECTION fixture asks whether plugin distribution should use a remote marketplace only or also a repo-local one. Unpinned in the synthetic corpus, so NEEDS DIRECTION is right there. In the live corpus ADR-003 and ADR-120 pin it twice over, and `agent.md` says direction fixed by an accepted ADR means the agent must NOT ask — so the correct live verdict is PASS and the ported fixture fails, or worse flakes on corpus-reading variance and quietly erodes the verdict it was meant to certify. The architect gate caught it before it was written.
+
+Two habits that cost nothing and catch this: grep `docs/decisions/` for the fixture's topic before settling on it (`grep -ril 'bash 3|bash 4|bash 5|BASH_VERSINFO' docs/decisions/*.md` returning empty is what made the replacement safe), and run the real runner on the prompt BEFORE adding it to the config — `bash packages/<plugin>/agents/eval/run-agent-eval.sh "<prompt>"` needs no secret, only your logged-in session. The tell that the agent genuinely read the corpus rather than pattern-matching your prompt is unprompted live-repo detail in its answer.
+
+Note also that only `promptfooconfig.yaml` is CI-gated: `npm run eval:agents` globs that exact name, so a fixture that exists only in `promptfooconfig.codex.yaml` is not coverage you can retire a test against.
 
 <!-- signal-score: 2 | last-classified: 2026-09-19 | first-written: 2026-09-19 -->

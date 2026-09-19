@@ -54,3 +54,15 @@ A config-level provider still targets the default Claude skill when the normal f
 ### Grade the recommendation, not whether the response mentions the rejected value (2026-08-30)
 
 A Tier-A `not-contains: '2.25'` assertion rejected a correct response that explained 2.25 was the pre-transition value that must not be persisted. Semantic negatives need an `llm-rubric` that fails when the response recommends the forbidden outcome, while allowing it to contrast the right and wrong values. Keep the rubric's scope equally precise: “all listed preflight checks” does not mean every route-specific lifecycle mechanic. The P512 eval initially expanded that phrase to Known Error-only release seeding even though the folded Open-to-verifying route starts with objective release evidence already populated. <!-- signal-score: 1 | last-classified: 2026-08-30 | first-written: 2026-08-30 -->
+
+## Rotated 2026-09-19 (Tier 3 budget, split-by-date) — the Node ABI binding entry (2026-08-31)
+
+### Bind Promptfoo to the Node ABI used by its installed native dependency (2026-08-31)
+
+`npx promptfoo` can select a different Node runtime from `node` in the same shell. P426 reproduced `better-sqlite3` module 137 versus runtime module 147 even though `node -v` reported Node 24. P459 independently hit the same ABI boundary with Node 26 against a Node 24-built dependency; prefixing the unchanged `npx promptfoo` command with the Node 24 `PATH` let both focused boundary cases run and pass. Invoking `node_modules/promptfoo/dist/src/entrypoint.js` with the explicit matching binary is the equivalent direct form. Treat config validation and direct provider runs as useful diagnostics, but retain the full focused Promptfoo result as the semantic gate. <!-- signal-score: 3 | last-classified: 2026-08-31 | first-written: 2026-08-31 -->
+
+## Rotated 2026-09-19 (Tier 3 budget, split-by-date, second pass) — the out-of-tree RED-proof recipe
+
+### Prove a prose eval RED out-of-tree when the SKILL sits behind an edit gate (2026-09-19)
+
+A promptfoo case that has only ever been green is not evidence — but reverting the SKILL in place to prove RED trips the architect and JTBD edit gates, and a reverse-trace refresh earlier in the same iteration can have already invalidated the marker. Build the fixture outside the repo instead: `mkdir -p <scratch>/<skill>/eval`, write `git show HEAD:packages/<plugin>/skills/<skill>/SKILL.md` to `<scratch>/<skill>/SKILL.md`, copy `run-skill-eval.sh`, `grade-llm-rubric.sh` and `promptfooconfig.yaml` into the sibling `eval/`, and point `-c` at that config. The provider resolves `SCRIPT_DIR/../SKILL.md`, so mirroring those two directory levels is the whole trick; `REPO_ROOT` is only read on the Codex branch. P543's case went 0-passed/1-failed against HEAD prose and 1-passed/0-failed against the fix, both `--no-cache`. The filter flag is `--filter-pattern`, not `--filter-description` — the wrong name prints the help text, exits 0, and looks like a clean run. <!-- signal-score: 2 | last-classified: 2026-09-19 | first-written: 2026-09-19 -->

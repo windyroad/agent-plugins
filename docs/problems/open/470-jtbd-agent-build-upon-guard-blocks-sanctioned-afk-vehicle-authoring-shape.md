@@ -129,6 +129,39 @@ test explicitly. The agent then passes on the first spawn. Recorded in
   does not enforce ADR-090 ratification — the inverse failure, where the guard is too weak
   rather than too strong).
 
+
+### Witness 2026-09-19 (P290 iter) — the guard also blocks an annotation-only edit that ADDS ratified citations
+
+A second shape, from a retro on an unattended P290 iteration. The proposed edit was to append
+`# @jtbd JTBD-202` and `# @jtbd JTBD-101` — both ratified — to the annotation block of
+`packages/jtbd/agents/eval/promptfooconfig.yaml`, so that a job-to-coverage trace carried by a
+structural bats file being retired would survive on its behavioural successor. The reviewer itself
+had asked for that migration on its prior pass.
+
+It then blocked the edit it had just prescribed. The reasoning: the annotation block already cites
+JTBD-001, JTBD-002 and JTBD-011, all unratified, so appending to it "re-authors that citation
+manifest" and counts as an explicit build-upon. The prescribed remedy was again
+`/wr-jtbd:confirm-jobs-and-personas`, again with no AFK path.
+
+Two things make this shape worse than the one above:
+
+- **The edit adds only ratified citations and creates no new assertion.** Nothing is built on the
+  unratified jobs; the unratified lines are pre-existing and untouched. Treating an append to a
+  comment block as re-authoring every line in it is the inverse-P078 over-fire the agent's own
+  guard prose warns against.
+- **One of the three jobs cannot be ratified at all.** That config's first fixture hard-codes
+  JTBD-011 as its unratified subject, so ratifying JTBD-011 turns the merge-blocking `eval-agents`
+  fixture red. A user-facing job is held unconfirmed by test infrastructure, and the drain the
+  guard prescribes would break CI if followed in full. The scoped drain (JTBD-001 + JTBD-002 only)
+  is recorded on P290.
+
+Cost: the iteration narrowed its scope three times across four reviewer spawns, ending with two
+retirements instead of four. The two deferred retirements are recorded on P290 with this gate named
+as their blocker. Note the carve-out this ticket already proposes would not have cleared this shape
+— the same-drain carve-out is about artefacts the iter itself authors born-unconfirmed, whereas
+here the unratified citations were pre-existing and the edit was additive. Whatever rule lands
+needs to distinguish *adding a line to a block* from *depending on every line already in it*.
+
 ## Related
 
 - Captured via `/wr-itil:capture-problem` from the P439 iteration retro (2026-07-26).
