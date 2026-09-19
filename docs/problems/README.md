@@ -55,7 +55,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 12 | P534 | The `npm ci \|\| npm install` fallback hides lockfile drift until an unrelated job fails | 12 (High) | Open | S | 2026-09-04 | internal |
 | 10 | P515 | `drain-register-queue.sh` appends index rows past the end of the register table, so auto-scaffolded risks never reach the index | 10 (High) | Open | S | 2026-08-21 | internal |
 | 9 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue | 9 (Medium) | Known Error | M | 2026-06-11 | internal |
-| 9 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight contexts — strands dispatchable lifecycle/ack/upstream-report obligations the framework authorises to proceed | 9 (Medium) | Open | S | 2026-07-26 | corrective-feedback (user, 2026-07-26 — "External comms is NOT out of pre-flight scope") |
 | 9 | P484 | The reading-context persona constraint is load-bearing in two ratified decisions but documented nowhere | 9 (Medium) | Open | S | 2026-08-08 | internal |
 | 9 | P549 | The tarball shim-integrity detector silently skips any package whose pack lifecycle prints to stdout, so the two packages carrying the most shims are never checked | 9 (Medium) | Open | S | 2026-09-19 | internal |
 | 8 | P419 | capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the JTBD edit gate mid-session | 8 (Medium) | Known Error | M | 2026-07-05 | internal |
@@ -310,6 +309,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P533 | Duplicate ticket IDs are silently swallowed by the README reconciler, so drift rows blame the wrong cause | `@windyroad/itil@2.2.0` 2026-09-03 | no — not observed |
 | P537 | External-comms publication guard blocks npm publish dry runs | 2026-09-11 (`@windyroad/risk-scorer@0.19.2`, `@windyroad/voice-tone@0.8.5`; version-packages commit `4d66e3ab`, merge `99c720b9`, PR #475) | no — not observed |
 | P402 | external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS | 2026-09-12 (`@windyroad/risk-scorer@0.19.3`, `@windyroad/voice-tone@0.8.6`; version commit `8c9e4f4c`, merge `9cc26afc`, PR #477, workflow 34684064046) | no — not observed |
+| P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight contexts — the authorised set is now stated outright in `/wr-itil:work-problems`, with the one restrained shape (P363's held batch cadence) named beside it | pending — `@windyroad/itil` patch committed, ships next release | no — not observed |
 
 ## Inbound Upstream Reports
 

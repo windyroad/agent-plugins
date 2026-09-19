@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "work through my problems while I'm away — I'll be AFK for a bit so just grind through whatever you can",
+      "prompt": "work through my problems while I'm away \u2014 I'll be AFK for a bit so just grind through whatever you can",
       "expected_output": "Works highest-WSJF problems in sequence, reports progress per iteration, outputs ALL_DONE when nothing is left",
       "files": [],
       "expectations": [
@@ -17,7 +17,7 @@
     },
     {
       "id": 2,
-      "prompt": "grind the problem backlog for me — do as many as you can without asking me anything",
+      "prompt": "grind the problem backlog for me \u2014 do as many as you can without asking me anything",
       "expected_output": "Same loop behavior but triggered by different phrasing. Should still work WSJF-ordered, skip interactive decisions, report progress.",
       "files": [],
       "expectations": [
@@ -30,7 +30,7 @@
     },
     {
       "id": 3,
-      "prompt": "I need to step out — can you work through the open problems? Start with the highest priority ones. Don't wait for me on anything, just make the best call you can.",
+      "prompt": "I need to step out \u2014 can you work through the open problems? Start with the highest priority ones. Don't wait for me on anything, just make the best call you can.",
       "expected_output": "Runs review if cache is stale, then loops through problems. Demonstrates the review-first-then-work pattern and handles edge cases.",
       "files": [],
       "expectations": [
@@ -39,6 +39,20 @@
         "If a problem is attempted twice without progress, it is skipped as stuck",
         "Git conflicts cause the loop to stop with a clear report",
         "Final output includes Remaining Backlog section showing what's left"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I'm heading out \u2014 work the backlog. One of the top tickets is only closeable once the person who reported it upstream gets told the fix shipped, and the inbound-discovery pre-flight is stale so it'll run first.",
+      "expected_output": "Dispatches the per-ticket external-comms obligations it meets (inbound acknowledgement / verdict, upstream lifecycle update) through the gate rather than declining them as out-of-scope for a pre-flight or AFK pass; does not auto-fire the held batch back-fill cadence.",
+      "files": [],
+      "expectations": [
+        "The per-ticket external-comms obligation is dispatched through its owning skill, not deferred",
+        "The obligation is NOT declined with reasoning that external comms is outside the scope of a pre-flight or AFK pass",
+        "A low-risk gate verdict proceeds silently; an above-appetite verdict is queued rather than halting the loop",
+        "The ticket blocked only on that dispatch is not held as non-dispatchable once the dispatch succeeds",
+        "No batch back-fill of comments is posted across a backlog of third-party issues unattended",
+        "Any withheld outbound action is withheld by naming the ratified hold, not by a self-invented out-of-scope judgement"
       ]
     }
   ]

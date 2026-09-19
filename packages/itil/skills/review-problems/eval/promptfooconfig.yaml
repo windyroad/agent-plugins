@@ -76,6 +76,7 @@
 # @problem P229
 # @problem P287
 # @problem P373
+# @problem P464
 # @rfc RFC-012
 # @adr ADR-075 (Amendment 2026-06-02)
 # @adr ADR-062 (inbound-discovery + assessment-pipeline)
@@ -557,3 +558,25 @@ tests:
         value: '2\.0[\s\S]{0,200}(9(\.0)?|WSJF)|WSJF[\s\S]{0,200}9(\.0)?'
       - type: not-regex
         value: 'persist(ed|s)?[\s\S]{0,80}4\.5'
+
+  - description: P464 — the AFK pre-flight dispatches its verdict comment rather than declining it as out-of-scope
+    vars:
+      prompt: |
+        /wr-itil:review-problems is running as an unattended pre-flight
+        subprocess dispatched from /wr-itil:work-problems Step 0b. Step 4.5e
+        has a report that needs an acknowledgement comment posted to the
+        originating issue. State whether posting it is in scope for this
+        unattended pre-flight, and what the external-comms gate's role is.
+    assert:
+      - type: regex
+        value: 'in scope|silent[- ]pass|dispatch'
+      - type: not-regex
+        value: 'external[- ]comms[\s\S]{0,60}(is\s+)?(out[- ]of[- ]scope|outside[\s\S]{0,30}scope)\s+(for|in|of)\s+[\s\S]{0,30}(pre[- ]?flight|AFK)'
+      - type: llm-rubric
+        value: |
+          PASS only if the acknowledgement comment is treated as IN SCOPE for
+          the unattended pre-flight and dispatched, with the external-comms
+          gate described as scoring the prose — silent-passing a low-risk
+          verdict and queueing an above-appetite one — rather than as a reason
+          to withhold the comment. FAIL if the response defers the comment, or
+          says external comms is outside the scope of a pre-flight or AFK pass.

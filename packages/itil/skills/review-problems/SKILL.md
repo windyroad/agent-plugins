@@ -286,7 +286,7 @@ The `## Inbound Upstream Reports` README section (ADR-062 § Step 9e renderer pe
 
 #### 4.5 AFK-loop behaviour
 
-When invoked from `/wr-itil:work-problems` as a `claude -p` pre-flight subprocess (the Step 0b inbound-discovery pre-flight dispatch; AFK-by-construction per the Step 5 dispatch constraint + ADR-032 subprocess isolation), Step 4.5 runs silently per the mechanical-stage carve-out. The only user-attention surface during AFK is the existing external-comms gate UX (a known interrupt class per ADR-028 amended); per-branch `AskUserQuestion` would re-introduce the friction P132 was engineered to remove.
+When invoked from `/wr-itil:work-problems` as a `claude -p` pre-flight subprocess (the Step 0b inbound-discovery pre-flight dispatch; AFK-by-construction per the Step 5 dispatch constraint + ADR-032 subprocess isolation), Step 4.5 runs silently per the mechanical-stage carve-out. The only user-attention surface during AFK is the existing external-comms gate UX (a known interrupt class per ADR-028 amended); per-branch `AskUserQuestion` would re-introduce the friction P132 was engineered to remove. Being gated this way is **not** being out-of-scope: the verdict / acknowledgement / pushback comments this step owns are dispatchable during an AFK pre-flight and MUST NOT be declined as "external comms is outside this pass's scope" — see `/wr-itil:work-problems` § External-comms scope in AFK / pre-flight for the authorised set and the one restrained shape (P464).
 
 ### 4.6. Relevance-close pass (P346 / P347 / ADR-079 Phase 1 + Phase 2)
 
