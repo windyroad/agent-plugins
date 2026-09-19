@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-19 **P550 captured** — the propose-fix trace predicate checks that a fix vehicle exists, not that a card on it covers the scope about to be implemented (lightweight aside via /wr-itil:capture-problem)
+> Last reviewed: 2026-09-19 **P441 known error** — selection and dispatch-eligibility are the same axis, so the loop only ever asks which ticket is most valuable, never whether anything can be done with it; the ranking then rewards a stuck ticket by raising its score on the Known-Error multiplier
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -21,6 +21,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 10 | P530 | Retrospective consumer-repo assumptions remain after shim fix | 10 (High) | Open | S | 2026-08-28 | inbound-reported (#453) |
 | 9.0 | P432 | Assistant does not auto-close the feedback loop on inbound-feedback conversion (channel-agnostic) | 9 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#347) |
 | 9.0 | P435 | wr-risk-scorer gates hardcoded to home-repo shape — push-gate over-fires on non-npm repos, external-comms under-fires on static-site/deck content | 9 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#235, #253) |
+| 9.0 | P441 | work-problems pre-dispatch selection filter misses committed-but-unpushed KE (#312) and direction-blocked / interactive-only-skill (#318) states | 9 (Medium) | Known Error | M | 2026-07-06 | inbound-reported (#312, #315, #318) |
 | 9 | P454 | wr-risk-scorer restage-commit helper sweeps the whole index/working tree into the commit instead of pathspec-scoping to the supplied paths | 9 (Medium) | Open | S | 2026-07-15 | inbound-reported (#344) |
 | 8 | P513 | The JTBD corpus has no index or persona currency check, unlike the decision corpus | 8 (Medium) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P111) |
 | 8 | P518 | `render-story-map` emits bare identifiers as link text, so every reference link announces as "P033" | 8 (Medium) | Open | S | 2026-08-24 | inbound-reported (#445) |
@@ -28,7 +29,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P436 | Issue templates declare labels ('problem', 'needs-triage') that don't exist; scaffold-intake should provision declared labels | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#170) |
 | 6 | P486 | The policy validator checks a policy's shape, never whether it contradicts itself | 12 (High) | Open | M | 2026-08-09 | inbound-reported |
 | 6 | P521 | Governance tools exit 0 over output they never validated | 12 (High) | Open | M | 2026-08-25 | inbound-reported (adopter-repo P224) |
-| 4.5 | P441 | work-problems pre-dispatch selection filter misses committed-but-unpushed KE (#312) and direction-blocked / interactive-only-skill (#318) states | 9 (Medium) | Open | M | 2026-07-06 | inbound-reported (#312, #315, #318) |
 | 4.5 | P448 | work-problems post-release K→V auto-transition has no release-vehicle class for repo-local fixes in consumer repos (no npm release) | 9 (Medium) | Open | M | 2026-07-15 | inbound-reported (#320) |
 | 4.5 | P449 | I13 RFC-trace predicate + manage-problem I13 gate are not adopter-aware — fire no-rfc-trace in repos without an RFC tier | 9 (Medium) | Open | M | 2026-07-15 | inbound-reported (#321) |
 | 4.5 | P451 | work-problems Step 5 iter/pre-flight dispatch exceeds the interactive-harness 10-minute foreground Bash ceiling (SIGTERM + 0-byte JSON) | 9 (Medium) | Open | M | 2026-07-15 | inbound-reported (#327) |

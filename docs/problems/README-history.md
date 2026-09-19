@@ -1510,6 +1510,9 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 
 ## 2026-09-19
 
+> Last reviewed: 2026-09-19 **P550 captured** — the propose-fix trace predicate checks that a fix vehicle exists, not that a card on it covers the scope about to be implemented (lightweight aside via /wr-itil:capture-problem)
+
+
 > Last reviewed: 2026-09-19 **P545 captured** — the verification-close drain has no state assertion, and the do-not-close guard green-lights tickets that are already closed (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-09-18 **P541 captured** — release verification failed a good release: the post-publish window is far shorter than real npm propagation, and its per-package nesting makes widening it worse (lightweight aside via /wr-itil:capture-problem)
