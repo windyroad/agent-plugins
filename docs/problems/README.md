@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-19 **P435 known error** — neither risk-scorer gate asks the repository what shape it is, so the push gate denies with a remedy that exists only here and the external-comms gate stays silent on the static-site and deck content an adopter actually ships.
+> Last reviewed: 2026-09-19 **P550 captured** — the propose-fix trace predicate checks that a fix vehicle exists, not that a card on it covers the scope about to be implemented (lightweight aside via /wr-itil:capture-problem)
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -121,6 +121,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3 | P418 | Reviewer-agent marker hooks do not fire on SendMessage-resumed agents — ISSUES FOUND cannot be continued to a marker-writing PASS, forcing a full fresh re-review | 6 (Medium) | Open | M | 2026-07-05 | internal |
 | 3 | P421 | Reference-section awk helpers destructively truncate governance files containing invalid UTF-8 | 6 (Medium) | Open | M | 2026-07-05 | internal |
 | 3 | P496 | Nine story maps carry the superseded stacked encoding, and two more use bespoke encodings, all needing migration to the rendered grid | 6 (Medium) | Open | M | 2026-08-05 | found while fixing the shipped template (ADR-102) |
+| 3 | P550 | The propose-fix trace predicate checks that a vehicle exists, not that a card covers the scope | 6 (Medium) | Open | M | 2026-09-19 | internal |
 | 3 | P045 | Auto plugin install on user's machine after governance release | 12 (High) | Open | L | 2026-04-19 | internal |
 | 3 | P460 | Agent surfaces ticket-worthy findings and obvious next-actions as recommendations instead of autonomously capturing or acting | 12 (High) | Open | L | 2026-07-25 | internal |
 | 3 | P473 | Story maps are authored as per-fix 1-card stubs, not user journeys — below the STORY-MAP-003 quality bar | 12 (High) | Open | L | 2026-07-27 | corrective-feedback (user, 2026-07-27) |
