@@ -133,6 +133,12 @@ from corpus evidence rather than assumption:
   every ticket whose detection misfired. Observed on this very ticket, whose
   body discusses upstream-blocked as a class and trips the strict token scan.
   The match requires the marker line to NOT carry the misfire wording.
+- **Every occurrence is evaluated, not the first.** `- **Blocked by**:` is not a
+  unique key in a ticket body, and these lists demonstrably are not
+  de-duplicated. A first-match read where the first line opens `(none` masks a
+  real hold below it; the inverse strands a buildable ticket. Evaluate every
+  line-anchored occurrence after the fence skip and hold if any survives the
+  negation guard. Fixtures cover the two-line shape in both orders.
 - **`unpushed-fix` matches fix-shaped commits only.** A commit that merely
   mentions a ticket is not a fix for it — a problem capture and a briefing
   refresh both name tickets in their subjects and neither implements anything.
@@ -163,6 +169,27 @@ at the loop-end question gate. Without it that class has no self-firing surface
 at all — the ticket would simply stop being dispatched, visible only in a
 per-session table. Scoped so it does not double-queue a question the ratification
 predicate already raised.
+
+The skip record must be **typed**, and only maintainer-owed holds may reach the
+shared outstanding-questions queue. That queue is not a neutral record: the
+loop-end gate surfaces every entry in it to the maintainer and then truncates
+it, and the session-start surfacer replays it. Writing all four classes there
+would put a pending push and an upstream wait on the maintainer's return
+checklist — exactly the harm the hold-owner column exists to prevent. Either the
+record carries a kind discriminator the surfacing gates filter on, or the
+loop-owned and upstream-owned holds land in a separate skip file that the
+backlog-empty gate names alongside the records it already reads. The
+`interactive-only` direction entry is the one that genuinely belongs in the
+maintainer's queue.
+
+The existing backlog-empty gate clause needs the **same misfire guard** as the
+predicate's `upstream` class. It matches the upstream marker prefix with no
+exclusion today, so a ticket whose detection misfired — recorded via the
+documented recovery path, which reuses that very prefix — is silently classified
+non-dispatchable and drops out of the loop entirely. This ticket hit it directly.
+Leaving the two surfaces disagreeing (predicate says not-held, gate says
+non-dispatchable) would re-create the divergence the fix exists to remove, so the
+guard lands in both.
 
 The iter-layer skip stays exactly as it is. The two surfaces are not redundant:
 the iter layer is the authoritative second source, the pre-dispatch gate is the
@@ -224,11 +251,10 @@ maintainer reads the skip in the loop summary rather than a pre-dispatch hold.
 ## Dependencies
 
 - **Composes with**: P385 (verifying — pre-dispatch relevance-close), P344 (verifying — pre-dispatch predicate-check), P352 (runtime queue-and-continue).
-- **Blocked by**: human ratification of the recorded decision that separates dispatch eligibility from priority — `docs/decisions/` entry captured 2026-09-19, born `human-oversight: unconfirmed`. The design above is settled and the approach-choice the ticket left open (filter dispatch versus demote rank) is pinned to filtering; what remains is a human confirming that recorded substance at the `/wr-architect:review-decisions` drain. Implementation waits on that confirmation. The un-park trigger is self-firing — an unconfirmed decision is surfaced by the session-start oversight nudge and by the loop's own pre-`ALL_DONE` oversight drain.
-
-- **Composes with**: P385 (verifying — pre-dispatch relevance-close), P344 (verifying — pre-dispatch predicate-check), P352 (runtime queue-and-continue).
+- **Blocked by**: human ratification of the recorded decision that separates dispatch eligibility from priority — `docs/decisions/` entry captured 2026-09-19, born `human-oversight: unconfirmed`. The design above is settled and the approach-choice the ticket left open (filter dispatch versus demote rank) is pinned to filtering; what remains is a human confirming that recorded substance at the `/wr-architect:review-decisions` drain. Implementation waits on that confirmation **and** on ratification of the story map carrying the fix's release row — the map is the approval surface and it is still a draft, so decision ratification alone does not unblock. Both gates are self-firing — an unconfirmed decision is surfaced by the session-start oversight nudge and by the loop's own pre-`ALL_DONE` oversight drain.
 
 ## Related
 
 - Inbound issues #312, #315, #318. Kept as one ticket: all three extend the same pre-dispatch selection filter (#315 absorbed 2026-07-15 per wr-itil:hang-off-check verdict).
-- **Upstream report pending** -- false positive; detection misfire. The strict external-root-cause token scan hits because this ticket *discusses* upstream-blocked tickets as one of the four held classes it must recognise. Its own root cause is entirely internal: our selection machinery asks which ticket is most valuable and never asks whether anything can be done with it.
+- **External-root-cause detection misfire** -- recorded deliberately WITHOUT the `Upstream report pending` marker wording. The strict external-root-cause token scan hits because this ticket *discusses* upstream-blocked tickets as one of the four held classes it must recognise. Its own root cause is entirely internal: our selection machinery asks which ticket is most valuable and never asks whether anything can be done with it.
+  Writing the canonical misfire marker here would have made this ticket non-dispatchable to the loop's own pre-`ALL_DONE` backlog-empty gate, which matches the marker prefix with no misfire exclusion — the ticket would have made itself invisible to the loop it exists to fix. That collision is recorded as a named guard in the Fix Strategy, and closing it in the existing gate clause is part of this ticket's scope.

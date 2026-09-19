@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 129 (115 in-force, 14 historical)
+**Total ADRs:** 130 (116 in-force, 14 historical)
 
 ---
 
 ## In-force decisions
 
-_115 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_116 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -590,6 +590,11 @@ _115 ADRs. These are the current rules. The architect agent reads this section f
 **Chosen:** Chosen option: **"Govern the published boundary; do not widen it"**.
 **Confirmation:** A for loop over a glob that contains a literal output redirection produces no event and no guessed target. The...; The verbatim 2026-09-19 recurrence command produces no event.; sed -i against a governed path produces no event.; A python3 - <<PY heredoc that opens a governed path for writing produces no event.; The existing cases for literal redirection, tee, read-only silence, heredoc marker discipline and the five cal...
 **Related:** ADR-110, ADR-116, ADR-066, ADR-068, ADR-118, ADR-017, ADR-045, ADR-005, ADR-052, ADR-087, ADR-103
+
+### ADR-132 — Dispatch eligibility is a separate axis from priority
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Chosen option: **"Separate dispatch eligibility from priority"**, because the two questions are genuinely different and only one of them is about value. Priority says how much a ticket is worth; eligibility says whether anything can be done...
+**Confirmation:** The predicate exits 0 with the right class and owner for a fixture ticket in; A ticket carrying two - Blocked by: lines — one (none — …), one a real; The predicate and the backlog-empty gate agree on every ticket. In particular; The held ticket still appears at its own position in the rankings, annotated; After a loop in which all four classes fired, the outstanding-questions queue; Every surfaced hold names what would unstick it, in the text the maintainer; The all-held stop is textually distinguishable from an empty-backlog stop, and; A ticket whose only hold was a pending push becomes dispatchable again once
 
 ---
 
