@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-09-19 **STORY-044 done** — @windyroad/cruise@0.4.11 ships the `/wr-cruise:status` pacing-telemetry skill; cruise suite 79/79 green, closing the last open story under RFC-046.
+> Last reviewed: 2026-09-19 **RFC-098 row drawn** — four stories cover P441's three reported faces and its four held classes, so a ticket waiting on a person stops competing for a dispatch slot without losing its rank. Prior: **STORY-044 done** — @windyroad/cruise@0.4.11 ships the `/wr-cruise:status` pacing-telemetry skill; cruise suite 79/79 green, closing the last open story under RFC-046.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -171,6 +171,12 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | in-progress | STORY-086 | Complete an external-comms review without repeating it | S | P402 | RFC-086 | STORY-MAP-002 |
 | in-progress | STORY-087 | Inspect a package without triggering publication review | S | P537 | RFC-091 | STORY-MAP-002 |
 | draft | STORY-092 | Provision the labels the intake templates declare | S | P436 | RFC-096 | STORY-MAP-004 |
+| draft | STORY-094 | The loop leaves a ticket alone while its fix is only waiting to be pushed | S | P441 | RFC-098 | STORY-MAP-011 |
+| draft | STORY-095 | The loop leaves a ticket alone while it is waiting on my answer | M | P441 | RFC-098 | STORY-MAP-011 |
+| draft | STORY-096 | The loop leaves a ticket alone while it is waiting on someone upstream | S | P441 | RFC-098 | STORY-MAP-011 |
+| draft | STORY-097 | When I come back I can see what is held, who owes it, and what would unstick it | S | P441 | RFC-098 | STORY-MAP-011 |
+| draft | STORY-091 | Invoke the Wardley map converter by a name that survives every upgrade | S | P437 | RFC-095 | STORY-MAP-008 |
+| draft | STORY-093 | Every conversion tells the reporter it landed | M | P432 | RFC-097 | STORY-MAP-004 |
 
 
 ## Done

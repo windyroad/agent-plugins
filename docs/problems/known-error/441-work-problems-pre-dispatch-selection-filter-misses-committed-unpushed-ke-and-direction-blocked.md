@@ -251,7 +251,25 @@ maintainer reads the skip in the loop summary rather than a pre-dispatch hold.
 ## Dependencies
 
 - **Composes with**: P385 (verifying — pre-dispatch relevance-close), P344 (verifying — pre-dispatch predicate-check), P352 (runtime queue-and-continue).
-- **Blocked by**: human ratification of the recorded decision that separates dispatch eligibility from priority — `docs/decisions/` entry captured 2026-09-19, born `human-oversight: unconfirmed`. The design above is settled and the approach-choice the ticket left open (filter dispatch versus demote rank) is pinned to filtering; what remains is a human confirming that recorded substance at the `/wr-architect:review-decisions` drain. Implementation waits on that confirmation **and** on ratification of the story map carrying the fix's release row — the map is the approval surface and it is still a draft, so decision ratification alone does not unblock. Both gates are self-firing — an unconfirmed decision is surfaced by the session-start oversight nudge and by the loop's own pre-`ALL_DONE` oversight drain.
+- **Blocked by**: human ratification of the recorded decision that separates dispatch eligibility from priority — `docs/decisions/` entry captured 2026-09-19, born `human-oversight: unconfirmed`. The design above is settled and the approach-choice the ticket left open (filter dispatch versus demote rank) is pinned to filtering; what remains is a human confirming that recorded substance at the `/wr-architect:review-decisions` drain. Implementation waits on that confirmation. The fix vehicle is drawn: release row RFC-098 on STORY-MAP-011, carrying STORY-094 through STORY-097 — one per reported face plus the return surface. Drawing the row left the map's own approval intact, so the map is not a second gate; the four stories do each need accepting out of draft before implementation, which is mechanical once the decision is ratified. The ratification gate is self-firing — an unconfirmed decision is surfaced by the session-start oversight nudge and by the loop's own pre-`ALL_DONE` oversight drain.
+
+## RFCs
+
+| RFC | Status | Title |
+|-----|--------|-------|
+| RFC-098 | proposed | A ticket waiting on a person stops competing for the loop's attention — release row on STORY-MAP-011 |
+
+## Stories
+
+| Story | Status | Covers | Title |
+|-------|--------|--------|-------|
+| STORY-094 | draft | #312 / `unpushed-fix` | The loop leaves a ticket alone while its fix is only waiting to be pushed |
+| STORY-095 | draft | #318 / `direction` + `interactive-only` | The loop leaves a ticket alone while it is waiting on my answer |
+| STORY-096 | draft | #315 / `upstream` | The loop leaves a ticket alone while it is waiting on someone upstream |
+| STORY-097 | draft | the return surface for all four holds | When I come back I can see what is held, who owes it, and what would unstick it |
+
+All three reported faces and all four held classes are covered by a card. A single
+card scoped to one face would read as a clean trace while stranding the rest.
 
 ## Related
 
