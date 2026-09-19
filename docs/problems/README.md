@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-19 **P551 captured** — an edit gate that only unlocks on a PASS deadlocks on a new file under a gated path: the reviewer has no artefact to read, judges a lossy prose proxy, and returns ISSUES FOUND, so every gated new file costs an extra reviewer round (lightweight aside via /wr-itil:capture-problem)
+> Last reviewed: 2026-09-19 **P543 known error** — the AFK loop can no longer end by simply going quiet, and being told you are going to bed now keeps it working instead of stopping it; the liveness-across-a-detour contract stays open for the maintainer. Prior: **P551 captured** — an edit gate that only unlocks on a PASS deadlocks on a new file under a gated path: the reviewer has no artefact to read, judges a lossy prose proxy, and returns ISSUES FOUND, so every gated new file costs an extra reviewer round.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -43,7 +43,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 16 | P420 | check-briefing-budgets.sh crashes with `must_split[@]: unbound variable` on empty arrays under macOS default bash 3.2 | 8 (Medium) | Known Error | S | 2026-07-05 | internal |
 | 16 | P471 | run-retro Step 2d ask-hygiene trail path collides across same-day iterations, clobbering prior entries | 8 (Medium) | Known Error | S | 2026-07-26 | internal |
 | 16 | P511 | The ask-hygiene trail is one file per day, so a second retro's counts are invisible to the R6 gate | 8 (Medium) | Known Error | S | 2026-08-21 | internal |
-| 16 | P543 | The agent treats the user's absence as a stop signal for the loop that exists to run during it | 16 (High) | Open | S | 2026-09-19 | corrective-feedback (user, 2026-09-19) |
+| 16 | P543 | The agent treats the user's absence as a stop signal for the loop that exists to run during it | 16 (High) | Known Error | S | 2026-09-19 | corrective-feedback (user, 2026-09-19) |
 | 15 | P507 | SessionStart surfacers emit a directive with nothing enforcing the drain — surfacing is not draining | 15 (High) | Known Error | M | 2026-08-20 | internal |
 | 12 | P468 | architect-mark-reviewed misses a genuine PASS whose verdict line is a markdown heading rather than bold | 6 (Medium) | Known Error | S | 2026-07-26 | internal |
 | 12 | P148 | Agent defers ticket creation to retro summary "Tickets Deferred" section instead of immediately invoking `/wr-itil:manage-problem` — observations could be lost if user is in a rush | 12 (High) | Known Error | M | 2026-04-29 | internal |

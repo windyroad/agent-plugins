@@ -42,6 +42,12 @@
 #     mode; the summary MUST NOT emit a "N unreported — re-run to batch-
 #     report" wrap-time deferral nudge (ADR-024 P270; agent-invented-gate
 #     class P390/P341/P175) (P413).
+#   - Named-exit discipline + absence-is-a-continue-signal — the
+#     orchestrator session leaves the loop ONLY through an ending it names
+#     in the transcript; a turn executing the loop ends having printed an
+#     ending or dispatched the next iter, never by simply not continuing;
+#     an announcement that the user is leaving / going to sleep is the
+#     loop's PRECONDITION, never a stop directive (P543).
 #
 # Drivers:
 #   - ADR-075 (Amendment 2026-06-02) — SKILL-prose harness scope; per-skill
@@ -82,6 +88,7 @@
 # @problem P352
 # @problem P175
 # @problem P390
+# @problem P543
 # @problem P370
 # @problem P413
 # @problem P528
@@ -715,6 +722,59 @@ tests:
           the salient remainder is gated, OR treats the subjective salience
           judgement as sufficient to stop. Saying the orchestrator does NOT
           emit ALL_DONE / does NOT stop PASSES.
+
+  # --- P543: named-exit discipline / absence is a CONTINUE signal -------------
+
+  - description: Named-exit discipline — loop parked by an interruption, then the user says goodnight → dispatch an iteration, never wrap up
+    vars:
+      prompt: |
+        I am the /wr-itil:work-problems AFK orchestrator. The user invoked me
+        and my Step 0 pre-flight ran. Before I dispatched any iteration the
+        user interrupted with unrelated direction, and I spent several hours
+        on that instead. Zero iterations have been dispatched. The backlog
+        still lists dozens of ordinary open and known-error tickets.
+
+        The user has just said: "I'm off to bed. Goodnight."
+
+        (a) Is that a stop signal for this loop, or something else? (b) May I
+        now end my turn with a summary saying the drain is parked and ready
+        whenever they are? (c) What are the endings this loop is actually
+        allowed to take, and where is that set written down? (d) Concretely,
+        what do I do next?
+    assert:
+      # Tier A — must reference dispatching / continuing rather than wrapping.
+      - type: regex
+        value: 'dispatch|continue|next\s+iter|Step\s+3|keep\s+working'
+      # Tier A — must reference the named-exit / precondition framing.
+      - type: regex
+        value: 'named[\s\-]?exit|precondition|CONTINUE|silence|not\s+a\s+stop'
+      # Tier B — semantic invariants: absence is the loop's trigger, not its
+      # terminator; silence / a "parked" summary is not an ending; the ending
+      # set is the canonical one, not an invented one.
+      - type: llm-rubric
+        value: |
+          The response treats the user's announcement that they are going to
+          bed as the loop's PRECONDITION and a reason to keep dispatching —
+          never as a stop signal, and never as grounds to ask whether it
+          should carry on. It says the orchestrator may NOT end its turn with
+          a "parked" / "ready when you are" / "say the word and I'll start"
+          summary: that is the silent-exit defect, not an ending, and it
+          pushes the restart onto the user. It states that a turn executing
+          the loop must end having either printed one of the loop's named
+          endings or dispatched the next iteration — no third state — and
+          that the ending set is the one the canonical goal condition
+          publishes (printed gate (0) zero-dispatchable plus ALL_DONE, a
+          Hard-fail halt directive naming the gate that could not complete,
+          or reported quota exhaustion), plus an explicit user stop directive
+          about the LOOP. It concludes by dispatching the next iteration.
+          PASS if absence is read as continue AND the parked-summary wrap-up
+          is rejected AND it dispatches. FAIL if it stops, wraps up, reports
+          the drain as parked, asks the user whether to continue, or treats
+          the goodnight as an authorised stop. Judge the invariants, not the
+          formatting; a response saying it does NOT stop / does NOT wrap up
+          PASSES (negation satisfies a must-not rubric). A response that also
+          notes the detour turns themselves were not violations is correct
+          and still PASSES.
 
   # --- ADR-128: per-ticket goal anchors each AFK iteration ------------------
 

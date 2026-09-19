@@ -1531,3 +1531,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-09-19 **P549 captured** — the tarball shim-integrity detector parses `npm pack --json` output that two packages prefix with lifecycle-script prose, so it silently skips `architect` and `risk-scorer`, the two carrying the most shims, and a blind walk looks identical to a clean one (lightweight aside via /wr-itil:capture-problem).
 
 > Last reviewed: 2026-09-19 **P435 known error** — neither risk-scorer gate asks the repository what shape it is, so the push gate denies with a remedy that exists only here and the external-comms gate stays silent on the static-site and deck content an adopter actually ships.
+
+## 2026-09-19
+
+> Last reviewed: 2026-09-19 **P551 captured** — an edit gate that only unlocks on a PASS deadlocks on a new file under a gated path: the reviewer has no artefact to read, judges a lossy prose proxy, and returns ISSUES FOUND, so every gated new file costs an extra reviewer round (lightweight aside via /wr-itil:capture-problem)
