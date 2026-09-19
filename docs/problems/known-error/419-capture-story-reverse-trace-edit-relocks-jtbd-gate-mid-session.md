@@ -40,6 +40,14 @@ The JTBD edit gate hashes docs/jtbd/ content for drift detection (ADR-008/ADR-00
 - [ ] Decide the fix shape: exclude reverse-trace sections from the gate hash vs. helper-side marker-hash refresh after a mechanical render
 - [ ] Create reproduction test
 
+### Recurrence 2026-09-19 (P543 iteration)
+
+Same class, a different reverse-trace caller. Working P543, the STORY-098 `draft → accepted` transition ran `wr-itil-update-jtbd-references-section` on `docs/jtbd/developer/JTBD-006-work-backlog-afk.proposed.md` to refresh its `## Stories` section — the transition's own mandated step. Several turns later a Bash write to `packages/itil/skills/work-problems/SKILL.md` was denied with *"jtbd policy file changed since last review. Re-delegate to wr-jtbd:agent"*, even though the JTBD review for that exact change had already returned PASS earlier in the same session.
+
+The caller here is the story transition, not `/wr-itil:capture-story` — so the relock is not specific to capture; any skill step that runs a reverse-trace helper over `docs/jtbd/` invalidates the marker for every subsequent gated edit in the session. The workaround the memory note prescribes (do all JTBD-touching work first, then one review, then all gated edits in one batch) does not survive a lifecycle transition sitting between two gated edits, which is the ordinary shape of working a ticket.
+
+Cost this time: the denied write was the temporary SKILL.md revert for a RED proof, so the recovery was to build the fixture out-of-tree instead of paying another review round. That worked, but it is a workaround for a workaround.
+
 ## Dependencies
 
 - **Blocks**: (none)

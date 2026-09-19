@@ -75,6 +75,14 @@ lossy in exactly the way that produces substantive findings.
       with no marker and confirm the deny message offers no recovery for a
       non-existent target.
 
+### Second witness 2026-09-19 (P543 iteration)
+
+Three architect rounds on one change, all on prose proxies, before a PASS. The change was new content for `packages/itil/skills/work-problems/SKILL.md` plus a new story and a new story-map release row — none of which existed on disk when the first review ran, so all three rounds judged a prose description of the intended text pasted into the review prompt.
+
+Round 1 returned six findings; two were real and load-bearing (a missing propose-fix release row; a contract resting on an unrecorded decision). Round 2 returned three more, two of them precision errors in the *proxy's* wording rather than in the change. Round 3 passed. The verdict quality was genuinely good, so this is not a case of a reviewer flailing — but rounds 2 and 3 were each ~250s, and the findings they added were about how the text was paraphrased in the prompt, which is exactly the lossy-proxy cost this ticket names.
+
+The compounding detail worth recording: the reviewer cannot read the file, so the agent must paraphrase; every paraphrase is a new artefact the reviewer can find fault in; and each round costs a full review turn. The rounds do not converge on the change, they converge on the paraphrase.
+
 ## Dependencies
 
 - **Blocks**: (none)

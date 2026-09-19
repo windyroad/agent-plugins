@@ -1,14 +1,10 @@
-# Ask Hygiene — 2026-09-19 (P509 iteration)
+# Ask Hygiene — 2026-09-19 (P543 iteration)
 
-Retro surface: `/wr-retrospective:run-retro` Step 2d, invoked from the P509 AFK iteration.
-
-No `AskUserQuestion` calls were made this session. The run was unattended under an explicit
-never-ask constraint, so the count is a floor rather than a signal about judgement — the
-iteration constraints removed the surface rather than the agent declining to use it.
+Per ADR-044 / run-retro Step 2d. This was an unattended `/wr-itil:work-problem 543` run under binding iteration constraints that forbid `AskUserQuestion` outright, so the call set is empty by construction.
 
 | Call # | Header | Classification | Citation |
 |--------|--------|----------------|----------|
-| — | (none) | — | Iteration constraint `iter-509.md` line 3: "NEVER call AskUserQuestion. The user is absent." |
+| — | (none) | — | `Framework: iter-543 constraint 2 — "NEVER call AskUserQuestion. The user is absent."` |
 
 **Lazy count: 0**
 **Direction count: 0**
@@ -17,18 +13,6 @@ iteration constraints removed the surface rather than the agent declining to use
 **Taste count: 0**
 **Correction-followup count: 0**
 
-## Decisions routed away from an ask
+One genuine direction-setting question arose and was correctly routed to `outstanding_questions` rather than asked: how long the AFK loop's liveness survives an orchestrator-level interruption (P543 investigation task 1, three options recorded on the ticket). Under the constraint that is the mandated path, and it would classify as `direction` (ADR-074 substance-confirm-before-build) had the session been interactive.
 
-Two decisions that would otherwise have been direction-setting asks were instead resolved and
-queued, per the constraint's instruction to route them to `outstanding_questions`:
-
-- The recorded decision was born `human-oversight: unconfirmed` rather than confirmed. No
-  substance-confirm event happened, so a confirmed marker would have been hollow (ADR-110 / P348).
-- One embedded design choice inside that decision — whether a row that asks for the pre-RFC
-  marker and does not qualify is demoted to an ordinary row or refused outright at capture — was
-  resolved by the agent on corpus-consistency grounds (ADR-107 weighed a render-time hard stop
-  and rejected it as premature) and queued for the ratification drain rather than asked.
-
-Both are `direction` shaped, not `lazy`: the framework does not resolve either, and both are
-about to be built on. Under an interactive run they would have fired an ADR-074
-substance-confirm ask and counted as category-1 direction.
+R6 numeric gate: does not fire. `wr-retrospective-check-ask-hygiene` reports `TREND lazy_first=0 lazy_last=0 delta=+0` across the trail.
