@@ -48,6 +48,23 @@ All in `scripts/verify-release-dist-tags.sh` unless noted.
 
 Distinct from P284, which is a publish-auth failure class (E404 / 2FA), not a verification false-negative.
 
+### Second witness, 2026-09-19 — reproduced on the next release
+
+The defect recurred on the very next release, under 17 hours after the first, confirming this is not a one-off.
+
+| | |
+|---|---|
+| Verifier reported | `@windyroad/wardley@0.3.0 is published without latest (registry latest: 0.2.1)` |
+| Registry, checked after | `dist-tags.latest = 0.3.0`, `has 0.3.0: true`, published `2026-09-19T06:34:49.618Z` |
+| Actual outcome | publish **succeeded**; the fix shipped to consumers |
+| Run | 35426885584 |
+
+Same mechanism as the first witness: the publish landed, the 30-second post-publish window expired before the registry exposed the version, and the job failed a correct release. The version-packages PR (#485) merged, the git tag pushed, and npm served the new version — only the verification step failed.
+
+**Bearing on the rating.** The Likelihood was captured at 4 from a single occurrence with the note "propagation above 30s is not unusual". Two occurrences in two consecutive releases is stronger evidence: the failure appears to track normal npm propagation rather than an unusual spike, which puts it closer to almost-certain for any release where propagation exceeds the window. Worth re-scoring at the next review pass rather than here, since WSJF re-ranking wants the whole backlog in view.
+
+**Second-order cost, now observed twice.** Each false negative leaves main's latest run red, which the release gate reads as blocking, so the next release cannot start until an unrelated green run lands. On this occasion the recovery was a rebase onto the release commits plus this very edit — meaning the defect's cost includes the work required to clear the deadlock it creates.
+
 ## Symptoms
 
 - Release job fails at `Verify stable npm dist-tags` with `<pkg>@<version> is published without latest (registry latest: <older>)` despite the publish having succeeded.
