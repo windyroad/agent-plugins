@@ -1,0 +1,7 @@
+# Architect Gate Marker Mechanics — Archive
+
+Entries rotated out of [`architect-gate-marker-mechanics.md`](./architect-gate-marker-mechanics.md) under the P099 Tier 3 budget pass (split-by-date, 2026-09-19). Load alongside the parent when the full mechanism — not just the failure modes — is what you need.
+
+## What You Need to Know
+
+- **An architect review unlocks edits only through a supported, caller-bound completion path and one unambiguous canonical verdict.** The shared marker writer accepts exactly one `**Architecture Review: PASS**` or `## Architecture Review: PASS` line. ISSUES FOUND, repeated or conflicting canonical verdicts, malformed headings, quoted examples, and narrative approval create no review, hash, or plan markers. The generated Codex completion transport records the parent session, checkout, reviewer role, and target at spawn time, then forwards the completed reviewer output to the shared marker writer under that parent context; unmatched targets, non-architect targets, and stale target reuse fail closed. Close the same fresh reviewer once through the native completion path. Never replay a verdict, guess a session id, or create marker evidence manually. P468 source commit `a02e8d0d` carries the parser repair; installed sessions may retain the bold-only matcher until maintainers release and refresh the package and users restart their sessions. <!-- signal-score: 6 | last-classified: 2026-09-04 | first-written: 2026-05-11 -->
