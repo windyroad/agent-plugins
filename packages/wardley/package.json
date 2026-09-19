@@ -24,10 +24,12 @@
     "agents/",
     "hooks/",
     "skills/",
+    "scripts/",
     ".agents/",
     ".claude-plugin/",
     ".codex-plugin/",
     "!skills/*/eval/",
+    "!scripts/test/",
     "lib/"
   ]
 }

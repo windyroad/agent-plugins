@@ -104,14 +104,28 @@ From->To
 
 ### 9. Render
 
-Resolve `<wardley-skill-dir>` to the absolute directory containing this
-installed `SKILL.md`. In Claude Code, `${CLAUDE_SKILL_DIR}` supplies that
-directory. In Codex, use this skill's installed path directly; do not search the
-adopter repository or assume a plugin `bin/` directory is on `PATH`.
+The converter has one name in Claude Code and one path in Codex, because the two
+runtimes resolve a bundled script differently. Use the branch for the runtime you
+are in.
+
+**Claude Code** -- the install puts the plugin's `bin/` directory on `PATH`, so
+the converter answers to its name and keeps answering to it after an upgrade:
+
+```bash
+wr-wardley-owm-to-svg
+```
+
+**Codex** -- plugin `bin/` directories are not on `PATH`, so resolve
+`<wardley-skill-dir>` to the absolute directory containing this installed
+`SKILL.md` and call the converter there. Do not search the adopter repository:
 
 ```bash
 node "<wardley-skill-dir>/owm-to-svg.mjs"
 ```
+
+Both forms take an optional input and output path
+(`[input.owm] [output.svg]`), defaulting to `docs/wardley-map.owm` and
+`docs/wardley-map.svg`.
 
 ### 10. Verify
 

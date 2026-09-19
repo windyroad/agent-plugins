@@ -34,6 +34,22 @@ restart the selected runtime.
 
 Analyses your codebase to identify components, their relationships, and their evolutionary stage, then produces the map and analysis.
 
+**Render an OWM file yourself:**
+
+```bash
+wr-wardley-owm-to-svg [input.owm] [output.svg]
+```
+
+Installing the plugin puts this command on your `PATH`, and it keeps working
+across upgrades -- it resolves to the newest installed version at every call. Use
+it rather than a path into the plugin cache: a cache path carries a version
+number that changes on every release, so calls written that way break the next
+time you update. Defaults are `docs/wardley-map.owm` and `docs/wardley-map.svg`
+(plus a `.png` alongside it on macOS).
+
+In Codex, plugin `bin/` directories are not on `PATH`; call
+`node <skill-dir>/owm-to-svg.mjs` from the installed skill directory instead.
+
 ## Updating and Uninstalling
 
 ```bash

@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-19 **P547 + P548 captured** — an AFK per-iter constraints file carried another ticket's *confirmed direction* verbatim (pinning P463's evaluator fix substance onto the P160 iteration), and the story `done` gate is stated as an OR on the manual path and an AND on the auto-fire path (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-09-19 **P437 known error** — wr-wardley publishes no $PATH-resolvable entry for its OWM-to-SVG converter and omits scripts/ from its packaged files, so a consumer has to name the cache version directory and breaks on every bump; WSJF 9 -> 18 on the Known Error multiplier.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -15,10 +15,10 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Very High) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported** (`**Origin**: inbound-reported` — an external user hit this) | | | | | |
+| 18 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter (consumers pin the cache version and break on bump) | 9 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#325) |
 | 16 | P429 | manage-problem commit-message examples fail @commitlint/config-conventional subject-case in adopter projects | 8 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#137) |
 | 16 | P503 | Edit gates are bound to the Edit\|Write matcher, so Bash-routed writes pass ungated and leave a stale hash | 16 (High) | Known Error | M | 2026-08-20 | inbound-reported (#412) — stamped 2026-08-21 review from the upstream poll; upstream filing `wr-architect: edit gate binds to the Edit/Write tool, so Bash-routed edits of governed files bypass it` |
 | 10 | P530 | Retrospective consumer-repo assumptions remain after shim fix | 10 (High) | Open | S | 2026-08-28 | inbound-reported (#453) |
-| 9 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter (consumers pin the cache version and break on bump) | 9 (Medium) | Open | S | 2026-07-06 | inbound-reported (#325) |
 | 9 | P454 | wr-risk-scorer restage-commit helper sweeps the whole index/working tree into the commit instead of pathspec-scoping to the supplied paths | 9 (Medium) | Open | S | 2026-07-15 | inbound-reported (#344) |
 | 8 | P513 | The JTBD corpus has no index or persona currency check, unlike the decision corpus | 8 (Medium) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P111) |
 | 8 | P518 | `render-story-map` emits bare identifiers as link text, so every reference link announces as "P033" | 8 (Medium) | Open | S | 2026-08-24 | inbound-reported (#445) |

@@ -81,6 +81,7 @@ button:focus-visible,
    thing distinguishing the three states. */
 .b-live  { color: var(--live-fg);  background: var(--live-bg);  border-color: var(--live-line); }
 .b-next  { color: var(--next-fg);  background: var(--next-bg);  border-color: var(--next-line); }
+.b-history { color: var(--fg); background: var(--card); border-color: var(--line); }
 /* A row with no RFC identity, or whose stories close no problem. Deliberately
    red rather than amber: this is not "later", it is wrong, and it needs an edit
    before the map is ratified. There is no amber resting state — the `.b-later`

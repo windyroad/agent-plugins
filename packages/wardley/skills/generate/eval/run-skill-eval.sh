@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# run-skill-eval.sh — promptfoo exec-provider driver for the wr-wardley
+# generate SKILL eval. Loads SKILL.md as an APPENDED system prompt (preserves
+# harness session context for skill-graph traversal per ADR-075 Amendment
+# 2026-06-02) and feeds promptfoo's per-test prompt as the user message.
+#
+# Promptfoo invokes this as: bash run-skill-eval.sh "$PROMPT"
+# (per `providers: - id: 'exec:bash <script>'` shape).
+#
+# Subscription auth via the developer's logged-in claude session — no
+# ANTHROPIC_API_KEY, no CLAUDE_CODE_OAUTH_TOKEN (those are CI/release-only
+# per ADR-075 §6).
+#
+# Sibling of the Codex-runtime driver in this directory
+# (run-codex-skill-eval.sh), which exercises the installed plugin end to end.
+# This driver exercises the SKILL prose itself, which is the surface the
+# Step 9 runtime branch lives on.
+#
+# @adr ADR-075 (Amendment 2026-06-02)
+# @adr ADR-083 (Codex CLI as second runtime — the branch under test)
+# @problem P437
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SKILL_MD="${SCRIPT_DIR}/../SKILL.md"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
+
+if [[ ! -f "$SKILL_MD" ]]; then
+  echo "run-skill-eval.sh: SKILL.md not found at $SKILL_MD" >&2
+  exit 2
+fi
+
+if [[ "${WR_EVAL_RUNTIME:-claude}" == "codex" ]]; then
+  exec codex exec --ephemeral --ignore-user-config --cd "$REPO_ROOT" \
+    -c 'approval_policy="never"' --sandbox read-only \
+    "Read ${SKILL_MD} and answer the validation prompt using that skill contract.
+
+${1:-}" </dev/null
+fi
+
+exec claude -p --append-system-prompt "$(cat "$SKILL_MD")" "${1:-}"

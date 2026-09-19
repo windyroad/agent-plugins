@@ -1,0 +1,71 @@
+# SKILL eval — wr-wardley generate Step 9 render, runtime branch selection (P437).
+#
+# Tier A deterministic eval. Step 9 now carries two branches: Claude Code
+# reaches the converter by its `$PATH` name, Codex reaches it relative to the
+# installed SKILL.md, because plugin `bin/` directories are not on `PATH`
+# there (ADR-083). The failure this guards is an agent picking the wrong
+# branch, or reaching past both of them into a version-pinned plugin cache
+# path — which is the defect P437 exists to close.
+#
+# Run from repo root:
+#   npx promptfoo eval -c packages/wardley/skills/generate/eval/promptfooconfig.yaml
+#
+# @jtbd JTBD-101 (Extend the Suite with New Plugins)
+# @problem P437
+# @adr ADR-049 (plugin scripts resolve via bin/ on $PATH)
+# @adr ADR-075 (Amendment 2026-06-02 — SKILL-prose eval scope)
+# @adr ADR-083 (Codex CLI as second runtime)
+
+description: |
+  wr-wardley generate SKILL eval — Step 9 render resolves per runtime, and
+  never by a version-pinned cache path.
+
+evaluateOptions:
+  maxConcurrency: 1
+
+providers:
+  # Path is relative to this config file's directory (promptfoo basePath).
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Claude Code render reaches the converter by its PATH name
+    vars:
+      prompt: |
+        You are running in Claude Code. Following this skill's Step 9 exactly,
+        print only the shell command you would run to render the map. No prose,
+        no explanation, no alternatives.
+    assert:
+      - type: regex
+        value: 'wr-wardley-owm-to-svg'
+      # The defect under guard: reaching into a version-pinned plugin cache
+      # directory instead of using the name.
+      - type: not-regex
+        value: '(plugins?/cache|/[0-9]+\.[0-9]+\.[0-9]+/)'
+
+  - description: Codex render resolves relative to the installed SKILL.md
+    vars:
+      prompt: |
+        You are running in Codex, where plugin bin/ directories are not on
+        PATH. Following this skill's Step 9 exactly, print only the shell
+        command you would run to render the map. No prose, no explanation,
+        no alternatives.
+    assert:
+      - type: regex
+        value: 'owm-to-svg\.mjs'
+      - type: not-regex
+        value: '(plugins?/cache|/[0-9]+\.[0-9]+\.[0-9]+/)'
+
+  - description: A consumer outside the skill is told the stable name, not a cache path
+    vars:
+      prompt: |
+        I maintain a separate plugin that needs to render a Wardley map by
+        calling this plugin's converter from my own step, in Claude Code.
+        Print only the single shell command I should call. No prose.
+    assert:
+      - type: regex
+        value: 'wr-wardley-owm-to-svg'
+      - type: not-regex
+        value: '(plugins?/cache|/[0-9]+\.[0-9]+\.[0-9]+/)'
