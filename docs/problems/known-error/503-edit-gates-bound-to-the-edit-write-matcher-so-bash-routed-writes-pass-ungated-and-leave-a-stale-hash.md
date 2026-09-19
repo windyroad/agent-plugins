@@ -82,6 +82,16 @@ Recommend weighing this against the Impact rating at the next re-score, and trea
 
 **Related capture**: the *sanctioned* shim silently no-ops under an env-var prefix, which is what pushes an agent onto this workaround in the first place. That is a parser-shape defect in `architect-slide-marker.sh`, with its own fix locus, captured separately rather than folded in here.
 
+### Boundary governed, 2026-09-19 — authored, not yet in force
+
+The four residual classes named above are now written down as a closed, published list rather than as a caveat inside a story's implementation notes, and what happens outside that list is recorded as the decision it is: **silence — never a guessed target, never a denial**. The argument on the page is that a false-positive denial lands on read-only commands on the default write path of unattended sessions, and the documented reaction to an unrecoverable denial is the Bash workaround that produced the recurrence directly above. Widening the classifier was considered and rejected on the same page, partly because it would not have caught the recurrence either — that write happened inside `node`, where no shell parser reaches.
+
+Behavioural coverage in `packages/shared/test/bash-write-dispatch.bats` locks the boundary against the recurrence shapes: a loop over a glob carrying a literal redirection, the verbatim `node` command, `sed -i`, and a `python3` heredoc. The loop case classifies its target once the loop is stripped, so the assertion is not vacuous, and both guards were shown RED before the assertion was committed.
+
+**This does not close the open task below.** The record carrying the boundary — `docs/decisions/131-the-bash-write-boundary-is-published-and-silence-outside-it-is-the-decision.proposed.md` — was authored in an unattended run where no confirmation event was possible, so it is born `human-oversight: unconfirmed`. A queued decision is not a governing one. The task is ticked when the record is ratified at a `/wr-architect:review-decisions` drain, not before.
+
+Two consequences are carried deliberately rather than fixed. The unfalsifiable-marker residual — a `human-oversight: confirmed` written through an unclassified shape is byte-identical to a real one and is never re-surfaced, because the oversight drain selects on the marker's *absence* — stays on this ticket, which is what keeps it ranked rather than buried. What would make it falsifiable is named: a post-hoc audit flagging a confirmed marker whose introducing commit carries no corresponding session evidence. And `JTBD-001`'s first desired outcome, which claimed every edit is reviewed, is narrowed in lockstep and its oversight marker downgraded; work citing that job will draw a failing jobs-reviewer verdict until it is re-ratified.
+
 ### Investigation Tasks
 
 - [x] Choose a conservative detection shape: classify explicit output redirection and `tee` targets, and leave unsupported shell-language write forms unclassified rather than guessing
@@ -90,7 +100,7 @@ Recommend weighing this against the Impact rating at the next re-score, and trea
 - [x] Deliver the canonical dispatcher and byte-identical copies in all five published plugins; the partial repair was published and its tarballs verified on 2026-08-31
 - [ ] Raise with the harness owners that bypass-permissions guidance steers writes onto the ungated path
 - [x] Create a RED behavioral reproduction for explicit redirection, read-only silence, multiple `tee` targets, and all five caller registrations
-- [ ] Address or explicitly govern the remaining dynamic-target, control-structure, in-process mutation, and unknown-content coverage gaps before claiming the general Bash-write problem resolved
+- [ ] Address or explicitly govern the remaining dynamic-target, control-structure, in-process mutation, and unknown-content coverage gaps before claiming the general Bash-write problem resolved — governing record authored 2026-09-19 and queued for ratification; ticks when it is ratified, not when it was written
 - [ ] Verify post-write side effects and an installed-runtime journey without changing the user's disabled-hook configuration
 
 ## Partial release evidence, 2026-08-31

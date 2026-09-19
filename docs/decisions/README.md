@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 128 (114 in-force, 14 historical)
+**Total ADRs:** 129 (115 in-force, 14 historical)
 
 ---
 
 ## In-force decisions
 
-_114 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_115 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -584,6 +584,12 @@ _114 ADRs. These are the current rules. The architect agent reads this section f
 **Chosen:** Chosen option: **"A narrowly evidenced exception to the closed set, on story-backed cards only"**, because the rule being relaxed was written against a hazard that released work cannot pose, and reusing a row shape that already appears on e...
 **Confirmation:** A capture that marks a row preRfc: true where every card names a released story produces that row, and the map...; A row asking for the marker where any card names a story that is not done, or whose release is not recorded, i...; A row whose stories are all done but unreleased does not qualify, so delivery still earns nothing — behaviou...; A row backed only by a change merged but not yet released does not qualify — behavioural test, because this ...; A row backed only by a mention — an existing decision record, a skill file on disk, a ticked acceptance crit...; A card on such a row that names no story file is refused by the existing rule for ordinary cards, unchanged by...; A newly drawn pre-RFC row contributes no request-for-comments identity to the map's derived list — behaviour...; Drawing such a row does not invalidate the map's human-oversight marker — behavioural test against the finge...; An ordinary row with no identity and no marker still renders with the "Untraced" badge — the existing ADR-10...; ADR-125's manifest-bound historical rows behave exactly as before — the existing migration tests pass unchan...
 **Related:** ADR-107, ADR-103, ADR-104, ADR-116, ADR-125, ADR-129
+
+### ADR-131 — The Bash-write boundary is published, and silence outside it is the decision
+**Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** ["ADR-110 (in part — only the unqualified SCOPE of the refusal rule at Decision Outcome and Confirmation criterion 1; the rule itself, its intent and every other criterion stand unchanged)"]
+**Chosen:** Chosen option: **"Govern the published boundary; do not widen it"**.
+**Confirmation:** A for loop over a glob that contains a literal output redirection produces no event and no guessed target. The...; The verbatim 2026-09-19 recurrence command produces no event.; sed -i against a governed path produces no event.; A python3 - <<PY heredoc that opens a governed path for writing produces no event.; The existing cases for literal redirection, tee, read-only silence, heredoc marker discipline and the five cal...
+**Related:** ADR-110, ADR-116, ADR-066, ADR-068, ADR-118, ADR-017, ADR-045, ADR-005, ADR-052, ADR-087, ADR-103
 
 ---
 

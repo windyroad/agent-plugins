@@ -30,6 +30,7 @@ In order to trust unattended and interactive edits equally, as a developer using
 - [ ] Classified Bash writes that introduce architecture or JTBD human-oversight markers pass through the existing marker-discipline gates.
 - [ ] After an authorized classified Bash write, architect refreshes the decision hash and compendium entry, and TDD runs its state-transition and test-quality-review post-write paths.
 - [ ] Behavioral tests cover write redirection, read-only silence, unauthorized and evidence-backed oversight-marker writes, architect post-write refresh, and both TDD post-write routes.
+- [x] Unclassified Bash write shapes — shell control structures, dynamic targets, and mutation performed inside another program — produce no gate event and no guessed target, and the classified boundary they sit outside of is published as a closed list rather than described as a caveat.
 - [x] Each changed package contains a patch changeset, and packed candidates contain the classifier and hook registrations expected for that package while package tests remain excluded by the existing tarball policy.
 
 ## Driving problem trace (required — I6 invariant)
@@ -49,6 +50,14 @@ Follow ADR-017: author one canonical helper under `packages/shared/hooks/lib/`, 
 Implemented support is bounded to literal output-redirection targets, heredocs, and `tee` operands in simple commands. Quoted target names and literal `cd directory &&` prefixes are supported. The classifier distinguishes operators from quoted text, comments, and heredoc bodies, and associates known content with the effective input and output descriptors. It never executes the command to discover targets.
 
 Dynamic targets, shell control structures, and arbitrary in-process writes remain unclassified. These are remaining P503 coverage gaps, not evidence that the original report is resolved. Unknown runtime-produced content is omitted, so passing an event through a content-sensitive marker gate does not prove that every marker introduction is protected.
+
+### Boundary governed, 2026-09-19
+
+Those four gaps are now written down as a closed, published list rather than as an implementation caveat, and the consequence for anything outside the list is stated as the decision it is: silence — never a guessed target, never a denial. The reasoning is that a wrong denial lands on read-only commands on the default write path of unattended sessions, and the documented reaction to an unrecoverable denial is the Bash workaround that caused the field recurrence in the first place. Behavioural coverage locks that boundary against the recurrence shapes, including a case that classifies once its surrounding loop is removed, so the assertion is not vacuous.
+
+The record carrying this is `docs/decisions/131-the-bash-write-boundary-is-published-and-silence-outside-it-is-the-decision.proposed.md`. It is **authored and queued for ratification, not yet in force** — it was written in an unattended run where no confirmation event was possible, so it is born `human-oversight: unconfirmed` and is ratified at the next `/wr-architect:review-decisions` drain. P503's corresponding investigation task stays unticked until then. `JTBD-001`'s first desired outcome is narrowed in lockstep and its marker downgraded accordingly, so work citing that job will draw a failing jobs-reviewer verdict until it is re-ratified — expected, and not to be cleared by dropping the citation.
+
+Widening the classifier is explicitly **not** what happened here, and would not have caught the recurrence anyway: that write happened inside `node`, where no shell parser reaches.
 
 ### Direct recovery evidence, 2026-08-31
 
@@ -78,3 +87,4 @@ Architect 0.22.1, JTBD 0.14.3, style-guide 0.6.3, voice-tone 0.8.4 and TDD 0.6.1
 - ADR-045
 - ADR-052
 - ADR-103
+- ADR-131

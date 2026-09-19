@@ -97,6 +97,36 @@ dispatch() {
   done
 }
 
+@test "the recurrence shapes outside the published boundary stay silent and guess no target" {
+  # P503 / ADR-131. Control structures, dynamic targets and in-process mutation sit
+  # outside the classified set. Outside it the answer is silence -- never a guessed
+  # target, never a denial. The first command carries a real redirection, so only the
+  # loop suppresses it; the rest are the 2026-09-19 field recurrence and its siblings.
+  commands=(
+    "for f in one two; do echo confirmed > docs/decisions/344-x.proposed.md; done"
+    'for f in docs/decisions/34[4-8]-*.proposed.md; do echo confirmed > "$f"; done'
+    'for f in docs/decisions/34[4-8]-*.proposed.md; do node scripts/replace-exact.mjs "$f" unconfirmed confirmed || exit 1; done'
+    "sed -i '' s/unconfirmed/confirmed/ docs/decisions/344-x.proposed.md"
+    $'python3 - <<\'PY\'\nopen("docs/decisions/344-x.proposed.md", "w").write("human-oversight: confirmed")\nPY'
+  )
+
+  for command in "${commands[@]}"; do
+    payload=$(jq -nc --arg dir "$WORK" --arg command "$command" \
+      '{tool_name:"Bash",tool_input:{workdir:$dir,command:$command}}')
+    run dispatch "$payload" "$CHILD"
+    [ "$status" -eq 0 ]
+    [ ! -e "$TRACE" ]
+  done
+
+  # Strip the loop from the first command and the same redirection classifies, so the
+  # silence above is the control structure being suppressed, not an absent target.
+  payload=$(jq -nc --arg dir "$WORK" \
+    '{tool_name:"Bash",tool_input:{workdir:$dir,command:"echo confirmed > docs/decisions/344-x.proposed.md"}}')
+  run dispatch "$payload" "$CHILD"
+  [ "$status" -eq 0 ]
+  grep -Fq "$WORK/docs/decisions/344-x.proposed.md" "$TRACE"
+}
+
 @test "quoted literal shell metacharacters retain their actual target names" {
   command='echo x > "\$literal.md"'
   payload=$(jq -nc --arg dir "$WORK" --arg command "$command" \
