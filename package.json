@@ -18,7 +18,7 @@
     "jsdom": "^26.0.0"
   },
   "scripts": {
-    "test": "LC_ALL=C bats --recursive packages/*/hooks/test/ packages/*/skills/*/test/ packages/*/agents/test/ packages/*/scripts/test/ packages/shared/test/ .claude/skills/*/test/",
+    "test": "LC_ALL=C bats --recursive scripts/test/ packages/*/hooks/test/ packages/*/skills/*/test/ packages/*/agents/test/ packages/*/scripts/test/ packages/shared/test/ .claude/skills/*/test/",
     "eval:skills": "for cfg in packages/*/skills/*/eval/promptfooconfig.yaml; do echo \"--- $cfg ---\"; npx promptfoo eval -c \"$cfg\" || exit 1; done",
     "eval:agents": "for cfg in packages/*/agents/eval/promptfooconfig.yaml; do echo \"--- $cfg ---\"; npx promptfoo eval -c \"$cfg\" || exit 1; done",
     "eval:architect:claude": "npx promptfoo eval -c packages/architect/skills/create-adr/eval/promptfooconfig.yaml",
@@ -53,7 +53,7 @@
     "check:shim-wrappers": "bash scripts/sync-shim-wrappers.sh --check",
     "check:goal-condition-drift": "bash packages/itil/scripts/check-goal-condition-drift.sh",
     "check:executable-modes": "bash scripts/check-executable-modes.sh",
-    "check:architect-published-ids": "bash packages/architect/scripts/check-published-internal-ids.sh",
+    "check:published-ids": "bash scripts/check-published-internal-ids.sh",
     "version": "changeset version && node scripts/sync-plugin-manifests.mjs && node scripts/sync-codex-plugin-manifests.mjs && node scripts/sync-codex-agents.mjs",
     "release": "bash scripts/verify-release-dist-tags.sh --pre-publish && changeset publish",
     "release:watch": "bash scripts/release-watch.sh",

@@ -61,3 +61,24 @@ Same family as **P294** (README should market from JTBD, not cite JTBD IDs): ado
 ## Superseding decision drafted - 2026-08-18
 
 P296 is closed. ADR-118 now records the already-pinned direction as an unconfirmed draft: published artefacts express the governing substance inline, do not ship the private decision corpus, and retain internal IDs only on source-side provenance surfaces. Implementation remains gated on explicit ratification of that document.
+
+## Slice landed — 2026-09-19 (publication-boundary guard + three packages cleared)
+
+**Measured state, not the 2026-05-03 baseline.** The old `check-internal-id-leaks.sh` survey counted 2,880 instances across the *source tree*. Counting the *published tarballs* instead — the surface that actually reaches an adopter, per P154 — the real figure at the start of this slice was **846 across 8 of 13 packages**: connect 3, cruise 1, itil 2, voice-tone 24, tdd 31, jtbd 70, risk-scorer 279, retrospective 436. Clean already: agent-plugins, architect, c4, style-guide, wardley. `packages/shared` has no `package.json` and is not an npm package.
+
+**Prior art found before building.** Two near-identical per-package detectors already existed (`packages/architect/scripts/` and `packages/itil/scripts/`), only one of them wired (`check:architect-published-ids`), neither in CI. They are now one repo-level check at `scripts/check-published-internal-ids.sh` with `npm run check:published-ids` and a CI step, and the duplicates are deleted. It keeps the architect perl logic verbatim, including the carve-out that lets `@adr` / `@problem` style structured annotations and leading source comments through — an identifier trailing a self-contained explanation is provenance, not a defect.
+
+**Ratchet, not a big-bang gate.** Packages still carrying identifiers (jtbd, retrospective, risk-scorer, tdd, voice-tone) are listed in `WR_PUBLISHED_IDS_PENDING` and report `PENDING <name> drift=<n>` at exit 0. Only a regression in an already-clean package fails the build. This is a deliberate, recorded deviation from the three-phase advisory-then-blocking rollout: ADR-118's ratified Confirmation pins the blocking form ("a package-content check **fails** when a published runtime artefact contains a source-repository identifier"), the 13-package survey above *is* the measurement phase that rollout asks for, and no currently-drifting package is blocked, so the anti-big-design-up-front concern behind the phased shape is not live. The drift counts stay visible so the remaining 840 can be watched down rather than discovered later.
+
+**Cleared this slice** — cruise (throttle hook). Connect's README lost both of its repo-relative links, which could never resolve from an installed tree, leaving one identifier in its setup skill.
+
+The commit scorer stopped the first draft of this slice at 6 against a Low-5 appetite. The driver was that two of the edited surfaces are prose an LLM loads as instructions — connect's setup skill and itil's hang-off-check agent description — and neither package has a paired eval that would catch the migration dropping substance rather than just the token. Both edits were therefore withdrawn from this slice and their packages stay on the pending list. Any package whose migration touches skill or agent prose needs that eval coverage first; that is now the gate on the remaining slices, not the prose surgery itself.
+
+### Remaining slices
+
+- [ ] connect (1) and itil (2) — one edit each, blocked on eval coverage. Connect needs a step-ordering eval for its setup skill. ITIL needs one asserting the hang-off-check agent still dispatches on its documented trigger and emits both verdict tokens.
+- [ ] voice-tone (24) and tdd (31) — smallest remaining, natural next increment.
+- [ ] jtbd (70), risk-scorer (279), retrospective (436).
+- [ ] Narrow the non-markdown comment carve-out. The detector currently skips *any* leading `#` / `//` / `/*` comment in non-markdown files, which is wider than "structured source annotations". Cruise's leak was caught only because its reference was a trailing comment; the same text one line higher would have passed.
+- [ ] `packages/retrospective/scripts/check-internal-id-leaks.sh` still ships to adopters with a `bin/` shim and teaches the superseded namespace-prefix rule, citing the superseded decision in its own body. It is adopter-facing tooling for a rule that no longer applies.
+- [ ] Runtime-generated tokens in hook deny-messages (the `/tmp/oversight-confirmed-<sha-of-path>-<sid>` witness above) are untouched by a tarball text scan — they are produced at runtime. Needs its own surface.

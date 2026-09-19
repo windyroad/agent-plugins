@@ -111,6 +111,9 @@ jobs:
       - name: Check plugin entrypoints are tracked executable (P447, R074)
         run: npm run check:executable-modes
 
+      - name: Check published tarballs carry no source-repository IDs (P298, ADR-118)
+        run: npm run check:published-ids
+
       - name: Check locale-discipline in bash scripts (P328, advisory)
         run: packages/itil/bin/wr-itil-check-locale-discipline .
 

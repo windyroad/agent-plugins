@@ -43,7 +43,6 @@
     "!hooks/test/",
     "!lib/test/",
     "!scripts/test/",
-    "!scripts/check-published-internal-ids.sh",
     "!scripts/codex-work-problems.md",
     "!scripts/sync-codex-skills.mjs",
     "!skills/*/test/"

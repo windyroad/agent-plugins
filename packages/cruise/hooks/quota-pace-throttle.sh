@@ -124,7 +124,7 @@ fi
 isint "$HD7" || HD7=5
 isint "$HD5" || HD5=0
 isint "$CEIL" || CEIL=600
-isint "$GUARD" || GUARD=4    # behind-line burn-guard multiple; 0 disables (ADR-093 Amendment 2026-07-24)
+isint "$GUARD" || GUARD=4    # behind-line burn-guard multiple; 0 disables
 
 # Keep Node and app-server off the fresh-cache path. The producer's numeric
 # sidecar also carries its write time, avoiding an external stat on every tool call.
