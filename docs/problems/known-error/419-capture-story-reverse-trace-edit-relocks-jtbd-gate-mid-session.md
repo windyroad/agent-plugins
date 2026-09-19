@@ -17,6 +17,7 @@ capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the J
 
 - After any `/wr-itil:capture-story` run that back-links a JTBD, the next Edit/Write in the session is denied with "jtbd policy file changed since last review".
 - A full `wr-jtbd:agent` re-review round-trip is required even though the docs/jtbd change was a helper-rendered `## Stories` table row.
+- **2026-09-19 (P437 iter) — recurrence, and the reason no ordering workaround exists.** capture-story Step 6 ran `wr-itil-update-jtbd-references-section` over `docs/jtbd/plugin-developer/JTBD-101-extend-suite.proposed.md`, adding one `## Stories` row for STORY-091. The JTBD review had returned PASS minutes earlier. The next write — the first line of fix code at `packages/wardley/scripts/owm-to-svg.sh` — was denied with the same *"jtbd policy file changed since last review"*. The sibling advice to sequence jtbd-policy writes last cannot apply on this path: the propose-fix trace gate refuses to let implementation begin until the story's card exists, so the capture must precede the fix, and the capture contract mandates the invalidating write. Any fix that needs a story captured for it pays this round-trip. Cross-ref P453 (the gate's wider policy-path-drift ticket) — this is the capture-story instance of it.
 
 ## Workaround
 

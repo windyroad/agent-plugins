@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-19 **P437 known error** — wr-wardley publishes no $PATH-resolvable entry for its OWM-to-SVG converter and omits scripts/ from its packaged files, so a consumer has to name the cache version directory and breaks on every bump; WSJF 9 -> 18 on the Known Error multiplier.
+> Last reviewed: 2026-09-19 **P549 captured** — the tarball shim-integrity detector parses `npm pack --json` output that two packages prefix with lifecycle-script prose, so it silently skips `architect` and `risk-scorer`, the two carrying the most shims, and a blind walk looks identical to a clean one (lightweight aside via /wr-itil:capture-problem).
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -57,6 +57,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 9 | P363 | Inbound-reported tickets never receive fix-released verdict on originating issue | 9 (Medium) | Known Error | M | 2026-06-11 | internal |
 | 9 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight contexts — strands dispatchable lifecycle/ack/upstream-report obligations the framework authorises to proceed | 9 (Medium) | Open | S | 2026-07-26 | corrective-feedback (user, 2026-07-26 — "External comms is NOT out of pre-flight scope") |
 | 9 | P484 | The reading-context persona constraint is load-bearing in two ratified decisions but documented nowhere | 9 (Medium) | Open | S | 2026-08-08 | internal |
+| 9 | P549 | The tarball shim-integrity detector silently skips any package whose pack lifecycle prints to stdout, so the two packages carrying the most shims are never checked | 9 (Medium) | Open | S | 2026-09-19 | internal |
 | 8 | P419 | capture-story's mechanical reverse-trace edit to a docs/jtbd file re-locks the JTBD edit gate mid-session | 8 (Medium) | Known Error | M | 2026-07-05 | internal |
 | 8 | P459 | Agent-Prose Behavioural Eval Flaky — Red-Lines CI on Unrelated Commits | 8 (Medium) | Known Error | M | 2026-07-24 | internal |
 | 8 | P508 | The fix proposal still instantiates a standalone RFC document, after ADR-103 made it a release row | 16 (High) | Known Error | L | 2026-08-20 | internal |
