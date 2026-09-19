@@ -88,3 +88,7 @@
 
 ## 2026-09-19
 > Last reviewed: 2026-09-17 **STORY-090 done** — @windyroad/voice-tone@0.9.0 shipped assistant-response voice guidance and fresh-install smoke checks passed.
+
+## 2026-09-19
+
+> Last reviewed: 2026-09-19 **RFC-098 row drawn** — four stories cover P441's three reported faces and its four held classes, so a ticket waiting on a person stops competing for a dispatch slot without losing its rank. Prior: **STORY-044 done** — @windyroad/cruise@0.4.11 ships the `/wr-cruise:status` pacing-telemetry skill; cruise suite 79/79 green, closing the last open story under RFC-046.

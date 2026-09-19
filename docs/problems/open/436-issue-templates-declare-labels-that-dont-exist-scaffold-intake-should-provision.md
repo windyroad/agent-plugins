@@ -89,3 +89,10 @@ re-litigate them. All are carried as acceptance criteria on STORY-092.
 ## Related
 
 - Inbound issue #170.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-092 | STORY-092: Provision the labels the intake templates declare | draft |

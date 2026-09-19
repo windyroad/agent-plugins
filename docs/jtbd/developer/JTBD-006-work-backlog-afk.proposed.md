@@ -67,10 +67,7 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-066 | STORY-066: A fix I can prove works gets closed without me | accepted |
 | STORY-072 | STORY-072: Record oversight evidence only for the confirming session | accepted |
 | STORY-085 | STORY-085: See the ID clash instead of the drift it causes | accepted |
-| STORY-094 | STORY-094: The loop leaves a ticket alone while its fix is only waiting to be pushed | draft |
-| STORY-095 | STORY-095: The loop leaves a ticket alone while it is waiting on my answer | draft |
-| STORY-096 | STORY-096: The loop leaves a ticket alone while it is waiting on someone upstream | draft |
-| STORY-097 | STORY-097: When I come back I can see what is held, who owes it, and what would unstick it | draft |
+| STORY-098 | STORY-098: The loop I left running is still running when I get back | accepted |
 | STORY-003 | STORY-003: /wr-itil:list-stories read-only display skill | done |
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-018 | STORY-018: Capture the problem in seconds, mid-flow | done |
@@ -89,6 +86,10 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-060 | STORY-060: Pick up a captured ticket and know what was observed | draft |
 | STORY-064 | STORY-064: A ticket that only names a decision as background stays open | draft |
 | STORY-093 | STORY-093: Every conversion tells the reporter it landed | draft |
+| STORY-094 | STORY-094: The loop leaves a ticket alone while its fix is only waiting to be pushed | draft |
+| STORY-095 | STORY-095: The loop leaves a ticket alone while it is waiting on my answer | draft |
+| STORY-096 | STORY-096: The loop leaves a ticket alone while it is waiting on someone upstream | draft |
+| STORY-097 | STORY-097: When I come back I can see what is held, who owes it, and what would unstick it | draft |
 | STORY-062 | STORY-062: Keep problem ranking correct after a status transition | in-progress |
 | STORY-069 | STORY-069: Drain one Codex ticket through an isolated Codex CLI | in-progress |
 | STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | in-progress |

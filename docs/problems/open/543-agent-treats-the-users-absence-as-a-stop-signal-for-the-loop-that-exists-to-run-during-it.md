@@ -84,3 +84,10 @@ Underlying both: the agent reasoned about whether stopping *felt* appropriate ra
 - Session memory `feedback_system_holds_the_memory_not_the_user.md` and `feedback_dont_defer_at_session_wrap.md` — the standing corrections the wrap-up repeated.
 
 (captured via /wr-itil:capture-problem; expand at next investigation)
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-098 | STORY-098: The loop I left running is still running when I get back | accepted |

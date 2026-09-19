@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-09-19 **RFC-098 row drawn** — four stories cover P441's three reported faces and its four held classes, so a ticket waiting on a person stops competing for a dispatch slot without losing its rank. Prior: **STORY-044 done** — @windyroad/cruise@0.4.11 ships the `/wr-cruise:status` pacing-telemetry skill; cruise suite 79/79 green, closing the last open story under RFC-046.
+> Last reviewed: 2026-09-19 **STORY-098 accepted** — RFC-099 draws the row that closes P543: telling the loop you are going to bed keeps it working, and it cannot end the session by quietly not continuing. Prior: **RFC-098 row drawn** — four stories cover P441's three reported faces and its four held classes, so a ticket waiting on a person stops competing for a dispatch slot without losing its rank.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -175,6 +175,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-095 | The loop leaves a ticket alone while it is waiting on my answer | M | P441 | RFC-098 | STORY-MAP-011 |
 | draft | STORY-096 | The loop leaves a ticket alone while it is waiting on someone upstream | S | P441 | RFC-098 | STORY-MAP-011 |
 | draft | STORY-097 | When I come back I can see what is held, who owes it, and what would unstick it | S | P441 | RFC-098 | STORY-MAP-011 |
+| accepted | STORY-098 | The loop I left running is still running when I get back | S | P543 | RFC-099 | STORY-MAP-011 |
 | draft | STORY-091 | Invoke the Wardley map converter by a name that survives every upgrade | S | P437 | RFC-095 | STORY-MAP-008 |
 | draft | STORY-093 | Every conversion tells the reporter it landed | M | P432 | RFC-097 | STORY-MAP-004 |
 
