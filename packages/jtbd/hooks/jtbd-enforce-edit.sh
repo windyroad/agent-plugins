@@ -210,5 +210,12 @@ if check_review_gate "$SESSION_ID" "jtbd" "$JTBD_PATH"; then
   exit 0
 fi
 
+if [ -n "${CODEX_THREAD_ID:-}" ]; then
+  case "$REVIEW_GATE_REASON" in
+    "No jtbd review marker found."*)
+      REVIEW_GATE_REASON="${REVIEW_GATE_REASON} After a genuine PASS from a completed wr-jtbd:agent task, call interrupt_agent once with that completed task's exact target, then retry the edit. If still blocked, run a fresh review and report the gate diagnostic. Do not create or edit review markers manually." ;;
+  esac
+fi
+
 review_gate_deny "BLOCKED: Cannot edit '${BASENAME}' without JTBD review. You MUST first delegate to wr-jtbd:agent using the Agent tool (subagent_type: 'wr-jtbd:agent'). ${REVIEW_GATE_REASON}"
 exit 0

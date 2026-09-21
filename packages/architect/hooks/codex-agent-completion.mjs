@@ -14,7 +14,11 @@ function riskDir(sessionId) {
 }
 
 function statePath(input, target) {
-  return join(riskDir(input.session_id), `codex-architect-${Buffer.from(target).toString("base64url")}`);
+  return join(riskDir(input.session_id), `codex-architect-${Buffer.from(normalizeTarget(target)).toString("base64url")}`);
+}
+
+function normalizeTarget(target) {
+  return target.startsWith("/root/") ? target.slice(6) : target;
 }
 
 function remember(input) {

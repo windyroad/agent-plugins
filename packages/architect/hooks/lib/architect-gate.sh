@@ -62,6 +62,9 @@ check_architect_gate() {
   fi
 
   ARCHITECT_GATE_REASON="No architect review marker found for this session. Delegate to wr-architect:agent via the Agent tool (subagent_type: 'wr-architect:agent') so the architect can review and create the marker. After an ISSUES FOUND verdict, obtain the upgraded PASS from a fresh wr-architect:agent spawn: resuming the prior agent does not fire the completion hook and therefore cannot write the marker. If you already hold a genuine PASS, assert the marker manually: touch /tmp/architect-reviewed-\$SID && rm -f /tmp/architect-reviewed-\$SID.hash (SID = newest architect-plan-reviewed-* / architect-announced-* basename)."
+  if [ -n "${CODEX_THREAD_ID:-}" ]; then
+    ARCHITECT_GATE_REASON="No architect review marker found for this session. After a genuine PASS from a completed wr-architect:agent task, call interrupt_agent once with that completed task's exact target, then retry the edit. If still blocked, run a fresh review and report the gate diagnostic. Do not create or edit review markers manually."
+  fi
   return 1  # No marker, deny
 }
 

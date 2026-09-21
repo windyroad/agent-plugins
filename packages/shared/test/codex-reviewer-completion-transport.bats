@@ -10,6 +10,9 @@ teardown() {
   rm -f /tmp/{style-guide,voice-tone}-{reviewed,plan-reviewed}-bats-p402-*-"$$"{,.hash,-other,-other.hash,-child,-child.hash}
   rm -f /tmp/{style-guide,voice-tone,jtbd}-{reviewed,plan-reviewed}-bats-p539-*-"$$"{,.hash}
   rm -f /tmp/architect-{reviewed,plan-reviewed}-bats-p539-architect-"$$"{,.hash}
+  rm -f /tmp/architect-{reviewed,plan-reviewed}-bats-p539-architect-relative-"$$"{,.hash}
+  rm -f /tmp/jtbd-{reviewed,plan-reviewed}-bats-p539-jtbd-stop-"$$"{,.hash}
+  rm -f /tmp/jtbd-{reviewed,plan-reviewed}-bats-p539-jtbd-ambiguous-"$$"{,.hash}
   rm -f /tmp/jtbd-verdict
 }
 
@@ -115,6 +118,57 @@ native_array_close_payload() {
   send_event "$helper" \
     "$(native_array_close_payload "$session" "$REPO_ROOT" "$target" '**Architecture Review: PASS**')"
   [ -e "$marker" ]
+}
+
+@test "packed architect matches a relative completion target to its canonical spawn target" {
+  local root session marker
+  root="$(pack_plugin architect)"
+  session="bats-p539-architect-relative-$$"
+  marker="/tmp/architect-reviewed-$session"
+  send_event "$root/hooks/codex-agent-completion.mjs" \
+    "$(spawn_payload "$session" "$REPO_ROOT" 'wr-architect:agent' '/root/review')"
+  send_event "$root/hooks/codex-agent-completion.mjs" \
+    "$(close_payload "$session" "$REPO_ROOT" 'review' '**Architecture Review: PASS**')"
+  [ -f "$marker" ]
+}
+
+@test "opaque JTBD stop fails closed, then a bound completion admits the next edit" {
+  local root session marker
+  root="$(pack_plugin jtbd)"
+  session="bats-p539-jtbd-stop-$$"
+  marker="/tmp/jtbd-reviewed-$session"
+  send_event "$root/hooks-codex/codex-agent-completion.mjs" \
+    "$(spawn_payload "$session" "$REPO_ROOT" 'wr-jtbd:agent' '/root/review')"
+  printf 'PASS\n' > /tmp/jtbd-verdict
+  send_event "$root/hooks-codex/codex-agent-completion.mjs" \
+    "$(stop_payload "$session" "$REPO_ROOT" 'wr-jtbd:agent' 'opaque-agent-id' '**JTBD Review: PASS**')"
+  [ ! -e "$marker" ]
+  send_event "$root/hooks-codex/codex-agent-completion.mjs" \
+    "$(close_payload "$session" "$REPO_ROOT" 'review' '**JTBD Review: PASS**')"
+  [ -f "$marker" ]
+  [ -f "$marker.hash" ]
+  local gate_input
+  gate_input="$(jq -cn --arg session "$session" --arg path "$REPO_ROOT/scripts/sync-codex-plugin-surfaces.mjs" \
+    '{session_id:$session,tool_name:"Edit",tool_input:{file_path:$path}}')"
+  run bash -c 'printf "%s" "$1" | "$2/hooks/jtbd-enforce-edit.sh"' _ "$gate_input" "$root"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "opaque JTBD completion does not choose among two pending reviewers" {
+  local root session marker
+  root="$(pack_plugin jtbd)"
+  session="bats-p539-jtbd-ambiguous-$$"
+  marker="/tmp/jtbd-reviewed-$session"
+  send_event "$root/hooks-codex/codex-agent-completion.mjs" \
+    "$(spawn_payload "$session" "$REPO_ROOT" 'wr-jtbd:agent' '/root/first')"
+  send_event "$root/hooks-codex/codex-agent-completion.mjs" \
+    "$(spawn_payload "$session" "$REPO_ROOT" 'wr-jtbd:agent' '/root/second')"
+  printf 'PASS\n' > /tmp/jtbd-verdict
+  send_event "$root/hooks-codex/codex-agent-completion.mjs" \
+    "$(stop_payload "$session" "$REPO_ROOT" 'wr-jtbd:agent' 'opaque-agent-id' '**JTBD Review: PASS**')"
+  [ ! -e "$marker" ]
+  [ -f /tmp/jtbd-verdict ]
 }
 
 @test "packed style-guide transports only genuine bound native completions" {
