@@ -42,6 +42,22 @@ assert_path_blocked() {
   [[ "$output" == *"BLOCKED"* ]]
 }
 
+@test "JTBD: Codex missing-marker denial gives an identity-bound recovery" {
+  mkdir -p docs/jtbd
+  run env CODEX_THREAD_ID="test-session-$$" bash -c 'printf "%s" "$1" | "$2"' _ \
+    "{\"tool_input\":{\"file_path\":\"$PWD/src/file.ts\"},\"session_id\":\"test-session-$$\"}" "$HOOK"
+  [[ "$output" == *"interrupt_agent"* ]]
+  [[ "$output" != *"touch /tmp/jtbd-reviewed"* ]]
+}
+
+@test "JTBD: Claude missing-marker guidance is unchanged" {
+  mkdir -p docs/jtbd
+  run env -u CODEX_THREAD_ID bash -c 'printf "%s" "$1" | "$2"' _ \
+    "{\"tool_input\":{\"file_path\":\"$PWD/src/file.ts\"},\"session_id\":\"test-session-$$\"}" "$HOOK"
+  [[ "$output" == *"No jtbd review marker found"* ]]
+  [[ "$output" != *"interrupt_agent"* ]]
+}
+
 # --- Exclusion tests (functional) ---
 
 # Claude Code passes absolute file paths in tool_input.file_path, so tests

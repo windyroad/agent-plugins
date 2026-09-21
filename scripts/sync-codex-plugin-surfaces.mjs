@@ -394,7 +394,7 @@ if (CLOSE_TOOLS.has(input.tool_name)) close(input);
 if (WAIT_TOOLS.has(input.tool_name)) wait(input);
 if (input.hook_event_name === "SubagentStop") {
   if (input.agent_type !== role) diagnostic("unrelated-subagent-stop", input);
-  else complete(input, input.agent_id, input.last_assistant_message);
+  else complete(input, input.task_name || input.agent_name || input.agent_id, input.last_assistant_message);
 }
 `);
   }
