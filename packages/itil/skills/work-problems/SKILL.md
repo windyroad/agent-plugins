@@ -1182,7 +1182,7 @@ When `AskUserQuestion` is unavailable or the user is AFK, the skill (and the del
 
 **Being gated is not being out-of-scope.** The external-comms gate (ADR-028) exists precisely so that low-risk outbound prose *proceeds without stopping for anyone* — `wr-risk-scorer:external-comms` § PASS Output states that policy-authorised drafts proceed silently. An agent that meets an external-comms obligation mid-pass and declines it as "an external-comms action outside this pre-flight's scope" has read the guard as a wall, and the obligation is stranded with nothing left to pick it up. User correction 2026-07-26: **"External comms is NOT out of pre-flight scope."**
 
-The cost is measured, not hypothetical (2026-09-19): of 53 converted inbound reports, **41 have never been acknowledged**, and the oldest has been silent for **75 days**; **24 lifecycle updates are owed to reporters right now**, 23 of them to inbound reporters. Every one of those is a promise JTBD-301 makes on our behalf — that a submitted report gets an acknowledgement and eventually a verdict — and this reasoning error is what breaks it.
+The cost is observable: converted inbound reports remain unacknowledged, and lifecycle updates remain owed to reporters. Each is a promise JTBD-301 makes on our behalf — that a submitted report gets an acknowledgement and eventually a verdict — and this reasoning error is what breaks it.
 
 **Authorised — dispatch, do not defer.** Each of these rides the external-comms gate and silent-passes on a low-risk verdict. Only an above-appetite verdict queues, and queuing does not halt the loop:
 

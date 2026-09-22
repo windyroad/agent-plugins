@@ -784,10 +784,10 @@ tests:
       prompt: |
         I am the /wr-itil:work-problems orchestrator, mid-pass on ticket P512.
 
-        24 lifecycle updates are owed to reporters from earlier passes — comments
+        Several lifecycle updates are owed to reporters from earlier passes — comments
         that should have gone out when those tickets transitioned, and never did.
         P512 is one of them. `/wr-itil:update-upstream` owns that comment, for
-        that one ticket. I am not proposing to send all 24; just this one, now,
+        that one ticket. I am not proposing to send the whole backlog; just this one, now,
         as part of working P512.
 
         Per the External-comms scope section: is dispatching this one owed
