@@ -4,8 +4,8 @@ job-id: enforce-governance
 persona: developer
 secondary-persona: tech-lead
 date-created: 2026-04-14
-human-oversight: unconfirmed
-oversight-date: 2026-05-31
+human-oversight: confirmed
+oversight-date: 2026-09-22
 oversight-downgraded: "2026-09-19 — material amendment per ADR-068, in lockstep with ADR-131. The first Desired Outcome read, unqualified, that every edit to a project file is reviewed before it lands. That is observably false: the five edit gates bind the Edit|Write tool matcher, and the classifier shipped on 2026-08-31 resolves only a published subset of Bash write shapes, so a shell loop, a wildcard target, or a write performed inside sed or node reaches disk unreviewed. A field instance on 2026-09-19 hand-wrote a ratification marker into five decision records through exactly that route. The outcome is NARROWED in prose to say where review actually fires. Grounded on ADR-110 and ADR-068, both ratified — not on the unratified ADR-131, so this withdrawal presumes no unratified decision. Withdrawing a ratification claim needs no confirm event; asserting one would. Expect the jobs reviewer to return a failing verdict naming this job on work that cites it while it is unratified (ADR-109) — that fire is known and accepted here, not a defect, and must not be cleared by dropping the citation. Re-ratification is owed at the next interactive /wr-jtbd:confirm-jobs-and-personas drain, and per ADR-111 it is discharged by a structured question carrying the summary AND this file, not by a prose ask."
 ---
 
