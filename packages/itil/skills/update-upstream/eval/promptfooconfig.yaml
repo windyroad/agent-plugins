@@ -81,8 +81,8 @@ tests:
         (the .known-error.md was renamed to .verifying.md in this session)
         and carries a ## Reported Upstream section pointing at
         https://github.com/anthropics/claude-code/issues/1234. The orchestrator
-        is in AFK mode. The `wr-risk-scorer:external-comms` gate has scored
-        the drafted comment as BELOW appetite (3/25, Low) and the
+        is in AFK mode. The `wr-risk-scorer:external-comms` gate returned
+        `EXTERNAL_COMMS_RISK_VERDICT: PASS` and the
         `wr-voice-tone:external-comms` gate has PASSED.
 
         Per the ADR-024 amendment (P080) AFK behaviour summary, what does the
@@ -99,50 +99,51 @@ tests:
       # Tier A — must record the posted-comment disclosure path.
       - type: regex
         value: 'posted-comment|disclosure path'
-      # Tier B — below-appetite path proceeds NOW; must not halt/queue.
+      # Tier B — both PASS verdicts proceed NOW; must not halt/queue.
       - type: llm-rubric
         value: |
           The response describes the skill PROCEEDING to post the lifecycle
-          update comment on this below-appetite KE→Verifying path (posting
+          update comment on this dual-PASS KE→Verifying path (posting
           via gh issue comment now). PASS if it proceeds to post. FAIL if it
           says the orchestrator HALTS, or that the update is QUEUED/DEFERRED
-          for later — below external-comms appetite means it posts now, it
+          for later — the external-comms PASS means it posts now, it
           does not queue or halt. An output that merely says it does NOT halt
           (a negation) still PASSES.
 
-  - description: AFK above-appetite → silent risk-reduce + re-score, queue if still above
+  - description: AFK external-comms FAIL → silent risk-reduce + re-review, queue if still FAIL
     vars:
       prompt: |
         I am executing /wr-itil:update-upstream for local problem ticket P420
-        in AFK mode. The drafted Open→KE lifecycle update comment scored
-        ABOVE appetite (8/25, Medium) from the `wr-risk-scorer:external-comms`
-        gate. The silent risk-reduce + re-score attempt did NOT bring the
-        verdict within appetite (re-scored 6/25, still Medium).
+        in AFK mode. The drafted Open→KE lifecycle update comment received
+        `EXTERNAL_COMMS_RISK_VERDICT: FAIL` and
+        `EXTERNAL_COMMS_RISK_REASON: private client name` from the
+        `wr-risk-scorer:external-comms` gate. A shorter, risk-reduced draft
+        received FAIL again for the same reason.
 
         Per the ADR-024 amendment (P080) AFK behaviour summary, what does the
         skill do next? Be specific about (a) the queue mechanism (where the
         drafted body is saved), (b) whether the orchestrator halts, and
         (c) the outstanding_questions entry category.
     assert:
-      # Tier A — must mention silent risk-reduce + re-score.
+      # Tier A — must mention silent risk reduction and re-review.
       - type: regex
-        value: 'risk-reduc|re-score|re-draft'
+        value: 'risk-reduc|re-review|re-draft'
       # Tier A — must save drafted body to ## Queued Upstream Update.
       - type: icontains
         value: 'Queued Upstream Update'
       # Tier A — must queue outstanding_questions with deviation-approval category.
       - type: regex
         value: 'outstanding_questions|deviation-approval'
-      # Tier B — above-appetite path is queue-and-continue per P352, NOT halt.
+      # Tier B — unresolved FAIL queues and continues per P352.
       - type: llm-rubric
         value: |
-          The response describes the above-appetite path as: attempt silent
-          risk-reduce + re-score, and if STILL above appetite, save the
+          The response describes the failed-gate path as: attempt silent
+          risk-reduce + re-review, and if STILL FAIL, save the
           drafted body to ## Queued Upstream Update + queue an
           outstanding_questions entry and CONTINUE the orchestrator loop
           (P352 queue-and-continue). PASS if it queues-and-continues without
           halting the loop. FAIL if it says the orchestrator HALTS / STOPS /
-          BLOCKS the loop on the above-appetite branch. An output that says
+          BLOCKS the loop on the failed-gate branch. An output that says
           it does NOT halt (a negation) PASSES.
 
   - description: ADR-117 — Verifying→Closed on a PULL-REQUEST target comments but never closes
@@ -266,8 +267,8 @@ tests:
     vars:
       prompt: |
         I am executing /wr-itil:update-upstream for local problem ticket P420
-        in AFK mode. The drafted comment passed the external-comms risk gate
-        (below appetite) but the voice-tone gate FAILED (the drafted prose
+        in AFK mode. The drafted comment received
+        `EXTERNAL_COMMS_RISK_VERDICT: PASS` but the voice-tone gate FAILED (the drafted prose
         violated the brand voice guide).
 
         Per the ADR-024 amendment (P080) gate composition rule, what does
@@ -277,19 +278,19 @@ tests:
       # Tier A — must mention both gates compose.
       - type: regex
         value: 'AND|both gates|both must pass|each gate'
-      # Tier A — voice-tone failure treated identically to above-appetite risk verdict.
+      # Tier A — voice-tone failure also blocks posting.
       - type: regex
-        value: 'queue|Queued Upstream Update|above-appetite'
+        value: 'queue|Queued Upstream Update|gate fail'
       # Tier B — gate composition is AND, not OR; one fail blocks the post.
       - type: llm-rubric
         value: |
           The response describes the gate composition as AND (BOTH gates must
-          PASS — external-comms within appetite AND voice-tone PASS — for
+          PASS — external-comms PASS AND voice-tone PASS — for
           the post to proceed). A voice-tone FAIL is routed identically to
-          an above-appetite external-comms verdict (silent risk-reduce +
-          re-score; queue if still failing). PASS if the response explicitly
+          an external-comms FAIL verdict (silent risk-reduce +
+          re-review; queue if still failing). PASS if the response explicitly
           frames the composition as AND, or describes a voice-tone fail as
-          blocking the post even when risk is within appetite. FAIL if the
+          blocking the post even when external-comms passed. FAIL if the
           response treats the gates as independent / OR (one passing gate
           authorises the post).
 

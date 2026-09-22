@@ -1147,23 +1147,23 @@ Commit the completed work per ADR-014 (governance skills commit their own work):
    - Problem closed: `docs(problems): close P<NNN> <title>`
    - Review/re-rank: `docs(problems): review — re-rank priorities`
    - Fix implemented: `fix(<scope>): <description> (closes P<NNN>)` — include problem file changes (rename to `.verifying.md` + `## Fix Released` section) in the same commit per ADR-022
-5. If commit risk is above appetite: auto-apply scorer remediations per **ADR-042 Rule 1** incrementally until residual commit risk is within appetite (≤ 4/25), OR halt per ADR-042 Rule 5 if the scorer cannot converge. **The skill MUST NOT commit above appetite, and MUST NOT call `AskUserQuestion` to ask whether to commit anyway** (P377/RFC-029 amendment 2026-06-24 — above-appetite is framework-mediated, never a category-3 one-time-override; same invariant the push/release branch at Step 12 already enforces). The ADR-013 Rule 6 fail-safe (no `AskUserQuestion` available / non-interactive → skip the commit and report the uncommitted state) remains the terminal fallback. This applies only to the risk-above-appetite branch, not to the delegation-unavailable case above.
+5. If commit risk is above appetite: auto-apply scorer remediations per **ADR-042 Rule 1** incrementally until residual commit risk is within appetite (at or below the effective appetite used by the scorer and gate), OR halt per ADR-042 Rule 5 if the scorer cannot converge. **The skill MUST NOT commit above appetite, and MUST NOT call `AskUserQuestion` to ask whether to commit anyway** (P377/RFC-029 amendment 2026-06-24 — above-appetite is framework-mediated, never a category-3 one-time-override; same invariant the push/release branch at Step 12 already enforces). The ADR-013 Rule 6 fail-safe (no `AskUserQuestion` available / non-interactive → skip the commit and report the uncommitted state) remains the terminal fallback. This applies only to the risk-above-appetite branch, not to the delegation-unavailable case above.
 
 **Multi-commit slice changeset discipline (P141 Phase 2)**: when a single logical fix lands across multiple ADR-014-grain commits targeting the same plugin (e.g. helper extraction in commit 1, callers wired in commit 2, SKILL note + transition in commit 3 — all `packages/<plugin>/`), author ONE changeset on the first commit in the slice. Subsequent same-plugin commits do NOT need their own changeset — the `itil-changeset-discipline.sh` hook's Check 2b recognises any `.changeset/*.md` already in the unpushed slice scope (`origin/<base>..HEAD` + untracked + modified-not-staged) that targets `"@windyroad/<plugin>": <any-bump>` and allows. This eliminates the per-commit changeset ceremony that previously produced N redundant `.changeset/*.md` files for one logical release entry (changesets-action collapses bump-class at version-package time, so per-commit changesets rendered N near-identical CHANGELOG bullets for one release). Once a changeset hits `origin/<base>` (drained at release time), it no longer counts — a fresh changeset is required for the next slice. Cross-plugin coverage is NOT permitted: an `@windyroad/itil` changeset does not satisfy a `packages/voice-tone/` commit.
 
-### 12. Auto-release when changesets are queued (ADR-020)
+### 12. Auto-release when changesets are queued (ADR-133)
 
 **Skip this step if the skill is running inside an AFK orchestrator** (e.g. `/wr-itil:work-problems`). Orchestrators handle release cadence themselves per ADR-018 (Step 6.5). Detect via the presence of an orchestrator marker in the invoking prompt — look for phrases like "AFK", "work-problems", "batch-work", or the sentinel `ALL_DONE` convention. When in doubt, defer to the orchestrator by skipping this step.
 
 Otherwise, after the commit in step 11 lands, drain the release queue so the fix actually lands on npm without requiring manual user action.
 
-**Mechanism — delegate, do not re-implement scoring (per ADR-015):**
+**Mechanism — reuse a valid cumulative assessment; delegate when needed (ADR-133, ADR-015):**
 
-1. Invoke the release scorer. Two paths are valid:
+1. Use the Step 11 pipeline assessment's separate `push` and `release` scores if it still covers this exact checkout, assessed content, unpushed and unreleased scope, and current effective appetite, and has not expired or drifted. A commit of identical assessed content does not require another scorer invocation. If any condition fails or cannot be established, invoke the scorer again before pushing or releasing. Two delegation paths are valid:
    - **Primary**: delegate to subagent type `wr-risk-scorer:pipeline` via the Agent tool.
    - **Fallback**: if that subagent type is not available, invoke skill `/wr-risk-scorer:assess-release` via the Skill tool. The skill wraps the same pipeline subagent.
-2. Read the returned `RISK_SCORES: commit=X push=Y release=Z` line.
-3. **Drain condition**: if `push` and `release` are both within appetite (≤ 4/25, "Low" band per `RISK-POLICY.md`), AND `.changeset/` is non-empty, proceed to the drain action. Otherwise, skip the drain and report the unreleased state.
+2. Read `RISK_SCORES: commit=X push=Y release=Z` from the valid assessment. Never substitute the commit score for a push or release score. The action-time `push:watch` and `release:watch` gates still check the relevant score, checkout, state, expiry, appetite, and CI; if a gate rejects stale or changed evidence, resolve the checkout binding or rescore before retrying.
+3. **Drain condition**: if `push` and `release` are both within appetite (at or below the effective appetite used by the scorer and gate), AND `.changeset/` is non-empty, proceed to the drain action. Otherwise, skip the drain and report the unreleased state.
 
 **Drain action (non-interactive, policy-authorised per ADR-013 Rule 6):**
 
@@ -1173,7 +1173,7 @@ Otherwise, after the commit in step 11 lands, drain the release queue so the fix
 
 **Failure handling**: If `release:watch` fails (CI failure, publish failure), stop and report the failure clearly. Do not retry non-interactively — the user must intervene.
 
-**Above-appetite branch (per ADR-042)**: If push or release risk is above appetite (≥ 5/25), the skill MUST auto-apply scorer remediations incrementally until residual risk converges within appetite, OR halt the skill per ADR-042 Rule 5 if the scorer cannot produce a convergent plan. **The skill MUST NOT release above appetite under any circumstance.** The skill MUST NOT call `AskUserQuestion` as a shortcut out of the auto-apply loop.
+**Above-appetite branch (per ADR-042)**: If push or release risk is above appetite (above the effective appetite used by the scorer and gate), the skill MUST auto-apply scorer remediations incrementally until residual risk converges within appetite, OR halt the skill per ADR-042 Rule 5 if the scorer cannot produce a convergent plan. **The skill MUST NOT release above appetite under any circumstance.** The skill MUST NOT call `AskUserQuestion` as a shortcut out of the auto-apply loop.
 
 **Auto-apply mechanism (ADR-042 Rule 2):**
 
@@ -1196,7 +1196,7 @@ Otherwise, after the commit in step 11 lands, drain the release queue so the fix
 - The final `RISK_SCORES:` line
 - An "Auto-apply trail" subsection listing each remediation attempted with outcome
 - Any Verification Pending ticket IDs implicated per Rule 2b
-- A one-line scorer-gap note (e.g., "available remediations did not reduce residual risk below 5/25 — extend scorer vocabulary per P108")
+- A one-line scorer-gap note (e.g., "available remediations did not reduce residual risk to within the effective appetite — extend scorer vocabulary per P108")
 
 The user resolves interactively — typical resolutions include splitting the commit, feature-flagging the change, or opening a problem ticket documenting the scorer gap.
 

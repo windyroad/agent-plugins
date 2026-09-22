@@ -11,7 +11,7 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 130 (116 in-force, 14 historical)
+**Total ADRs:** 131 (116 in-force, 15 historical)
 
 ---
 
@@ -91,11 +91,6 @@ _116 ADRs. These are the current rules. The architect agent reads this section f
 ### ADR-019 — AFK orchestrator preflight: get the repo into a clean state before starting
 **Status:** proposed | **Oversight:** confirmed
 **Chosen:** Chosen option: **"Three-branch clean-state preflight"**, because it is the honest articulation of the umbrella goal the user pinned 2026-05-25 *"get the repo into a clean state before starting"*. It absorbs P040's narrow-fetch case (Branch ...
-
-### ADR-020 — Governance skills auto-release when changesets are queued
-**Status:** proposed | **Oversight:** confirmed
-**Chosen:** Chosen option: **"New ADR citing ADR-014 + ADR-018 as lineage"**, because it follows the precedent set by ADR-018 (symmetric decision, separate file, cited lineage) and preserves single-purpose ADRs. ADR-014 stays focused on "commit their w...
-**Related:** ADR-014, ADR-020, ADR-018, ADR-015, ADR-013, ADR-019, ADR-061
 
 ### ADR-021 — Plugin manifest version sync mechanism
 **Status:** proposed | **Oversight:** confirmed
@@ -596,11 +591,16 @@ _116 ADRs. These are the current rules. The architect agent reads this section f
 **Chosen:** Chosen option: **"Separate dispatch eligibility from priority"**, because the two questions are genuinely different and only one of them is about value. Priority says how much a ticket is worth; eligibility says whether anything can be done...
 **Confirmation:** The predicate exits 0 with the right class and owner for a fixture ticket in; A ticket carrying two - Blocked by: lines — one (none — …), one a real; The predicate and the backlog-empty gate agree on every ticket. In particular; The held ticket still appears at its own position in the rankings, annotated; After a loop in which all four classes fired, the outstanding-questions queue; Every surfaced hold names what would unstick it, in the text the maintainer; The all-held stop is textually distinguishable from an empty-backlog stop, and; A ticket whose only hold was a pending push becomes dispatchable again once
 
+### ADR-133 — Reuse valid cumulative risk assessments across pipeline actions
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** [020-governance-auto-release-for-non-afk-flows]
+**Confirmation:** An attended skill with unchanged assessed scope invokes the scorer once, then commits, pushes, and releases th...; If the checkout, assessed content, release scope, or effective appetite changes, or the score expires, run a n...; A stale or above-appetite release score, or failing CI, still blocks release.; The AFK orchestrator's scoring and release cadence remain unchanged.
+**Related:** ADR-020, ADR-015, ADR-042, ADR-099
+
 ---
 
 ## Historical decisions
 
-_14 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
+_15 ADRs. These were tried and superseded, rejected, or deprecated. Read them as direction for what NOT to do, or to understand the lineage of an in-force decision. Do not enforce them as current rules._
 
 ### ADR-001 — Unified Install Experience via npm Package
 **Status:** superseded
@@ -610,6 +610,11 @@ _14 ADRs. These were tried and superseded, rejected, or deprecated. Read them as
 **Status:** superseded
 **Superseded-by:** [008-jtbd-directory-structure]
 **Confirmation:** jtbd-eval.sh suggests /wr-jtbd:update-guide for any project missing the doc (no UI file check); jtbd-enforce-edit.sh gates all project files except the exclusion list; jtbd-enforce-edit.sh allows: .css, .scss, .png, .jpg, .svg, .woff, package-lock.json, .changeset/*.md, MEMORY....; jtbd-enforce-edit.sh blocks: .ts, .js, .sh, .mjs, .json (non-lockfile), .md (non-excluded); BATS tests exist for the broadened scope
+
+### ADR-020 — Governance skills auto-release when changesets are queued
+**Status:** superseded | **Oversight:** confirmed
+**Chosen:** Chosen option: **"New ADR citing ADR-014 + ADR-018 as lineage"**, because it follows the precedent set by ADR-018 (symmetric decision, separate file, cited lineage) and preserves single-purpose ADRs. ADR-014 stays focused on "commit their w...
+**Related:** ADR-014, ADR-020, ADR-018, ADR-015, ADR-013, ADR-019, ADR-061
 
 ### ADR-027 — Governance skill auto-delegation — Step 0 delegates skill workflow to a subagent
 **Status:** superseded

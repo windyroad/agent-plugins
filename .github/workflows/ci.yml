@@ -159,7 +159,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check whether agent-prose evals are relevant
+      - name: Check whether behavioral evals are relevant
         id: scope
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -168,15 +168,24 @@ jobs:
         run: |
           if [ "$EVENT_NAME" != "pull_request" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "agents=true" >> "$GITHUB_OUTPUT"
+            echo "skills=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
-          if printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|scripts/run-agent-evals-ci\.sh|packages/shared/test/agent-eval-quota-gate\.bats|packages/[^/]+/agents/.*|package(-lock)?\.json)$'; then
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run=false" >> "$GITHUB_OUTPUT"
-            echo "No agent-prose or promptfoo dependency changes — skipping Claude evals."
+          run=false
+          if printf '%s\n' "$changed" | grep -Eq '^(scripts/run-agent-evals-ci\.sh|packages/shared/test/agent-eval-quota-gate\.bats|packages/[^/]+/agents/.*|package(-lock)?\.json)$'; then
+            echo "agents=true" >> "$GITHUB_OUTPUT"
+            run=true
+          fi
+          if printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|packages/itil/skills/(work-problems|update-upstream)/(SKILL\.md|eval/.*)|package(-lock)?\.json)$'; then
+            echo "skills=true" >> "$GITHUB_OUTPUT"
+            run=true
+          fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          if [ "$run" = false ]; then
+            echo "No relevant eval changes — skipping Claude evals."
           fi
 
       - name: Check CLAUDE_CODE_OAUTH_TOKEN availability
@@ -210,7 +219,19 @@ jobs:
           npm i -g @anthropic-ai/claude-code@2.1.150
 
       - name: Run agent-prose behavioural evals
-        if: steps.scope.outputs.run == 'true' && steps.token.outputs.present == 'true'
+        if: steps.scope.outputs.agents == 'true' && steps.token.outputs.present == 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: scripts/run-agent-evals-ci.sh
+
+      - name: Verify work-problems appetite behavior
+        if: steps.scope.outputs.skills == 'true' && steps.token.outputs.present == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: npx promptfoo eval -c packages/itil/skills/work-problems/eval/risk-appetite.promptfooconfig.yaml --no-table
+
+      - name: Verify update-upstream gate verdict behavior
+        if: steps.scope.outputs.skills == 'true' && steps.token.outputs.present == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: npx promptfoo eval -c packages/itil/skills/update-upstream/eval/promptfooconfig.yaml --filter-pattern 'AFK below-appetite|AFK external-comms FAIL|Gate composition is mandatory' --no-table

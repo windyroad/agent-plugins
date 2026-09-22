@@ -160,7 +160,7 @@ Otherwise, after the commit in step 8 lands, drain the release queue so the fix 
    - **Primary**: delegate to subagent type `wr-risk-scorer:pipeline` via the Agent tool.
    - **Fallback**: if that subagent type is not available, invoke skill `/wr-risk-scorer:assess-release` via the Skill tool.
 2. Read the returned `RISK_SCORES: commit=X push=Y release=Z` line.
-3. **Drain condition**: if `push` and `release` are both within appetite (≤ 4/25, "Low" band per `RISK-POLICY.md`), AND `.changeset/` is non-empty, proceed to the drain action. Otherwise, skip the drain and report the unreleased state.
+3. **Drain condition**: if `push` and `release` are both within appetite (at or below the effective appetite used by the scorer and gate), AND `.changeset/` is non-empty, proceed to the drain action. Otherwise, skip the drain and report the unreleased state.
 
 **Drain action (non-interactive, policy-authorised per ADR-013 Rule 6):**
 

@@ -46,4 +46,4 @@ if [[ "${WR_EVAL_RUNTIME:-claude}" == "codex" ]]; then
 ${1:-}" </dev/null
 fi
 
-exec claude -p --append-system-prompt "$(cat "$SKILL_MD")" "${1:-}"
+exec claude -p --append-system-prompt-file "$SKILL_MD" "${1:-}"
