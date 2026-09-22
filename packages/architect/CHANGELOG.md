@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 0.23.2
+
+### Patch Changes
+
+- 02acf7d: Fix Codex reviewer completion matching so architecture and JTBD reviews persist edit markers when the completion identifies the reviewed task. Unknown reviewer IDs remain blocked.
+
 ## 0.23.1
 
 ### Patch Changes

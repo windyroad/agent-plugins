@@ -1,6 +1,6 @@
 {
   "name": "wr-connect",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Connect coding-agent sessions across repositories via Discord",
   "author": {
     "name": "Windy Road Technology",
