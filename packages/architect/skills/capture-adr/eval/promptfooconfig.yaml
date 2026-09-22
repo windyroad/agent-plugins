@@ -184,3 +184,31 @@ tests:
           discussion), and does NOT say to write a deferred/placeholder
           marker, pointer string, or sentinel into either section, and does
           NOT halt or ask the user via AskUserQuestion.
+
+  - description: ADR body keeps the two-demo-org decision free of rollout steps and an unsolicited customer-wide rider
+    vars:
+      prompt: |
+        I am executing /wr-architect:capture-adr Step 3. The user decided that
+        public-demo verification checks exactly two existing Xero test
+        organisations, one UK and one Australian. A teammate separately
+        suggested a customer-wide connection sweep; the user did not choose
+        to consider it. The delivery checklist says reconnect both test
+        organisations, update monitoring, run tests, then deploy to production.
+        Produce only the complete ADR file body, with real options, decision,
+        consequences, and confirmation.
+    assert:
+      - type: regex
+        value: '## Decision Outcome'
+      - type: regex
+        value: '## Confirmation'
+      - type: not-regex
+        value: '[Cc]ustomer[- ]wide|[Ss]weep'
+      - type: not-regex
+        value: '[Rr]econnect both|[Uu]pdate monitoring|[Rr]un tests|[Dd]eploy to production|[Rr]ollout checklist'
+      - type: llm-rubric
+        value: |
+          PASS only if the ADR records the enduring choice to verify exactly
+          the two named test organisations and gives decision-level confirmation.
+          It must omit the unsolicited customer-wide sweep entirely, including
+          as a rejected option, consequence, reassessment trigger, or afterword.
+          It must omit the delivery checklist and procedural rollout steps.

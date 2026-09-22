@@ -8,6 +8,11 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 
 Capture an Architecture Decision Record quickly during foreground work. Lightweight aside-invocation surface that complements the heavyweight `/wr-architect:create-adr` flow. See `REFERENCE.md` in this directory for rationale, edge cases, contract trade-offs, and the ADR-032 foreground-lightweight-capture amendment.
 
+Record the enduring choice and rationale, its constraints and consequences, and decision-level confirmation criteria. Put rollout order, migration steps, commands, assignments, and release tasks in the applicable ticket, story-map release row, or implementation artifact. Do not copy a delivery checklist into the ADR, even when the invoking context includes one.
+The user's pinned subject bounds every ADR section: do not add adjacent populations or operations as riders in the options, outcome, consequences, or confirmation. A decision about two named demo organisations does not authorize a customer-wide sweep.
+When asked for the ADR file body, output only that body. Do not append a recap of excluded rollout work or unsolicited suggestions after it.
+An unsolicited adjacent suggestion is not a considered option. Omit it from the entire ADR, including reassessment criteria, and do not revive it in post-ADR notes or follow-up offers unless the decision-maker actually chose to consider it.
+
 This skill is the foreground-lightweight-capture variant of `/wr-architect:create-adr`'s new-ADR path per ADR-032 (P156 amendment, 2026-05-03). The deferred background-capture variant named in ADR-032's original taxonomy remains deferred per P088 settlement.
 
 ## When to invoke
@@ -27,7 +32,7 @@ This skill has **zero AskUserQuestion branches** by design. Each potentially-int
 
 | Decision | Resolution |
 |----------|-----------|
-| Considered Options ≥2 | Silent derivation (ADR-044 category-4): write the chosen option PLUS every alternative that was actually weighed and rejected in the decision context (`$ARGUMENTS` + the invoking session). Real options with one-line summaries — never a placeholder sibling. If the context genuinely weighed only one option, derive the strongest do-nothing / status-quo alternative and say why it lost. |
+| Considered Options ≥2 | Silent derivation (ADR-044 category-4): write the chosen option PLUS every alternative the decision-maker actually weighed and rejected in the decision context (`$ARGUMENTS` + the invoking session). An unsolicited adjacent suggestion is not an option. Real options with one-line summaries — never a placeholder sibling. If the context genuinely weighed only one option, derive the strongest do-nothing / status-quo alternative and say why it lost. |
 | Decision drivers | Silent derivation: extract the forces that actually drove the decision from the context (the problem's symptoms, the constraint that ruled options out, the user's stated priorities). |
 | Consequences | Silent derivation: real Good/Neutral/Bad trade-off analysis of the chosen option. The invoking agent performs the analysis at capture — it has more decision context in-session than any later expansion pass would. |
 | Confirmation criteria | Silent derivation: testable criteria (a command, an observable behaviour, a hook that fires) confirming the decision is implemented and holding. |

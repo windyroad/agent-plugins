@@ -8,6 +8,11 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent
 
 Create a new ADR in `docs/decisions/` following MADR 4.0 format. The wr-architect:agent reviews these files to enforce architectural compliance.
 
+An ADR records the enduring decision: the chosen approach and why, its constraints, consequences, and decision-level confirmation criteria. Keep rollout order, migration steps, commands, assignments, and release tasks in the applicable ticket, story-map release row, or implementation artifact. Do not turn the ADR's Decision Outcome, Consequences, or Confirmation into an implementation plan.
+The user's pinned subject bounds every ADR section: do not add adjacent populations or operations as riders in the options, outcome, consequences, or confirmation. A decision about two named demo organisations does not authorize a customer-wide sweep.
+When asked for the ADR file body, output only that body. Do not append a recap of excluded rollout work or unsolicited suggestions after it.
+An unsolicited adjacent suggestion is not a considered option. Omit it from the entire ADR, including reassessment criteria, and do not revive it in post-ADR notes or follow-up offers unless the decision-maker actually chose to consider it.
+
 ## Needs-Direction handoff + confirm-every-ADR (ADR-064)
 
 When a `wr-architect:agent` review returns a **NEEDS DIRECTION** verdict (a new decision with 2+ viable options and no pinned direction, per ADR-064), the option choice is the user's, not the agent's — this skill is the translation surface. The architect's named question + options become the Step 2 cat-1 `AskUserQuestion` calls (Considered Options / Decision Outcome), and the Step 5 confirm is the load-bearing **review-and-confirm-every-ADR** gate: an ADR must not stand as a human-oversighted decision (reach `accepted`) without that confirm pass. A `/wr-architect:capture-adr` ADR — zero-ask, with its decision pre-pinned in `$ARGUMENTS` and its remaining sections silently DERIVED at capture per the ADR-032 derived-substance amendment (RFC-045) — must still have its derived substance human-ratified (via `/wr-architect:review-decisions` or this skill's confirm) before promotion to `accepted`. When direction IS already pinned (same-turn / same-session / accepted ADR / RISK-POLICY.md / CLAUDE.md mandatory rule), act on it — do not re-ask (P132 inverse-P078 guard).
@@ -94,6 +99,7 @@ ADR titles must name the **decision outcome** as a short noun phrase, not the qu
 ### 2b. Decision-boundary analysis (multi-decision check)
 
 Before writing the ADR file, perform a decision-boundary analysis on the gathered context to prevent conflated ADRs that block independent status transitions and weaken auditability (P017).
+This check applies only to decisions the user actually asked to make; splitting or keeping decisions together never authorizes an unrequested rider.
 
 **Self-check**: Read the context gathered in step 2. Answer: "How many distinct decisions are present? If each could be independently accepted, rejected, or superseded without affecting the others, they are distinct."
 
