@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 2.4.3
+
+### Patch Changes
+
+- 5e0d97f: Reuse a valid cumulative risk assessment when committing, pushing, and releasing an attended problem or incident fix. Rescore if the assessed work or policy changes or the assessment expires. Use the effective risk appetite across attended and unattended release flows. Match upstream communications gating to its PASS/FAIL verdict contract.
+
 ## 2.4.2
 
 ### Patch Changes
