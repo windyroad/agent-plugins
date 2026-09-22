@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 0.23.3
+
+### Patch Changes
+
+- 77e50dc: Keep architecture decision records focused on the chosen decision. ADR authoring now excludes rollout plans and unrequested adjacent scope from the record and follow-up notes.
+
 ## 0.23.2
 
 ### Patch Changes
