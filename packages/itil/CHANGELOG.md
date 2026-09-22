@@ -1,5 +1,41 @@
 # @windyroad/problem
 
+## 2.4.2
+
+### Patch Changes
+
+- da5d24a: State which outbound messages an unattended run is allowed to send.
+
+  Running the backlog while you are away, the agent would meet a piece of
+  external communication that was ready to go -- an acknowledgement owed to
+  someone who filed a report, a lifecycle update on an issue we raised
+  upstream -- and decline it as outside the scope of an unattended pass. It
+  was not outside scope. Those dispatches are reviewed as they are composed,
+  and a low-risk one is meant to proceed without stopping for anyone. Nothing
+  in the skill ever said so, though: four separate steps each mentioned in
+  passing that their own outbound message was fine to send, and no page stated
+  the set. Seeing a review step and no statement that passing it was expected,
+  the agent supplied the missing statement itself, and guessed conservatively.
+
+  `/wr-itil:work-problems` now carries a section that names the four
+  obligations an unattended pass is authorised to dispatch and the skill that
+  owns each one, and, beside them, the one shape that is deliberately held
+  back: a batch of comments posted across a backlog of other people's issues
+  in a single unattended sweep. That one stays a decision for the maintainer.
+  `/wr-itil:review-problems` points at the same section from its own
+  unattended branch, and an eval case covers the distinction.
+
+- 678e308: Remove operational report counts from the published work-problems skill and its behavioural example. The unattended communication rule and the held backlog distinction remain unchanged.
+- 3fb196b: The story reconciler no longer reports correct work as drift on the legacy-RFC leg, and now says which population it checked.
+
+  An RFC may reference only a story whose story map has been ratified. The reconciler demanded a `## Stories` reverse-trace row from every story that named an RFC regardless, so for a story held pending ratification the row's absence — which is the correct state — was reported as `MISSING_REVERSE_TRACE`. The finding could not be cleared by any compliant action: satisfying it meant writing the reference the rule forbids. That leg is now narrowed to approved stories. The release-row leg is unchanged, because a story card belongs on its map from capture and its absence there is never correct.
+
+  Every run of that leg now writes one line to stderr saying how many story/RFC pairs it checked and how many it skipped, so a clean result can be read as "checked and clean" rather than "quietly skipped". Two skip reasons are corpus defects rather than correct absences — a story that names no story map, and a story naming a map id that does not resolve to exactly one file — and they are counted apart so neither hides behind an explanation that does not apply to it.
+
+  The helper that regenerates an RFC's `## Stories` section is gated on the same rule and names on stderr any story it withheld, so the repair for a genuine finding can no longer sweep unapproved stories in behind a now-quiet detector.
+
+  Standard output and the exit codes are unchanged.
+
 ## 2.4.1
 
 ### Patch Changes
