@@ -1,6 +1,6 @@
 ---
 name: wr-itil:update-upstream
-description: Post a lifecycle-update comment to an upstream issue when a local problem ticket transitions. Drafts a transition-specific update (root-cause confirmed / fix released / closed), composes the prose through the external-comms risk gate + voice-tone gate, auto-posts within appetite, queues above-appetite. Reciprocal sibling to /wr-itil:report-upstream — initial-filing vs lifecycle-update split per ADR-024 amendment (P080).
+description: Post a lifecycle-update comment to an upstream issue when a local problem ticket transitions. Drafts a transition-specific update (root-cause confirmed / fix released / closed), composes the prose through the external-comms risk gate + voice-tone gate, auto-posts on PASS, queues unresolved FAIL verdicts. Reciprocal sibling to /wr-itil:report-upstream — initial-filing vs lifecycle-update split per ADR-024 amendment (P080).
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill, Agent
 ---
 
@@ -23,7 +23,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Skill, Agen
 
 # Update Upstream — Lifecycle-Update Skill
 
-Post a lifecycle-update comment to an upstream issue or pull request when the local problem ticket transitions. Reads the local ticket's `## Reported Upstream` section, drafts a transition-specific update from the templates below, composes the draft through the external-comms risk gate (`wr-risk-scorer:external-comms`) and voice-tone gate (`wr-voice-tone:external-comms`), auto-posts via `gh issue comment` or `gh pr comment` when both gates pass within appetite, closes only issue targets on Verifying → Closed, and queues an `outstanding_questions` entry when either gate scores above appetite.
+Post a lifecycle-update comment to an upstream issue or pull request when the local problem ticket transitions. Reads the local ticket's `## Reported Upstream` section, drafts a transition-specific update from the templates below, composes the draft through the external-comms risk gate (`wr-risk-scorer:external-comms`) and voice-tone gate (`wr-voice-tone:external-comms`), auto-posts via `gh issue comment` or `gh pr comment` when both gates PASS, closes only issue targets on Verifying → Closed, and queues an `outstanding_questions` entry when either gate still FAILS after risk reduction.
 
 This skill is the **reciprocal sibling** to [`/wr-itil:report-upstream`](../report-upstream/SKILL.md) — that skill files the initial upstream report; this skill keeps the upstream record in sync as the local ticket walks its lifecycle. The split is per [ADR-010](../../../docs/decisions/010-rename-wr-problem-to-wr-itil.proposed.md) amended Skill Granularity rule (one skill per distinct user intent) — initial-filing and lifecycle-update are distinct user intents with distinct autocomplete surfaces.
 
@@ -49,8 +49,8 @@ The single-ticket form is typically invoked from `/wr-itil:transition-problem` S
 - Determine the local ticket's current Status from the filename suffix.
 - Draft a transition-specific lifecycle-update comment per the templates below (Open→KE / KE→Verifying / Verifying→Closed).
 - Compose the drafted prose through `wr-risk-scorer:external-comms` + `wr-voice-tone:external-comms` gates.
-- Within appetite → post via `gh issue comment <n>`, or `gh pr comment <n>` when the disclosure path records a pull request (ADR-117); on Verifying→Closed also run `gh issue close <n>` — **but never `gh pr close`** (see below).
-- Above appetite → AskUserQuestion (interactive) / queue `outstanding_questions` (AFK, per P352 queue-and-continue).
+- Both gates PASS → post via `gh issue comment <n>`, or `gh pr comment <n>` when the disclosure path records a pull request (ADR-117); on Verifying→Closed also run `gh issue close <n>` — **but never `gh pr close`** (see below).
+- Gate FAIL → AskUserQuestion (interactive) / queue `outstanding_questions` (AFK, per P352 queue-and-continue).
 - Back-write a `## Upstream Lifecycle Updates` log entry to the local ticket recording the transition, the matched URL, the posted comment URL, and the disclosure path.
 - **Historical catch-up migration (`--catchup`, P080 Phase 2)** — one-shot retroactive scan of the existing `.verifying.md` + `.closed.md` corpus; posts the lifecycle update each linked-upstream ticket should already carry. Idempotent — re-running is safe. See [§ Catchup migration mode](#catchup-migration-mode-phase-2).
 
@@ -105,7 +105,7 @@ For each `- **URL**: <url>` line under `## Reported Upstream`, extract:
 
 Skip entries whose disclosure path is `drafted-and-saved (mailbox / out-of-band)` — those reports were never filed via `gh`, so there is no issue to comment on. Log a one-line skip note: `Skipping upstream entry <url> — disclosure path is out-of-band; user follow-up required.` The skip is **not** queued as an `outstanding_questions` entry (the user already owns the out-of-band channel per the ADR-024 no-infra-for-email constraint).
 
-Multiple `## Reported Upstream` entries are supported (the local ticket may have been filed to multiple upstream trackers). Process each entry independently — the gate composition + post + back-write all run per-entry; one above-appetite entry queues only that entry, the rest proceed.
+Multiple `## Reported Upstream` entries are supported (the local ticket may have been filed to multiple upstream trackers). Process each entry independently — the gate composition + post + back-write all run per-entry; one failed gate queues only that entry, the rest proceed.
 
 ### 3. Determine the transition that fired this invocation
 
@@ -223,33 +223,36 @@ Score the drafted comment body via the `wr-risk-scorer:external-comms` agent (sh
 The agent returns a structured verdict:
 
 ```
-EXTERNAL_COMMS_RISK_VERDICT
-band: Low (<=4/25) | Medium (5..16) | High (17+)
-score: <0..25>
-pass: true | false
-reason: <one-line rationale>
+EXTERNAL_COMMS_RISK_VERDICT: PASS
 ```
 
-- **`pass: true` AND band ≤ Low (4/25)**: within appetite per RISK-POLICY.md commit-layer. Proceed to 5b (voice-tone).
-- **`pass: false` OR band > Low**: above appetite. Branch to 5c (above-appetite handling).
+Or, on failure:
+
+```
+EXTERNAL_COMMS_RISK_VERDICT: FAIL
+EXTERNAL_COMMS_RISK_REASON: <one-line rationale>
+```
+
+- **PASS**: proceed to 5b (voice-tone).
+- **FAIL**: branch to 5c (gate-failure handling).
 
 #### 5b. Voice-tone gate
 
 `gh issue comment` and `gh issue close` are on the ADR-028 gated surface list. The PreToolUse:Bash hook fires deny-plus-delegate to `wr-voice-tone:agent`. The agent reads the drafted body against `docs/VOICE-AND-TONE.md` and writes the bypass marker on PASS; the original `gh` call retries automatically.
 
-A FAIL verdict on the voice-tone gate is treated identically to an above-appetite risk verdict — branch to 5c.
+A FAIL verdict on the voice-tone gate also branches to 5c.
 
-#### 5c. Above-appetite handling
+#### 5c. Gate-failure handling
 
-The decision policy here is **framework-resolved** per [ADR-044](../../../docs/decisions/044-decision-delegation-contract.proposed.md) (decision-delegation contract) and ADR-013 Rule 6 (AFK fail-safe). No per-transition `AskUserQuestion` for the GATE FIRING — the gate scoring is itself the framework. The above-appetite handling differs by orchestrator context:
+The decision policy here is **framework-resolved** per [ADR-044](../../../docs/decisions/044-decision-delegation-contract.proposed.md) (decision-delegation contract) and ADR-013 Rule 6 (AFK fail-safe). No per-transition `AskUserQuestion` for the GATE FIRING — the gate verdict is itself the framework. The failure handling differs by orchestrator context:
 
 - **Interactive context** (per ADR-013 Rule 1): use `AskUserQuestion` to surface the drafted comment + the gate verdict + the matched URL, with options:
   - `Post the comment anyway (Recommended after review)` — user has read the draft and judged the post warranted; the skill bypasses the gate for this single post.
-  - `Risk-reduce and re-score` — invoke a tighter draft (shorter / fewer claims / stricter source-citation) and re-run the gate.
+  - `Risk-reduce and re-review` — invoke a tighter draft (shorter / fewer claims / stricter source-citation) and re-run the gate.
   - `Queue for later review` — save the draft to `## Queued Upstream Update` on the local ticket; user acts on return.
   - `Skip this update` — exit no-op for this upstream entry; the next transition's invocation re-considers.
 
-- **AFK / non-interactive context** (per ADR-013 Rule 6 + P352 queue-and-continue): the skill applies **silent risk-reduce + re-score** first — re-draft the comment with tighter source-citation + shorter prose, then re-invoke the external-comms gate. If the re-scored verdict is within appetite, proceed via 5b. Otherwise, save the drafted comment to the local ticket's `## Queued Upstream Update` section (shape below) and queue an `outstanding_questions` entry (category: `deviation-approval`) naming the local ticket ID + the matched URL + the residual band + the risk-reduce attempts taken. **The orchestrator continues per P352** — do NOT halt the loop on an above-appetite upstream update.
+- **AFK / non-interactive context** (per ADR-013 Rule 6 + P352 queue-and-continue): the skill applies **silent risk-reduce + re-review** first — re-draft the comment with tighter source-citation + shorter prose, then re-invoke the external-comms gate. If the new verdict is PASS, proceed via 5b. Otherwise, save the drafted comment to the local ticket's `## Queued Upstream Update` section (shape below) and queue an `outstanding_questions` entry (category: `deviation-approval`) naming the local ticket ID + the matched URL + the FAIL reason + the risk-reduce attempts taken. **The orchestrator continues per P352** — do NOT halt the loop on a failed upstream update gate.
 
 The silent risk-reduce step is **mechanical** per ADR-044 framework-resolution boundary — the skill owns the re-draft; per-iter `AskUserQuestion` for risk-reduce vocabulary is the lazy-deferral anti-pattern P132 closes.
 
@@ -261,8 +264,8 @@ The silent risk-reduce step is **mechanical** per ADR-044 framework-resolution b
 - **Drafted**: <YYYY-MM-DD>
 - **Transition**: Open → Known Error | Known Error → Verification Pending | Verification Pending → Closed
 - **Target URL**: <upstream-issue-url>
-- **Halt reason**: above-appetite external-comms gate (band: <verdict band>; score: <verdict score>; reason: <verdict reason>) | above-appetite voice-tone gate (reason: <verdict reason>)
-- **Risk-reduce attempts**: <count, e.g. "1 — tighter source-citation; re-scored band Medium">
+- **Halt reason**: external-comms gate FAIL (reason: <EXTERNAL_COMMS_RISK_REASON>) | voice-tone gate FAIL (reason: <verdict reason>)
+- **Risk-reduce attempts**: <count, e.g. "1 — tighter source-citation; re-reviewed FAIL">
 - **Drafted comment body**:
 
   <the body that would have been posted as a `gh issue comment`, ready for manual review>
@@ -312,9 +315,9 @@ Append a log entry to the local ticket's `## Upstream Lifecycle Updates` section
 
 - **<YYYY-MM-DD>** — Open → Known Error
   - **Target URL**: <upstream-issue-url>
-  - **Comment URL**: <posted-comment-url> (or "queued — see ## Queued Upstream Update" when above-appetite)
-  - **Disclosure path**: posted-comment | posted-pr-comment (pull-request target — never closed) | posted-comment-and-closed (confirmed Verifying → Closed, issue targets only) | posted-comment-local-close-only (outbound evidence-authorised close) | queued-above-appetite | closed-already-upstream | skipped-out-of-band
-  - **Gate verdict**: external-comms <band/score> + voice-tone <pass|fail>
+  - **Comment URL**: <posted-comment-url> (or "queued — see ## Queued Upstream Update" when a gate fails)
+  - **Disclosure path**: posted-comment | posted-pr-comment (pull-request target — never closed) | posted-comment-and-closed (confirmed Verifying → Closed, issue targets only) | posted-comment-local-close-only (outbound evidence-authorised close) | queued-gate-failure | closed-already-upstream | skipped-out-of-band
+  - **Gate verdict**: external-comms <PASS|FAIL> + voice-tone <PASS|FAIL>
 
 - **<YYYY-MM-DD>** — Known Error → Verification Pending
   - ... (next entry appends; never replaces earlier entries)
@@ -494,7 +497,7 @@ Route the GENERATED comment through the reporter-facing gate chain — **cogniti
 
 **Cog-a11y gate (when-available, P338-gated — do NOT block):** the cognitive-accessibility evaluator rides FIRST so reporter-facing prose is checked for plain-language / reading-level before the risk + voice-tone legs. `@windyroad/cognitive-a11y` does not exist yet ([P338](../../../docs/problems/open/338-p082-phase-2-cognitive-a11y-evaluator-on-external-comms-surfaces-new-windyroad-cognitive-a11y-plugin.md) Open) — until it lands the chain degrades to the existing external-comms + voice-tone dual gate, exactly as ADR-028's per-evaluator marker scheme handles an uninstalled evaluator (an absent evaluator's gate is simply not registered → the remaining legs' PASS unblocks the retry). The cog-a11y-as-third-external-comms-evaluator declaration is recorded in [ADR-028](../../../docs/decisions/028-voice-tone-gate-external-comms.proposed.md)'s `## Amendments` (the locus ADR-028's own Reassessment Criteria designate for a third evaluator); this leg is the consumer-side wiring note only. **Do NOT block this iteration's inbound dispatch on P338** — ship the wiring, ride the dual gate today.
 
-Above-appetite handling is identical to Step 5c (silent risk-reduce + re-score; if still above, save to `## Queued Upstream Update` + queue an `outstanding_questions` entry; the orchestrator continues per P352 — do NOT halt). Within appetite, post on our own repo:
+Gate-failure handling is identical to Step 5c (silent risk-reduce + re-review; if still FAIL, save to `## Queued Upstream Update` + queue an `outstanding_questions` entry; the orchestrator continues per P352 — do NOT halt). When both gates PASS, post on our own repo:
 
 ```bash
 gh issue comment "${NN}" --repo "${OWN_OWNER_REPO}" --body "${INBOUND_BODY}"
@@ -517,16 +520,16 @@ Append to the same `## Upstream Lifecycle Updates` log (Step 6 shape), tagged fo
 ```markdown
 - **<YYYY-MM-DD>** — Known Error → Verification Pending (inbound)
   - **Target**: inbound #<NN> (own repo <OWN_OWNER_REPO>)
-  - **Comment URL**: <posted-comment-url> (or "skipped — already-posted-inbound" when the idempotency guard matched, or "queued — see ## Queued Upstream Update" when above-appetite)
-  - **Disclosure path**: posted-inbound-comment | posted-inbound-comment-and-closed (proven owned issue, confirmed or evidence-authorised close) | already-posted-inbound | queued-above-appetite | closed-already | inbound-channel-unresolved
-  - **Gate verdict**: external-comms <band/score> + voice-tone <pass|fail>
+  - **Comment URL**: <posted-comment-url> (or "skipped — already-posted-inbound" when the idempotency guard matched, or "queued — see ## Queued Upstream Update" when a gate fails)
+  - **Disclosure path**: posted-inbound-comment | posted-inbound-comment-and-closed (proven owned issue, confirmed or evidence-authorised close) | already-posted-inbound | queued-gate-failure | closed-already | inbound-channel-unresolved
+  - **Gate verdict**: external-comms <PASS|FAIL> + voice-tone <PASS|FAIL>
 ```
 
 The log stays append-only and direction-tagged; `/wr-itil:check-upstream-responses` (P249) does NOT read this section, so logging inbound entries here cannot contaminate the outbound poller.
 
 #### I7. Both-direction tickets
 
-A ticket may carry BOTH a `## Reported Upstream` section AND an inbound `**Origin**` field (we reported it upstream *and* someone reported it against us). The two legs are **independent**: the outbound entries run Steps 2–6 against their external URLs; the inbound leg runs I1–I6 against the own-repo issue. Each gate-composes, posts, and logs separately — one above-appetite leg queues only itself; the other proceeds.
+A ticket may carry BOTH a `## Reported Upstream` section AND an inbound `**Origin**` field (we reported it upstream *and* someone reported it against us). The two legs are **independent**: the outbound entries run Steps 2–6 against their external URLs; the inbound leg runs I1–I6 against the own-repo issue. Each gate-composes, posts, and logs separately — one failed gate queues only its own leg; the other proceeds.
 
 ### 7. Commit per ADR-014
 
@@ -578,10 +581,10 @@ The append-only log (written by Step 6 on every post) is the source of truth —
 For each `CATCHUP` line, parse its `disclosure=` token and run the **existing per-ticket flow** (Steps 4–6) against that ticket ID. `disclosure=pull-request` selects `gh pr comment` and forbids any close command; `disclosure=issue` selects `gh issue comment` and permits `gh issue close` for Verifying → Closed:
 
 1. Draft the transition template (Step 4) for the entry's transition (`KE->Verifying` → Known Error → Verification Pending template; `Verifying->Closed` → Verification Pending → Closed template). Only an issue disclosure also runs `gh issue close`; a pull-request disclosure never runs `gh pr close`.
-2. Compose through the external-comms + voice-tone gates (Step 5) — **identical** dual-gate composition as the per-ticket path. Above-appetite handling (Step 5c) is unchanged: silent risk-reduce + re-score, then queue to `## Queued Upstream Update` + `outstanding_questions` (category `deviation-approval`) per P352 if still above. Catchup does NOT bypass the gates.
-3. Post within appetite (Step 5b final) and back-write the `## Upstream Lifecycle Updates` log (Step 6).
+2. Compose through the external-comms + voice-tone gates (Step 5) — **identical** dual-gate composition as the per-ticket path. Gate-failure handling (Step 5c) is unchanged: silent risk-reduce + re-review, then queue to `## Queued Upstream Update` + `outstanding_questions` (category `deviation-approval`) per P352 if still FAIL. Catchup does NOT bypass the gates.
+3. Post after both gates PASS (Step 5b final) and back-write the `## Upstream Lifecycle Updates` log (Step 6).
 
-Process entries one at a time so a single above-appetite entry queues only itself; the rest proceed. There is no batch-cap on the number of catchup posts — the gate composition is the rate-limit, and the corpus is bounded (one pass over local tickets).
+Process entries one at a time so a single failed gate queues only its own entry; the rest proceed. There is no batch-cap on the number of catchup posts — the gate composition is the rate-limit, and the corpus is bounded (one pass over local tickets).
 
 ### C4. Commit per ADR-014
 
@@ -593,15 +596,15 @@ The live-upstream end-to-end confirmation (P080 acceptance criterion 7 — a cat
 
 ## AFK behaviour summary
 
-Four distinct AFK branches. Per the [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) amendment (P080) — same composition shape as the post-P270 initial-filing path — ALL pre-post branches route through the `wr-risk-scorer:external-comms` + `wr-voice-tone:external-comms` gates. Below-appetite proceeds; above-appetite silent risk-reduces + re-scores; if still above, queues per P352 queue-and-continue without halting the loop.
+Four distinct AFK branches. Per the [ADR-024](../../../docs/decisions/024-cross-project-problem-reporting-contract.proposed.md) amendment (P080) — same composition shape as the post-P270 initial-filing path — ALL pre-post branches route through the `wr-risk-scorer:external-comms` + `wr-voice-tone:external-comms` gates. PASS proceeds; FAIL silently risk-reduces + re-reviews; an unresolved FAIL queues per P352 queue-and-continue without halting the loop.
 
 | Branch | AFK behaviour | Authority |
 |---|---|---|
-| Below-appetite post (Step 5b final) | Post via `gh issue comment`; on Verifying→Closed also `gh issue close`. Back-write to `## Upstream Lifecycle Updates`. Voice-tone gate per ADR-028 may delegate-and-retry on the post; treat as expected. | ADR-024 amendment (P080); ADR-028 |
-| Above-appetite — silent risk-reduce + re-score within appetite | Re-draft with tighter source-citation + shorter prose; re-invoke `wr-risk-scorer:external-comms`. If within → post per the below-appetite branch. | ADR-024 amendment (P080); ADR-044 framework-resolution boundary; ADR-042 within-axis precedent (open-vocabulary risk-reducing measures) |
-| Above-appetite — silent risk-reduce did not bring within appetite | Save drafted comment to `## Queued Upstream Update` + queue `outstanding_questions` entry (category: `deviation-approval`). Orchestrator continues per P352. | ADR-024 amendment (P080); ADR-013 Rule 6; P352 |
+| Both gates PASS (Step 5b final) | Post via `gh issue comment`; on Verifying→Closed also `gh issue close`. Back-write to `## Upstream Lifecycle Updates`. Voice-tone gate per ADR-028 may delegate-and-retry on the post; treat as expected. | ADR-024 amendment (P080); ADR-028 |
+| Gate FAIL — silent risk-reduce yields PASS | Re-draft with tighter source-citation + shorter prose; re-invoke `wr-risk-scorer:external-comms`. On PASS → post through the voice-tone gate. | ADR-024 amendment (P080); ADR-044 framework-resolution boundary; ADR-042 within-axis precedent (open-vocabulary risk-reducing measures) |
+| Gate FAIL — silent risk-reduce still FAILS | Save drafted comment to `## Queued Upstream Update` + queue `outstanding_questions` entry (category: `deviation-approval`). Orchestrator continues per P352. | ADR-024 amendment (P080); ADR-013 Rule 6; P352 |
 | Above-appetite commit (Step 7) | Skip the commit, report uncommitted state. | ADR-013 Rule 6 |
-| **Inbound-origin verdict (P363)** | When the ticket carries `**Origin**: inbound-reported (#NN)`, run the [§ Inbound-origin verdict dispatch](#inbound-origin-verdict-dispatch-p363) leg (I1–I7): idempotency-guard, then **GENERATE** the verdict comment from ticket context (no templates; O→KE shares the workaround with provenance-credit), route through the cog-a11y → external-comms → voice-tone gate chain (cog-a11y when-available per P338; dual gate today), post `gh issue comment` on our own repo (and `gh issue close` on Verifying → Closed), back-write a direction-tagged lifecycle log entry. Above-appetite queues per the rows above (does NOT halt). Reporter-facing prose; anti-leakage visibility-gated (PUBLIC → titled+linked refs; PRIVATE/indeterminate → strict ban; classification tokens / step IDs / internal vocab always banned — P229/P350). | ADR-024 amendment (P363); ADR-028 (cog-a11y third evaluator, P338); ADR-055 (linked-title); ADR-076 (Origin field); P352 |
+| **Inbound-origin verdict (P363)** | When the ticket carries `**Origin**: inbound-reported (#NN)`, run the [§ Inbound-origin verdict dispatch](#inbound-origin-verdict-dispatch-p363) leg (I1–I7): idempotency-guard, then **GENERATE** the verdict comment from ticket context (no templates; O→KE shares the workaround with provenance-credit), route through the cog-a11y → external-comms → voice-tone gate chain (cog-a11y when-available per P338; dual gate today), post `gh issue comment` on our own repo (and `gh issue close` on Verifying → Closed), back-write a direction-tagged lifecycle log entry. Failed gates queue per the rows above (does NOT halt). Reporter-facing prose; anti-leakage visibility-gated (PUBLIC → titled+linked refs; PRIVATE/indeterminate → strict ban; classification tokens / step IDs / internal vocab always banned — P229/P350). | ADR-024 amendment (P363); ADR-028 (cog-a11y third evaluator, P338); ADR-055 (linked-title); ADR-076 (Origin field); P352 |
 
 The pre-amendment "halt-the-orchestrator on above-appetite" semantics are **superseded** by queue-and-continue per P352 — same shape as the post-P270 initial-filing path.
 

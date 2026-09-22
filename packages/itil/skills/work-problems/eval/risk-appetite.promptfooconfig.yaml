@@ -1,0 +1,45 @@
+description: Work-problems release cadence at the effective appetite
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Score five with releasable material drains the queue
+    vars:
+      prompt: |
+        You are running /wr-itil:work-problems Step 6.5. The pipeline scorer
+        returned push=5 and release=5. There are unpushed commits and a
+        changeset. Report the action prescribed by the supplied Step 6.5
+        instructions for score 5, without correcting those instructions from
+        general policy knowledge. What action comes next? What if either
+        action score is 6? Include the action-time gates.
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if the response drains the queue at score 5 via push:watch
+          and release:watch with their action-time gates, and treats score 6
+          as above appetite without releasing. FAIL if score 5 blocks release.
+
+  - description: Score five with an empty queue is a no-op
+    vars:
+      prompt: |
+        You are running /wr-itil:work-problems Step 6.5. The pipeline scorer
+        returned push=5 and release=5. There are no unpushed commits and no
+        changesets. Report the action prescribed by the supplied Step 6.5
+        instructions for score 5, without correcting those instructions from
+        general policy knowledge. Do you run push:watch or release:watch?
+        What happens next?
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if the response skips both drain commands because the
+          queue is empty and proceeds to Step 6.75, while classifying score 5
+          as within appetite. FAIL if it calls score 5 above appetite.
