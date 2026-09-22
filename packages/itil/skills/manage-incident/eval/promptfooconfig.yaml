@@ -1,0 +1,122 @@
+description: ITIL release risk behavior (ADR-133 and ADR-086)
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh'
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ../../work-problems/eval/grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Close incident - score five is within the effective appetite
+    vars:
+      prompt: |
+        I am at /wr-itil:close-incident's auto-release step with a queued
+        changeset. The pipeline scorer reports push=5 and release=5; the
+        effective appetite used by the scorer and gate is 5. Follow the
+        supplied skill text exactly. Do I run push:watch and release:watch?
+        What if the release score were 6 instead?
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if score 5 for both actions permits the queued release
+          drain through push:watch and release:watch, while release score 6
+          blocks the drain as above appetite. FAIL if it treats score 5 as
+          above appetite or skips the action-time gates.
+
+  - description: Link incident - score five is within the effective appetite
+    vars:
+      prompt: |
+        I am at /wr-itil:link-incident's auto-release step with a queued
+        changeset. The pipeline scorer reports push=5 and release=5; the
+        effective appetite used by the scorer and gate is 5. Follow the
+        supplied skill text exactly. Do I run push:watch and release:watch?
+        What if the release score were 6 instead?
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if score 5 for both actions permits the queued release
+          drain through push:watch and release:watch, while release score 6
+          blocks the drain as above appetite. FAIL if it treats score 5 as
+          above appetite or skips the action-time gates.
+
+  - description: Mitigate incident - score five is within the effective appetite
+    vars:
+      prompt: |
+        I am at /wr-itil:mitigate-incident's auto-release step with a queued
+        changeset. The pipeline scorer reports push=5 and release=5; the
+        effective appetite used by the scorer and gate is 5. Follow the
+        supplied skill text exactly. Do I run push:watch and release:watch?
+        What if the release score were 6 instead?
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if score 5 for both actions permits the queued release
+          drain through push:watch and release:watch, while release score 6
+          blocks the drain as above appetite. FAIL if it treats score 5 as
+          above appetite or skips the action-time gates.
+
+  - description: Restore incident - score five is within the effective appetite
+    vars:
+      prompt: |
+        I am at /wr-itil:restore-incident's auto-release step with a queued
+        changeset. The pipeline scorer reports push=5 and release=5; the
+        effective appetite used by the scorer and gate is 5. Follow the
+        supplied skill text exactly. Do I run push:watch and release:watch?
+        What if the release score were 6 instead?
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if score 5 for both actions permits the queued release
+          drain through push:watch and release:watch, while release score 6
+          blocks the drain as above appetite. FAIL if it treats score 5 as
+          above appetite or skips the action-time gates.
+
+  - description: Reuse a valid cumulative assessment after problem commit
+    vars:
+      prompt: |
+        I am executing /wr-itil:manage-problem Step 12 after Step 11 committed
+        a fix with a queued changeset. The pre-commit pipeline assessment in
+        this session returned commit=2 push=3 release=4. The checkout, assessed
+        content and release scope are unchanged; the effective appetite is 5,
+        the assessment is within its TTL, and its state hash still matches.
+        Follow the Step 12 instructions in the supplied skill text exactly;
+        do not consult ADRs or other repository files. What is the first
+        action after commit, before push:watch and release:watch? Then say
+        what changes if the release scope changes or the assessment expires.
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if the response reuses the original push=3 and release=4
+          values without invoking the scorer again for the unchanged valid
+          state, still runs push:watch and release:watch with their action-time
+          gates, and invokes the scorer again if release scope changes or the
+          assessment expires. FAIL if it unconditionally scores after commit,
+          substitutes commit=2 for either later score, or skips either gate.
+
+  - description: Reuse a valid cumulative assessment after incident commit
+    vars:
+      prompt: |
+        I am executing /wr-itil:manage-incident Step 15 after Step 14
+        committed an incident fix with a queued changeset. The pre-commit
+        pipeline assessment in this session returned commit=2 push=3
+        release=4. The checkout, assessed content and release scope are
+        unchanged; the effective appetite is 5, the assessment is within
+        its TTL, and its state hash still matches. What do I do before
+        push:watch and release:watch? Then say what changes if the release
+        scope changes or the assessment expires. Follow the Step 15 instructions
+        in the supplied skill text exactly; do not consult ADRs or other
+        repository files. Name the first action after commit.
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if the response reuses the original push=3 and release=4
+          values without invoking the scorer again for the unchanged valid
+          state, still runs push:watch and release:watch with their action-time
+          gates, and invokes the scorer again if release scope changes or the
+          assessment expires. FAIL if it unconditionally scores after commit,
+          substitutes commit=2 for either later score, or skips either gate.
