@@ -37,9 +37,19 @@ This examines your existing content and asks about your brand voice, target audi
 
 ### Assistant responses
 
-Run `/wr-voice-tone:update-assistant-guide` to create or update `docs/ASSISTANT-VOICE-AND-TONE.md`. The file's existence is the only enablement switch. Its prose may describe plain-language standards such as ISO 24495-1:2023 or ASD-STE100, or creative voice traits. Before stopping, the same assistant always rewrites its response in full and makes the requested voice unmistakable. This adds one continuation's latency and token use, and some runtimes may briefly show the first response before its replacement.
+Run `/wr-voice-tone:update-assistant-guide` to create or update `docs/ASSISTANT-VOICE-AND-TONE.md`. The file's existence is the only enablement switch. Use plain prose to describe how you want the assistant to speak to you; you can also describe creative voice traits.
 
-This supports the plugin's Claude Code and Codex command-hook runtimes, not ordinary web ChatGPT conversations. Standards references express alignment, not certification.
+For example, adapt this guidance to your preferences and put it in that file:
+
+```markdown
+For general explanations, draw on ISO 24495-1:2023 plain-language principles. Answer my question first. Use familiar words and clear headings so I can find, understand, and use the information. Make next steps explicit.
+
+For technical procedures, draw on ASD-STE100 Simplified Technical English. Use consistent terms, direct instructions, short steps, and active voice. Preserve technical accuracy and explain unfamiliar abbreviations.
+```
+
+See the [ISO 24495-1:2023 overview](https://www.iso.org/standard/78907.html) and the [official ASD-STE100 standard](https://www.asd-ste100.org/STE_downloads.html) for the standards themselves. Naming a standard alone does not give the assistant its complete rules. The same assistant reviews its response semantically against your prose guide; the plugin does not validate or certify conformity. If formal ASD-STE100 compliance matters, use the current standard's writing rules and controlled dictionary and arrange qualified human review.
+
+Before stopping, the assistant always rewrites an opted-in response in full and makes the requested voice unmistakable. This adds one continuation's latency and token use, and some runtimes may briefly show the first response before its replacement. This works in the plugin's Claude Code and Codex command-hook runtimes, not ordinary web ChatGPT conversations.
 
 ## How It Works
 
