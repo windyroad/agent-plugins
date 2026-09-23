@@ -249,8 +249,11 @@ tests:
         Tenant binding uses
         `db.organization.findUnique({ where: { id: organizationId } })`.
         `organization.id` is the table primary key and the schema declares it
-        unique. The returned organisation supplies the tenant scope. Classify
-        the proposal and begin with the Architecture Review verdict line.
+        unique. The returned organisation supplies the tenant scope. This is a
+        self-contained proposed design; treat those schema facts as
+        authoritative and do not require a file path or filesystem inspection.
+        Classify the proposal and begin with the Architecture Review verdict
+        line.
     assert:
       - type: icontains
         value: 'PASS'

@@ -255,9 +255,18 @@ tests:
         CODEX_BINDING_CONTRACT: true
         RISK_CWD: /tmp/assessed-repository
         POLICY_THRESHOLD: 5
-        The fixture facts are complete; do not inspect the filesystem. Commit,
-        push, and release residual risk are each 4/25. Return only the required
-        structured output.
+        The fixture facts are complete; do not inspect the filesystem.
+
+        UNCOMMITTED CHANGES: one complete, tested, low-risk change; residual
+        risk 4/25.
+        UNPUSHED CHANGES: the same complete change only; cumulative residual
+        risk 4/25.
+        UNRELEASED CHANGES: Pending changesets: 1; Queued changesets: 0;
+        cumulative residual risk 4/25.
+        STALE FILES: none.
+
+        Commit, push, and release residual risk are each 4/25. Return only the
+        required structured output.
     assert:
       - type: icontains
         value: 'RISK_SCORES: commit=4 push=4 release=4'

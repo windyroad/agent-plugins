@@ -201,3 +201,14 @@ Commit `d0d4cd49` accepts `session limit` only inside the same anchored, single-
 An unchanged direct invocation of `packages/jtbd/agents/eval/run-agent-eval.sh` with the same fixture prompt exited 0 locally and explicitly reported all three classifications, including `Incomplete option set`. The local pass does not reproduce the CI failure or establish whether the original failure omitted a required classification or expressed it without the asserted word. No assertion or agent behavior was changed. At capture time, one unchanged rerun of the failed CI job was in progress.
 
 P459 remains Known Error. The full failing response and a measured reproduction cohort are still needed before claiming a root cause or correction. No installed plugin or live hook setting was changed.
+
+## Fixture-ambiguity recurrence and correction — 2026-09-24
+
+Two unchanged-revision reruns exposed concrete ambiguity in separate fixtures:
+
+- [CI run 35916386825](https://github.com/windyroad/agent-plugins/actions/runs/35916386825), attempt 1, failed the architect `First-match over-fire guard — unique primary-key lookup passes` case (5/6). The agent returned `Architecture Review: ISSUES FOUND` because the self-contained proposal named no source path, so it treated the stated primary-key invariant as unverifiable. Attempt 2 passed without a source change.
+- [CI run 35919005470](https://github.com/windyroad/agent-plugins/actions/runs/35919005470), attempt 1, failed the risk-scorer `Codex pipeline binds structured output to the supplied assessed root exactly once` case (11/12). Although the prompt said its facts were complete, it omitted the four pipeline-state sections the agent contract says it receives; the agent therefore refused to echo the supplied scores because no pipeline state was present. Attempt 2 passed without a source change.
+
+The correction preserves ADR-075's fail-closed pass semantics rather than adding a majority/retry escape. The architect fixture now explicitly identifies itself as a self-contained proposed design whose stated schema facts are authoritative. The risk-scorer fixture now supplies `UNCOMMITTED CHANGES`, `UNPUSHED CHANGES`, `UNRELEASED CHANGES`, and `STALE FILES` while retaining the exact single-`RISK_CWD` binding and existing assertions. No assertion, verdict expectation, provider-error handling, or package surface changed.
+
+Both configs validate. Fresh local calls passed the architect case twice and the risk-scorer case once before the Claude session quota became unavailable; the quota failure remained a provider error rather than being converted to passing evidence. P459 remains Known Error pending exact-revision CI evidence and a longer recurrence-free cohort.
