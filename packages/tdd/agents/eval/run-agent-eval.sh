@@ -34,7 +34,7 @@ if [[ ! -f "$AGENT_MD" ]]; then
 fi
 
 set +e
-agent_out="$(claude -p --system-prompt "$(cat "$AGENT_MD")" "$@")"
+agent_out="$(claude -p --model "${AGENT_EVAL_MODEL:-claude-sonnet-5}" --system-prompt "$(cat "$AGENT_MD")" "$@")"
 claude_status=$?
 set -e
 

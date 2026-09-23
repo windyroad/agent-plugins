@@ -91,7 +91,7 @@ case "$AGENT" in
 esac
 agent_out=""
 for _attempt in 1 2 3; do
-  agent_out="$(claude -p --system-prompt "$AGENT_INSTRUCTIONS" "$PROMPT")"
+  agent_out="$(claude -p --model "${AGENT_EVAL_MODEL:-claude-sonnet-5}" --system-prompt "$AGENT_INSTRUCTIONS" "$PROMPT")"
   if [[ "$AGENT" = "plan" ]] && {
     { printf '%s' "$agent_out" | grep -Eiq 'Overall:.*FAIL' && ! printf '%s' "$agent_out" | grep -q '^RISK_VERDICT: FAIL$'; } ||
     { printf '%s' "$agent_out" | grep -Eiq 'Overall:.*PASS' && ! printf '%s' "$agent_out" | grep -q '^RISK_VERDICT: PASS$'; }

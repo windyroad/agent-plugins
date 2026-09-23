@@ -51,6 +51,17 @@ EOF
   [ ! -e "$TMP/npm-called" ]
 }
 
+@test "quota-only probe accepts the current session-limit wording" {
+  write_claude "You've hit your session limit · resets 2am (UTC)" 1
+  write_npm 9
+
+  run env PATH="$BIN:$PATH" "$SCRIPT"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"::warning::Claude subscription quota is exhausted"* ]]
+  [ ! -e "$TMP/npm-called" ]
+}
+
 @test "ordinary probe failure remains blocking" {
   write_claude "Authentication failed" 7
   write_npm 0

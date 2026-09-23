@@ -68,6 +68,7 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-072 | STORY-072: Record oversight evidence only for the confirming session | accepted |
 | STORY-085 | STORY-085: See the ID clash instead of the drift it causes | accepted |
 | STORY-099 | STORY-099: A clean reconciler result means the tier really is clean | accepted |
+| STORY-101 | STORY-101: Trust agent-prose CI across model updates | accepted |
 | STORY-003 | STORY-003: /wr-itil:list-stories read-only display skill | done |
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-018 | STORY-018: Capture the problem in seconds, mid-flow | done |

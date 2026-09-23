@@ -6,7 +6,7 @@ harness. Respond with only one minified JSON object using this schema:
 {"pass": <true|false>, "score": <number 0..1>, "reason": "<one short sentence>"}.
 Set pass true only if the model output satisfies the supplied rubric.'
 
-raw="$(claude -p --setting-sources "" --append-system-prompt "$GRADER_SYSTEM" "$@")"
+raw="$(claude -p --model "${AGENT_EVAL_GRADER_MODEL:-claude-opus-5-5}" --setting-sources "" --append-system-prompt "$GRADER_SYSTEM" "$@")"
 printf '%s' "$raw" | awk '
   BEGIN { depth = 0; started = 0 }
   {

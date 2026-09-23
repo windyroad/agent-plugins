@@ -182,6 +182,17 @@ The failed first run's full response remains unavailable. The broader flake clas
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-081 | STORY-081: Trust plan reviews when no risk policy is present | accepted |
+| STORY-101 | STORY-101: Trust agent-prose CI across model updates | accepted |
+
+## Phase 3 — stable Claude model roles in agent-prose CI (2026-09-23)
+
+The CI harness invokes `claude -p` without `--model` for both the agent under test and the semantic rubric grader. Claude Code's default can change independently of this repository, so identical prompts and source are not bound to a reproducible model pair. RFC-102 / STORY-101 pins Sonnet 5 for evaluated agents and Opus 5.5 for semantic grading while preserving the existing sandbox, output, and retry behaviour.
+
+## Fix Committed — current session-limit quota wording (2026-09-23)
+
+PR #496 CI run `35804107411` reached the availability probe and returned the single line `You've hit your session limit · resets 2am (UTC)`. The existing fail-closed classifier recognized only the equivalent `weekly limit` wording, so it reported a provider failure before any agent eval ran.
+
+Commit `d0d4cd49` accepts `session limit` only inside the same anchored, single-line quota classifier. The behavioral suite covers the exact observed response while retaining blocking cases for ordinary failures, multiline mixed output, and same-line mixed output; all 10 quota and model-selection cases pass. This records a scoped CI recovery only. P459 remains Known Error pending model-pin CI evidence and the other open flake-class work.
 
 ## JTBD recommendation-case recurrence, 2026-08-31
 
