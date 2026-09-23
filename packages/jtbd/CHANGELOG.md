@@ -1,5 +1,11 @@
 # @windyroad/jtbd
 
+## 0.14.6
+
+### Patch Changes
+
+- 890bac1: Make the JTBD reviewer evaluate recommendation option sets as a whole when checking whether they cover documented outcomes.
+
 ## 0.14.5
 
 ### Patch Changes

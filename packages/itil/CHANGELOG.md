@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 2.4.4
+
+### Patch Changes
+
+- e3ed792: Keep Codex backlog-drain telemetry separate from diagnostics, retain private failure evidence, and report completed work without continuing when telemetry is malformed.
+
 ## 2.4.3
 
 ### Patch Changes
