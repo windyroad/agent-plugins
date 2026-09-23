@@ -134,7 +134,7 @@ jobs:
           done
 
       - name: Install Claude Code CLI for plugin manifest validation (P263, ADR-063 Confirmation #11)
-        run: npm i -g @anthropic-ai/claude-code@2.1.150
+        run: npm i -g @anthropic-ai/claude-code@2.1.280
 
       - name: Install Codex CLI for Codex plugin integration tests
         run: npm i -g @openai/codex@0.145.0
@@ -216,7 +216,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y bubblewrap socat
-          npm i -g @anthropic-ai/claude-code@2.1.150
+          npm i -g @anthropic-ai/claude-code@2.1.280
 
       - name: Run agent-prose behavioural evals
         id: agent-evals
