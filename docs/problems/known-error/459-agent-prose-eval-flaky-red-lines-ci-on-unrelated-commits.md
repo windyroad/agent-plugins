@@ -182,6 +182,11 @@ The failed first run's full response remains unavailable. The broader flake clas
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-081 | STORY-081: Trust plan reviews when no risk policy is present | accepted |
+| STORY-101 | STORY-101: Trust agent-prose CI across model updates | accepted |
+
+## Phase 3 — stable Claude model roles in agent-prose CI (2026-09-23)
+
+The CI harness invokes `claude -p` without `--model` for both the agent under test and the semantic rubric grader. Claude Code's default can change independently of this repository, so identical prompts and source are not bound to a reproducible model pair. RFC-102 / STORY-101 pins Sonnet 5 for evaluated agents and Opus 5.5 for semantic grading while preserving the existing sandbox, output, and retry behaviour.
 
 ## JTBD recommendation-case recurrence, 2026-08-31
 

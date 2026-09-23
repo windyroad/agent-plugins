@@ -12,6 +12,7 @@ fi
 
 cd "$REPO_ROOT"
 claude -p \
+  --model "${AGENT_EVAL_MODEL:-claude-sonnet-5}" \
   --setting-sources "" \
   --tools "Read,Glob,Grep" \
   --system-prompt "$(<"$AGENT_MD")" \

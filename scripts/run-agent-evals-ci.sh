@@ -1,8 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+export AGENT_EVAL_MODEL=claude-sonnet-5
+export AGENT_EVAL_GRADER_MODEL=claude-opus-5-5
+
 set +e
-probe=$(claude -p "Reply exactly: available" 2>&1)
+probe=$(claude -p --model "$AGENT_EVAL_MODEL" "Reply exactly: available" 2>&1)
 status=$?
 set -e
 

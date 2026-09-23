@@ -96,3 +96,7 @@
 ## 2026-09-19
 
 > Last reviewed: 2026-09-19 **STORY-098 accepted** — RFC-099 draws the row that closes P543: telling the loop you are going to bed keeps it working, and it cannot end the session by quietly not continuing. Prior: **RFC-098 row drawn** — four stories cover P441's three reported faces and its four held classes, so a ticket waiting on a person stops competing for a dispatch slot without losing its rank.
+
+## 2026-09-23
+
+> Last reviewed: 2026-09-19 **STORY-099 accepted** — the story reconciler demands a reverse-trace row that the ratified-stories rule forbids, so it reports correct work as drift; RFC-100 draws the row on the problem-to-resolution map that narrows the demand to the population the rule covers and makes the tool say which population it checked. Prior: **STORY-098 in progress** — all five criteria met: the loop now leaves only through an ending it names.

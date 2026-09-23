@@ -77,6 +77,7 @@ cd "$REPO_ROOT"
 
 set +e
 JTBD_VERDICT_FILE="$VERDICT_FILE" claude -p \
+  --model "${AGENT_EVAL_MODEL:-claude-sonnet-5}" \
   --output-format stream-json \
   --verbose \
   --setting-sources "" \
