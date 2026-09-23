@@ -27,11 +27,10 @@
 #     non-strict.
 #
 # CLI VERSION PIN (set in `.github/workflows/ci.yml`):
-#   CI installs `@anthropic-ai/claude-code@2.1.150` before invoking
+#   CI installs `@anthropic-ai/claude-code@2.1.280` before invoking
 #   this script. The exact pin protects against Anthropic-side CLI
-#   behaviour change silently breaking the gate. 2.1.150 is the
-#   version P263 iter 6 empirically tested against. Bump the pin
-#   only after re-running the iter-6 probe against the new version.
+#   behaviour change silently breaking the gate. 2.1.280 is the
+#   version re-checked against the P263 iter-6 probe before the bump.
 #
 # LOOP CONTRACT:
 #   - Walks `packages/*/.claude-plugin/plugin.json` from CWD.

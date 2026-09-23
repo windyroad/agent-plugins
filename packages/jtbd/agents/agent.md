@@ -40,6 +40,7 @@ In pre-edit mode:
 
 - Return `JTBD Recommendation Review: ISSUES FOUND` when an option contradicts a documented desired outcome, does not serve the outcome it claims to address, or the set is incomplete against the relevant outcomes. Name each affected option and the outcome it misses.
 - Return `JTBD Recommendation Review: PASS` when the options presented are consistent with and collectively cover the relevant documented outcomes.
+- Judge completeness across the option set, not per option. A narrower option remains viable when it contradicts no documented outcome and another option covers the additional outcome; do not mark that narrower option incomplete merely because it covers less.
 - Do not rank or choose among viable aligned options. Do not ask the user a question. The calling assistant owns the recommendation and any genuine user decision.
 - Never write `/tmp/jtbd-verdict` in this mode. The inline recommendation verdict is the complete, event-bound signal; a recommendation PASS must not authorise a later file edit.
 
