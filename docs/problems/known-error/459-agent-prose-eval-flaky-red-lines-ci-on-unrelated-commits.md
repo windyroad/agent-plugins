@@ -188,6 +188,12 @@ The failed first run's full response remains unavailable. The broader flake clas
 
 The CI harness invokes `claude -p` without `--model` for both the agent under test and the semantic rubric grader. Claude Code's default can change independently of this repository, so identical prompts and source are not bound to a reproducible model pair. RFC-102 / STORY-101 pins Sonnet 5 for evaluated agents and Opus 5.5 for semantic grading while preserving the existing sandbox, output, and retry behaviour.
 
+## Fix Committed — current session-limit quota wording (2026-09-23)
+
+PR #496 CI run `35804107411` reached the availability probe and returned the single line `You've hit your session limit · resets 2am (UTC)`. The existing fail-closed classifier recognized only the equivalent `weekly limit` wording, so it reported a provider failure before any agent eval ran.
+
+Commit `d0d4cd49` accepts `session limit` only inside the same anchored, single-line quota classifier. The behavioral suite covers the exact observed response while retaining blocking cases for ordinary failures, multiline mixed output, and same-line mixed output; all 10 quota and model-selection cases pass. This records a scoped CI recovery only. P459 remains Known Error pending model-pin CI evidence and the other open flake-class work.
+
 ## JTBD recommendation-case recurrence, 2026-08-31
 
 [CI run 33384315308](https://github.com/windyroad/agent-plugins/actions/runs/33384315308), on the P503 evidence-only commit `922bdd5988b8b142efd1f46ad4fe128ecc543416`, passed 4,291 hook checks with two skips and no failures. The agent-prose job passed all six architect cases, then passed five of six JTBD cases. It failed `Recommendation review reports an incomplete option set`: the visible response returned `JTBD Recommendation Review: ISSUES FOUND`, but the assertion requiring the word `incomplete` failed. The console table truncated the full response; later package suites did not run. This is not evidence that all 31 agent cases ran.
