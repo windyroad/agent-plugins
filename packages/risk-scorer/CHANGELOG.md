@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.19.6
+
+### Patch Changes
+
+- 82652e3: Keep Codex pipeline scoring bound to the caller-supplied checkout while leaving deterministic checkout validation to the completion bridge.
+
 ## 0.19.5
 
 ### Patch Changes

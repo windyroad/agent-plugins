@@ -1,5 +1,11 @@
 # @windyroad/voice-tone
 
+## 0.9.2
+
+### Patch Changes
+
+- 917ef6d: Document how to guide assistant responses with ISO 24495-1:2023 and ASD-STE100 Simplified Technical English while making clear that semantic review does not certify conformity.
+
 ## 0.9.1
 
 ### Patch Changes
