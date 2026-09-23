@@ -62,6 +62,18 @@ EOF
   [ ! -e "$TMP/npm-called" ]
 }
 
+@test "quota-only probe exposes its skip to dependent CI steps" {
+  write_claude "You've hit your session limit · resets 2am (UTC)" 1
+  write_npm 9
+  output_file="$TMP/github-output"
+
+  run env PATH="$BIN:$PATH" GITHUB_OUTPUT="$output_file" "$SCRIPT"
+
+  [ "$status" -eq 0 ]
+  grep -Fxq "quota-exhausted=true" "$output_file"
+  [ ! -e "$TMP/npm-called" ]
+}
+
 @test "ordinary probe failure remains blocking" {
   write_claude "Authentication failed" 7
   write_npm 0
@@ -103,4 +115,16 @@ EOF
 
   [ "$status" -eq 9 ]
   [ -e "$TMP/npm-called" ]
+}
+
+@test "available probe can gate dependent evals without running agent evals" {
+  write_claude "available" 0
+  write_npm 9
+  output_file="$TMP/github-output"
+
+  run env PATH="$BIN:$PATH" GITHUB_OUTPUT="$output_file" AGENT_EVAL_RUN_AGENTS=false "$SCRIPT"
+
+  [ "$status" -eq 0 ]
+  grep -Fxq "quota-exhausted=false" "$output_file"
+  [ ! -e "$TMP/npm-called" ]
 }
