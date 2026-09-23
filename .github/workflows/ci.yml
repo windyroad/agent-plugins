@@ -219,19 +219,21 @@ jobs:
           npm i -g @anthropic-ai/claude-code@2.1.150
 
       - name: Run agent-prose behavioural evals
-        if: steps.scope.outputs.agents == 'true' && steps.token.outputs.present == 'true'
+        id: agent-evals
+        if: steps.scope.outputs.run == 'true' && steps.token.outputs.present == 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          AGENT_EVAL_RUN_AGENTS: ${{ steps.scope.outputs.agents }}
         run: scripts/run-agent-evals-ci.sh
 
       - name: Verify work-problems appetite behavior
-        if: steps.scope.outputs.skills == 'true' && steps.token.outputs.present == 'true'
+        if: steps.scope.outputs.skills == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: npx promptfoo eval -c packages/itil/skills/work-problems/eval/risk-appetite.promptfooconfig.yaml --no-table
 
       - name: Verify update-upstream gate verdict behavior
-        if: steps.scope.outputs.skills == 'true' && steps.token.outputs.present == 'true'
+        if: steps.scope.outputs.skills == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: npx promptfoo eval -c packages/itil/skills/update-upstream/eval/promptfooconfig.yaml --filter-pattern 'AFK below-appetite|AFK external-comms FAIL|Gate composition is mandatory' --no-table
