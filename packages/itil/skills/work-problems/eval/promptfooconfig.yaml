@@ -1494,6 +1494,78 @@ tests:
           output after successful exit/error classification, validates it for
           P529, and only then continues the outer loop.
 
+  - description: P529 transport — stderr stays outside private JSONL evidence and success cleans up
+    vars:
+      prompt: |
+        The selected ticket is P529. Show the exact output-file setup and
+        redirections for one Codex iteration. The process writes valid JSONL
+        to stdout, a harmless warning to stderr, and a valid selected-ticket
+        ITERATION_SUMMARY to the final-output file. State the permissions,
+        which stream is parsed as JSONL, and what happens to the artifacts
+        after complete success.
+    assert:
+      - type: regex
+        value: 'stderr|diagnostic'
+      - type: regex
+        value: 'umask\s+077|private|owner[ -]only'
+      - type: llm-rubric
+        value: |
+          PASS only if the response creates one private per-iteration
+          directory, sends stdout alone to the JSONL file and stderr to a
+          separate diagnostics file, parses only stdout as JSONL, validates
+          the selected-ticket final summary, and removes that exact directory
+          only after complete success. FAIL if it combines stdout and stderr,
+          treats the warning as JSONL, or retains successful artifacts.
+
+  - description: P529 transport — malformed telemetry preserves evidence but cannot authorize delivery
+    vars:
+      prompt: |
+        The P529 Codex process exits 0. Stdout contains two valid JSONL records
+        and then one malformed line. Stderr has diagnostics. The separate
+        final-output file contains exactly one valid P529 ITERATION_SUMMARY
+        naming a coherent commit. Explain what may be reported, what evidence
+        is retained, state the exact first malformed line number, whether the
+        worker is retried, and whether recovery, push, release, P530 dispatch,
+        or outer-loop continuation is allowed.
+    assert:
+      - type: regex
+        value: 'malformed|invalid.*JSONL|telemetry[ -]inconclusive'
+      - type: regex
+        value: '[Rr]etain|preserv'
+      - type: regex
+        value: 'line(?: number)?\s+3'
+      - type: llm-rubric
+        value: |
+          PASS only if the response validates the separate final summary so
+          the completed P529 work and commit can be truthfully reported, but
+          retains the private stdout/stderr/final artifacts and halts before
+          recovery, push, release, P530, or another iteration because the
+          malformed telemetry could conceal an error event. It must identify
+          the offending line without printing potentially sensitive contents
+          and must not retry the worker.
+
+  - description: P529 transport — valid error events remain terminal with separate stderr
+    vars:
+      prompt: |
+        Compare two exit-zero P529 runs. Run A has valid stdout JSONL containing
+        an `error` event. Run B has valid stdout JSONL containing a
+        `turn.failed` event. Each has unrelated stderr text and a plausible
+        final summary. Give the classification order, artifact disposition,
+        and whether either run may parse its summary, retry, push, release, or
+        continue.
+    assert:
+      - type: regex
+        value: 'error|turn\.failed'
+      - type: regex
+        value: '[Hh]alt|terminal|stop'
+      - type: llm-rubric
+        value: |
+          PASS only if both valid error-event types are terminal after the
+          zero process exit, before final-summary parsing. Both runs retain
+          their private evidence for diagnosis and neither retries, pushes,
+          releases, recovers, or continues. Stderr is diagnostic evidence and
+          never weakens the valid stdout error event.
+
   - description: P529 — non-zero Codex exit halts before final-summary parsing
     vars:
       prompt: |

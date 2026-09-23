@@ -30,7 +30,7 @@ Continuously work the highest-priority actionable problem until the backlog is d
 3. Run the relevance and stop-condition checks. Before declaring `ALL_DONE`, run the repository's unconditional pre-completion gates and rescan the backlog.
 4. Dispatch exactly the selected ticket through the isolated Codex command below. Do not select or work a second ticket inside that process.
 5. Wait for that same process. Do not cancel, replace, retry, or fan out merely because normal model execution is slow.
-6. Classify the exit and JSONL metadata before reading the final-output file. On success, validate the summary with `wr-itil-verify-iter-summary` and consume it. On failure, apply the recovery contract below and halt.
+6. Classify the exit and stdout JSONL before consuming the final-output file. On success, validate the summary with `wr-itil-verify-iter-summary` and consume it. Malformed telemetry may be paired with an independently validated summary for truthful reporting only; it never authorizes recovery or continuation. On failure, retain the private evidence directory, apply the recovery contract below, and halt.
 7. Run inter-iteration verification. If the iteration produced committed shippable work, complete the repository's governed push and release cadence when risk is within appetite. Above-appetite risk is a remediation instruction: reduce scope or split the change; never ask the user to approve risk above appetite.
 8. Report only material progress, then rescan and repeat.
 
@@ -51,8 +51,13 @@ Run the nested process in the outer session's installed Codex environment. Do no
 
 ```bash
 ITERATION_CHECKOUT="$(git rev-parse --show-toplevel)"
-ITERATION_JSONL="$(mktemp)"
-ITERATION_FINAL="$(mktemp)"
+ITERATION_RUN_DIR="$(
+  umask 077
+  mktemp -d "${TMPDIR:-/tmp}/wr-itil-work-problems.XXXXXX"
+)"
+ITERATION_JSONL="$ITERATION_RUN_DIR/stdout.jsonl"
+ITERATION_STDERR="$ITERATION_RUN_DIR/stderr.log"
+ITERATION_FINAL="$ITERATION_RUN_DIR/final.txt"
 
 export WR_SUPPRESS_PENDING_QUESTIONS=1
 export WR_SUPPRESS_OVERSIGHT_NUDGE=1
@@ -66,24 +71,26 @@ codex exec \
   --json \
   --output-last-message "$ITERATION_FINAL" \
   "$ITERATION_PROMPT" \
-  >"$ITERATION_JSONL" 2>&1
+  >"$ITERATION_JSONL" 2>"$ITERATION_STDERR"
 ITERATION_EXIT=$?
 ```
 
-The two output channels are load-bearing and must stay separate:
+The three output channels are load-bearing and must stay separate:
 
-- `ITERATION_JSONL` carries progress and error metadata only. Parse it as JSONL; never scrape the final agent message from this stream.
+- `ITERATION_JSONL` carries stdout progress and error metadata only. Validate every non-empty line independently as JSON before scanning all valid records for `error` and `turn.failed`; never scrape the final agent message from this stream.
+- `ITERATION_STDERR` carries diagnostics only. Never parse it as JSONL or print its raw contents, which may contain sensitive material.
 - `ITERATION_FINAL` carries the final agent message. Read `ITERATION_SUMMARY` only from this file after the exit and metadata checks pass.
 
-Always remove both temporary files after their contents have been classified and consumed.
+Remove `ITERATION_RUN_DIR` only after an error-free exit, fully valid JSONL, one validated selected-ticket summary, and completed checkout attribution. On any failure, retain the private directory and report its path plus the first malformed line number when applicable; do not print raw artifact contents.
 
 ## Error classification and recovery
 
 Classify in this order:
 
-1. A non-zero process exit halts the loop. Use the exit code plus JSONL error messages to report `quota exhausted`, `rate limited`, `authentication failed`, `service overloaded`, or `execution failed`; do not call a quota failure merely unavailable.
-2. Exit zero with a JSONL `error` or `turn.failed` event also halts before summary parsing. Apply the same message classification. A final-output file does not override an error event.
-3. Exit zero without an error event permits final-output parsing. The file must contain exactly one valid `ITERATION_SUMMARY` for the selected ticket; otherwise halt as `invalid iteration summary`.
+1. A non-zero process exit halts the loop. Use the exit code plus valid JSONL error records and separately retained stderr diagnostics to report `quota exhausted`, `rate limited`, `authentication failed`, `service overloaded`, or `execution failed`; do not call a quota failure merely unavailable.
+2. Exit zero with fully valid JSONL containing an `error` or `turn.failed` event also halts before summary parsing. Apply the same message classification. A final-output file does not override an error event.
+3. Exit zero with any malformed JSONL line is `telemetry-inconclusive`. Record the first offending line number and independently validate the final-output file. Exactly one valid summary for the selected ticket may be used to report the worker's outcome and commit truthfully, but it does not authorize recovery, push, release, or another iteration because the malformed line may conceal an error event. Retain all three artifacts and halt.
+4. Exit zero with fully valid JSONL and no error event permits final-output parsing. The file must contain exactly one valid `ITERATION_SUMMARY` for the selected ticket; otherwise halt as `invalid iteration summary`.
 
 After every exit, record the checkout delta against the pre-iteration status for diagnosis, without mutation. Recovery may begin only after exit zero, error-free JSONL, and exactly one valid `ITERATION_SUMMARY` for the selected ticket. Missing, multiple, or wrong-ticket summaries halt without recovery. Then compare the checkout with the recorded pre-iteration status:
 
@@ -92,6 +99,8 @@ After every exit, record the checkout delta against the pre-iteration status for
 - Coherent staged work attributable only to the selected ticket may be recovered only after its focused tests and governance gates pass again in the outer session.
 - Ambiguous, unstaged, or unrelated changes hard-block recovery. Report their paths and halt without mutation.
 - When a failed iteration created known disposable paths, restore only the explicit verified path list with path-scoped Git commands. Never use a broad reset, clean, checkout, restore, or stash operation.
+
+Never retry a failed or telemetry-inconclusive worker automatically. It may already have changed or committed the checkout; redispatch can duplicate or conflict with coherent work.
 
 ## Fix Proposal Rule
 
