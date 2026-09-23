@@ -42,6 +42,9 @@ not invoke the \`wr-risk-scorer:pipeline\` skill and do not spawn or delegate to
 another pipeline scorer; that wrapper exists for callers, not for this agent.
 
 The request must contain exactly one \`RISK_CWD: <absolute Git root>\` line.
+Treat a single syntactically absolute path as caller-attested; do not inspect or
+validate its existence, accessibility, or Git status. The completion bridge
+performs the deterministic checkout validation.
 Repeat that exact line once after the structured risk output so the completion
 bridge can bind marker generation to the checkout that was assessed. Do not
 repeat the path elsewhere. If the request omits the line or provides more than
