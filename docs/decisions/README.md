@@ -597,7 +597,7 @@ _117 ADRs. These are the current rules. The architect agent reads this section f
 **Related:** ADR-020, ADR-015, ADR-042, ADR-099
 
 ### ADR-134 — New story maps are authored before ratification
-**Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** ["ADR-103 (in part — the pre-creation human gate for a new map)", "ADR-119 (in part — the pre-creation human gate when a fix needs its first map)"]
+**Status:** proposed | **Oversight:** confirmed | **Supersedes:** ["ADR-103 (in part — the pre-creation human gate for a new map)", "ADR-119 (in part — the pre-creation human gate when a fix needs its first map)"]
 **Chosen:** Chosen option: **"Author the map proposal, then ask for ratification"**, because ratification is meaningful only after the user can review the substance being ratified.
 **Confirmation:** When a repository has no suitable story map, the problem workflow authors a complete unconfirmed map proposal ...; The proposal includes any initial release row, cards, and story files required to present a valid fix proposal...; The completed map proposal is presented for ratification, and only that ratification writes the confirmed over...; Source changes and story-implementation commits depending on the map are refused while it remains unratified.; Initial release rows and cards remain outside the oversight fingerprint, and later row/card edits do not reope...; In unattended mode, map proposal creation completes, exactly one ratification item for the completed map is qu...; Behavioural evaluations reject responses that ask permission to create a map, skip map authoring, auto-ratify,...
 
