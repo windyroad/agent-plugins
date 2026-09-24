@@ -120,3 +120,25 @@ tests:
           gates, and invokes the scorer again if release scope changes or the
           assessment expires. FAIL if it unconditionally scores after commit,
           substitutes commit=2 for either later score, or skips either gate.
+
+  - description: Xero add incident - direct recovery precedes product repair
+    vars:
+      prompt: |
+        A customer cannot add a second Xero organisation in Voder. The chooser
+        sends them to /connect/xero and shows an MCP-worded error before OAuth.
+        We have independently verified that /connect/xero?add=1 starts the correct
+        fresh-consent flow without changing their existing connections. The
+        chooser defect is understood but has not been fixed or deployed.
+
+        What should the incident responder do next, and in what order?
+    assert:
+      - type: contains
+        value: '/connect/xero?add=1'
+      - type: llm-rubric
+        value: |
+          PASS only if the response sequences the verified direct recovery
+          path before deployment or root-cause work, requires verification of
+          the affected customer journey before retry guidance or marking the
+          incident restored, and hands root-cause work to problem management
+          only after restoration. FAIL if deployment is a prerequisite for
+          recovery or the customer is told to retry before verification.
