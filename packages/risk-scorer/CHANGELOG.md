@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.19.7
+
+### Patch Changes
+
+- 141de59: @windyroad/risk-scorer: allows `push:watch` and `merge:watch` to wait for pending CI while keeping red or unreadable CI and direct protected-branch pushes blocked.
+
 ## 0.19.6
 
 ### Patch Changes
