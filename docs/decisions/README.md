@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 131 (116 in-force, 15 historical)
+**Total ADRs:** 132 (117 in-force, 15 historical)
 
 ---
 
 ## In-force decisions
 
-_116 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_117 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -595,6 +595,11 @@ _116 ADRs. These are the current rules. The architect agent reads this section f
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** [020-governance-auto-release-for-non-afk-flows]
 **Confirmation:** An attended skill with unchanged assessed scope invokes the scorer once, then commits, pushes, and releases th...; If the checkout, assessed content, release scope, or effective appetite changes, or the score expires, run a n...; A stale or above-appetite release score, or failing CI, still blocks release.; The AFK orchestrator's scoring and release cadence remain unchanged.
 **Related:** ADR-020, ADR-015, ADR-042, ADR-099
+
+### ADR-134 — New story maps are authored before ratification
+**Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** ["ADR-103 (in part — the pre-creation human gate for a new map)", "ADR-119 (in part — the pre-creation human gate when a fix needs its first map)"]
+**Chosen:** Chosen option: **"Author the map proposal, then ask for ratification"**, because ratification is meaningful only after the user can review the substance being ratified.
+**Confirmation:** When a repository has no suitable story map, the problem workflow authors a complete unconfirmed map proposal ...; The proposal includes any initial release row, cards, and story files required to present a valid fix proposal...; The completed map proposal is presented for ratification, and only that ratification writes the confirmed over...; Source changes and story-implementation commits depending on the map are refused while it remains unratified.; Initial release rows and cards remain outside the oversight fingerprint, and later row/card edits do not reope...; In unattended mode, map proposal creation completes, exactly one ratification item for the completed map is qu...; Behavioural evaluations reject responses that ask permission to create a map, skip map authoring, auto-ratify,...
 
 ---
 
