@@ -1245,8 +1245,8 @@ tests:
           existing map, (b) says no new RFC document is created, AND (c) says
           no mid-loop user ask / the loop proceeds. FAIL if it directs creating
           a file under docs/rfcs/, OR says the iter must ask the user / pause /
-          block the loop, OR silently draws a NEW map rather than queueing that
-          for a person.
+          block the loop, OR duplicates the planning vehicle by drawing a new
+          map even though the suitable approved map already covers the journey.
 
   # --- P508: the exit-3 refusals at the AFK surface -------------------------
   #
@@ -1305,7 +1305,7 @@ tests:
           row before re-rendering, OR reads the refusal as "no row proposes
           this fix".
 
-  - description: Step 5 I13 exit 3, no story maps — queue ONE entry, next problem, never halt (P508)
+  - description: Step 5 I13 exit 3, no story maps — author then queue ratification (ADR-134)
     vars:
       prompt: |
         I am an AFK /wr-itil:work-problems iter subprocess inside the delegated
@@ -1325,19 +1325,13 @@ tests:
         value: '--fix-time'
       - type: llm-rubric
         value: |
-          Drawing the FIRST story map for a journey decides what that journey
-          is — new substance that needs a person and must never be minted
-          unattended. The iter queues exactly ONE outstanding_questions entry
-          (draw a story map covering this work) and moves to the NEXT problem.
-          The loop is never stopped for it, and AskUserQuestion is never called
-          mid-loop under AFK. PASS if it (a) says the first map needs a person
-          and is not auto-created, (b) queues exactly one entry at
-          outstanding_questions rather than asking or listing many, AND (c)
-          continues to the next problem rather than halting the loop. FAIL if
-          it auto-creates a story map, OR calls AskUserQuestion, OR halts /
-          stops / ends the loop, OR creates a file under docs/rfcs/ as a
-          fallback, OR proceeds to draw a row as though the predicate had
-          answered "no row proposes this fix".
+          PASS only if the unattended iter authors the complete unconfirmed map
+          proposal without AskUserQuestion, including the required release row,
+          cards, and story files; queues exactly ONE outstanding_questions item
+          to ratify the completed proposal; blocks source/story implementation;
+          and continues with independent work. FAIL if it asks permission,
+          skips proposal authoring, auto-ratifies, creates a file under docs/rfcs/,
+          implements the fix, or stops the loop.
 
   # --- P413: upstream reports auto-file per-iter, not deferred to wrap-time batch ---
   #

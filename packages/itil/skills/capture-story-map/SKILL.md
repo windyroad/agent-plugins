@@ -45,7 +45,7 @@ Positional grammar mirrors `/wr-itil:capture-story` shape (footnote per ADR-060 
 | STORY-MAP ID allocation | Mechanical: `max(local, origin, history) + 1` enumerating `docs/story-maps/*/STORY-MAP-*.html` (ADR-019 inline collision-guard) | silent-mechanical |
 | Persona journey derivation | Mechanical: read the persona + JTBD and derive the ordered steps they walk before authoring | silent-mechanical |
 | Title kebab-slug | Mechanical: short outcome phrase naming the derived journey, then kebab-case | silent-mechanical |
-| Title prose refinement | Optional taste AskUserQuestion; silent-default to derived form | taste |
+| Title prose refinement | Mechanical: use the journey-derived title without a permission or taste prompt | silent-mechanical |
 | HTML file write | Mechanical: schema per ADR-060 § Phase 2 encoding amendment 2026-05-12 lines 381-435 | silent-mechanical |
 | Reverse-trace `## Story Maps` refresh | Mechanical: inline on driving problem + JTBD files via Slice 2a/2b helpers | silent-mechanical |
 | README refresh | Mechanical: deferred to `/wr-itil:manage-story-map review` or `wr-itil-reconcile-story-maps` | silent-mechanical |
@@ -109,9 +109,9 @@ history_max=$(git log --all --name-only --format= -- docs/story-maps/ 2>/dev/nul
 next=$(printf '%03d' $(( 10#$(printf '%s\n' "${local_max:-0}" "${origin_max:-0}" "${history_max:-0}" | sort -n | tail -1) + 1 )))
 ```
 
-### 4. Optional taste prompt for the derived journey title
+### 4. Use the derived journey title
 
-Same shape as capture-story Step 4 — offer the journey-derived title, not the change description, and silent-default when unavailable.
+Use the journey-derived title without `AskUserQuestion` or a permission prompt. Ratification reviews the completed map; creation itself is mechanical under ADR-134.
 
 ### 5. Write the story-map JSON, then render it
 
@@ -209,7 +209,9 @@ Hand-editing the island still works — the renderer reads whatever is there —
 - Presentation is not yours to set. There is no CSS in the JSON and no inline `style` anywhere; the template is the only styling source.
 - Escape a literal `<` in any string as `\\u003c`. A raw `</script>` inside the island terminates the block early — in the renderer and in a browser — and the renderer will refuse the file rather than emit a truncated map.
 
-**Born unconfirmed (ADR-090).** Do NOT author `humanOversight` at all: the renderer treats an absent field as `unconfirmed`, so writing it is writing the default, and the field exists so that `wr-itil-mark-story-oversight-confirmed` can set `confirmed` — which an agent must never hand-write (P348). The `<meta name="human-oversight">` tag is a projection the renderer regenerates from the island; never author it directly (ADR-102). The map is NOT ratified until a human confirms it via `/wr-itil:manage-story-map <NNN> ratify`, which writes `confirmed` + an `oversight-hash` fingerprint through `wr-itil-mark-story-oversight-confirmed`. Until then `wr-itil-detect-unratified-stories-maps` surfaces it and an RFC may not reference its stories (`wr-itil-check-rfc-stories-ratified`).
+**Born unconfirmed (ADR-090).** Do NOT author `humanOversight` at all: the renderer treats an absent field as `unconfirmed`, so writing it is writing the default, and the field exists so that `wr-itil-mark-story-oversight-confirmed` can set `confirmed` — which an agent must never hand-write (P348). The `<meta name="human-oversight">` tag is a projection the renderer regenerates from the island; never author it directly (ADR-102). The map is NOT ratified until a human confirms it via `/wr-itil:manage-story-map <NNN> ratify`, which writes `confirmed` + an `oversight-hash` fingerprint through `wr-itil-mark-story-oversight-confirmed`. Until then `wr-itil-detect-unratified-stories-maps` surfaces it and `wr-itil-check-rfc-stories-ratified` blocks dependent implementation; ADR-134 still permits the proposal's initial row, cards, and story files to be authored for review.
+
+**Author before ratifying (ADR-134).** Create the initial map without `AskUserQuestion` or permission. A fix workflow may complete the proposal with its initial activities, release row, cards, and story files while the map is unconfirmed. Present that completed proposal for ratification afterward. Source changes and story implementation remain blocked until ratification; only the ratification flow writes confirmation.
 
 **What re-opens ratification, and what does not (ADR-103).** A later edit to the map's SUBSTANCE — the map's own substance as ADR-090 defines it — its journey, its identity, and what it traces to; `oversight_map_substance_keys()` is the field list — drifts the fingerprint and silently re-opens ratification. Release rows and the cards in them sit OUTSIDE the basis, so drawing a row or adding a story to one changes nothing. Presentation is outside it too: restyling the shared template cannot revoke an approval. Do NOT hand-write `confirmed` — born-unconfirmed is the load-bearing default.
 

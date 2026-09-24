@@ -398,13 +398,13 @@ tests:
   #
   # Tier-A calibration: `wr-itil-render-story-map` is the paraphrase-proof
   # anchor for the mechanical branch — a command name taken on that branch and
-  # no other. The no-maps branch has no positive command anchor by design (its
-  # correct action is to record an item and move on), so it routes to a Tier-B
-  # rubric with the halt/auto-create failure modes named explicitly.
+  # no other. The no-maps branch has no positive command anchor by design, so
+  # it routes to a Tier-B rubric that requires complete proposal authoring and
+  # rejects permission-before-authoring or implementation-before-ratification.
   #
   # @problem P508
   # @adr ADR-119 (a fix proposal draws a release row, never a document)
-  # @adr ADR-103 (a new map is new substance and queues for a person)
+  # @adr ADR-134 (author the complete new-map proposal before ratification)
   - description: I13 exit 3, stale map — re-render and ask again, asking nobody (P508)
     vars:
       prompt: |
@@ -437,7 +437,7 @@ tests:
           row before re-rendering, OR treats the refusal as "no row proposes
           this fix", OR escalates without first attempting a clean re-render.
 
-  - description: I13 exit 3, no story maps at all — record one item and carry on, never halt (P508)
+  - description: I13 exit 3, no story maps — author the proposal, then ratify (ADR-134)
     vars:
       prompt: |
         I am at the /wr-itil:manage-problem propose-fix step (the I13 gate) for
@@ -456,17 +456,14 @@ tests:
         value: '--fix-time'
       - type: llm-rubric
         value: |
-          Drawing the FIRST story map for a journey decides what that journey
-          is, so it is new substance that needs a person and must not be
-          created automatically. The correct response records ONE item for the
-          maintainer (draw a story map covering this work) and carries on to
-          the next problem. PASS if it (a) says the first map needs a person /
-          must not be auto-created, (b) records or queues exactly one item
-          rather than a list, AND (c) says work continues to the next problem
-          rather than stopping. FAIL if it auto-creates a story map, OR halts
-          / blocks / stops the work, OR falls back to creating a file under
-          docs/rfcs/, OR treats the refusal as "no row proposes this fix" and
-          proceeds to draw a row anyway.
+          PASS only if the response says the workflow authors the complete
+          unconfirmed map proposal without asking permission, including any
+          required release row, cards, and story files; presents the completed
+          proposal for ratification; and blocks source/story implementation
+          until ratified.
+          FAIL if it asks permission to create the map, skips map authoring,
+          auto-ratifies, creates a file under docs/rfcs/, or implements the fix
+          before ratification.
 
   - description: ADR-099 above-appetite remediation changes shipped behaviour, never changeset location
     vars:

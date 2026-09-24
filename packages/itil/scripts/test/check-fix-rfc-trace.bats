@@ -255,30 +255,32 @@ EOF
   [[ "$output" == *"mechanical"* ]]
 }
 
-@test "a repository with no story maps at all → exit 3, one item for a person" {
+@test "a repository with no story maps at all → exit 3, author then ratify directive" {
   rm -rf "$MAPS_DIR"
   check "$(write_problem 508)"
   [ "$status" -eq 3 ]
   [[ "$output" == *"no story maps"* ]]
-  [[ "$output" == *"needs a person"* ]]
+  [[ "$output" == *"complete unconfirmed story-map proposal"* ]]
+  [[ "$output" == *"ask only for ratification after"* ]]
+  [[ "$output" != *"needs a person"* ]]
+  [[ "$output" != *"must not be created automatically"* ]]
 }
 
-@test "the no-maps refusal tells the caller to carry on, not to stop" {
-  # An adopter with no maps would otherwise see every Known Error refuse, which
-  # reads as the loop mysteriously halting.
+@test "the no-maps refusal blocks implementation, not proposal authoring" {
   rm -rf "$MAPS_DIR"
   check "$(write_problem 508)"
   [ "$status" -eq 3 ]
-  [[ "$output" == *"next problem"* ]]
+  [[ "$output" == *"Do not implement"* ]]
+  [[ "$output" == *"ratified"* ]]
 }
 
 @test "an empty maps directory is drawable, not a no-maps refusal" {
-  # A repo that has the directory but no maps yet is the same case as one whose
-  # maps do not cover this journey: still a person's call. It is the ABSENT
-  # corpus that this distinguishes, so assert the boundary rather than assume it.
+  # A repo that has the directory but no maps yet follows the same
+  # author-then-ratify workflow as an absent directory.
   check "$(write_problem 508)"
   [ "$status" -eq 3 ]
   [[ "$output" == *"no story maps"* ]]
+  [[ "$output" == *"complete unconfirmed story-map proposal"* ]]
 }
 
 # ── Caller misuse ──────────────────────────────────────────────────────────

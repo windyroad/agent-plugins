@@ -33,16 +33,19 @@ tests:
           problem-traced RFC row, attaches at least one traced story, and does
           not create a standalone RFC document.
 
-  - description: Missing planning or decision substance is queued, not invented
+  - description: A missing story map is authored before ratification
     vars:
       prompt: |
-        Problem P124 has no suitable approved story map, activity, job, or
-        ratified decision for the proposed fix. Explain what capture-rfc does.
+        Problem P124 has no story maps yet. It has a resolved problem trace and
+        ratified job and decision context for the proposed fix. Explain what
+        capture-rfc does before any source implementation begins.
     assert:
-      - type: regex
-        value: 'AskUserQuestion|request_user_input|queue'
       - type: llm-rubric
         value: |
-          PASS only if the response briefs and asks or queues the missing human
-          direction, creates no RFC row or document, and does not amend a
-          ratified decision with new substance.
+          PASS only if the response says the workflow authors a complete
+          unconfirmed map proposal without asking permission, including the
+          required release row, cards, and story files; then asks or queues only
+          ratification of the completed proposal and blocks source/story
+          implementation until ratification.
+          FAIL if it asks permission to create the map, skips proposal authoring,
+          auto-ratifies, creates a standalone RFC document, or implements the fix.

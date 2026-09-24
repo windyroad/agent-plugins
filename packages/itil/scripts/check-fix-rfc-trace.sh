@@ -51,10 +51,9 @@
 #     a re-render. MECHANICAL, no person: a renderer clears this condition, so
 #     the caller re-renders and asks again, and escalates only if a clean
 #     re-render still reports it.
-#   - The repository holds no story maps at all → exit 3, directive naming the
-#     one thing a person has to do — draw the first map for this journey, which
-#     is new substance nothing may mint on their behalf. The caller records that
-#     single item and moves to the next problem; it does not stop.
+#   - The repository holds no story maps at all → exit 3, directive telling the
+#     caller to author the complete unconfirmed proposal without permission,
+#     then ask only for ratification. Dependent implementation stays blocked.
 #   - Missing problem file / no args → exit 2 (caller misuse), stderr usage.
 #
 # Exit 3 is a refusal the caller can act on without reading prose, and is
@@ -62,8 +61,7 @@
 #
 # @adr ADR-119 (a fix proposal draws a release row, never a document; the reader
 #   is repointed ahead of the writer and fails closed during the window)
-# @adr ADR-103 (a release row is the RFC; the map is the approval surface, and
-#   a proposal needing a new map queues for a person)
+# @adr ADR-134 (a new map proposal is authored before ratification)
 # @adr ADR-071 (every fix goes through an RFC — unconditional, no carve-out)
 # @adr ADR-060 (I1 load-bearing-from-the-start; I13 fix-proposal invariant)
 # @adr ADR-049 (invoked via the wr-itil-check-fix-rfc-trace bin shim on
@@ -169,7 +167,7 @@ if [ -n "${stale_maps// /}" ]; then
 fi
 
 if [ "$map_count" -eq 0 ]; then
-  printf 'no-rfc-trace: %s — a fix is proposed as a release row on a story map, and this repository has no story maps yet. Drawing the first map for a journey decides what that journey is, so it needs a person and must not be created automatically. Record one item for the maintainer — draw a story map covering this work — and carry on to the next problem rather than stopping.\n' \
+  printf 'no-rfc-trace: %s — a fix is proposed as a release row on a story map, and this repository has no story maps yet. Author a complete unconfirmed story-map proposal without asking permission, including its initial activities, release row, cards, and story files, then ask only for ratification after the completed proposal exists. Do not implement its stories until the map is ratified; continue only with independent work.\n' \
     "$PID"
   exit 3
 fi

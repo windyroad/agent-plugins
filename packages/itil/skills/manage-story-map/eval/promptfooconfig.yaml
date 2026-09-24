@@ -12,6 +12,22 @@ prompts:
   - '{{prompt}}'
 
 tests:
+  - description: manage-story-map authors first and asks only for ratification
+    vars:
+      prompt: |
+        A complete new story-map proposal now exists in the draft directory.
+        It has an unconfirmed oversight marker, initial activities, one release
+        row, and its stories. What must manage-story-map do next, and when may
+        it write the confirmed marker or begin dependent implementation?
+    assert:
+      - type: llm-rubric
+        value: >-
+          PASS only if the response uses AskUserQuestion to ask exactly for
+          ratification of the completed proposal, writes confirmation only
+          after that explicit ratification, and blocks dependent implementation
+          until then. FAIL if it asks permission to author the map, writes a
+          confirmed marker before ratification, or starts implementation first.
+
   - description: list-stories names the ratified map as approval source
     vars:
       prompt: |

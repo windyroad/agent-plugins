@@ -104,7 +104,7 @@ Never retry a failed or telemetry-inconclusive worker automatically. It may alre
 
 ## Fix Proposal Rule
 
-A fix proposal is a release row on an existing story map, never a new file under `docs/rfcs/`. The row has an identity from `wr-itil-next-rfc-id`, at least one story card, and a story whose `problems:` list names the driving problem. Creating a new map, activity column, job, or uncovered architectural choice requires a queued human decision rather than a silent edit.
+A fix proposal is a release row on a story map, never a new file under `docs/rfcs/`. The row has an identity from `wr-itil-next-rfc-id`, at least one story card, and a story whose `problems:` list names the driving problem. When no story map exists, author the complete unconfirmed proposal without asking permission: initial activities, identified release row, cards, and story files. Queue exactly one human decision to ratify the completed map, block dependent implementation until ratification, and continue independent work. A substantive change to an existing map, a new job, or an uncovered architectural choice still requires its existing human gate.
 
 ## Questions and Stop Conditions
 

@@ -1,7 +1,7 @@
 ---
 name: wr-itil:manage-story-map
 description: Heavyweight story-map intake + lifecycle management following ADR-060 Phase 2. Authors backbone × ribs × slices structure on draft maps, transitions through draft → accepted → in-progress → completed → archived, re-validates I3 + I4 invariants at every transition, and refreshes docs/story-maps/README.md per the P062 / P094 contract pattern. Companion to /wr-itil:capture-story-map (lightweight aside surface).
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, AskUserQuestion
 ---
 
 # Manage Story Map Skill
@@ -49,6 +49,7 @@ No WSJF token in any grammar form (I5 invariant).
 | Decision | Resolution | Authority class |
 |----------|-----------|-----------------|
 | Story-map ID resolution | Mechanical: regex match `^STORY-MAP-[0-9]{3}$` against `docs/story-maps/*/STORY-MAP-<NNN>-*.html` | silent-mechanical |
+| Initial map proposal authoring | Mechanical: author the unconfirmed map, initial activities, row, cards, and story files without permission | silent-mechanical |
 | Lifecycle transition validation | Mechanical state machine | silent-mechanical |
 | Backbone/ribs/slices authoring | AskUserQuestion (taste) at accepted; agent applies user input as HTML edits | taste |
 | `<meta>` block updates | Mechanical: update status `<meta>` on transitions; preserve all other meta | silent-mechanical |
@@ -82,7 +83,7 @@ Parse `<meta>` block (problems, rfcs, jtbd, status, reported, decision-makers) �
 
 Display current map state. Surface gaps: missing backbone ribs, slices with unresolved `data-story-id` references, mismatched `<meta name="status">` vs filename `<state>` subdir.
 
-Before asking about backbone authoring direction, apply `/wr-itil:capture-story-map`'s journey-derivation and title/backbone shape checks. Present that derived persona journey for taste-class refinement; use silent-mechanical resolution for housekeeping (status normalisation).
+For a newly captured, unconfirmed map, apply `/wr-itil:capture-story-map`'s journey-derivation and title/backbone shape checks and author the initial complete proposal without `AskUserQuestion` or permission. Present the result only at the ratification flow below. For later substantive refinement of an existing map, retain the taste-class direction prompt; use silent-mechanical resolution for housekeeping such as status normalisation.
 
 ### 7. Status transitions
 
@@ -117,6 +118,8 @@ Per architect amend finding 2 on Slice 7: story-map HTML files do NOT carry an a
 ### 7.5. Ratification flow (`ratify`) — ADR-090 / ADR-103 / STORY-022
 
 `ratify` is **orthogonal to the status lifecycle** — a map can be ratified at any status. It confirms human oversight of **the map**, and under ADR-103 that approves every ordinary story on it, including stories added later; stories are never ratified individually. Ratification is **drift-invalidated** (ADR-009 lineage, NOT ADR-066 write-once), but only a **substance** edit re-opens it: the map's own substance as ADR-090 defines it — its journey, its identity, what it traces to, and any manifest-bound historical projection. `oversight_map_substance_keys()` is the authoritative field list; this page deliberately does not restate it. Ordinary release rows and cards, story-body edits and template restyling sit outside the fingerprint basis and change nothing. Historical projections are the narrow exception and may be added only through `/wr-itil:migrate-story-map` under exact confirmed adopter authority. This is the STORY-022 surface.
+
+Under ADR-134, creation asks nothing: author the complete unconfirmed proposal first, including its initial activities, release row, cards, and story files. This `ratify` flow is the only human approval in the new-map workflow. Source changes and story implementation depending on the map are blocked until ratification completes; proposal authoring itself is allowed.
 
 **Born-confirmed discipline (P348).** Before any marker write, `export CLAUDE_SESSION_ID` from the transcript path — the marker shim silently no-ops on an empty SID. Every `confirmed` marker MUST be backed by a same-turn human confirm event; never write `confirmed` without the `AskUserQuestion` below (a hollow marker is the P348 bug).
 

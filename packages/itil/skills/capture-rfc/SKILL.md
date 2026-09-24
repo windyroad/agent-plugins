@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Skill, AskUserQuestion
 
 # Capture RFC
 
-Draw a lightweight RFC release row on an existing story map. An RFC is a planning row, not a standalone document.
+Draw a lightweight RFC release row on a story map. An RFC is a planning row, not a standalone document.
 
 ## Arguments
 
@@ -19,13 +19,14 @@ Draw a lightweight RFC release row on an existing story map. An RFC is a plannin
 ## Workflow
 
 1. Require every problem trace to resolve under `docs/problems/`. If a trace is missing, stop and direct the caller to `/wr-itil:capture-problem`; never infer or create a problem silently.
-2. Reuse the existing delivery-planning vehicle. Prefer the supplied `--story-map`; otherwise select an approved story map whose journey contains the fix. Never create a duplicate vehicle.
-3. If no existing map, activity, job, or ratified decision can carry the proposed work, brief the missing substance and use `AskUserQuestion`. In unattended work, queue the question and continue with other actionable work. Do not create a row until the direction is supplied.
-4. Allocate the RFC identity mechanically with `wr-itil-next-rfc-id`; never scan one directory or reuse a retired identity.
-5. Reuse the ordered stories supplied by `--stories`, or capture the smallest delivery stories needed for the fix. Every story must name the driving problem trace.
-6. Run `wr-itil-story-map add-band` to add one release row and `wr-itil-story-map add-card` for each story. The row must include the RFC identity, description, problem trace, and ordered story identifiers.
-7. Render the story map, update the driving problem's RFC references, and run the relevant reconciliation checks.
-8. Commit the map, stories, problem references, and regenerated render together in one focused commit.
+2. Reuse an existing delivery-planning vehicle when one covers the journey. Prefer the supplied `--story-map`; otherwise select an approved matching map. Never create a duplicate vehicle.
+3. If no story map exists for the journey, invoke `/wr-itil:capture-story-map` without asking permission, then complete the unconfirmed proposal: initial backbone activities, the release row, its cards, and the corresponding story files. The problem, ratified job, persona, and ratified decisions supply the derivation context. Do not call `AskUserQuestion` to authorize this authoring step.
+4. If the fix instead needs a new decision, a new job, or a substantive change to an already-ratified map, preserve that existing human gate: brief and ask interactively, or queue one question unattended. Do not invent that missing substance.
+5. Allocate the RFC identity mechanically with `wr-itil-next-rfc-id`; never scan one directory or reuse a retired identity.
+6. Reuse the ordered stories supplied by `--stories`, or capture the smallest delivery stories needed for the fix. Every story must name the driving problem trace.
+7. Run `wr-itil-story-map add-band` to add one release row and `wr-itil-story-map add-card` for each story. The row must include the RFC identity, description, problem trace, and ordered story identifiers.
+8. Render the story map, update the driving problem's RFC references, and run the relevant reconciliation checks.
+9. Commit the map, stories, problem references, and regenerated render together in one focused commit. Present the completed new map for ratification; in unattended work queue exactly that ratification. Source changes and story implementation remain blocked until the map is ratified.
 
 ## Prohibitions
 
