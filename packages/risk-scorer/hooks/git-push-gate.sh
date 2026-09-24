@@ -1,7 +1,8 @@
 #!/bin/bash
 # PreToolUse hook for pipeline discipline:
 # - Blocks bare `git push` and directs to npm run push:watch.
-# - Gates `npm run push:watch` on push risk score (TTL + drift + threshold).
+# - Gates `npm run push:watch` and `npm run merge:watch` on push risk score
+#   (TTL + drift + threshold), while letting those watchers wait on pending CI.
 # - Gates `npx changeset` / `npm run changeset` on release + push risk (back-pressure).
 # - Gates `npm run release:watch` on release risk score (TTL + drift + threshold).
 # - Blocks `gh pr merge` of the changeset release PR and directs to
@@ -21,7 +22,13 @@ TOOL_NAME=$(_get_tool_name)
 COMMAND=$(_get_command)
 SESSION_ID=$(_get_session_id)
 
-if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*(git push|npm run (push:watch|release:watch)|npx changeset|npm run changeset|gh pr merge)(\s|$)'; then
+_watchers_own_ci_wait() {
+    [ -f package.json ] && node -e \
+        'const p = require(process.argv[1]); process.exit(p.windyroadRiskScorer?.watchersOwnCiWait === true ? 0 : 1)' \
+        "$PWD/package.json" 2>/dev/null
+}
+
+if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*(git push|npm run (push:watch|merge:watch|release:watch)|npx changeset|npm run changeset|gh pr merge)(\s|$)'; then
     if ! _enter_hook_cwd; then
         risk_gate_deny "Pipeline action blocked: the command checkout could not be validated. Run the command from an absolute Git working directory and rescore that checkout."
         exit 0
@@ -40,8 +47,10 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*git push(\s|$)'; then
     exit 0
 fi
 
-# Gate push:watch on push risk score (inherits three-band TTL via check_risk_gate — P090)
-if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run push:watch(\s|$)'; then
+# Gate wait-capable push commands on push risk score (inherits three-band TTL
+# via check_risk_gate, P090). A pending run is theirs to wait for; red or
+# unreadable CI remains fail-closed.
+if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run (push:watch|merge:watch)(\s|$)'; then
     if [ -n "$SESSION_ID" ]; then
         RDIR=$(_risk_dir "$SESSION_ID")
         # Risk-reducing/neutral bypass for push — session-scoped, drift-
@@ -77,8 +86,15 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run push:watch(\s|$)'; then
         # one-shot bypass markers and BEFORE the predicted-risk gate so
         # incident workflows and clean-tree pushes are unaffected.
         if ! check_ci_status "$SESSION_ID" "push"; then
-            risk_gate_deny "Push blocked: ${CI_GATE_REASON}"
-            exit 0
+            if [ "$CI_GATE_CATEGORY" = "pending" ] && _watchers_own_ci_wait; then
+                :
+            elif [ "$CI_GATE_CATEGORY" = "pending" ]; then
+                risk_gate_deny "Push blocked: ${CI_GATE_REASON} This project has not declared wait-capable watchers with windyroadRiskScorer.watchersOwnCiWait=true."
+                exit 0
+            else
+                risk_gate_deny "Push blocked: ${CI_GATE_REASON}"
+                exit 0
+            fi
         fi
         if ! check_risk_gate "$SESSION_ID" "push"; then
             if [ "$RISK_GATE_CATEGORY" = "threshold" ]; then

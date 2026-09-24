@@ -185,6 +185,10 @@ _build_input() {
 JSON
 }
 
+_enable_wait_capable_watchers() {
+  printf '%s\n' '{"windyroadRiskScorer":{"watchersOwnCiWait":true}}' > "$TEST_REPO/package.json"
+}
+
 @test "git-push-gate.sh denies push:watch when CI is red even if risk score is within appetite" {
   # Within-appetite risk score
   echo "1" > "$RDIR/push"
@@ -198,6 +202,85 @@ JSON
   [[ "$output" == *"permissionDecision"* ]]
   [[ "$output" == *"deny"* ]]
   [[ "$output" == *"failure"* ]]
+}
+
+@test "git-push-gate.sh lets push:watch own the wait while CI is in progress" {
+  _enable_wait_capable_watchers
+  echo "1" > "$RDIR/push"
+  export FAKE_GH_OUTPUT='[{"status":"in_progress","conclusion":null,"databaseId":15,"url":"https://github.com/x/y/actions/runs/15"}]'
+
+  INPUT=$(_build_input "npm run push:watch")
+  output=$( cd "$TEST_REPO" && echo "$INPUT" | \
+    FAKE_GH_OUTPUT="$FAKE_GH_OUTPUT" PATH="$STUB_DIR:$PATH" \
+    "$HOOKS_DIR/git-push-gate.sh" )
+  [[ "$output" != *"permissionDecision"* ]]
+}
+
+@test "git-push-gate.sh lets merge:watch own the wait while CI is queued" {
+  _enable_wait_capable_watchers
+  echo "1" > "$RDIR/push"
+  export FAKE_GH_OUTPUT='[{"status":"queued","conclusion":null,"databaseId":16,"url":"https://github.com/x/y/actions/runs/16"}]'
+
+  INPUT=$(_build_input "npm run merge:watch")
+  output=$( cd "$TEST_REPO" && echo "$INPUT" | \
+    FAKE_GH_OUTPUT="$FAKE_GH_OUTPUT" PATH="$STUB_DIR:$PATH" \
+    "$HOOKS_DIR/git-push-gate.sh" )
+  [[ "$output" != *"permissionDecision"* ]]
+}
+
+@test "git-push-gate.sh still requires push risk evidence while CI is pending" {
+  _enable_wait_capable_watchers
+  export FAKE_GH_OUTPUT='[{"status":"in_progress","conclusion":null,"databaseId":17,"url":"https://github.com/x/y/actions/runs/17"}]'
+
+  INPUT=$(_build_input "npm run push:watch")
+  output=$( cd "$TEST_REPO" && echo "$INPUT" | \
+    FAKE_GH_OUTPUT="$FAKE_GH_OUTPUT" PATH="$STUB_DIR:$PATH" \
+    "$HOOKS_DIR/git-push-gate.sh" )
+  [[ "$output" == *"permissionDecision"* ]]
+  [[ "$output" == *"deny"* ]]
+}
+
+@test "git-push-gate.sh denies pending CI unless the project declares wait-capable watchers" {
+  echo "1" > "$RDIR/push"
+  export FAKE_GH_OUTPUT='[{"status":"in_progress","conclusion":null,"databaseId":19,"url":"https://github.com/x/y/actions/runs/19"}]'
+
+  INPUT=$(_build_input "npm run push:watch")
+  output=$( cd "$TEST_REPO" && echo "$INPUT" | \
+    FAKE_GH_OUTPUT="$FAKE_GH_OUTPUT" PATH="$STUB_DIR:$PATH" \
+    "$HOOKS_DIR/git-push-gate.sh" )
+  [[ "$output" == *"permissionDecision"* ]]
+  [[ "$output" == *"wait-capable"* ]]
+}
+
+@test "git-push-gate.sh denies merge:watch when CI is red" {
+  echo "1" > "$RDIR/push"
+  export FAKE_GH_OUTPUT='[{"status":"completed","conclusion":"failure","databaseId":18,"url":"https://github.com/x/y/actions/runs/18"}]'
+
+  INPUT=$(_build_input "npm run merge:watch")
+  output=$( cd "$TEST_REPO" && echo "$INPUT" | \
+    FAKE_GH_OUTPUT="$FAKE_GH_OUTPUT" PATH="$STUB_DIR:$PATH" \
+    "$HOOKS_DIR/git-push-gate.sh" )
+  [[ "$output" == *"permissionDecision"* ]]
+  [[ "$output" == *"failure"* ]]
+}
+
+@test "git-push-gate.sh fails closed when CI cannot be read" {
+  echo "1" > "$RDIR/push"
+
+  INPUT=$(_build_input "npm run push:watch")
+  output=$( cd "$TEST_REPO" && echo "$INPUT" | \
+    FAKE_GH_EXIT=1 PATH="$STUB_DIR:$PATH" \
+    "$HOOKS_DIR/git-push-gate.sh" )
+  [[ "$output" == *"permissionDecision"* ]]
+  [[ "$output" == *"deny"* ]]
+}
+
+@test "git-push-gate.sh still denies a direct protected push" {
+  INPUT=$(_build_input "git push origin main")
+  output=$( cd "$TEST_REPO" && echo "$INPUT" | \
+    PATH="$STUB_DIR:$PATH" "$HOOKS_DIR/git-push-gate.sh" )
+  [[ "$output" == *"permissionDecision"* ]]
+  [[ "$output" == *"npm run push:watch"* ]]
 }
 
 @test "git-push-gate.sh denies release:watch when CI is red even if risk score is within appetite" {
