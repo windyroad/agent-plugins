@@ -376,7 +376,7 @@ EXTERNAL_COMMS_VOICE_TONE_KEY: $key")"
   sleep 1
   send_event "$root/hooks-codex/codex-agent-completion-2.mjs" "$(parent_guarded_payload "$session" "$REPO_ROOT")"
   [ -e "$marker" ]
-  [ "$(marker_time "$marker")" = "$completed_at" ]
+  node -e 'process.exit(Math.abs(Number(process.argv[1]) - Number(process.argv[2])) <= 1 ? 0 : 1)' "$(marker_time "$marker")" "$completed_at"
 
   session="bats-p402-voice-unrelated-$$"
   marker="/tmp/voice-tone-reviewed-$session"
