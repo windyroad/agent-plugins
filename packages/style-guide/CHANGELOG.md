@@ -1,5 +1,11 @@
 # @windyroad/style-guide
 
+## 0.6.6
+
+### Patch Changes
+
+- af88767: Make background reviewer recovery independent of runtime environment detection across Architect, JTBD, Style Guide, and Voice & Tone. Add packaged native verification that each completed reviewer persists the parent marker and opens the next governed edit.
+
 ## 0.6.5
 
 ### Patch Changes
