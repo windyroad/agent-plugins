@@ -1,5 +1,12 @@
 # @windyroad/risk-scorer
 
+## 0.19.8
+
+### Patch Changes
+
+- 045949a: Ensure external-communications completion markers bind to the caller's trailing structured prompt when Codex prefixes reviewer instructions that also mention draft markers.
+- 2095b13: Validated background reviewer PASS results now reach the exact parent task before its next guarded action. Failed or mismatched completion transport remains non-blocking and creates no review authorization.
+
 ## 0.19.7
 
 ### Patch Changes

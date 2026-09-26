@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 0.23.4
+
+### Patch Changes
+
+- 2095b13: Validated background reviewer PASS results now reach the exact parent task before its next guarded action. Failed or mismatched completion transport remains non-blocking and creates no review authorization.
+
 ## 0.23.3
 
 ### Patch Changes
