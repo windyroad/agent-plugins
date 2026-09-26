@@ -1,5 +1,11 @@
 # @windyroad/voice-tone
 
+## 0.9.4
+
+### Patch Changes
+
+- af88767: Make background reviewer recovery independent of runtime environment detection across Architect, JTBD, Style Guide, and Voice & Tone. Add packaged native verification that each completed reviewer persists the parent marker and opens the next governed edit.
+
 ## 0.9.3
 
 ### Patch Changes
