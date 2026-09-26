@@ -98,6 +98,11 @@ pipeline_subagent_stop_input() {
     "${1:-child-session}" "$OTHER_REPO" "${2:-child-agent}" "${3:-4}" "${3:-4}" "${3:-4}" "$PIPELINE_REPO"
 }
 
+pipeline_spawn_input() {
+  printf '{"session_id":"%s","cwd":"%s","tool_name":"spawn_agent","tool_input":{"agent_type":"wr-risk-scorer:pipeline","message":"review"},"tool_response":{"task_name":"%s"}}' \
+    "$SESSION" "$OTHER_REPO" "${1:-child-agent}"
+}
+
 parent_bash_input() {
   printf '{"hook_event_name":"PreToolUse","session_id":"%s","cwd":"%s","tool_name":"Bash","tool_input":{"cwd":"%s","command":"git commit --dry-run"}}' \
     "$SESSION" "$PIPELINE_REPO" "$PIPELINE_REPO"
@@ -128,11 +133,64 @@ dispatch_pretool() {
   [ "$(find "$TMPDIR/claude-risk-$SESSION" -name 'codex-agent-*.done' | wc -l | tr -d ' ')" = "1" ]
 }
 
-@test "desktop pipeline SubagentStop hands a checkout-bound receipt to the parent without spawn state" {
+@test "background external-comms PASS is imported only by its parent session" {
+  draft="Background receipt release note"
+  review_key="$(source "$HOOK_DIR/lib/external-comms-key.sh" && compute_external_comms_key "$draft" changeset-author)"
+  review_prompt="$(printf 'SURFACE: changeset-author\n<draft>\n%s\n</draft>\n' "$draft")"
+  spawn="$(current_spawn_input | jq -c --arg cwd "$OTHER_REPO" --arg message "$review_prompt" '.cwd = $cwd | .tool_input.message = $message')"
+  dispatch "$spawn"
+  stop="$(subagent_stop_input | jq -c --arg cwd "$OTHER_REPO" --arg key "$review_key" '.session_id = "child-session" | .cwd = $cwd | .last_assistant_message = ("EXTERNAL_COMMS_RISK_VERDICT: PASS\nEXTERNAL_COMMS_RISK_KEY: " + $key)')"
+  dispatch_subagent_stop "$stop"
+
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/external-comms-risk-reviewed-$review_key" ]
+  prompt="$(parent_prompt_input | jq -c --arg cwd "$OTHER_REPO" '.cwd = $cwd | .hook_event_name = "PreToolUse" | .tool_name = "Edit"')"
+  printf '%s' "$prompt" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ -f "$TMPDIR/claude-risk-$SESSION/external-comms-risk-reviewed-$review_key" ]
+  [ ! -e "$TMPDIR/claude-risk-child-session/external-comms-risk-reviewed-$review_key" ]
+}
+
+@test "background plan policy and WIP reviews restore their parent markers" {
+  local role output marker target spawn stop prompt
+  for role in plan policy wip; do
+    target="/root/background-$role"
+    output="RISK_VERDICT: PASS"
+    marker="$role-reviewed"
+    [ "$role" != wip ] || output="RISK_VERDICT: CONTINUE"
+    spawn="$(jq -cn --arg cwd "$OTHER_REPO" --arg session "$SESSION" --arg role "wr-risk-scorer:$role" --arg target "$target" \
+      '{session_id:$session,cwd:$cwd,tool_name:"spawn_agent",tool_input:{agent_type:$role,message:"review"},tool_response:{task_name:$target}}')"
+    dispatch "$spawn"
+    stop="$(jq -cn --arg cwd "$OTHER_REPO" --arg role "wr-risk-scorer:$role" --arg target "$target" --arg output "$output" \
+      '{session_id:"child-session",cwd:$cwd,hook_event_name:"SubagentStop",agent_type:$role,agent_id:$target,last_assistant_message:$output}')"
+    dispatch_subagent_stop "$stop"
+    [ ! -e "$TMPDIR/claude-risk-$SESSION/$marker" ]
+    prompt="$(parent_prompt_input | jq -c --arg cwd "$OTHER_REPO" '.cwd = $cwd')"
+    printf '%s' "$prompt" | "$HOOK_DIR/risk-pending-receipt.sh"
+    [ -f "$TMPDIR/claude-risk-$SESSION/$marker" ]
+  done
+}
+
+
+@test "background WIP narrative and PAUSE do not authorize the next edit" {
+  local target spawn stop prompt output
+  target="/root/background-wip-deny"
+  for output in "review complete" "RISK_VERDICT: PAUSE"; do
+    spawn="$(jq -cn --arg cwd "$OTHER_REPO" --arg session "$SESSION" --arg target "$target" \
+      '{session_id:$session,cwd:$cwd,tool_name:"spawn_agent",tool_input:{agent_type:"wr-risk-scorer:wip",message:"review"},tool_response:{task_name:$target}}')"
+    dispatch "$spawn"
+    stop="$(jq -cn --arg cwd "$OTHER_REPO" --arg target "$target" --arg output "$output" \
+      '{session_id:"child-session",cwd:$cwd,hook_event_name:"SubagentStop",agent_type:"wr-risk-scorer:wip",agent_id:$target,last_assistant_message:$output}')"
+    dispatch_subagent_stop "$stop"
+    prompt="$(parent_prompt_input | jq -c --arg cwd "$OTHER_REPO" '.cwd = $cwd | .hook_event_name = "PreToolUse" | .tool_name = "Edit"')"
+    printf '%s' "$prompt" | "$HOOK_DIR/risk-pending-receipt.sh"
+    [ ! -e "$TMPDIR/claude-risk-$SESSION/wip-reviewed" ]
+  done
+}
+
+@test "unregistered pipeline SubagentStop stays non-blocking and creates no authorization" {
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
   diagnostic="$TMPDIR/claude-risk-pending/subagent-stop-diagnostic.json"
-  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).outcome' "$diagnostic")" = "receipt-written" ]
-  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$diagnostic")" = "checkout-bound-receipt" ]
+  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).outcome' "$diagnostic")" = "rejected" ]
+  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$diagnostic")" = "missing-parent-registration" ]
   [ "$(node -p '(require("fs").statSync(process.argv[1]).mode & 0o777).toString(8)' "$diagnostic")" = "600" ]
   run grep -F "$PIPELINE_REPO" "$diagnostic"
   [ "$status" -ne 0 ]
@@ -144,39 +202,33 @@ dispatch_pretool() {
 
   run dispatch_pretool "$(parent_bash_input)"
   [ "$status" -eq 0 ]
-  [ -z "$output" ]
-
-  rdir="$TMPDIR/claude-risk-$SESSION"
-  [ "$(cat "$rdir/commit")" = "4" ]
-  expected_hash="$(cd "$PIPELINE_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && "$HOOK_DIR/lib/pipeline-state.sh" --hash-inputs | _hashcmd | cut -d' ' -f1)"
-  expected_checkout="$(cd "$PIPELINE_REPO" && source "$HOOK_DIR/lib/gate-helpers.sh" && _checkout_id)"
-  [ "$(cat "$rdir/state-hash")" = "$expected_hash" ]
-  [ "$(cat "$rdir/checkout-id")" = "$expected_checkout" ]
-  [ ! -e "$TMPDIR/claude-risk-child-session/commit" ]
-  [ "$(find "$PIPELINE_REPO/.risk-reports" -type f -name '*-commit.md' | wc -l | tr -d ' ')" = "1" ]
-  run grep -R "$PIPELINE_REPO" "$PIPELINE_REPO/.risk-reports"
-  [ "$status" -ne 0 ]
-
-  dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
-  dispatch_pretool "$(parent_bash_input)"
-  [ "$(find "$PIPELINE_REPO/.risk-reports" -type f -name '*-commit.md' | wc -l | tr -d ' ')" = "1" ]
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
 }
 
-@test "a distinct completion from the same agent supersedes an unchanged checkout score" {
-  dispatch_subagent_stop "$(pipeline_subagent_stop_input child-one agent-one 3)"
-  dispatch_subagent_stop "$(pipeline_subagent_stop_input child-one agent-one 4)"
-  dispatch_pretool "$(parent_bash_input)"
+@test "registered background pipeline receipt is bound to its exact parent" {
+  dispatch "$(current_spawn_input wr-risk-scorer:pipeline)"
+  stop="$(pipeline_subagent_stop_input child-session "${TARGET#/root/}")"
+  dispatch_subagent_stop "$stop"
+  diagnostic="$TMPDIR/claude-risk-pending/subagent-stop-diagnostic.json"
+  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$diagnostic")" = "parent-bound-receipt" ]
+
+  wrong="$(parent_prompt_input | jq -c '.session_id = "wrong-parent"')"
+  printf '%s' "$wrong" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ ! -e "$TMPDIR/claude-risk-wrong-parent/commit" ]
+  printf '%s' "$(parent_prompt_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
   [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
-  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' ! -name 'subagent-stop-diagnostic.json' | wc -l | tr -d ' ')" = "0" ]
+  [ ! -e "$TMPDIR/claude-risk-child-session/commit" ]
 }
 
 @test "duplicate delivery of the same completion writes one receipt" {
+  dispatch "$(pipeline_spawn_input)"
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
-  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' ! -name 'subagent-stop-diagnostic.json' | wc -l | tr -d ' ')" = "1" ]
+  [ "$(find "$TMPDIR/codex-review-transport" -name 'risk-receipt-*.json' | wc -l | tr -d ' ')" = "1" ]
 }
 
 @test "desktop pipeline SubagentStop records a privacy-safe rejection reason" {
+  dispatch "$(pipeline_spawn_input)"
   input="$(pipeline_subagent_stop_input | node -e 'let s=""; process.stdin.on("data", c => s += c); process.stdin.on("end", () => { const value = JSON.parse(s); delete value.last_assistant_message; process.stdout.write(JSON.stringify(value)); });')"
   dispatch_subagent_stop "$input"
 
@@ -184,7 +236,7 @@ dispatch_pretool() {
   [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).outcome' "$diagnostic")" = "rejected" ]
   [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$diagnostic")" = "missing-output" ]
   [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).fields.last_assistant_message' "$diagnostic")" = "absent" ]
-  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name 'subagent-stop-diagnostic.json' | wc -l | tr -d ' ')" = "0" ]
+  [ "$(find "$TMPDIR/codex-review-transport" -name 'risk-receipt-*.json' | wc -l | tr -d ' ')" = "0" ]
 }
 
 @test "desktop pipeline SubagentStop records malformed JSON without leaking it" {
@@ -205,6 +257,7 @@ dispatch_pretool() {
 }
 
 @test "Codex parent prompt imports a completed child receipt" {
+  dispatch "$(pipeline_spawn_input)"
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
   run bash -c 'printf "%s" "$1" | "$2" user-prompt' _ "$(parent_prompt_input)" "$HOOK_DIR/risk-scorer-dispatch.sh"
   [ "$status" -eq 0 ]
@@ -212,6 +265,7 @@ dispatch_pretool() {
 }
 
 @test "Codex parent imports a receipt when only an explicit cd identifies the checkout" {
+  dispatch "$(pipeline_spawn_input)"
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
   printf '%s' "$(parent_hidden_workdir_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
   [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
@@ -220,9 +274,10 @@ dispatch_pretool() {
 }
 
 @test "imported score retains the original assessment timestamp" {
+  dispatch "$(pipeline_spawn_input)"
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
-  pending="$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' ! -name 'subagent-stop-diagnostic.json' -print -quit)"
-  assessed_seconds="$(node -e 'console.log(Math.floor(JSON.parse(require("fs").readFileSync(process.argv[1])).createdAt / 1000))' "$pending")"
+  pending="$(find "$TMPDIR/codex-review-transport" -name 'risk-receipt-*.json' -print -quit)"
+  assessed_seconds="$(node -e 'console.log(Math.floor(JSON.parse(require("fs").readFileSync(process.argv[1])).completedAt / 1000))' "$pending")"
   sleep 1
   printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
   born_seconds="$(source "$HOOK_DIR/lib/gate-helpers.sh" && _mtime "$TMPDIR/claude-risk-$SESSION/commit-born")"
@@ -234,6 +289,7 @@ dispatch_pretool() {
   mkdir -p "$rdir"
   touch -t 200001010000 "$rdir/incident-release"
   before="$(source "$HOOK_DIR/lib/gate-helpers.sh" && _mtime "$rdir/incident-release")"
+  dispatch "$(pipeline_spawn_input)"
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
   printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
   after="$(source "$HOOK_DIR/lib/gate-helpers.sh" && _mtime "$rdir/incident-release")"
@@ -241,6 +297,7 @@ dispatch_pretool() {
 }
 
 @test "pending pipeline receipt rejects checkout drift" {
+  dispatch "$(pipeline_spawn_input)"
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
   printf 'drift\n' >> "$PIPELINE_REPO/state"
   printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
@@ -248,37 +305,25 @@ dispatch_pretool() {
 }
 
 @test "pending pipeline receipt rejects malformed completion" {
+  dispatch "$(pipeline_spawn_input)"
   malformed="$(pipeline_subagent_stop_input | sed 's#RISK_CWD: [^\"]*#RISK_CWD: relative/path#')"
   dispatch_subagent_stop "$malformed"
   printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
   [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
 }
 
-@test "expired consumed receipt permits rescoring the unchanged checkout" {
+@test "expired registrations are reaped before parent resolution" {
+  transport="$TMPDIR/codex-review-transport"
+  mkdir -p "$transport"
+  stale="$transport/registration-$(printf 'a%.0s' {1..64}).json"
+  jq -cn --arg root "$OTHER_REPO" '{parentSession:"old-parent",role:"wr-risk-scorer:pipeline",target:"child-agent",root:$root,physical:"stale",policy:{kind:"absent"},createdAt:0}' > "$stale"
+
+  dispatch "$(pipeline_spawn_input)"
   dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
-  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
-  done_receipt="$(find "$TMPDIR/claude-risk-pending" -name '*.done' -print -quit)"
-  touch -t 200001010000 "$done_receipt"
 
-  RISK_TTL=1 dispatch_subagent_stop "$(pipeline_subagent_stop_input)"
-  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name '*.done' ! -name '*.claim' ! -name 'subagent-stop-diagnostic.json' | wc -l | tr -d ' ')" = "1" ]
-}
-
-@test "receipt bridge reaps only expired receipt-shaped files" {
-  pending_dir="$TMPDIR/claude-risk-pending"
-  mkdir -p "$pending_dir"
-  stale="$(printf 'a%.0s' {1..64})-$(printf 'b%.0s' {1..32})-$(printf 'c%.0s' {1..64})"
-  fresh="$(printf 'd%.0s' {1..64})-$(printf 'e%.0s' {1..32})-$(printf 'f%.0s' {1..64})"
-  touch "$pending_dir/$stale" "$pending_dir/$stale.done" "$pending_dir/$fresh" "$pending_dir/keep-me"
-  touch -t 200001010000 "$pending_dir/$stale" "$pending_dir/$stale.done"
-
-  RISK_TTL=1 dispatch_subagent_stop "$(pipeline_subagent_stop_input fresh-session fresh-agent)"
-
-  [ ! -e "$pending_dir/$stale" ]
-  [ ! -e "$pending_dir/$stale.done" ]
-  [ -e "$pending_dir/$fresh" ]
-  [ -e "$pending_dir/keep-me" ]
-  [ -e "$pending_dir/subagent-stop-diagnostic.json" ]
+  [ ! -e "$stale" ]
+  [ "$(find "$transport" -name 'risk-receipt-*.json' | wc -l | tr -d ' ')" = "1" ]
+  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$TMPDIR/claude-risk-pending/subagent-stop-diagnostic.json")" = "parent-bound-receipt" ]
 }
 
 @test "Codex completion bridge marks the exact risk agent when it closes" {

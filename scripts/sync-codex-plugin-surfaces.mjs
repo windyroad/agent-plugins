@@ -13,14 +13,14 @@ const backup = join(root, ".pack-codex-source");
 const supported = new Set(["c4", "connect", "jtbd", "retrospective", "style-guide", "tdd", "voice-tone"]);
 const reviewerCompletions = {
   jtbd: [
-    { role: "wr-jtbd:agent", writer: "jtbd-mark-reviewed.sh", policy: "docs/jtbd" },
+    { role: "wr-jtbd:agent", writer: "jtbd-mark-reviewed.sh", policy: "docs/jtbd", passPattern: "^[ \\t]*>?[ \\t]*\\*\\*JTBD Review: PASS\\*\\*[ \\t]*$", firstLineOnly: true, verdictFile: "/tmp/jtbd-verdict" },
   ],
   "style-guide": [
-    { role: "wr-style-guide:agent", writer: "style-guide-mark-reviewed.sh", policy: "docs/STYLE-GUIDE.md" },
+    { role: "wr-style-guide:agent", writer: "style-guide-mark-reviewed.sh", policy: "docs/STYLE-GUIDE.md", passPattern: "^[ \\t]*>?[ \\t]*\\*\\*Style Guide Review: PASS\\*\\*.*$" },
   ],
   "voice-tone": [
-    { role: "wr-voice-tone:agent", writer: "voice-tone-mark-reviewed.sh", policy: "docs/VOICE-AND-TONE.md" },
-    { role: "wr-voice-tone:external-comms", writer: "external-comms-mark-reviewed.sh", policy: "docs/VOICE-AND-TONE.md" },
+    { role: "wr-voice-tone:agent", writer: "voice-tone-mark-reviewed.sh", policy: "docs/VOICE-AND-TONE.md", passPattern: "^[ \\t]*>?[ \\t]*\\*\\*Voice & Tone Review: PASS\\*\\*.*$" },
+    { role: "wr-voice-tone:external-comms", writer: "external-comms-mark-reviewed.sh", policy: "docs/VOICE-AND-TONE.md", passPattern: "^EXTERNAL_COMMS_VOICE_TONE_VERDICT:[ \\t]*PASS$" },
   ],
 }[packageName] ?? [];
 
@@ -143,6 +143,8 @@ if (existsSync(hooks)) {
     }
   }
   if (reviewerCompletions.length > 0) {
+    config.hooks.UserPromptSubmit ||= [];
+    config.hooks.PreToolUse ||= [];
     config.hooks.PostToolUse ||= [];
     config.hooks.SubagentStop ||= [];
     const completionCommands = reviewerCompletions.map((_completion, index) => {
@@ -151,6 +153,11 @@ if (existsSync(hooks)) {
     });
     config.hooks.PostToolUse.push({
       matcher: "collaboration.spawn_agent|collaboration.wait_agent|collaboration.interrupt_agent|collaborationspawn_agent|collaborationwait_agent|collaborationinterrupt_agent|spawn_agent|wait_agent|interrupt_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__wait_agent|multi_agent_v1__close_agent",
+      hooks: completionCommands,
+    });
+    config.hooks.UserPromptSubmit.push({ hooks: completionCommands });
+    config.hooks.PreToolUse.unshift({
+      matcher: "Bash|Edit|Write|ExitPlanMode",
       hooks: completionCommands,
     });
     for (const [index, completion] of reviewerCompletions.entries()) {
@@ -195,7 +202,8 @@ run_hook "$input"
     const filename = index === 0 ? "codex-agent-completion.mjs" : `codex-agent-completion-${index + 1}.mjs`;
     writeFileSync(join(hooksOutput, filename), `#!/usr/bin/env node
 
-import { existsSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameSync, rmSync, statSync, utimesSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -205,6 +213,9 @@ const hookDir = dirname(fileURLToPath(import.meta.url));
 const role = ${JSON.stringify(completion.role)};
 const writer = join(hookDir, "..", "hooks", ${JSON.stringify(completion.writer)});
 const policy = ${JSON.stringify(completion.policy)};
+const passPattern = new RegExp(${JSON.stringify(completion.passPattern)}, "m");
+const firstLineOnly = ${JSON.stringify(Boolean(completion.firstLineOnly))};
+const verdictFile = ${JSON.stringify(completion.verdictFile ?? null)};
 const ttlSeconds = process.env.REVIEW_TTL ?? "3600";
 const ttl = Number(ttlSeconds) * 1000;
 
@@ -212,8 +223,24 @@ function stateDir(sessionId) {
   return join(process.env.TMPDIR || "/tmp", \`claude-risk-\${sessionId}\`);
 }
 
+function transportDir() {
+  return join(process.env.TMPDIR || "/tmp", "codex-review-transport");
+}
+
 function statePath(input, target, suffix = "") {
   return join(stateDir(input.session_id), \`codex-review-\${Buffer.from(role + ":" + target).toString("base64url")}\${suffix}\`);
+}
+
+function transportId(sessionId, target) {
+  return createHash("sha256").update(sessionId + "\\0" + role + "\\0" + target).digest("hex");
+}
+
+function registrationPath(sessionId, target) {
+  return join(transportDir(), \`registration-\${transportId(sessionId, target)}.json\`);
+}
+
+function receiptPath(sessionId, target, suffix = "") {
+  return join(transportDir(), \`receipt-\${transportId(sessionId, target)}.json\${suffix}\`);
 }
 
 function normalizeTarget(target) {
@@ -226,6 +253,47 @@ function policyHash(root) {
     join(hookDir, "..", "hooks", "lib", "gate-helpers.sh"), policy], { cwd: root, encoding: "utf8" });
   const hash = result.stdout?.trim();
   return result.status === 0 && /^[a-f0-9]{64}$/.test(hash || "") ? hash : null;
+}
+
+function expectedExternalKey(prompt) {
+  if (role !== "wr-voice-tone:external-comms" || typeof prompt !== "string" || !prompt) return null;
+  const result = spawnSync("bash", ["-c", 'source "$1"; value="$(cat)"; derive_external_comms_key_from_prompt "$value"',
+    "external-key", join(hookDir, "..", "hooks", "lib", "external-comms-key.sh")], { input: prompt, encoding: "utf8" });
+  const key = result.stdout?.trim();
+  return result.status === 0 && /^[a-f0-9]{64}$/.test(key || "") ? key : null;
+}
+
+function outputAllowed(output, registered) {
+  const candidate = firstLineOnly ? output.split(/\\r?\\n/).find((line) => line.trim()) || "" : output;
+  if (!passPattern.test(candidate)) return false;
+  if (verdictFile) {
+    try { if (readFileSync(verdictFile, "utf8").trim() !== "PASS") return false; }
+    catch { return false; }
+  }
+  if (role !== "wr-voice-tone:external-comms") return true;
+  const keys = [...output.matchAll(/^EXTERNAL_COMMS_VOICE_TONE_KEY:[ \\t]*([a-f0-9]{64})$/gm)];
+  if (keys.length !== 1) return false;
+  return Boolean(registered.expectedKey && registered.expectedKey === keys[0][1]);
+}
+
+function reapTransport() {
+  if (!existsSync(transportDir())) return;
+  for (const name of readdirSync(transportDir())) {
+    const path = join(transportDir(), name);
+    try {
+      const statAge = Date.now() - statSync(path).mtimeMs;
+      if (/^(?:receipt|risk-receipt)-[a-f0-9]{64}\\.json\\.(?:claim|done)$/.test(name)) {
+        if (!Number.isFinite(statAge) || statAge < 0 || statAge >= ttl) rmSync(path, { force: true });
+        continue;
+      }
+      if (!/^(?:registration|receipt)-[a-f0-9]{64}\\.json$/.test(name)) continue;
+      const value = JSON.parse(readFileSync(path, "utf8"));
+      if (value.role !== role) continue;
+      const timestamp = name.startsWith("receipt-") ? value.completedAt : value.createdAt;
+      const age = Date.now() - timestamp;
+      if (!Number.isFinite(age) || age < 0 || age >= ttl) rmSync(path, { force: true });
+    } catch { /* Another completion may own or remove this transport file. */ }
+  }
 }
 
 function diagnostic(reason, input) {
@@ -266,9 +334,12 @@ function targetFromSpawn(input) {
 
 function clear(input, target) {
   for (const suffix of ["", ".claim", ".done"]) rmSync(statePath(input, target, suffix), { force: true });
+  rmSync(registrationPath(input.session_id, target), { force: true });
+  for (const suffix of ["", ".claim", ".done"]) rmSync(receiptPath(input.session_id, target, suffix), { force: true });
 }
 
 function remember(input) {
+  reapTransport();
   const target = normalizeTarget(targetFromSpawn(input));
   if (!target) return;
   mkdirSync(stateDir(input.session_id), { recursive: true });
@@ -284,7 +355,17 @@ function remember(input) {
     diagnostic("policy-hash-failed", input);
     return;
   }
-  writeFileSync(statePath(input, target), JSON.stringify({ role, target, ...bound, policyHash: hash }), { mode: 0o600 });
+  const prompt = input.tool_input?.message ?? input.tool_input?.prompt ?? "";
+  const externalKey = expectedExternalKey(prompt);
+  const registered = { parentSession: input.session_id, role, target, ...bound, policyHash: hash,
+    promptDigest: createHash("sha256").update(prompt).digest("hex"), expectedKey: externalKey, createdAt: Date.now() };
+  writeFileSync(statePath(input, target), JSON.stringify(registered), { mode: 0o600 });
+  if (role === "wr-voice-tone:external-comms" && !externalKey) {
+    diagnostic("missing-external-comms-key-binding", input);
+    return;
+  }
+  mkdirSync(transportDir(), { recursive: true, mode: 0o700 });
+  writeFileSync(registrationPath(input.session_id, target), JSON.stringify(registered), { mode: 0o600 });
 }
 
 function claim(input, target) {
@@ -297,6 +378,73 @@ function claim(input, target) {
     throw error;
   }
   return { path, done };
+}
+
+function validRegistration(registered, input, target, age) {
+  if (registered.role !== role || registered.target !== target) {
+    diagnostic("registration-mismatch", input);
+    return false;
+  }
+  if (!Number.isFinite(age) || age < 0) {
+    diagnostic("invalid-registration-age", input);
+    return false;
+  }
+  if (age >= ttl) {
+    diagnostic("stale-registration", input);
+    return false;
+  }
+  const current = checkout(input.cwd || process.cwd());
+  if (!current || current.root !== registered.root || current.physical !== registered.physical) {
+    diagnostic("checkout-mismatch", input);
+    return false;
+  }
+  const hash = policyHash(registered.root);
+  if (!hash || hash !== registered.policyHash) {
+    diagnostic(hash ? "policy-changed" : "policy-hash-failed", input);
+    return false;
+  }
+  return true;
+}
+
+function writeMarker(input, registered, target, output, completedAt, claimed) {
+  const synthetic = {
+    ...input,
+    session_id: registered.parentSession,
+    cwd: registered.root,
+    tool_name: "Agent",
+    tool_input: { subagent_type: role, prompt: "" },
+    tool_response: { content: [{ type: "text", text: output }] },
+  };
+  const result = spawnSync(writer, {
+    cwd: registered.root,
+    env: process.env,
+    input: JSON.stringify(synthetic),
+    encoding: "utf8",
+  });
+  if (result.status !== 0) {
+    rmSync(claimed.path, { force: true });
+    diagnostic("marker-writer-failed", input);
+    return false;
+  }
+  renameSync(claimed.path, claimed.done);
+  rmSync(statePath({ session_id: registered.parentSession }, target), { force: true });
+  rmSync(registrationPath(registered.parentSession, target), { force: true });
+  const assessedAt = new Date(completedAt);
+  for (const candidate of [
+    join(process.env.TMPDIR || "/tmp", \`${packageName}-reviewed-\${registered.parentSession}\`),
+    join(process.env.TMPDIR || "/tmp", \`${packageName}-plan-reviewed-\${registered.parentSession}\`),
+  ]) {
+    if (existsSync(candidate)) utimesSync(candidate, assessedAt, assessedAt);
+    if (existsSync(candidate + ".hash")) utimesSync(candidate + ".hash", assessedAt, assessedAt);
+  }
+  if (role === "wr-voice-tone:external-comms") {
+    const keys = [...output.matchAll(/^EXTERNAL_COMMS_VOICE_TONE_KEY:[ \\t]*([a-f0-9]{64})$/gm)];
+    if (keys.length === 1) {
+      const keyed = join(stateDir(registered.parentSession), \`external-comms-voice-tone-reviewed-\${keys[0][1]}\`);
+      if (existsSync(keyed)) utimesSync(keyed, assessedAt, assessedAt);
+    }
+  }
+  return true;
 }
 
 function complete(input, target, output) {
@@ -318,54 +466,84 @@ function complete(input, target, output) {
     diagnostic("malformed-registration", input);
     return;
   }
-  if (registered.role !== role || registered.target !== target) {
-    diagnostic("registration-mismatch", input);
-    return;
-  }
-  if (!Number.isFinite(age) || age < 0) {
-    diagnostic("invalid-registration-age", input);
-    return;
-  }
-  if (age >= ttl) {
-    diagnostic("stale-registration", input);
-    return;
-  }
-
-  const current = checkout(input.cwd || process.cwd());
-  if (!current || current.root !== registered.root || current.physical !== registered.physical) {
-    diagnostic("checkout-mismatch", input);
-    return;
-  }
-
-  const hash = policyHash(registered.root);
-  if (!hash || hash !== registered.policyHash) {
-    diagnostic(hash ? "policy-changed" : "policy-hash-failed", input);
+  if (!validRegistration(registered, input, target, age)) {
+    rmSync(path, { force: true });
+    rmSync(registrationPath(registered.parentSession || input.session_id, target), { force: true });
     return;
   }
 
   const claimed = claim(input, target);
   if (!claimed) return;
-  const synthetic = {
-    ...input,
-    cwd: registered.root,
-    tool_name: "Agent",
-    tool_input: { subagent_type: role, prompt: "" },
-    tool_response: { content: [{ type: "text", text: output }] },
-  };
-  const result = spawnSync(writer, {
-    cwd: registered.root,
-    env: process.env,
-    input: JSON.stringify(synthetic),
-    encoding: "utf8",
-  });
-  if (result.status === 0) {
-    renameSync(claimed.path, claimed.done);
-    rmSync(path, { force: true });
+  writeMarker(input, registered, target, output, Date.now(), claimed);
+}
+
+function registrations(input, target) {
+  reapTransport();
+  if (!existsSync(transportDir())) return [];
+  const current = checkout(input.cwd || process.cwd());
+  if (!current) return [];
+  return readdirSync(transportDir())
+    .filter((name) => /^registration-[a-f0-9]{64}\\.json$/.test(name))
+    .flatMap((name) => {
+      const path = join(transportDir(), name);
+      try {
+        const registered = JSON.parse(readFileSync(path, "utf8"));
+        return registered.role === role && registered.target === target &&
+          registered.root === current.root && registered.physical === current.physical
+          ? [{ path, registered, age: Date.now() - Math.floor(statSync(path).mtimeMs) }]
+          : [];
+      } catch { return []; }
+    });
+}
+
+function persistPending(input, target, output) {
+  target = normalizeTarget(target);
+  if (!target || typeof output !== "string" || !output) return;
+  const candidates = registrations(input, target);
+  if (candidates.length !== 1) {
+    diagnostic(candidates.length ? "ambiguous-parent-registration" : "missing-parent-registration", input);
     return;
   }
-  rmSync(claimed.path, { force: true });
-  diagnostic("marker-writer-failed", input);
-  process.exitCode = 1;
+  const { registered, age } = candidates[0];
+  if (!validRegistration(registered, input, target, age)) return;
+  if (!outputAllowed(output, registered)) {
+    diagnostic("non-pass-or-mismatched-output", input);
+    return;
+  }
+  const path = receiptPath(registered.parentSession, target);
+  if (existsSync(path) || existsSync(path + ".done")) return;
+  try {
+    writeFileSync(path, JSON.stringify({ ...registered, output, completedAt: Date.now() }), { flag: "wx", mode: 0o600 });
+  } catch (error) {
+    if (error?.code !== "EEXIST") diagnostic("receipt-write-failed", input);
+  }
+}
+
+function consumePending(input) {
+  reapTransport();
+  if (!existsSync(transportDir())) return;
+  const prefix = \`receipt-\`;
+  for (const name of readdirSync(transportDir()).filter((entry) => entry.startsWith(prefix) && entry.endsWith(".json"))) {
+    const path = join(transportDir(), name);
+    let pending, age;
+    try {
+      pending = JSON.parse(readFileSync(path, "utf8"));
+      age = Date.now() - pending.completedAt;
+    } catch {
+      diagnostic("malformed-receipt", input);
+      continue;
+    }
+    if (pending.parentSession !== input.session_id || pending.role !== role) continue;
+    if (!validRegistration(pending, input, pending.target, age)) continue;
+    const claimPath = path + ".claim";
+    const donePath = path + ".done";
+    try { writeFileSync(claimPath, "", { flag: "wx", mode: 0o600 }); }
+    catch (error) { if (error?.code === "EEXIST") continue; throw error; }
+    const claimed = { path: claimPath, done: donePath };
+    if (writeMarker(input, pending, pending.target, pending.output, pending.completedAt, claimed)) {
+      rmSync(path, { force: true });
+    }
+  }
 }
 
 function close(input) {
@@ -389,12 +567,23 @@ if (!/^[0-9]+$/.test(ttlSeconds) || !Number.isSafeInteger(ttl) || ttl <= 0) {
   process.exit(0);
 }
 
-if (SPAWN_TOOLS.has(input.tool_name)) remember(input);
-if (CLOSE_TOOLS.has(input.tool_name)) close(input);
-if (WAIT_TOOLS.has(input.tool_name)) wait(input);
-if (input.hook_event_name === "SubagentStop") {
-  if (input.agent_type !== role) diagnostic("unrelated-subagent-stop", input);
-  else complete(input, input.task_name || input.agent_name || input.agent_id, input.last_assistant_message);
+try {
+  if (SPAWN_TOOLS.has(input.tool_name)) remember(input);
+  if (CLOSE_TOOLS.has(input.tool_name)) close(input);
+  if (WAIT_TOOLS.has(input.tool_name)) wait(input);
+  if (input.hook_event_name === "UserPromptSubmit" || input.hook_event_name === "PreToolUse" || ["Bash", "Edit", "Write", "ExitPlanMode"].includes(input.tool_name)) consumePending(input);
+  if (input.hook_event_name === "SubagentStop") {
+    if (input.agent_type !== role) diagnostic("unrelated-subagent-stop", input);
+    else {
+      const target = input.task_name || input.agent_name || input.agent_id;
+      const local = statePath(input, normalizeTarget(target));
+      if (existsSync(local)) complete(input, target, input.last_assistant_message);
+      else persistPending(input, target, input.last_assistant_message);
+    }
+  }
+} catch {
+  diagnostic("transport-error", input);
+  process.exitCode = 0;
 }
 `);
   }

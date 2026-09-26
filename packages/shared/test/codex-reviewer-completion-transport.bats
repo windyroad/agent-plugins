@@ -58,6 +58,16 @@ wait_payload() {
     '{session_id:$session,cwd:$cwd,tool_name:"wait_agent",tool_input:{},tool_response:{status:{($target):{completed:$output}}}}'
 }
 
+parent_prompt_payload() {
+  jq -cn --arg session "$1" --arg cwd "$2" \
+    '{session_id:$session,cwd:$cwd,hook_event_name:"UserPromptSubmit"}'
+}
+
+parent_guarded_payload() {
+  jq -cn --arg session "$1" --arg cwd "$2" \
+    '{session_id:$session,cwd:$cwd,hook_event_name:"PreToolUse",tool_name:"Edit",tool_input:{file_path:"src/example.js"}}'
+}
+
 stop_payload() {
   jq -cn --arg session "$1" --arg cwd "$2" --arg role "$3" --arg target "$4" --arg output "$5" \
     '{session_id:$session,cwd:$cwd,hook_event_name:"SubagentStop",agent_type:$role,agent_id:$target,last_assistant_message:$output}'
@@ -267,7 +277,12 @@ native_array_close_payload() {
   send_configured_event "$style" SubagentStop "$(stop_payload "$session-child" "$fixture" 'wr-style-guide:agent' '/root/review' '**Style Guide Review: PASS**')"
   [ ! -e "/tmp/style-guide-reviewed-$session" ]
   [ ! -e "/tmp/style-guide-reviewed-$session-child" ]
-  jq -e '.reason == "missing-parent-registration"' "$TMPDIR/codex-review-completion-diagnostic.json"
+  send_configured_event "$style" UserPromptSubmit "$(parent_prompt_payload "$session-other" "$fixture")"
+  [ ! -e "/tmp/style-guide-reviewed-$session-other" ]
+  send_event "$style/hooks-codex/codex-agent-completion.mjs" "$(parent_guarded_payload "$session" "$fixture")"
+  [ -e "/tmp/style-guide-reviewed-$session" ]
+  [ ! -e "/tmp/style-guide-reviewed-$session-child" ]
+  jq -e '.hooks.PreToolUse[0].matcher | contains("Edit")' "$style/hooks-codex/hooks.json"
 
   session="bats-p402-expired-$$"
   send_configured_event "$style" PostToolUse "$(spawn_payload "$session" "$fixture" 'wr-style-guide:agent' '/root/review')"
@@ -339,6 +354,30 @@ native_array_close_payload() {
 EXTERNAL_COMMS_VOICE_TONE_KEY: $key")"
   [ -e "$marker" ]
 
+  session="bats-p402-voice-external-unbound-$$"
+  marker="$TMPDIR/claude-risk-$session/external-comms-voice-tone-reviewed-$key"
+  send_configured_event "$root" PostToolUse "$(spawn_payload "$session" "$REPO_ROOT" 'wr-voice-tone:external-comms' "$target-external-unbound")"
+  send_configured_event "$root" SubagentStop "$(stop_payload "$session-child" "$REPO_ROOT" 'wr-voice-tone:external-comms' "$target-external-unbound" "EXTERNAL_COMMS_VOICE_TONE_VERDICT: PASS
+EXTERNAL_COMMS_VOICE_TONE_KEY: $key")"
+  [ ! -e "$marker" ]
+  [ "$(find "$TMPDIR/codex-review-transport" -name 'receipt-*.json' | wc -l | tr -d ' ')" = "0" ]
+
+  session="bats-p402-voice-external-background-$$"
+  draft="Background changeset summary"
+  prompt="$(printf 'SURFACE: changeset-author\n<draft>\n%s\n</draft>\n' "$draft")"
+  key="$(source "$root/hooks/lib/external-comms-key.sh" && compute_external_comms_key "$draft" changeset-author)"
+  marker="$TMPDIR/claude-risk-$session/external-comms-voice-tone-reviewed-$key"
+  payload="$(spawn_payload "$session" "$REPO_ROOT" 'wr-voice-tone:external-comms' "$target-external-background" | jq -c --arg prompt "$prompt" '.tool_input.message = $prompt')"
+  send_configured_event "$root" PostToolUse "$payload"
+  send_configured_event "$root" SubagentStop "$(stop_payload "$session-child" "$REPO_ROOT" 'wr-voice-tone:external-comms' "$target-external-background" "EXTERNAL_COMMS_VOICE_TONE_VERDICT: PASS
+EXTERNAL_COMMS_VOICE_TONE_KEY: $key")"
+  receipt="$(find "$TMPDIR/codex-review-transport" -name 'receipt-*.json' -print -quit)"
+  completed_at="$(jq -r .completedAt "$receipt")"
+  sleep 1
+  send_event "$root/hooks-codex/codex-agent-completion-2.mjs" "$(parent_guarded_payload "$session" "$REPO_ROOT")"
+  [ -e "$marker" ]
+  [ "$(marker_time "$marker")" = "$completed_at" ]
+
   session="bats-p402-voice-unrelated-$$"
   marker="/tmp/voice-tone-reviewed-$session"
   send_configured_event "$root" PostToolUse "$(spawn_payload "$session" "$REPO_ROOT" 'wr-voice-tone:unknown' "$target-unrelated")"
@@ -358,9 +397,26 @@ EXTERNAL_COMMS_VOICE_TONE_KEY: $key")"
   writer="$root/hooks/voice-tone-mark-reviewed.sh"
   chmod -x "$writer"
   run send_event "$helper" "$(close_payload "$session" "$REPO_ROOT" "$target-writer" '**Voice & Tone Review: PASS**')"
-  [ "$status" -ne 0 ]
+  [ "$status" -eq 0 ]
   [ ! -e "$marker" ]
   chmod +x "$writer"
   send_event "$helper" "$(close_payload "$session" "$REPO_ROOT" "$target-writer" '**Voice & Tone Review: PASS**')"
   [ -e "$marker" ]
+}
+
+@test "generated reviewer transport errors fail open without authorization" {
+  local root helper blocked payload session marker
+  root="$(pack_plugin style-guide)"
+  helper="$root/hooks-codex/codex-agent-completion.mjs"
+  blocked="$BATS_TEST_TMPDIR/blocked-transport"
+  mkdir -p "$blocked"
+  printf 'not a directory\n' > "$blocked/codex-review-transport"
+  session="bats-p402-transport-error-$$"
+  marker="/tmp/style-guide-reviewed-$session"
+  payload="$(spawn_payload "$session" "$REPO_ROOT" 'wr-style-guide:agent' '/root/blocked')"
+
+  run bash -c 'printf "%s" "$1" | env TMPDIR="$2" node "$3"' _ "$payload" "$blocked" "$helper"
+
+  [ "$status" -eq 0 ]
+  [ ! -e "$marker" ]
 }

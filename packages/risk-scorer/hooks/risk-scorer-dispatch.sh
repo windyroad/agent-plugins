@@ -55,6 +55,8 @@ if messages:
     run_hook staleness-check.sh
     ;;
   pre-tool)
+    # Import an exact-parent background receipt before every guarded action.
+    "$SCRIPT_DIR/risk-pending-receipt.sh" <<<"$INPUT" || true
     case "$(tool_name)" in
       Edit|Write)
         run_hook secret-leak-gate.sh
@@ -63,10 +65,6 @@ if messages:
         run_hook risk-policy-enforce-edit.sh
         ;;
       Bash)
-        # Current Codex emits SubagentStop in the child conversation but does
-        # not expose native collaboration calls to the parent's PostToolUse.
-        # Import the exact checkout/hash-bound receipt before enforcing gates.
-        "$SCRIPT_DIR/risk-pending-receipt.sh" <<<"$INPUT" || true
         run_hook git-push-gate.sh
         run_hook risk-score-commit-gate.sh
         run_hook external-comms-gate.sh

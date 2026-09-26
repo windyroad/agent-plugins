@@ -6,6 +6,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/gate-helpers.sh"
+source "$SCRIPT_DIR/lib/architect-verdict.sh"
 
 # P191 Phase 2: anchor docs/decisions on the project root, not the hook's
 # runtime CWD (see architect-enforce-edit.sh). A false-negative here never
@@ -36,15 +37,7 @@ case "$SUBAGENT" in
     # canonical verdict on the first nonblank line is required so examples
     # and conflicting output fail closed.
     AGENT_OUTPUT=$(_get_tool_output)
-    _architect_verdicts() {
-      sed -nE \
-        -e 's/^[[:space:]]*>?[[:space:]]*\*\*Architecture Review: (PASS|ISSUES FOUND|NEEDS DIRECTION)\*\*[[:space:]]*$/\1/p' \
-        -e 's/^[[:space:]]*>?[[:space:]]*##[[:space:]]+Architecture Review: (PASS|ISSUES FOUND|NEEDS DIRECTION)[[:space:]]*$/\1/p'
-    }
-    VERDICT=$(printf '%s\n' "$AGENT_OUTPUT" | _architect_verdicts)
-    FIRST_VERDICT=$(printf '%s\n' "$AGENT_OUTPUT" | awk 'NF { print; exit }' | _architect_verdicts)
-    [ "$FIRST_VERDICT" = "$VERDICT" ] || VERDICT=""
-    [ "$VERDICT" = "ISSUES FOUND" ] && VERDICT="FAIL"
+    VERDICT=$(printf '%s\n' "$AGENT_OUTPUT" | architect_verdict)
 
     # Substance-aware drift hash + atomic verdict-write (ADR-009 amendment
     # 2026-06-06). The marker + hash file are written as an atomic pair via

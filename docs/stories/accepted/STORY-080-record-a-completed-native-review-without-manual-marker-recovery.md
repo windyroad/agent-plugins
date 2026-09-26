@@ -21,14 +21,14 @@ estimated-effort: M
 
 ## User value (required, INVEST Valuable)
 
-In order to keep a genuine governance PASS from blocking my next edit, as a developer using Codex native reviewers, I want completed ordinary style-guide and voice-tone reviews to reach their existing marker writers with the parent session and checkout still bound.
+In order to keep a genuine governance PASS from blocking my next guarded action, as a developer using Codex native reviewers, I want completed background reviews to reach their existing marker writers with the parent session, checkout, policy, and content bindings still intact.
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
 - [x] A registered ordinary style-guide or voice-tone reviewer completion delivered through completed close, completed wait, or `SubagentStop` reaches the package's existing marker writer.
 - [x] Spawn acknowledgements, empty waits, interrupted running reviews, narrative summaries, stale or unrelated reviews, and mismatched parent sessions or physical checkouts do not approve an edit.
-- [x] Duplicate completion delivery is claimed atomically, and marker-writer failure remains retryable and returns failure.
-- [x] Packed-package tests cover both packages while voice-tone external-comms, JTBD, runtime configuration, plugin caches, and Claude behavior remain unchanged.
+- [x] Duplicate completion delivery is claimed atomically. A transport or marker-writer failure remains retryable and does not create authorization, while the completion hook itself stays non-blocking.
+- [x] Packed-package tests cover architect, JTBD, style-guide, voice-tone, external-comms, and risk-scorer marker paths while runtime configuration, plugin caches, and Claude behavior remain unchanged.
 
 ## Driving problem trace (required — I6 invariant)
 
@@ -40,7 +40,7 @@ P402 records that Codex can complete a genuine review without delivering its res
 
 ## Implementation notes (optional)
 
-Generate the Codex-only compatibility bridge from the existing surface generator under ADR-083 and ADR-017. Bind role, target, parent session, and physical checkout; keep external-comms keyed review transport outside this slice.
+Generate the Codex-only compatibility bridge from the existing surface generator under ADR-083 and ADR-017. Bind role, target, parent session, physical checkout, policy or state, and content identity for keyed external communications. Transport failures stay non-blocking and create no authorization.
 
 ## Dependencies
 

@@ -35,15 +35,17 @@ input() {
 }
 
 @test "packed SubagentStop bridge writes privacy-safe diagnostics and one receipt" {
+  dispatch_post "$(printf '{\"session_id\":\"parent-session\",\"cwd\":\"%s\",\"tool_name\":\"spawn_agent\",\"tool_input\":{\"agent_type\":\"wr-risk-scorer:pipeline\"},\"tool_response\":{\"task_name\":\"child-agent\"}}' "$TMP/repo")"
   dispatch "$(input)"
   [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).outcome' "$DIAGNOSTIC")" = "receipt-written" ]
   [ "$(node -p '(require("fs").statSync(process.argv[1]).mode & 0o777).toString(8)' "$DIAGNOSTIC")" = "600" ]
-  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name 'subagent-stop-diagnostic.json' | wc -l | tr -d ' ')" = "1" ]
+  [ "$(find "$TMPDIR/codex-review-transport" -name 'risk-receipt-*.json' | wc -l | tr -d ' ')" = "1" ]
 
   dispatch "$(input)"
-  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$DIAGNOSTIC")" = "fresh-receipt-exists" ]
-  [ "$(find "$TMPDIR/claude-risk-pending" -type f ! -name 'subagent-stop-diagnostic.json' | wc -l | tr -d ' ')" = "1" ]
+  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$DIAGNOSTIC")" = "fresh-parent-bound-receipt-exists" ]
+  [ "$(find "$TMPDIR/codex-review-transport" -name 'risk-receipt-*.json' | wc -l | tr -d ' ')" = "1" ]
 
+  dispatch_post "$(printf '{\"session_id\":\"private-parent\",\"cwd\":\"%s\",\"tool_name\":\"spawn_agent\",\"tool_input\":{\"agent_type\":\"wr-risk-scorer:pipeline\"},\"tool_response\":{\"task_name\":\"private-agent\"}}' "$TMP/repo")"
   dispatch '{"hook_event_name":"SubagentStop","session_id":"private-session","agent_id":"private-agent","agent_type":"wr-risk-scorer:pipeline"}'
   [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$DIAGNOSTIC")" = "missing-output" ]
 

@@ -57,12 +57,17 @@ if messages:
     fi
     ;;
   user-prompt)
+    printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs"
     detect_output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/architect-detect.sh")"
     stale_output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/staleness-check.sh")"
     [ -z "$detect_output" ] || printf '%s\n' "$detect_output"
     [ -z "$stale_output" ] || printf '%s\n' "$stale_output"
     ;;
+  subagent-stop)
+    printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs"
+    ;;
   pre-tool)
+    printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs"
     case "$(tool_name)" in
       Edit|Write)
         run_gate architect-enforce-edit.sh

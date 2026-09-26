@@ -9,6 +9,6 @@ _parse_input
 
 TOOL_NAME="$(_get_tool_name)"
 EVENT_NAME="$(printf '%s' "$_HOOK_INPUT" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("hook_event_name", ""))' 2>/dev/null || true)"
-[ "$TOOL_NAME" = "Bash" ] || [ "$EVENT_NAME" = "UserPromptSubmit" ] || exit 0
+[ "$EVENT_NAME" = "PreToolUse" ] || [ "$EVENT_NAME" = "UserPromptSubmit" ] || [ "$TOOL_NAME" = "Bash" ] || exit 0
 _enter_hook_cwd || exit 0
 printf '%s' "$_HOOK_INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs" --consume-pending

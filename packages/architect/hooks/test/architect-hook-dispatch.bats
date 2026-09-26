@@ -41,14 +41,14 @@ run_fake() {
   return "$status"
 }
 
-@test "hooks.json registers four command hooks" {
+@test "hooks.json registers five command hooks" {
   run python3 - "$HOOKS/hooks.json" <<'PY'
 import json, sys
 data = json.load(open(sys.argv[1]))
 print(sum(len(entry["hooks"]) for entries in data["hooks"].values() for entry in entries))
 PY
   [ "$status" -eq 0 ]
-  [ "$output" = "4" ]
+  [ "$output" = "5" ]
 }
 
 @test "dispatcher retains all thirteen child hook routes" {
@@ -93,13 +93,15 @@ EOF
   run run_fake session-start
   [ "$output" = $'codex-agent.mjs\narchitect-oversight-nudge.sh' ]
   run run_fake user-prompt
-  [ "$output" = $'architect-detect.sh\nstaleness-check.sh' ]
+  [ "$output" = $'codex-agent-completion.mjs\narchitect-detect.sh\nstaleness-check.sh' ]
+  run run_fake subagent-stop
+  [ "$output" = 'codex-agent-completion.mjs' ]
   run run_fake pre-tool Edit
-  [ "$output" = $'architect-enforce-edit.sh\narchitect-oversight-marker-discipline.sh' ]
+  [ "$output" = $'codex-agent-completion.mjs\narchitect-enforce-edit.sh\narchitect-oversight-marker-discipline.sh' ]
   run run_fake pre-tool ExitPlanMode
-  [ "$output" = 'architect-plan-enforce.sh' ]
+  [ "$output" = $'codex-agent-completion.mjs\narchitect-plan-enforce.sh' ]
   run run_fake pre-tool Bash
-  [ "$output" = 'architect-readme-pairing-check.sh' ]
+  [ "$output" = $'codex-agent-completion.mjs\narchitect-readme-pairing-check.sh' ]
   run run_fake post-tool Agent
   [ "$output" = $'architect-mark-reviewed.sh\narchitect-slide-marker.sh' ]
   run run_fake post-tool multi_agent_v1__close_agent
@@ -122,7 +124,7 @@ EOF
   run run_fake pre-tool Edit
   [ "$status" -eq 0 ]
   [[ "$output" == *'permissionDecision'* ]]
-  [ "$(cat "$TRACE")" = 'architect-enforce-edit.sh' ]
+  [ "$(cat "$TRACE")" = $'codex-agent-completion.mjs\narchitect-enforce-edit.sh' ]
 }
 
 @test "dispatcher propagates a nonzero deny" {

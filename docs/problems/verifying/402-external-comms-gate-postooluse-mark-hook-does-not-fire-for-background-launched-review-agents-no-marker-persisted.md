@@ -336,6 +336,17 @@ Version Packages PR #477 released `@windyroad/risk-scorer@0.19.3` and `@windyroa
 
 Published-package behaviour is verified. A restarted installed task exercising the same denial remains the exact verification needed before closure.
 
+## Cross-reviewer parent receipt repair candidate — 2026-09-26
+
+The remaining background failure was reproduced from a native task transcript: a child reviewer returned the canonical PASS, then the parent edit was denied because the child-session completion could not see the parent-session registration. The candidate repair gives architect, JTBD, style-guide, voice-tone, external-comms, plan, WIP, policy, and registered pipeline reviews the same parent-bound completion lifecycle:
+
+- the parent spawn records role, target, parent session, physical checkout, policy or state binding, and content identity where the gate is content-keyed;
+- a child `SubagentStop` may write only a validated pending PASS receipt and never writes a parent marker directly;
+- only the exact parent may consume that receipt, and it revalidates checkout, policy or pipeline state, content key, age, and duplicate-delivery state before invoking the existing marker writer;
+- transport and writer failures return successfully so the hook cannot impede unrelated runtime work, but they leave no marker and therefore grant no authorization.
+
+No new architecture decision is required; the candidate implements the existing marker-lifecycle, external-comms binding, shared-package, and native completion transport decisions. Focused source and freshly packed-package coverage passes 67/67 across all affected marker paths. Installed-package verification in a restarted Codex task remains required before P402 can close.
+
 ## Upstream Lifecycle Updates
 
 - **2026-09-11** — Known Error → Verification Pending (inbound)
