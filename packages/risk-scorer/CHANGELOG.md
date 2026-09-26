@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.19.9
+
+### Patch Changes
+
+- 68d11d2: Recover completed Codex background risk reviews without relying on runtime environment detection, while leaving active reviewers running until they finish.
+
 ## 0.19.8
 
 ### Patch Changes
