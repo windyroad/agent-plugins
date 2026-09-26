@@ -65,19 +65,13 @@ assert_gate_allows() {
   assert_gate_denies "$TEST_SESSION" "commit" "No commit risk score found"
 }
 
-@test "missing-score deny instructs synchronous scorer dispatch (P402)" {
-  # A background-launched scorer's PostToolUse:Agent mark hook does not fire, so
-  # no marker persists and the gate re-blocks. The deny must tell the agent to
-  # dispatch synchronously. Mirrors external-comms-gate-canonical.bats.
-  assert_gate_denies "$TEST_SESSION" "commit" "run_in_background: false"
-}
-
-@test "Codex missing-score deny names interrupt_agent completion compatibility" {
-  export CODEX_THREAD_ID=codex-test
-  assert_gate_denies "$TEST_SESSION" "commit" "invoke interrupt_agent once on that completed target"
-  [[ "$RISK_GATE_REASON" != *"run_in_background: false"* ]]
+@test "missing-score deny names both runtime recovery paths without runtime detection" {
+  assert_gate_denies "$TEST_SESSION" "commit" "confirm that exact target is completed"
+  [[ "$RISK_GATE_REASON" == *'invoke `interrupt_agent` exactly once'* ]]
+  [[ "$RISK_GATE_REASON" == *"If it is still running, keep waiting"* ]]
+  [[ "$RISK_GATE_REASON" == *"On Claude Code"* ]]
+  [[ "$RISK_GATE_REASON" == *"run_in_background: false"* ]]
   [[ "$RISK_GATE_REASON" == *"no transcript parsing or nested codex exec"* ]]
-  unset CODEX_THREAD_ID
 }
 
 @test "score file with PENDING denies (non-numeric)" {

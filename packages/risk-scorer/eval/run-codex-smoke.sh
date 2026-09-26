@@ -54,12 +54,12 @@ else
   NPM_SPEC="$(find "$TMP_PACK_DIR" -maxdepth 1 -type f -name '*.tgz' -print -quit)"
   [[ -n "$NPM_SPEC" ]]
 fi
-CODEX_BINARY="$CODEX_BIN" npm exec --yes --package "$NPM_SPEC" -- windyroad-risk-scorer --runtime codex --scope user >/dev/null
+PATH="$(dirname "$CODEX_BIN"):$PATH" CODEX_BINARY="$CODEX_BIN" npm exec --yes --package "$NPM_SPEC" -- windyroad-risk-scorer --runtime codex --scope user >/dev/null
 
 for mode in pipeline plan wip policy external-comms inbound-report; do
   test -f "$CODEX_HOME/agents/wr-risk-scorer-${mode}.toml"
 done
-CODEX_HOME="$CODEX_HOME" "$CODEX_BIN" plugin list | grep -q 'wr-risk-scorer@windyroad-risk-scorer-local'
+grep -q 'wr-risk-scorer@windyroad-risk-scorer-local' <<<"$(CODEX_HOME="$CODEX_HOME" "$CODEX_BIN" plugin list)"
 
 run_codex() {
   local cwd="$1"
@@ -80,8 +80,10 @@ git init -q "$ASSESSED_REPO"
 git init -q "$COMPLETION_REPO"
 printf 'same\n' > "$ASSESSED_REPO/state"
 printf 'same\n' > "$COMPLETION_REPO/state"
-git -C "$ASSESSED_REPO" add state
-git -C "$COMPLETION_REPO" add state
+printf '# Risk Policy\n\n## Risk Appetite\n\nThreshold: 5\n' > "$ASSESSED_REPO/RISK-POLICY.md"
+printf '# Risk Policy\n\n## Risk Appetite\n\nThreshold: 5\n' > "$COMPLETION_REPO/RISK-POLICY.md"
+git -C "$ASSESSED_REPO" add state RISK-POLICY.md
+git -C "$COMPLETION_REPO" add state RISK-POLICY.md
 git -C "$ASSESSED_REPO" -c user.name=test -c user.email=test@example.com commit -qm initial
 git -C "$COMPLETION_REPO" -c user.name=test -c user.email=test@example.com commit -qm initial
 
