@@ -1,5 +1,11 @@
 # @windyroad/jtbd
 
+## 0.14.7
+
+### Patch Changes
+
+- 2095b13: Validated background reviewer PASS results now reach the exact parent task before its next guarded action. Failed or mismatched completion transport remains non-blocking and creates no review authorization.
+
 ## 0.14.6
 
 ### Patch Changes
