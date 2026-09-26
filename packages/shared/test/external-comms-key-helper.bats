@@ -95,6 +95,36 @@ compute() {
   [ -z "$KEY" ]
 }
 
+@test "Codex prompt prefix with illustrative draft markers does not replace the trailing caller draft" {
+  DRAFT="the reviewed changeset body"
+  PROMPT=$'The reviewer receives text wrapped in <draft>...</draft> markers.\nSURFACE: changeset-author\n<draft>\n'"$DRAFT"$'\n</draft>'
+  KEY=$(derive "$PROMPT")
+  EXPECTED=$(gate_key "$DRAFT" "changeset-author")
+  [ "$KEY" = "$EXPECTED" ]
+}
+
+@test "last valid structured pair wins over an earlier developer-instruction example" {
+  DRAFT="the actual reviewed body"
+  PROMPT=$'SURFACE: gh-issue-create\n<draft>\nexample from developer instructions\n</draft>\n\nSURFACE: changeset-author\n<draft>\n'"$DRAFT"$'\n</draft>'
+  KEY=$(derive "$PROMPT")
+  EXPECTED=$(gate_key "$DRAFT" "changeset-author")
+  [ "$KEY" = "$EXPECTED" ]
+}
+
+@test "anchored SURFACE line inside the actual draft is not treated as a new structured pair" {
+  DRAFT=$'first line\nSURFACE: npm-publish\nquoted prose, not a draft envelope\nlast line'
+  PROMPT=$'SURFACE: gh-pr-comment\n<draft>\n'"$DRAFT"$'\n</draft>'
+  KEY=$(derive "$PROMPT")
+  EXPECTED=$(gate_key "$DRAFT" "gh-pr-comment")
+  [ "$KEY" = "$EXPECTED" ]
+}
+
+@test "surface separated from its draft envelope by prose fails closed" {
+  PROMPT=$'SURFACE: changeset-author\nReview this exact body.\n<draft>\nbody\n</draft>'
+  KEY=$(derive "$PROMPT")
+  [ -z "$KEY" ]
+}
+
 # ---------------------------------------------------------------------------
 # P010 / ADR-028 amended 2026-05-25 — changeset frontmatter strip + canonical
 # newline normalization. The GATE sees the FULL Write content (incl. YAML

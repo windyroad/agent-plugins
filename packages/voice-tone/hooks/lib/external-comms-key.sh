@@ -88,24 +88,43 @@ print(hashlib.sha256((draft + '\n' + surface).encode('utf-8')).hexdigest())
 derive_external_comms_key_from_prompt() {
     local prompt="$1"
     [ -n "$prompt" ] || { echo ""; return 0; }
-    # Extract SURFACE + <draft> body in one pass. The two fields are emitted
-    # \x1f-separated (ASCII unit separator) so a body containing newlines — or
-    # an empty body — round-trips through command substitution intact (only
-    # trailing newlines are dropped, which compute_external_comms_key rstrips
-    # anyway). Empty output when either marker is absent → empty key.
+    # Extract the last valid SURFACE + <draft> pair. Codex completion payloads
+    # may prefix the caller prompt with the custom agent's developer
+    # instructions, which themselves mention illustrative <draft> markers.
+    # A pair is valid only when the draft envelope follows the SURFACE line
+    # without intervening non-whitespace prose, and the SURFACE line is not
+    # itself inside another draft envelope. Scanning valid candidates from
+    # right to left selects the caller's trailing prompt rather than a decoy
+    # in the prefixed instructions.
+    #
+    # The two fields are emitted \x1f-separated (ASCII unit separator) so a
+    # body containing newlines — or an empty body — round-trips through command
+    # substitution intact (only trailing newlines are dropped, which
+    # compute_external_comms_key rstrips anyway). Empty output when no valid
+    # pair is present → empty key.
     local extracted
     extracted=$(printf '%s' "$prompt" | python3 -c "
 import sys, re
 text = sys.stdin.read()
-# DRAFT: non-greedy match between <draft>...</draft>, tolerating an optional
-# newline immediately after <draft> and before </draft>.
-draft_match = re.search(r'<draft>\n?(.*?)\n?</draft>', text, re.DOTALL)
-# SURFACE: anchored to line start (MULTILINE) so prose like 'context says
-# SURFACE: x' does not match. Surface name is a single letter+word/hyphen token.
-surface_match = re.search(r'^SURFACE:\s*([A-Za-z][\w-]*)', text, re.MULTILINE)
-if not draft_match or not surface_match:
-    sys.exit(0)
-sys.stdout.write(surface_match.group(1) + '\x1f' + draft_match.group(1))
+surface_pattern = re.compile(
+    r'^SURFACE:\s*([A-Za-z][\w-]*)[^\r\n]*(?:\r?\n|$)',
+    re.MULTILINE,
+)
+for surface_match in reversed(list(surface_pattern.finditer(text))):
+    prefix = text[:surface_match.start()]
+    # Reject a SURFACE line quoted inside an existing draft body.
+    if prefix.rfind('<draft>') > prefix.rfind('</draft>'):
+        continue
+    remainder = text[surface_match.end():]
+    draft_match = re.match(
+        r'[ \t\r\n]*<draft>\r?\n?(.*?)\r?\n?</draft>',
+        remainder,
+        re.DOTALL,
+    )
+    if not draft_match:
+        continue
+    sys.stdout.write(surface_match.group(1) + '\x1f' + draft_match.group(1))
+    break
 " 2>/dev/null) || extracted=""
     [ -n "$extracted" ] || { echo ""; return 0; }
     local surface="${extracted%%$'\x1f'*}"
