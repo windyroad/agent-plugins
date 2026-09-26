@@ -22,6 +22,7 @@ check_architect_gate() {
   # P191 Phase 2: anchor the docs/decisions drift-hash on the project root,
   # not the hook's runtime CWD (see architect-enforce-edit.sh for rationale).
   local PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+  local COMPLETION_GUIDANCE="On Codex, wait for the reviewer to finish, then invoke interrupt_agent exactly once with that completed task's exact target before retrying. On Claude Code, dispatch the reviewer synchronously. Do not create or edit review markers manually."
 
   if [ -n "$SESSION_ID" ] && [ -f "$MARKER" ]; then
     local NOW=$(date +%s)
@@ -44,7 +45,7 @@ check_architect_gate() {
         fi
         if [ "$STORED" != "$CURRENT" ]; then
           rm -f "$MARKER" "$HASH_FILE"
-          ARCHITECT_GATE_REASON="Decision drift detected — docs/decisions/ changed substantively since the last architect review. Re-delegate to wr-architect:agent via the Agent tool (subagent_type: 'wr-architect:agent') to refresh the marker."
+          ARCHITECT_GATE_REASON="Decision drift detected — docs/decisions/ changed substantively since the last architect review. Re-delegate to wr-architect:agent via the Agent tool (subagent_type: 'wr-architect:agent') to refresh the marker. ${COMPLETION_GUIDANCE}"
           return 1  # Drift detected, deny
         else
           touch "$MARKER"  # Slide TTL window forward
@@ -56,15 +57,12 @@ check_architect_gate() {
       fi
     else
       rm -f "$MARKER"
-      ARCHITECT_GATE_REASON="Architect review expired (${AGE}s old, TTL ${TTL_SECONDS}s). Re-delegate to wr-architect:agent via the Agent tool (subagent_type: 'wr-architect:agent') to refresh the marker."
+      ARCHITECT_GATE_REASON="Architect review expired (${AGE}s old, TTL ${TTL_SECONDS}s). Re-delegate to wr-architect:agent via the Agent tool (subagent_type: 'wr-architect:agent') to refresh the marker. ${COMPLETION_GUIDANCE}"
       return 1  # TTL expired, deny
     fi
   fi
 
-  ARCHITECT_GATE_REASON="No architect review marker found for this session. Delegate to wr-architect:agent via the Agent tool (subagent_type: 'wr-architect:agent') so the architect can review and create the marker. After an ISSUES FOUND verdict, obtain the upgraded PASS from a fresh wr-architect:agent spawn: resuming the prior agent does not fire the completion hook and therefore cannot write the marker. If you already hold a genuine PASS, assert the marker manually: touch /tmp/architect-reviewed-\$SID && rm -f /tmp/architect-reviewed-\$SID.hash (SID = newest architect-plan-reviewed-* / architect-announced-* basename)."
-  if [ -n "${CODEX_THREAD_ID:-}" ]; then
-    ARCHITECT_GATE_REASON="No architect review marker found for this session. After a genuine PASS from a completed wr-architect:agent task, call interrupt_agent once with that completed task's exact target, then retry the edit. If still blocked, run a fresh review and report the gate diagnostic. Do not create or edit review markers manually."
-  fi
+  ARCHITECT_GATE_REASON="No architect review marker found for this session. Delegate to wr-architect:agent via the Agent tool (subagent_type: 'wr-architect:agent'). After an ISSUES FOUND verdict, obtain the upgraded PASS from a fresh spawn because resuming the prior agent does not fire the completion hook. ${COMPLETION_GUIDANCE}"
   return 1  # No marker, deny
 }
 

@@ -57,6 +57,7 @@ teardown() {
   check_review_gate "$TEST_SESSION" "voice-tone" "docs/VOICE-AND-TONE.md" || true
   [[ "$REVIEW_GATE_REASON" == *"wr-voice-tone:agent"* ]]
   [[ "$REVIEW_GATE_REASON" == *"Agent tool"* ]]
+  [[ "$REVIEW_GATE_REASON" == *"interrupt_agent"* ]]
 }
 
 @test "REVIEW_GATE_REASON names refresh-the-marker directive when TTL expired" {
@@ -66,6 +67,7 @@ teardown() {
   [[ "$REVIEW_GATE_REASON" == *"expired"* ]]
   [[ "$REVIEW_GATE_REASON" == *"wr-voice-tone:agent"* ]]
   [[ "$REVIEW_GATE_REASON" == *"refresh the marker"* ]]
+  [[ "$REVIEW_GATE_REASON" == *"interrupt_agent"* ]]
 }
 
 @test "REVIEW_GATE_REASON names drift directive when policy hash differs" {
@@ -78,4 +80,5 @@ teardown() {
   [[ "$REVIEW_GATE_REASON" == *"changed"* ]] || [[ "$REVIEW_GATE_REASON" == *"drift"* ]]
   [[ "$REVIEW_GATE_REASON" == *"wr-voice-tone:agent"* ]]
   [[ "$REVIEW_GATE_REASON" == *"refresh the marker"* ]]
+  [[ "$REVIEW_GATE_REASON" == *"interrupt_agent"* ]]
 }

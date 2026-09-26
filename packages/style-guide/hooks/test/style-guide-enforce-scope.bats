@@ -73,3 +73,11 @@ assert_path_blocked() {
 @test "style-guide: still blocks a .tsx component file when no policy exists" {
   assert_path_blocked "$PWD/src/Component.tsx"
 }
+
+@test "style-guide: missing-marker recovery names the completed-agent handshake without runtime detection" {
+  mkdir -p docs
+  printf '# Style guide\n' > docs/STYLE-GUIDE.md
+  run env -u CODEX_THREAD_ID bash -c 'printf "%s" "$1" | "$2"' _ \
+    "{\"tool_input\":{\"file_path\":\"$PWD/src/Component.tsx\"},\"session_id\":\"test-session-$$\"}" "$HOOK"
+  [[ "$output" == *"interrupt_agent"* ]]
+}

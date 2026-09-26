@@ -50,12 +50,12 @@ assert_path_blocked() {
   [[ "$output" != *"touch /tmp/jtbd-reviewed"* ]]
 }
 
-@test "JTBD: Claude missing-marker guidance is unchanged" {
+@test "JTBD: missing-marker recovery does not depend on runtime environment detection" {
   mkdir -p docs/jtbd
   run env -u CODEX_THREAD_ID bash -c 'printf "%s" "$1" | "$2"' _ \
     "{\"tool_input\":{\"file_path\":\"$PWD/src/file.ts\"},\"session_id\":\"test-session-$$\"}" "$HOOK"
   [[ "$output" == *"No jtbd review marker found"* ]]
-  [[ "$output" != *"interrupt_agent"* ]]
+  [[ "$output" == *"interrupt_agent"* ]]
 }
 
 # --- Exclusion tests (functional) ---

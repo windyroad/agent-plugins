@@ -48,11 +48,11 @@ assert_path_allowed() {
   [[ "$output" != *"touch /tmp/architect-reviewed"* ]]
 }
 
-@test "architect: Claude missing-marker guidance is unchanged" {
+@test "architect: missing-marker recovery does not depend on runtime environment detection" {
   run env -u CODEX_THREAD_ID bash -c 'printf "%s" "$1" | "$2"' _ \
     "{\"tool_input\":{\"file_path\":\"$PWD/src/file.ts\"},\"session_id\":\"test-session-$$\"}" "$HOOK"
-  [[ "$output" == *"touch /tmp/architect-reviewed"* ]]
-  [[ "$output" != *"interrupt_agent"* ]]
+  [[ "$output" == *"interrupt_agent"* ]]
+  [[ "$output" != *"touch /tmp/architect-reviewed"* ]]
 }
 
 @test "architect: does NOT exempt legacy docs/JOBS_TO_BE_DONE.md (ADR-008 Option 3, P019)" {

@@ -17,10 +17,11 @@ check_review_gate() {
   local MARKER="/tmp/${SYSTEM}-reviewed-${SESSION_ID}"
   local HASH_FILE="/tmp/${SYSTEM}-reviewed-${SESSION_ID}.hash"
   local TTL_SECONDS="${REVIEW_TTL:-3600}"
+  local COMPLETION_GUIDANCE="On Codex, wait for the reviewer to finish, then invoke interrupt_agent exactly once with that completed task's exact target before retrying. On Claude Code, dispatch the reviewer synchronously. Do not create or edit review markers manually."
 
   # 1. Marker must exist
   if [ ! -f "$MARKER" ]; then
-    REVIEW_GATE_REASON="No ${SYSTEM} review marker found. Delegate to wr-${SYSTEM}:agent via the Agent tool (subagent_type: 'wr-${SYSTEM}:agent') so the agent can review and create the marker."
+    REVIEW_GATE_REASON="No ${SYSTEM} review marker found. Delegate to wr-${SYSTEM}:agent via the Agent tool (subagent_type: 'wr-${SYSTEM}:agent'). ${COMPLETION_GUIDANCE}"
     return 1
   fi
 
@@ -30,7 +31,7 @@ check_review_gate() {
   local AGE=$(( NOW - MARKER_TIME ))
   if [ "$AGE" -ge "$TTL_SECONDS" ]; then
     rm -f "$MARKER" "$HASH_FILE"
-    REVIEW_GATE_REASON="${SYSTEM} review expired (${AGE}s old, TTL ${TTL_SECONDS}s). Re-delegate to wr-${SYSTEM}:agent via the Agent tool (subagent_type: 'wr-${SYSTEM}:agent') to refresh the marker."
+    REVIEW_GATE_REASON="${SYSTEM} review expired (${AGE}s old, TTL ${TTL_SECONDS}s). Re-delegate to wr-${SYSTEM}:agent via the Agent tool (subagent_type: 'wr-${SYSTEM}:agent') to refresh the marker. ${COMPLETION_GUIDANCE}"
     return 1
   fi
 
@@ -45,7 +46,7 @@ check_review_gate() {
     CURRENT_HASH=$(_substance_hash_path "$POLICY_FILE")
     if [ "$STORED_HASH" != "$CURRENT_HASH" ]; then
       rm -f "$MARKER" "$HASH_FILE"
-      REVIEW_GATE_REASON="${SYSTEM} policy file changed since last review. Re-delegate to wr-${SYSTEM}:agent via the Agent tool (subagent_type: 'wr-${SYSTEM}:agent') to refresh the marker."
+      REVIEW_GATE_REASON="${SYSTEM} policy file changed since last review. Re-delegate to wr-${SYSTEM}:agent via the Agent tool (subagent_type: 'wr-${SYSTEM}:agent') to refresh the marker. ${COMPLETION_GUIDANCE}"
       return 1
     fi
   fi
