@@ -100,3 +100,7 @@
 ## 2026-09-23
 
 > Last reviewed: 2026-09-19 **STORY-099 accepted** — the story reconciler demands a reverse-trace row that the ratified-stories rule forbids, so it reports correct work as drift; RFC-100 draws the row on the problem-to-resolution map that narrows the demand to the population the rule covers and makes the tool say which population it checked. Prior: **STORY-098 in progress** — all five criteria met: the loop now leaves only through an ending it names.
+
+## 2026-09-29
+
+> Last reviewed: 2026-09-23 **STORY-101 accepted** — Sonnet 5 evaluates agent prose and Opus 5.5 grades semantic rubrics under RFC-102, replacing the mutable Claude Code default with explicit model roles.

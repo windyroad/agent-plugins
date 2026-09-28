@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-09-23 **STORY-101 accepted** — Sonnet 5 evaluates agent prose and Opus 5.5 grades semantic rubrics under RFC-102, replacing the mutable Claude Code default with explicit model roles.
+> Last reviewed: 2026-09-29 **STORY-102 accepted** — ordinary implementation commits proceed without release metadata; one complete cumulative changeset is created only at intentional release preparation.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -180,6 +180,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-101 | Trust agent-prose CI across model updates | S | P459 | RFC-102 | STORY-MAP-002 |
 | draft | STORY-091 | Invoke the Wardley map converter by a name that survives every upgrade | S | P437 | RFC-095 | STORY-MAP-008 |
 | draft | STORY-093 | Every conversion tells the reporter it landed | M | P432 | RFC-097 | STORY-MAP-004 |
+| accepted | STORY-102 | Commit implementation before preparing its release metadata | M | P554 | RFC-103 | STORY-MAP-008 |
 
 
 ## Done

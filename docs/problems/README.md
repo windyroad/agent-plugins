@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-19 **P553 captured** — the RFC stories section's recorded contract says it projects the RFC's own story list, the code reverse-indexes each story's RFC claim instead, and nothing checks either; the audit found 8 rows that exist in only one of the two, 10 unratified stories already referenced where the rule forbids it, and 19 of 42 trace pairs that a detector was counting as checked (lightweight aside via /wr-itil:capture-problem). Prior: **P472 known error** — the story reconciler demands a reverse-trace row that the ratified-stories-only rule forbids.
+> Last reviewed: 2026-09-28 **P554 known error** — the installed commit hook forces release metadata onto ordinary implementation commits; ADR-390 requires changesets only at intentional release preparation. Prior: **P553 captured** — the RFC stories section's recorded contract and implementation disagree.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -11,6 +11,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 |------|-----|-------|----------|--------|--------|----------|--------|
 | | | **Tier 0 — Critical-bypass** (Severity Very High ≥17, security-classified, or incident-linked) | | | | | |
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) — stamped 2026-08-21 review; upstream issue *"wr-itil evaluate-relevance matches ADR numbers across repos and treats Composes-with as fix evidence"* is the external filing of this defect |
+| 20 | P554 | Commit-time changeset enforcement forces premature release metadata | 20 (Very High) | Known Error | M | 2026-09-28 | internal |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Very High) | Known Error | XL | 2026-05-03 | internal |
