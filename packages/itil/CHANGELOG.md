@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 2.5.1
+
+### Patch Changes
+
+- 0e36f83: Allow ordinary implementation commits without release metadata and create cumulative changesets only during intentional release preparation.
+
 ## 2.5.0
 
 ### Minor Changes
