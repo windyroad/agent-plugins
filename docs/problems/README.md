@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-09-28 **P554 known error** — the installed commit hook forces release metadata onto ordinary implementation commits; ADR-390 requires changesets only at intentional release preparation. Prior: **P553 captured** — the RFC stories section's recorded contract and implementation disagree.
+> Last reviewed: 2026-09-29 **P554 closed** — `@windyroad/itil@2.5.1` removes the premature commit-time changeset gate while preserving cumulative metadata at intentional release preparation.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -11,7 +11,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 |------|-----|-------|----------|--------|--------|----------|--------|
 | | | **Tier 0 — Critical-bypass** (Severity Very High ≥17, security-classified, or incident-linked) | | | | | |
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) — stamped 2026-08-21 review; upstream issue *"wr-itil evaluate-relevance matches ADR numbers across repos and treats Composes-with as fix evidence"* is the external filing of this defect |
-| 20 | P554 | Commit-time changeset enforcement forces premature release metadata | 20 (Very High) | Known Error | M | 2026-09-28 | internal |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Very High) | Known Error | XL | 2026-05-03 | internal |
@@ -415,6 +414,7 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 
 | ID | Title | Closed via |
 |----|-------|-----------|
+| P554 | Commit-time changeset enforcement forces premature release metadata | Closed 2026-09-29 on published `@windyroad/itil@2.5.1` evidence: the registry tarball omits the obsolete hook and helper, both registered runtimes permit implementation commits without changesets, npm `latest` is `2.5.1`, and release workflow 36513111022 passed. Recovery: `/wr-itil:transition-problem 554 known-error`. |
 | P450 | VQ evidence cells have no write path from subsequent sessions — drain starved | Relevance-closed 2026-09-18 by the Step 4.6 pass (ADR-079 Phase 1 + Phase 2), shapes `ADR-shipped-confirmed, named-skill-or-feature-exists, driver-child-ticket-closed`. Reversible: `git revert` the relevance-close commit, or `git mv` back to `known-error/`. |
 | P425 | Architect edit gate relitigates a same-session pass — unratified-dependency overfire | Relevance-closed 2026-09-18 by the Step 4.6 pass (ADR-079 Phase 1 + Phase 2), shapes `ADR-shipped-confirmed, named-skill-or-feature-exists, driver-child-ticket-closed`. Reversible: `git revert` the relevance-close commit, or `git mv` back to `known-error/`. |
 | P540 | Assistant responses cannot opt into project voice-and-tone guidance | Closed 2026-09-17 on fresh published-artifact evidence: `@windyroad/voice-tone@0.9.1` installed into an isolated Codex home and produced a non-empty final response containing the required guide marker; release workflow 35218418697 passed on rerun. Recovery: `/wr-itil:transition-problem 540 known-error`. |

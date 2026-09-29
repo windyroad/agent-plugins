@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: done
 story-id: commit-implementation-before-preparing-release-metadata
 reported: 2026-09-28
 decision-makers: [Tom Howard]
@@ -25,13 +25,13 @@ In order to integrate reviewed, tested implementation without inventing release 
 
 ## Acceptance criteria (accepted-gate, INVEST Testable)
 
-- [ ] With Windy Road package source staged and no changeset, an actual `git commit` PreToolUse payload sent through every registered ITIL Bash hook receives no changeset-related denial.
-- [ ] The same composite registered-hook test permits an adopter-shaped `packages/core/src/push-and-watch.test.ts` implementation commit without a changeset.
-- [ ] When implementation is ready to integrate but its exact pipeline is not yet green, the problem-work workflow commits and runs `push:watch` without creating a changeset or running `release:watch`.
-- [ ] After exact implementation CI is green and release is intentionally requested, the workflow inspects cumulative package scope, authors one complete changeset-only commit, refreshes cumulative risk evidence, runs `push:watch`, and then runs `release:watch`.
-- [ ] Dormant, incomplete, placeholder, or speculative implementation creates no release metadata.
-- [ ] Existing `release:watch` behavior still refuses when no release pull request exists.
-- [ ] The obsolete commit-time hook, helper, registration, manifest entry, and deny-oriented test contract are absent from shipped plugin surfaces.
+- [x] With Windy Road package source staged and no changeset, an actual `git commit` PreToolUse payload sent through every registered ITIL Bash hook receives no changeset-related denial.
+- [x] The same composite registered-hook test permits an adopter-shaped `packages/core/src/push-and-watch.test.ts` implementation commit without a changeset.
+- [x] When implementation is ready to integrate but its exact pipeline is not yet green, the problem-work workflow commits and runs `push:watch` without creating a changeset or running `release:watch`.
+- [x] After exact implementation CI is green and release is intentionally requested, the workflow inspects cumulative package scope, authors one complete changeset-only commit, refreshes cumulative risk evidence, runs `push:watch`, and then runs `release:watch`.
+- [x] Dormant, incomplete, placeholder, or speculative implementation creates no release metadata.
+- [x] Existing `release:watch` behavior still refuses when no release pull request exists.
+- [x] The obsolete commit-time hook, helper, registration, manifest entry, and deny-oriented test contract are absent from shipped plugin surfaces.
 
 ## Driving problem trace (required — I6 invariant)
 

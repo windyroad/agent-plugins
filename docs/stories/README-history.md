@@ -104,3 +104,5 @@
 ## 2026-09-29
 
 > Last reviewed: 2026-09-23 **STORY-101 accepted** — Sonnet 5 evaluates agent prose and Opus 5.5 grades semantic rubrics under RFC-102, replacing the mutable Claude Code default with explicit model roles.
+
+> Last reviewed: 2026-09-29 **STORY-102 accepted** — ordinary implementation commits proceed without release metadata; one complete cumulative changeset is created only at intentional release preparation.

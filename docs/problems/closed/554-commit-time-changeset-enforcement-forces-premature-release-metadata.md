@@ -1,6 +1,6 @@
 # P554: Commit-time changeset enforcement forces premature release metadata
 
-**Status**: Known Error
+**Status**: Closed (closed-on-evidence 2026-09-29 — `@windyroad/itil@2.5.1` is published under npm `latest`; its registry tarball omits the obsolete hook, helper, registrations, and deny-oriented contract, and both registered Claude and Codex paths permit Windy Road and adopter-shaped implementation commits without release metadata. Release workflow 36513111022 passed on rerun after registry propagation. Recovery: rerun `/wr-itil:transition-problem 554 known-error` to reopen)
 **Reported**: 2026-09-28
 **Severity**: 20 (Very High)
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5 — the installed hook blocks ordinary implementation commits whenever package source changes without release metadata
@@ -39,8 +39,8 @@ Reproduction is retained in `packages/itil/hooks/test/itil-changeset-discipline.
 - [x] Reproduce the installed commit denial with staged package source and no changeset.
 - [x] Confirm the governing release decision with the Voder General Manager.
 - [x] Rule out narrowing the package classifier as a root-cause repair.
-- [ ] Retire the hook and its direct consumers.
-- [ ] Verify ordinary implementation commits pass while the release boundary still requires complete cumulative metadata.
+- [x] Retire the hook and its direct consumers.
+- [x] Verify ordinary implementation commits pass while the release boundary still requires complete cumulative metadata.
 
 ## RFCs
 
@@ -50,10 +50,18 @@ Reproduction is retained in `packages/itil/hooks/test/itil-changeset-discipline.
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-102 | STORY-102: Commit implementation before preparing its release metadata | accepted |
+| STORY-102 | STORY-102: Commit implementation before preparing its release metadata | done |
+
+## Verification
+
+- Exact implementation pipeline `36510425220` passed after the hook retirement landed on `main`.
+- The intentional changeset-only commit followed that green pipeline; release PR #505 published `@windyroad/itil@2.5.1`.
+- npm `latest` resolves to `2.5.1`, and release workflow `36513111022` passed on rerun after registry propagation completed.
+- The published registry tarball contains neither `itil-changeset-discipline.sh` nor `changeset-detect.sh`, and its Claude and Codex registered hook paths permit both Windy Road and adopter-shaped implementation commits without a changeset.
 
 ## History
 
 - 2026-09-28 — Captured after the installed commit hook blocked an ordinary implementation commit in an adopter repository.
 - 2026-09-28 — Transitioned to Known Error after reproducing the denial and identifying the release-boundary inversion.
 - 2026-09-28 — Fresh-context hang-off arbitration returned `PROCEED_NEW`: P173 concerns bypass-message accuracy, P177 held changesets, P268 README-hook command detection, and P272 changeset-hook command detection; none covers release-metadata timing.
+- 2026-09-29 — Closed on published-artifact evidence from `@windyroad/itil@2.5.1`; the release boundary remains in the release workflow rather than an implementation-commit hook.

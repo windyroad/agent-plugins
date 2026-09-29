@@ -1542,3 +1542,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-09-19
 
 > Last reviewed: 2026-09-19 **P551 captured** — an edit gate that only unlocks on a PASS deadlocks on a new file under a gated path: the reviewer has no artefact to read, judges a lossy prose proxy, and returns ISSUES FOUND, so every gated new file costs an extra reviewer round (lightweight aside via /wr-itil:capture-problem)
+
+## 2026-09-29
+
+> Last reviewed: 2026-09-28 **P554 known error** — the installed commit hook forces release metadata onto ordinary implementation commits; ADR-390 requires changesets only at intentional release preparation. Prior: **P553 captured** — the RFC stories section's recorded contract and implementation disagree.

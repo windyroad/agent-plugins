@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-09-29 **STORY-102 accepted** — ordinary implementation commits proceed without release metadata; one complete cumulative changeset is created only at intentional release preparation.
+> Last reviewed: 2026-09-29 **STORY-102 done** — the published ITIL plugin permits ordinary implementation commits without release metadata and keeps cumulative changesets at intentional release preparation.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -180,7 +180,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-101 | Trust agent-prose CI across model updates | S | P459 | RFC-102 | STORY-MAP-002 |
 | draft | STORY-091 | Invoke the Wardley map converter by a name that survives every upgrade | S | P437 | RFC-095 | STORY-MAP-008 |
 | draft | STORY-093 | Every conversion tells the reporter it landed | M | P432 | RFC-097 | STORY-MAP-004 |
-| accepted | STORY-102 | Commit implementation before preparing its release metadata | M | P554 | RFC-103 | STORY-MAP-008 |
 
 
 ## Done
@@ -189,6 +188,7 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-102 | Commit implementation before preparing its release metadata | 2026-09-29 | P554 |
 | STORY-044 | See what cruise is doing — status/telemetry skill | 2026-09-19 | P160, P446 |
 | STORY-090 | Keep assistant responses in my chosen voice | 2026-09-17 | P540 |
 | STORY-089 | I can continue after a reviewer passes, without plugin-specific recovery | 2026-09-14 | P539 |
