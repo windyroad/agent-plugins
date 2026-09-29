@@ -277,7 +277,7 @@ Refs: RFC-002"
 # The hook must fire on ACTUAL `git commit` invocations, NOT on Bash that
 # merely MENTIONS the phrase "git commit" in argument vectors or heredoc
 # bodies. Mirrors the P268 regression fixtures in command-detect.bats and
-# the P272 sibling fixtures in itil-changeset-discipline.bats.
+# the P272 sibling fixtures in p057-staging-trap-detect.bats.
 #
 # Setup constructs a drift state (RFC + stale problem) — the hook would
 # emit an advisory on any `git commit` after `Refs: RFC-001` lands in HEAD.

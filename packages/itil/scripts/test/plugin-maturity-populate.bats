@@ -44,7 +44,7 @@ teardown() {
 # Helper: create a synthetic plugin under packages/<name>/ with a
 # minimal plugin.json and the declared surface inventory. Surfaces are
 # passed as `kind:name` tokens — e.g. `skill:manage-problem`,
-# `agent:agent`, `hook:itil-changeset-discipline`.
+# `agent:agent`, `hook:itil-readme-refresh-discipline`.
 make_plugin() {
   local plugin="$1"; shift
   local pkg="$PROJECT_ROOT/packages/$plugin"

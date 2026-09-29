@@ -112,7 +112,6 @@
 #              fact rescue this hook obviates).
 #   P125     — sibling staging-trap helper (same enforcement-layer
 #              shape — per-invocation deterministic, no markers).
-#   P141     — sibling changeset-discipline helper (same shape).
 #   P165     — this helper.
 #   P265     — RISK_BYPASS trailer allow-list bypass (this addition).
 

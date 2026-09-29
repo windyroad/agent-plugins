@@ -146,7 +146,7 @@ run_bash_hook() {
 # merely MENTIONS the phrase "git commit" in argument vectors or heredoc
 # bodies. Mirrors the P268 regression fixtures landed in
 # command-detect.bats and the P272 sibling fixtures in
-# itil-changeset-discipline.bats.
+# itil-rfc-trailer-advisory.bats.
 
 @test "allow: grep with literal 'git commit' pattern in trap state does NOT deny" {
   # Trap shape IS present in the working tree, but the Bash is a grep

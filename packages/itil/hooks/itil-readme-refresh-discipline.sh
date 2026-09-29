@@ -46,7 +46,6 @@
 #   P094    — parent (README refresh on creation contract).
 #   P118    — sibling reconcile-readme recovery path.
 #   P125    — sibling staging-trap hook (same enforcement-layer shape).
-#   P141    — sibling changeset-discipline hook (same shape).
 #   P165    — this hook.
 #   P268    — leading-executable-token command-detect helper.
 

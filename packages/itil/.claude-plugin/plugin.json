@@ -50,17 +50,6 @@
         },
         "schema_version": "2.0"
       },
-      "itil-changeset-discipline": {
-        "band": "Experimental",
-        "computed_at": "2026-05-18T11:42:50Z",
-        "evidence": {
-          "breaking_change_age_days": null,
-          "closed_tickets_window": 99,
-          "days_shipped": 33,
-          "invocations_30d": null
-        },
-        "schema_version": "2.0"
-      },
       "itil-claude-space-protection": {
         "band": "Experimental",
         "computed_at": "2026-05-18T11:42:50Z",

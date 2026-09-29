@@ -46,7 +46,7 @@
 #
 # Cost: one git invocation per `git commit` Bash call (~30-60ms). No
 # marker (per-invocation deterministic; mirrors P125 staging-detect.sh
-# and P141 itil-changeset-discipline.sh precedent).
+# and P165 itil-readme-refresh-discipline.sh precedent).
 #
 # Command-shape detection delegates to
 # `lib/command-detect.sh::command_invokes_git_commit`, which strips

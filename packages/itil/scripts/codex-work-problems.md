@@ -42,7 +42,7 @@ Build a self-contained prompt containing the selected ticket ID and title, the e
 - preserve unrelated work and use path-scoped staging;
 - load and obey the installed governance skills, agents, and hooks;
 - run focused tests and required architecture, JTBD, voice, accessibility, and risk checks when their gates apply;
-- add a changeset for shippable package behavior;
+- commit ordinary implementation work without a changeset; after its exact pipeline passes and release preparation is intentional, add one complete cumulative changeset in a separate commit;
 - commit completed iteration work, but do not push or release;
 - invoke `/wr-retrospective:run-retro` before the final response, commit any retro-owned briefing refresh through its governed path, and continue to the summary even if retro reports a non-blocking failure;
 - end with one `ITERATION_SUMMARY` containing ticket, action, outcome, commit state, tests, risks, outstanding questions, remaining work, and notes.

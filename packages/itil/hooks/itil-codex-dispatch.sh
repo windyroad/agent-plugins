@@ -119,7 +119,6 @@ case "$EVENT" in
         run_hook itil-no-implement-draft-gate.sh
         run_hook itil-bash-polling-antipattern-detect.sh
         run_hook pre-publish-intake-gate.sh
-        run_hook itil-changeset-discipline.sh
         run_hook itil-readme-refresh-discipline.sh
         ;;
       request_user_input|AskUserQuestion)

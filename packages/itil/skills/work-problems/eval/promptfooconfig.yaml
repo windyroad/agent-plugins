@@ -8,8 +8,8 @@
 #     dispatches /wr-itil:check-upstream-responses (P220).
 #   - Step 5 iter-prompt re-grounding — per-iter reset; no Fix Strategy
 #     inline; no prior-iter content leak (P211).
-#   - Step 5 changeset-required — fixes touching shippable code MUST
-#     author `.changeset/*.md` in same commit; doc/test-only exempt (P206).
+#   - Step 5 release-preparation boundary — implementation commits omit
+#     changesets; intentional release preparation creates one later (P554).
 #   - Step 5 is_error transient HALT — ordered check exit → is_error →
 #     ITERATION_SUMMARY; 529/429/401 advisory mapping (P214).
 #   - Step 5 retro-on-exit iter-owned BRIEFING commit — iter (not
@@ -59,7 +59,7 @@
 #     commit as its paired changeset.
 #   - RFC-012 — single build vehicle for the harness.
 #   - P324 (driving problem — agent-prose verdict harness gap).
-#   - P206 / P211 / P212 / P214 / P220 / P228 / P352 (behavioural
+#   - P554 / P211 / P212 / P214 / P220 / P228 / P352 (behavioural
 #     contracts covered by this eval).
 #
 # Tier-B (llm-rubric) grader: the work-problems contracts contain heavy
@@ -79,7 +79,7 @@
 # @jtbd JTBD-101 (Extend the Suite with New Plugins)
 # @problem P324
 # @problem P012
-# @problem P206
+# @problem P554
 # @problem P211
 # @problem P212
 # @problem P214
@@ -231,9 +231,9 @@ tests:
           content carries across into iter N+1's prompt. Saying it does
           NOT inline / does NOT carry across PASSES.
 
-  # --- P206: Step 5 changeset-required ---------------------------------------
+  # --- P554: Step 5 release-preparation boundary -----------------------------
 
-  - description: Step 5 changeset-required — fix touching shippable code MUST author .changeset/*.md
+  - description: Step 5 release boundary — implementation commit MUST omit changeset
     vars:
       prompt: |
         I am an AFK /wr-itil:work-problems iter subprocess. I have
@@ -241,61 +241,37 @@ tests:
         — a path under `packages/<plugin>/hooks/` that ships in the
         published tarball.
 
-        Per the Step 5 iteration prompt body's changeset-required
-        constraint, do I need to author a `.changeset/*.md` entry alongside
-        the fix commit? Is it the same single ADR-014-grain commit or a
-        separate commit?
+        Per the Step 5 release-preparation boundary, do I author a
+        `.changeset/*.md` entry alongside the fix commit, or later?
     assert:
-      # Tier A — must affirm changeset required.
-      - type: icontains
-        value: '.changeset'
-      # Tier A — must mention same single ADR-014-grain commit.
+      # Tier A — must preserve the no-changeset implementation boundary.
       - type: regex
-        value: 'same\s+(single\s+)?(ADR-014[\s\-]grain\s+)?commit|single\s+commit|ADR-014'
-      # Tier B — semantic: shippable-code fix REQUIRES changeset; doc-only
-      # and test-only changes MAY omit; the contract is load-bearing for
-      # JTBD-006 + JTBD-007 audit + closure outcomes.
+        value: 'implementation commit.{0,120}must not.{0,120}changeset|commit.{0,80}with.{0,20}no changeset'
       - type: llm-rubric
         value: |
-          For a fix touching shippable code at packages/<plugin>/hooks/
-          (or src, bin, skills, scripts, lib, agents — excluding test
-          paths and excluding README.md / docs/*.md), the response
-          requires the iter to author a paired `.changeset/*.md` entry
-          in the SAME single ADR-014-grain commit as the fix. PASS if it
-          requires the changeset AND names same-commit grain. FAIL if it
-          says the changeset can land in a separate commit OR says
-          shippable-code fixes can omit the changeset. Mentioning that
-          doc-only or test-only changes MAY omit the changeset is allowed
-          (correct narrowing).
+          The response says the ordinary implementation commit does not
+          include a changeset and its release truth remains STAGED; STAGED
+          implementation may be committed and pushed. After its exact
+          pipeline passes and release preparation is intentional, the
+          orchestrator creates one complete cumulative changeset-only commit.
+          FAIL if it requires release metadata in the implementation commit.
 
-  - description: Step 5 changeset-required — doc-only / test-only fix MAY omit changeset
+  - description: Step 5 release boundary — speculative changesets are forbidden
     vars:
       prompt: |
-        I am an AFK /wr-itil:work-problems iter subprocess. I have
-        implemented a fix that edits ONLY `docs/decisions/052-behavioural-tests-default.proposed.md`
-        and `packages/itil/skills/work-problems/test/work-problems-step-5.bats`
-        — no source paths under packages/*/{src,bin,hooks,skills/<skill>/SKILL.md,scripts,lib,agents}
-        are touched.
-
-        Per the Step 5 changeset-required constraint, do I MUST author a
-        `.changeset/*.md` entry, or MAY I omit it for this doc-only +
-        test-only commit?
+        I have a dormant foundation commit that is not ready to release.
+        Should I add a placeholder changeset now so a future release can
+        discover it?
     assert:
-      # Tier A — must reference the exempt category.
       - type: regex
-        value: 'MAY\s+omit|may\s+omit|exempt|doc[\s\-]?only|test[\s\-]?only'
-      # Tier B — semantic narrowing: doc-only + test-only changes that
-      # ship no behaviour MAY omit the changeset; the orchestrator must
-      # not require a changeset for them.
+        value: '[Nn]ever create speculative|do not.*placeholder|must not.*placeholder|don.t.*placeholder'
       - type: llm-rubric
         value: |
-          For a fix touching ONLY docs/ paths and test/ paths (no source
-          paths under packages/<plugin>/{src,bin,hooks,scripts,lib,agents}
-          or SKILL.md surfaces), the response says the iter MAY omit the
-          `.changeset/*.md` entry — doc-only and test-only changes that
-          ship no behaviour are exempt from the changeset-required
-          constraint. PASS if it says MAY omit / exempt. FAIL if it says
-          a changeset is still required for doc-only + test-only changes.
+          The response refuses speculative, placeholder, dormant-foundation,
+          or for-later changesets and keeps release truth STAGED until release
+          preparation is intentional. STAGED implementation may be committed
+          and pushed. FAIL if it recommends adding release metadata before
+          that boundary.
 
   # --- P214: Step 5 is_error transient HALT ----------------------------------
 

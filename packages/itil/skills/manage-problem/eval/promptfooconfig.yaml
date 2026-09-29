@@ -50,6 +50,45 @@ prompts:
   - '{{prompt}}'
 
 tests:
+  - description: P554 implementation commit remains STAGED without release metadata
+    vars:
+      prompt: |
+        I have completed and tested an ordinary @windyroad/itil implementation
+        commit, but its exact pipeline has not passed yet. Per manage-problem's
+        release-preparation boundary, do I add a changeset now? State the
+        release state and the next command.
+    assert:
+      - type: regex
+        value: 'STAGED'
+      - type: regex
+        value: 'push:watch'
+      - type: llm-rubric
+        value: |
+          The response says the ordinary implementation commit has no
+          changeset, remains STAGED, and runs push:watch before release
+          preparation. FAIL if it creates release metadata before the exact
+          implementation pipeline passes.
+
+  - description: P554 intentional release preparation creates one later cumulative changeset
+    vars:
+      prompt: |
+        The exact implementation pipeline has passed and release preparation
+        is now intentional. Per manage-problem, what release metadata and
+        governed commands come next? Also say whether placeholder, dormant,
+        or for-later changesets are allowed.
+    assert:
+      - type: regex
+        value: '(complete|cumulative).{0,80}changeset-only commit'
+      - type: regex
+        value: 'push:watch[\s\S]{0,800}release:watch'
+      - type: llm-rubric
+        value: |
+          The response creates one complete cumulative changeset-only commit
+          only after exact implementation CI is green, refreshes risk or scope,
+          runs push:watch and then release:watch, and refuses speculative,
+          placeholder, dormant-foundation, or for-later changesets. FAIL if it
+          pairs the changeset with the implementation commit.
+
   - description: P538 creation preflight - classify the operation before missing-index routing
     vars:
       prompt: |

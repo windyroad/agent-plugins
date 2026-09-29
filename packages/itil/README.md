@@ -79,7 +79,6 @@ See [ADR-011](../../docs/decisions/011-manage-incident-skill.proposed.md) for th
 | `itil-claude-space-protection.sh` | Write, Edit | Prevents project-generated artefacts from being written under `.claude/` (P131) |
 | `p057-staging-trap-detect.sh` | Bash | Detects the P057 staging trap during ticket transitions |
 | `pre-publish-intake-gate.sh` | Bash | Blocks `npm publish` when downstream OSS intake scaffolding is missing (ADR-036) |
-| `itil-changeset-discipline.sh` | Bash | Gates `git commit` on changeset coverage for source-package changes (P141) |
 | `itil-assistant-output-review.sh` | Stop | Reviews assistant output at session end for ITIL-discipline patterns |
 
 ## Skills
