@@ -74,16 +74,6 @@ import json, re, shlex, sys
 try:
     data = json.load(sys.stdin)
     tool = data.get("tool_input") or {}
-    for owner, key in ((tool, "cwd"), (tool, "workdir")):
-        if key in owner:
-            value = owner[key]
-            if not isinstance(value, str):
-                print(json.dumps({"declared": True, "path": ""}))
-                raise SystemExit
-            if value:
-                print(json.dumps({"declared": True, "path": value}))
-                raise SystemExit
-
     try:
         tokens = shlex.split(tool.get("command", ""))
     except (TypeError, ValueError):
@@ -93,6 +83,16 @@ try:
     if len(tokens) >= 3 and tokens[0] == "cd" and tokens[2] == "&&":
         print(json.dumps({"declared": True, "path": tokens[1]}))
         raise SystemExit
+
+    for owner, key in ((tool, "cwd"), (tool, "workdir")):
+        if key in owner:
+            value = owner[key]
+            if not isinstance(value, str):
+                print(json.dumps({"declared": True, "path": ""}))
+                raise SystemExit
+            if value:
+                print(json.dumps({"declared": True, "path": value}))
+                raise SystemExit
 
     if "cwd" in data:
         value = data["cwd"]

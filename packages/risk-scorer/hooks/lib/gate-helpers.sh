@@ -219,7 +219,7 @@ try:
             command_cwd = tokens[1]
     except ValueError:
         pass
-    print(tool.get('cwd') or tool.get('workdir') or command_cwd or data.get('cwd') or '')
+    print(command_cwd or tool.get('cwd') or tool.get('workdir') or data.get('cwd') or '')
 except:
     print('')
 " 2>/dev/null || echo ""
