@@ -341,17 +341,25 @@ function registrationCandidates(input, role, target) {
   reapRegisteredTransport();
   if (!existsSync(transportDir())) return [];
   const current = directoryBinding(input.cwd || process.cwd());
-  return readdirSync(transportDir())
+  const registrations = readdirSync(transportDir())
     .filter((name) => /^registration-[a-f0-9]{64}\.json$/.test(name))
     .flatMap((name) => {
       const path = join(transportDir(), name);
       try {
         const registered = JSON.parse(readFileSync(path, "utf8"));
-        if (registered.role !== role || registered.target !== target) return [];
+        if (registered.role !== role) return [];
         if (role !== "wr-risk-scorer:pipeline" && (!current || registered.root !== current.root || registered.physical !== current.physical)) return [];
         return [{ path, registered }];
       } catch { return []; }
     });
+  const exact = registrations.filter(({ registered }) => registered.target === target);
+  if (exact.length) return exact;
+  // Current Codex returns a task name at spawn and a child UUID at stop.
+  // The runtime parent session plus one invoking-checkout registration binds them.
+  if (input.hook_event_name !== "SubagentStop" || !current) return [];
+  return registrations.filter(({ registered }) =>
+    registered.parentSession === input.session_id &&
+    registered.root === current.root && registered.physical === current.physical);
 }
 
 function singleLine(output, label) {
@@ -412,14 +420,15 @@ function registrationValid(input, registered) {
 
 function persistRegisteredPending(input) {
   const role = input.agent_type;
-  const target = normalizeTarget(input.task_name || input.agent_name || input.agent_id);
-  if (!riskAgentRoles.has(role) || !target) return false;
-  const candidates = registrationCandidates(input, role, target);
+  const reportedTarget = normalizeTarget(input.task_name || input.agent_name || input.agent_id);
+  if (!riskAgentRoles.has(role) || !reportedTarget) return false;
+  const candidates = registrationCandidates(input, role, reportedTarget);
   if (candidates.length !== 1) {
     diagnoseSubagentStop(input, "rejected", candidates.length ? "ambiguous-parent-registration" : "missing-parent-registration");
     return false;
   }
   const { registered } = candidates[0];
+  const target = registered.target;
   if (!registrationValid(input, registered)) return true;
   let rejection;
   const assessment = applicableAssessment(role, input.last_assistant_message, registered, (reason) => { rejection = reason; });
@@ -472,7 +481,17 @@ function consumeRegisteredPending(input) {
     const claim = `${path}.claim`;
     try { writeFileSync(claim, "", { flag: "wx", mode: 0o600 }); }
     catch (error) { if (error?.code === "EEXIST") continue; throw error; }
+    let targetClaim;
     try {
+      const targetInput = { session_id: pending.parentSession };
+      targetClaim = claimTarget(targetInput, pending.target);
+      if (!targetClaim) {
+        if (existsSync(statePath(targetInput, pending.target, ".done"))) {
+          renameSync(path, `${path}.done`);
+          rmSync(transportRegistrationPath(pending.parentSession, pending.role, pending.target), { force: true });
+        }
+        continue;
+      }
       const markerRoot = pending.role === "wr-risk-scorer:pipeline" ? pending.assessmentRoot : pending.root;
       const synthetic = { ...input, session_id: pending.parentSession, cwd: markerRoot, tool_name: "Agent",
         tool_input: { subagent_type: pending.role, prompt: "" }, tool_response: { content: [{ type: "text", text: pending.output }] } };
@@ -483,10 +502,14 @@ function consumeRegisteredPending(input) {
       }
       const assessedAt = new Date(pending.completedAt);
       for (const marker of markerPaths(pending.role, pending.parentSession, pending)) if (existsSync(marker)) utimesSync(marker, assessedAt, assessedAt);
+      renameSync(targetClaim.claim, targetClaim.done);
       renameSync(path, `${path}.done`);
       rmSync(transportRegistrationPath(pending.parentSession, pending.role, pending.target), { force: true });
-      rmSync(statePath({ session_id: pending.parentSession }, pending.target), { force: true });
-    } finally { rmSync(claim, { force: true }); }
+      rmSync(statePath(targetInput, pending.target), { force: true });
+    } finally {
+      if (targetClaim) rmSync(targetClaim.claim, { force: true });
+      rmSync(claim, { force: true });
+    }
   }
 }
 

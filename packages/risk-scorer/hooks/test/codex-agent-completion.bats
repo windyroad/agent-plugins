@@ -98,6 +98,14 @@ pipeline_subagent_stop_input() {
     "${1:-child-session}" "$OTHER_REPO" "${2:-child-agent}" "${3:-4}" "${3:-4}" "${3:-4}" "$PIPELINE_REPO"
 }
 
+current_pipeline_subagent_stop_input() {
+  jq -cn --arg session "$SESSION" --arg cwd "$OTHER_REPO" \
+    --arg agent "11111111-2222-4333-8444-555555555555" --arg assessed "$PIPELINE_REPO" \
+    '{hook_event_name:"SubagentStop",session_id:$session,cwd:$cwd,agent_id:$agent,
+      agent_type:"wr-risk-scorer:pipeline",
+      last_assistant_message:("RISK_SCORES: commit=4 push=4 release=4\nRISK_CWD: " + $assessed)}'
+}
+
 pipeline_spawn_input() {
   printf '{"session_id":"%s","cwd":"%s","tool_name":"spawn_agent","tool_input":{"agent_type":"wr-risk-scorer:pipeline","message":"review"},"tool_response":{"task_name":"%s"}}' \
     "$SESSION" "$OTHER_REPO" "${1:-child-agent}"
@@ -302,6 +310,40 @@ dispatch_pretool() {
   printf 'drift\n' >> "$PIPELINE_REPO/state"
   printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
   [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+}
+
+@test "SubagentStop binds a distinct runtime agent id to its exact parent registration" {
+  dispatch "$(pipeline_spawn_input named-risk-review)"
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+
+  [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
+}
+
+@test "SubagentStop rejects ambiguous parent registrations for a distinct agent id" {
+  dispatch "$(pipeline_spawn_input first-risk-review)"
+  dispatch "$(pipeline_spawn_input second-risk-review)"
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+  [ "$(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1])).reason' "$TMPDIR/claude-risk-pending/subagent-stop-diagnostic.json")" = "ambiguous-parent-registration" ]
+}
+
+@test "a completed close and pending stop share one marker claim" {
+  dispatch "$(pipeline_spawn_input named-risk-review)"
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input)"
+  close="$(current_pipeline_close_input | jq -c '.tool_input.target = "named-risk-review"')"
+  dispatch "$close"
+  marker="$TMPDIR/claude-risk-$SESSION/commit"
+  [ "$(cat "$marker")" = "4" ]
+  touch -t 202001010000 "$marker"
+
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+
+  [ "$(cat "$marker")" = "4" ]
+  [ "$(date -r "$marker" +%Y)" = "2020" ]
+  [ "$(find "$TMPDIR/codex-review-transport" -name 'risk-receipt-*.json.done' | wc -l | tr -d ' ')" = "1" ]
 }
 
 @test "pending pipeline receipt rejects malformed completion" {

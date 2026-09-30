@@ -19,8 +19,8 @@ cleanup() {
 trap cleanup EXIT
 
 if [[ -z "$CODEX_BIN" ]]; then
-  if [[ -x /Applications/ChatGPT.app/Contents/Resources/codex ]]; then
-    CODEX_BIN=/Applications/ChatGPT.app/Contents/Resources/codex
+  if [[ -x /Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex ]]; then
+    CODEX_BIN=/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex
   else
     CODEX_BIN="$(command -v codex)"
   fi
