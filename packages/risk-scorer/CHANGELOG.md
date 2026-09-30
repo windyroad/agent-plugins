@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.19.10
+
+### Patch Changes
+
+- f17ec92: Restore Codex risk score delivery when reviewer task names and completion IDs differ. Prevent duplicate marker writes when completion arrives through both the reviewer stop and parent close hooks.
+
 ## 0.19.9
 
 ### Patch Changes
