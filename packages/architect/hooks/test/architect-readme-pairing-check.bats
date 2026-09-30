@@ -195,6 +195,15 @@ run_commit_hook_payload() {
   [[ "$output" == *"050-y.proposed.md"* ]]
 }
 
+@test "leading quoted cd selects the command checkout over conflicting tool cwd" {
+  echo "# adr 050 edited" > "$TARGET_REPO/docs/decisions/050-y.proposed.md"
+  git -C "$TARGET_REPO" add docs/decisions/050-y.proposed.md
+  payload=$(jq -n --arg cwd "$REPO" --arg cmd "cd '$TARGET_REPO' && git commit -m wip" '{tool_name:"Bash",tool_input:{command:$cmd,cwd:$cwd}}')
+  run run_commit_hook_payload "$payload"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"050-y.proposed.md"* ]]
+}
+
 @test "top-level cwd selects the command checkout when tool fields are absent" {
   echo "# adr 050 edited" > "$TARGET_REPO/docs/decisions/050-y.proposed.md"
   git -C "$TARGET_REPO" add docs/decisions/050-y.proposed.md

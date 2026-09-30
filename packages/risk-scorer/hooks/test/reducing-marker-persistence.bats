@@ -206,6 +206,19 @@ print(json.dumps({
   [ -f "$RDIR/commit" ]
 }
 
+@test "ordinary score uses a leading cd over a conflicting tool workdir" {
+  cd "$OTHER_REPO"
+  _checkout_id > "$RDIR/checkout-id"
+  echo "$(_current_hash)" > "$RDIR/state-hash"
+  printf '4' > "$RDIR/commit"
+
+  cd "$TMP_REPO"
+  HOOK_WORKDIR="$TMP_REPO" run invoke_commit_gate "cd '$OTHER_REPO' && git commit -m x"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"deny"* ]]
+  [ -f "$RDIR/commit" ]
+}
+
 @test "checkout mismatch does not also tell Codex to rescore a valid commit assessment" {
   cd "$OTHER_REPO"
   _checkout_id > "$RDIR/checkout-id"
