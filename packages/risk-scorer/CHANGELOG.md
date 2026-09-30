@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.19.12
+
+### Patch Changes
+
+- c9959b6: Respect an explicit leading `cd` when a governed Codex command also carries a conflicting tool workdir. This keeps risk and decision gates bound to the checkout the command actually uses.
+
 ## 0.19.11
 
 ### Patch Changes

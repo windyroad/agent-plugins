@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 0.23.7
+
+### Patch Changes
+
+- c9959b6: Respect an explicit leading `cd` when a governed Codex command also carries a conflicting tool workdir. This keeps risk and decision gates bound to the checkout the command actually uses.
+
 ## 0.23.6
 
 ### Patch Changes
