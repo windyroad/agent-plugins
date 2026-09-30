@@ -206,6 +206,19 @@ print(json.dumps({
   [ -f "$RDIR/commit" ]
 }
 
+@test "checkout mismatch does not also tell Codex to rescore a valid commit assessment" {
+  cd "$OTHER_REPO"
+  _checkout_id > "$RDIR/checkout-id"
+  printf '4' > "$RDIR/commit"
+
+  cd "$TMP_REPO"
+  HOOK_CWD="$TMP_REPO" run invoke_commit_gate 'git commit -m x'
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"explicit leading"* ]]
+  [[ "$output" != *"To proceed: (1) stage files"* ]]
+  [ -f "$RDIR/commit" ]
+}
+
 @test "hash refresh from another checkout cannot rebind the score" {
   HASH=$(_current_hash)
   echo "$HASH" > "$RDIR/state-hash"

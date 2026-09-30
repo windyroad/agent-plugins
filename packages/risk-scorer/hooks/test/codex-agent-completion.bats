@@ -401,7 +401,9 @@ dispatch_pretool() {
 
 @test "Codex 0.153 input_text responses persist a completed pipeline assessment" {
   dispatch "$(codex_0153_spawn_input)"
-  dispatch "$(codex_0153_pipeline_interrupt_input)"
+  run dispatch "$(codex_0153_pipeline_interrupt_input)"
+  [ "$status" -eq 0 ]
+  [[ "$(printf '%s' "$output" | jq -r '.hookSpecificOutput.additionalContext')" == *"cd '$(cd "$PIPELINE_REPO" && pwd -P)' &&"* ]]
 
   rdir="$TMPDIR/claude-risk-$SESSION"
   [ "$(cat "$rdir/commit")" = "4" ]

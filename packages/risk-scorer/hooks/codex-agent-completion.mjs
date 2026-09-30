@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, response } from "./lib/codex-completion-input.mjs";
 
 const hookDir = dirname(fileURLToPath(import.meta.url));
+const markedPipelineRoots = new Set();
 const riskAgentRoles = new Set([
   "wr-risk-scorer:pipeline",
   "wr-risk-scorer:plan",
@@ -291,6 +292,7 @@ function markTarget(input, target, output) {
     renameSync(claim.claim, claim.done);
     rmSync(state, { force: true });
     rmSync(transportRegistrationPath(input.session_id, role, normalizeTarget(target)), { force: true });
+    if (assessment) markedPipelineRoots.add(assessment.root);
   } else {
     rmSync(claim.claim, { force: true });
     process.exitCode = 1;
@@ -555,4 +557,10 @@ try {
 } catch {
   diagnoseSubagentStop(input, "rejected", "transport-error");
   process.exitCode = 0;
+}
+
+if (markedPipelineRoots.size && !process.argv.includes("--subagent-stop") && !process.argv.includes("--consume-pending")) {
+  const prefixes = [...markedPipelineRoots].map((root) => `cd '${root.replaceAll("'", "'\\''")}' &&`);
+  console.log(JSON.stringify({ hookSpecificOutput: { hookEventName: "PostToolUse",
+    additionalContext: `Risk score recorded. Begin the next governed commit, push, release, or changeset command with ${prefixes.join(" or ")} inside the shell command; set the tool workdir to the same checkout. Codex may hide a nested workdir from checkout-binding hooks.` } }));
 }
