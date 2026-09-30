@@ -160,19 +160,22 @@ function registrations(input, target) {
     const path = join(transportDir(), name);
     try {
       const registered = JSON.parse(readFileSync(path, "utf8"));
-      return registered.role === role && registered.target === target && registered.root === current.root && registered.physical === current.physical ? [{ registered, age: Date.now() - statSync(path).mtimeMs }] : [];
+      return registered.role === role && registered.root === current.root && registered.physical === current.physical ? [{ registered, age: Date.now() - statSync(path).mtimeMs }] : [];
     } catch { return []; }
   });
 }
 
 function persist(input) {
-  const target = normalizeTarget(input.task_name || input.agent_name || input.agent_id);
+  let target = normalizeTarget(input.task_name || input.agent_name || input.agent_id);
   const output = input.last_assistant_message;
   if (!target || typeof output !== "string" || !output) return;
   if (parsedVerdict(output) !== "PASS") return diagnostic("non-pass-output", input);
-  const candidates = registrations(input, target);
+  const registrationsForCheckout = registrations(input, target);
+  const exact = registrationsForCheckout.filter(({ registered }) => registered.target === target);
+  const candidates = exact.length ? exact : registrationsForCheckout.filter(({ registered }) => registered.parentSession === input.session_id);
   if (candidates.length !== 1) return diagnostic(candidates.length ? "ambiguous-parent-registration" : "missing-parent-registration", input);
   const { registered, age } = candidates[0];
+  target = registered.target;
   if (!valid(registered, input, target, age)) return;
   const path = receiptPath(registered.parentSession, target);
   if (existsSync(path) || existsSync(`${path}.done`)) return;

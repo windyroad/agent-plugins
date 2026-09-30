@@ -142,7 +142,44 @@ native_array_close_payload() {
   [ -f "$marker" ]
 }
 
-@test "opaque JTBD stop fails closed, then a bound completion admits the next edit" {
+@test "packed non-risk reviewers accept one same-parent stop with a distinct agent id" {
+  local package root role verdict session marker helper
+  for package in architect jtbd style-guide voice-tone; do
+    root="$(pack_plugin "$package")"
+    session="bats-distinct-$package-$$"
+    case "$package" in
+      architect) role='wr-architect:agent'; verdict='**Architecture Review: PASS**'; marker="/tmp/architect-reviewed-$session"; helper="$root/hooks/codex-agent-completion.mjs" ;;
+      jtbd) role='wr-jtbd:agent'; verdict='**JTBD Review: PASS**'; marker="/tmp/jtbd-reviewed-$session"; helper="$root/hooks-codex/codex-agent-completion.mjs"; printf 'PASS\n' > /tmp/jtbd-verdict ;;
+      style-guide) role='wr-style-guide:agent'; verdict='**Style Guide Review: PASS**'; marker="/tmp/style-guide-reviewed-$session"; helper="$root/hooks-codex/codex-agent-completion.mjs" ;;
+      voice-tone) role='wr-voice-tone:agent'; verdict='**Voice & Tone Review: PASS**'; marker="/tmp/voice-tone-reviewed-$session"; helper="$root/hooks-codex/codex-agent-completion.mjs" ;;
+    esac
+    send_event "$helper" "$(spawn_payload "$session" "$REPO_ROOT" "$role" '/root/review')"
+    send_event "$helper" "$(stop_payload "$session" "$REPO_ROOT" "$role" 'distinct-runtime-uuid' "$verdict")"
+    send_event "$helper" "$(parent_prompt_payload "$session" "$REPO_ROOT")"
+    [ -f "$marker" ]
+  done
+}
+
+@test "packed non-risk reviewers reject ambiguous same-parent distinct-id stops" {
+  local package root role verdict session marker helper
+  for package in architect jtbd style-guide voice-tone; do
+    root="$(pack_plugin "$package")"
+    session="bats-ambiguous-$package-$$"
+    case "$package" in
+      architect) role='wr-architect:agent'; verdict='**Architecture Review: PASS**'; marker="/tmp/architect-reviewed-$session"; helper="$root/hooks/codex-agent-completion.mjs" ;;
+      jtbd) role='wr-jtbd:agent'; verdict='**JTBD Review: PASS**'; marker="/tmp/jtbd-reviewed-$session"; helper="$root/hooks-codex/codex-agent-completion.mjs"; printf 'PASS\n' > /tmp/jtbd-verdict ;;
+      style-guide) role='wr-style-guide:agent'; verdict='**Style Guide Review: PASS**'; marker="/tmp/style-guide-reviewed-$session"; helper="$root/hooks-codex/codex-agent-completion.mjs" ;;
+      voice-tone) role='wr-voice-tone:agent'; verdict='**Voice & Tone Review: PASS**'; marker="/tmp/voice-tone-reviewed-$session"; helper="$root/hooks-codex/codex-agent-completion.mjs" ;;
+    esac
+    send_event "$helper" "$(spawn_payload "$session" "$REPO_ROOT" "$role" '/root/first')"
+    send_event "$helper" "$(spawn_payload "$session" "$REPO_ROOT" "$role" '/root/second')"
+    send_event "$helper" "$(stop_payload "$session" "$REPO_ROOT" "$role" 'distinct-runtime-uuid' "$verdict")"
+    send_event "$helper" "$(parent_prompt_payload "$session" "$REPO_ROOT")"
+    [ ! -e "$marker" ]
+  done
+}
+
+@test "unique same-parent JTBD stop admits the next edit" {
   local root session marker
   root="$(pack_plugin jtbd)"
   session="bats-p539-jtbd-stop-$$"
@@ -152,9 +189,8 @@ native_array_close_payload() {
   printf 'PASS\n' > /tmp/jtbd-verdict
   send_event "$root/hooks-codex/codex-agent-completion.mjs" \
     "$(stop_payload "$session" "$REPO_ROOT" 'wr-jtbd:agent' 'opaque-agent-id' '**JTBD Review: PASS**')"
-  [ ! -e "$marker" ]
   send_event "$root/hooks-codex/codex-agent-completion.mjs" \
-    "$(close_payload "$session" "$REPO_ROOT" 'review' '**JTBD Review: PASS**')"
+    "$(parent_prompt_payload "$session" "$REPO_ROOT")"
   [ -f "$marker" ]
   [ -f "$marker.hash" ]
   local gate_input

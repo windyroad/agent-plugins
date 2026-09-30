@@ -488,7 +488,7 @@ function registrations(input, target) {
       const path = join(transportDir(), name);
       try {
         const registered = JSON.parse(readFileSync(path, "utf8"));
-        return registered.role === role && registered.target === target &&
+        return registered.role === role &&
           registered.root === current.root && registered.physical === current.physical
           ? [{ path, registered, age: Date.now() - Math.floor(statSync(path).mtimeMs) }]
           : [];
@@ -499,12 +499,15 @@ function registrations(input, target) {
 function persistPending(input, target, output) {
   target = normalizeTarget(target);
   if (!target || typeof output !== "string" || !output) return;
-  const candidates = registrations(input, target);
+  const registrationsForCheckout = registrations(input, target);
+  const exact = registrationsForCheckout.filter(({ registered }) => registered.target === target);
+  const candidates = exact.length ? exact : registrationsForCheckout.filter(({ registered }) => registered.parentSession === input.session_id);
   if (candidates.length !== 1) {
     diagnostic(candidates.length ? "ambiguous-parent-registration" : "missing-parent-registration", input);
     return;
   }
   const { registered, age } = candidates[0];
+  target = registered.target;
   if (!validRegistration(registered, input, target, age)) return;
   if (!outputAllowed(output, registered)) {
     diagnostic("non-pass-or-mismatched-output", input);
