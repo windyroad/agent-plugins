@@ -1,5 +1,11 @@
 # @windyroad/style-guide
 
+## 0.6.7
+
+### Patch Changes
+
+- b75d977: Persist Codex reviewer results when a completion reports a runtime agent ID instead of the task name returned at spawn. The fallback requires one matching reviewer registration in the same parent session and checkout; ambiguous completions remain blocked.
+
 ## 0.6.6
 
 ### Patch Changes
