@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.19.11
+
+### Patch Changes
+
+- b9905d5: Show the assessed checkout command prefix as Codex context when a pipeline score is recorded, so governed commands use the checkout visible to every plugin hook. Remove conflicting rescore advice when a valid score is bound to another hook-visible checkout.
+
 ## 0.19.10
 
 ### Patch Changes
