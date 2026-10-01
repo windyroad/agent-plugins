@@ -98,6 +98,17 @@ run_hook() {
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
+@test "reviewed gh pr body-file clears the voice-tone gate" {
+  local body='A reviewed pull request summary.' key
+  printf '%s\n' "$body" > "$TEST_PROJECT_DIR/pr-body.md"
+  key="$(source "$HOOKS_DIR/lib/external-comms-key.sh"; compute_external_comms_key "$body" gh-pr-create)"
+  touch "$RDIR/external-comms-voice-tone-reviewed-$key"
+  INPUT=$(build_bash_input "gh pr create --title T --body-file '$TEST_PROJECT_DIR/pr-body.md'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
 # P377/RFC-029: the BYPASS_RISK_GATE env override was removed. The only
 # clearance path named in the deny is delegation to the external-comms subagent.
 @test "marker-absent deny names the reviewer and offers no env override (P377/RFC-029)" {
