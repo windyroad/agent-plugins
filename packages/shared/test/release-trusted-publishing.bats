@@ -31,32 +31,68 @@ teardown() {
   mkdir -p "$TEST_TMPDIR/packages/agent-plugins"
   printf '%s\n' '{"name":"@windyroad/agent-plugins","version":"0.2.0"}' \
     > "$TEST_TMPDIR/packages/agent-plugins/package.json"
-  printf '%s\n' '#!/bin/bash' 'echo 0.1.6' > "$TEST_TMPDIR/npm"
-  chmod +x "$TEST_TMPDIR/npm"
-
-  run env PACKAGE_ROOT="$TEST_TMPDIR/packages" NPM_CMD="$TEST_TMPDIR/npm" \
-    POST_PUBLISH_ATTEMPTS=1 bash "$VERIFY_TAGS"
-
-  [ "$status" -eq 1 ]
-  [[ "$output" == *'@windyroad/agent-plugins@0.2.0 is published without latest (registry latest: 0.1.6)'* ]]
-}
-
-@test "stable release retries while npm latest is still propagating" {
-  make_candidate_package
   printf '%s\n' '#!/bin/bash' \
-    'count_file="'"$TEST_TMPDIR"'/count"' \
-    'count=$(cat "$count_file" 2>/dev/null || echo 0)' \
-    'count=$((count + 1))' \
-    'echo "$count" > "$count_file"' \
-    'if [ "$count" -lt 2 ]; then echo 0.1.7; else echo 0.2.0; fi' \
+    'if [[ "$*" == *"dist-tags.latest"* ]]; then echo 0.1.6; else echo 0.2.0; fi' \
     > "$TEST_TMPDIR/npm"
   chmod +x "$TEST_TMPDIR/npm"
 
   run env PACKAGE_ROOT="$TEST_TMPDIR/packages" NPM_CMD="$TEST_TMPDIR/npm" \
-    POST_PUBLISH_ATTEMPTS=2 POST_PUBLISH_DELAY=0 bash "$VERIFY_TAGS"
+    POST_PUBLISH_WINDOW=0 bash "$VERIFY_TAGS"
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *'@windyroad/agent-plugins@0.2.0 exists but is not latest (registry latest: 0.1.6)'* ]]
+}
+
+@test "stable release distinguishes a version absent from the registry" {
+  make_candidate_package
+  make_fake_npm absent 0.1.7
+
+  run env PACKAGE_ROOT="$TEST_TMPDIR/packages" NPM_CMD="$TEST_TMPDIR/npm" \
+    POST_PUBLISH_WINDOW=0 bash "$VERIFY_TAGS"
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *'@windyroad/agent-plugins@0.2.0 is not visible in the registry yet'* ]]
+}
+
+@test "stable release retries unresolved packages together while npm latest propagates" {
+  make_candidate_package
+  mkdir -p "$TEST_TMPDIR/packages/second"
+  printf '%s\n' '{"name":"@windyroad/second","version":"0.2.0"}' \
+    > "$TEST_TMPDIR/packages/second/package.json"
+  printf '%s\n' '#!/bin/bash' \
+    '[[ "$*" == *"--prefer-online"* ]] || exit 44' \
+    'if [[ "$*" == *"dist-tags.latest"* ]]; then' \
+    '  name="$2"; echo "$name" >> "'"$TEST_TMPDIR"'/probes"' \
+    '  count=$(grep -c "^$name$" "'"$TEST_TMPDIR"'/probes")' \
+    '  if [ "$count" -lt 2 ]; then echo 0.1.7; else echo 0.2.0; fi' \
+    'else echo 0.2.0; fi' \
+    > "$TEST_TMPDIR/npm"
+  chmod +x "$TEST_TMPDIR/npm"
+
+  run env PACKAGE_ROOT="$TEST_TMPDIR/packages" NPM_CMD="$TEST_TMPDIR/npm" \
+    POST_PUBLISH_WINDOW=10 POST_PUBLISH_DELAY=0 bash "$VERIFY_TAGS"
 
   [ "$status" -eq 0 ]
-  [ "$(cat "$TEST_TMPDIR/count")" -eq 2 ]
+  [ "$(cat "$TEST_TMPDIR/probes")" = $'@windyroad/agent-plugins\n@windyroad/second\n@windyroad/agent-plugins\n@windyroad/second' ]
+}
+
+@test "stable release uses one deadline for multiple persistent mismatches" {
+  make_candidate_package
+  mkdir -p "$TEST_TMPDIR/packages/second"
+  printf '%s\n' '{"name":"@windyroad/second","version":"0.2.0"}' \
+    > "$TEST_TMPDIR/packages/second/package.json"
+  printf '%s\n' '#!/bin/bash' \
+    'if [[ "$*" == *"dist-tags.latest"* ]]; then echo "$2" >> "'"$TEST_TMPDIR"'/probes"; echo 0.1.7; else echo 0.2.0; fi' \
+    > "$TEST_TMPDIR/npm"
+  chmod +x "$TEST_TMPDIR/npm"
+
+  run env PACKAGE_ROOT="$TEST_TMPDIR/packages" NPM_CMD="$TEST_TMPDIR/npm" \
+    POST_PUBLISH_WINDOW=0 bash "$VERIFY_TAGS"
+
+  [ "$status" -eq 1 ]
+  [ "$(wc -l < "$TEST_TMPDIR/probes" | tr -d ' ')" -eq 2 ]
+  [[ "$output" == *'@windyroad/agent-plugins@0.2.0 exists but is not latest'* ]]
+  [[ "$output" == *'@windyroad/second@0.2.0 exists but is not latest'* ]]
 }
 
 @test "pre-publish allows a version absent from npm" {
