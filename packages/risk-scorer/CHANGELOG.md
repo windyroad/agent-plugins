@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.19.14
+
+### Patch Changes
+
+- afe373d: Clarify the feature-branch push and PR check workflow in the push gate guidance.
+
 ## 0.19.13
 
 ### Patch Changes
