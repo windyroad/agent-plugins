@@ -107,6 +107,170 @@ run_hook() {
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
 }
 
+@test "reviewed gh pr body-file clears the content-bound gate" {
+  local body='A reviewed pull request summary.' key
+  printf '%s\n' "$body" > "$TEST_PROJECT_DIR/pr-body.md"
+  key="$(source "$HOOKS_DIR/lib/external-comms-key.sh"; compute_external_comms_key "$body" gh-pr-create)"
+  touch "$RDIR/external-comms-risk-reviewed-$key"
+  INPUT=$(build_bash_input "gh pr create --title T --body-file '$TEST_PROJECT_DIR/pr-body.md'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "short -F body-file reads and scans the real file" {
+  printf 'credential=%s\n' "$GH_TOKEN_LIKE" > "$TEST_PROJECT_DIR/pr-body.md"
+  INPUT=$(build_bash_input "gh pr create --title T -F '$TEST_PROJECT_DIR/pr-body.md'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"credential"* || "$output" == *"GitHub token"* ]]
+}
+
+@test "attached short -F body-file forms use the file content" {
+  local body='Reviewed attached file.' key form
+  printf '%s\n' "$body" > "$TEST_PROJECT_DIR/pr-body.md"
+  key="$(source "$HOOKS_DIR/lib/external-comms-key.sh"; compute_external_comms_key "$body" gh-pr-create)"
+  touch "$RDIR/external-comms-risk-reviewed-$key"
+  for form in "-F=$TEST_PROJECT_DIR/pr-body.md" "-F$TEST_PROJECT_DIR/pr-body.md"; do
+    INPUT=$(build_bash_input "gh pr create --title T '$form'")
+    run_hook "$INPUT"
+    [ "$status" -eq 0 ]
+    [ -z "$output" ]
+  done
+}
+
+@test "short -b literal body uses its actual review key" {
+  local body='A reviewed short body.' key
+  key="$(source "$HOOKS_DIR/lib/external-comms-key.sh"; compute_external_comms_key "$body" gh-pr-create)"
+  touch "$RDIR/external-comms-risk-reviewed-$key"
+  INPUT=$(build_bash_input "gh pr create --title T -b '$body'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "attached short -b literal forms use their actual review key" {
+  local body='Reviewed attached body.' key form
+  key="$(source "$HOOKS_DIR/lib/external-comms-key.sh"; compute_external_comms_key "$body" gh-pr-create)"
+  touch "$RDIR/external-comms-risk-reviewed-$key"
+  for form in "-b=$body" "-b$body"; do
+    INPUT=$(build_bash_input "gh pr create --title T '$form'")
+    run_hook "$INPUT"
+    [ "$status" -eq 0 ]
+    [ -z "$output" ]
+  done
+}
+
+@test "relative gh pr body-file resolves from the command checkout" {
+  local body='A reviewed relative file.' key
+  printf '%s\n' "$body" > "$TEST_PROJECT_DIR/pr-body.md"
+  key="$(source "$HOOKS_DIR/lib/external-comms-key.sh"; compute_external_comms_key "$body" gh-pr-create)"
+  touch "$RDIR/external-comms-risk-reviewed-$key"
+  INPUT=$(build_bash_input "cd '$TEST_PROJECT_DIR' && gh pr create --title T --body-file pr-body.md")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "relative gh pr body-file resolves from tool workdir metadata" {
+  local body='A reviewed workdir file.' key
+  printf '%s\n' "$body" > "$TEST_PROJECT_DIR/pr-body.md"
+  key="$(source "$HOOKS_DIR/lib/external-comms-key.sh"; compute_external_comms_key "$body" gh-pr-create)"
+  touch "$RDIR/external-comms-risk-reviewed-$key"
+  INPUT=$(build_bash_input "gh pr create --title T --body-file pr-body.md")
+  INPUT=$(printf '%s' "$INPUT" | python3 -c 'import json,sys; event=json.load(sys.stdin); event["tool_input"]["workdir"]=sys.argv[1]; print(json.dumps(event))' "$TEST_PROJECT_DIR")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "relative gh pr body-file without checkout binding is denied" {
+  printf 'Unbound body.\n' > "$TEST_PROJECT_DIR/pr-body.md"
+  INPUT=$(build_bash_input "gh pr create --title T --body-file pr-body.md")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"body-file could not be read"* ]]
+}
+
+@test "missing gh pr body-file gives a source error" {
+  INPUT=$(build_bash_input "gh pr create --title T --body-file '$TEST_PROJECT_DIR/missing.md'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"body-file could not be read"* ]]
+}
+
+@test "body-file contents receive the same leak scan as literal prose" {
+  printf 'credential=%s\n' "$GH_TOKEN_LIKE" > "$TEST_PROJECT_DIR/pr-body.md"
+  INPUT=$(build_bash_input "gh pr create --title T --body-file '$TEST_PROJECT_DIR/pr-body.md'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"credential"* || "$output" == *"GitHub token"* ]]
+}
+
+@test "body-file combined with a literal body cannot reuse the file review" {
+  local body='Approved file text.' key
+  printf '%s\n' "$body" > "$TEST_PROJECT_DIR/pr-body.md"
+  key="$(source "$HOOKS_DIR/lib/external-comms-key.sh"; compute_external_comms_key "$body" gh-pr-create)"
+  touch "$RDIR/external-comms-risk-reviewed-$key"
+  INPUT=$(build_bash_input "gh pr create --title T --body-file '$TEST_PROJECT_DIR/pr-body.md' --body 'Different text'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+}
+
+@test "body-file combined with short -b cannot reuse the file review" {
+  local body='Approved file text.' key
+  printf '%s\n' "$body" > "$TEST_PROJECT_DIR/pr-body.md"
+  key="$(source "$HOOKS_DIR/lib/external-comms-key.sh"; compute_external_comms_key "$body" gh-pr-create)"
+  touch "$RDIR/external-comms-risk-reviewed-$key"
+  INPUT=$(build_bash_input "gh pr create --title T -F '$TEST_PROJECT_DIR/pr-body.md' -b 'Different text'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+}
+
+@test "literal prose mentioning body-file is still reviewed as literal prose" {
+  local body='Notes about --body-file usage.' key
+  key="$(source "$HOOKS_DIR/lib/external-comms-key.sh"; compute_external_comms_key "$body" gh-pr-create)"
+  touch "$RDIR/external-comms-risk-reviewed-$key"
+  INPUT=$(build_bash_input "gh pr create --title T --body '$body'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "quoted title and body values resembling short flags are not parsed as flags" {
+  local body='-F is a CLI option' key
+  key="$(source "$HOOKS_DIR/lib/external-comms-key.sh"; compute_external_comms_key "$body" gh-pr-create)"
+  touch "$RDIR/external-comms-risk-reviewed-$key"
+  INPUT=$(build_bash_input "gh pr create --title '-b is a title' --body '$body'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "quoted title resembling a shell operator is not command chaining" {
+  local body='Reviewed operator title.' key
+  printf '%s\n' "$body" > "$TEST_PROJECT_DIR/pr-body.md"
+  key="$(source "$HOOKS_DIR/lib/external-comms-key.sh"; compute_external_comms_key "$body" gh-pr-create)"
+  touch "$RDIR/external-comms-risk-reviewed-$key"
+  INPUT=$(build_bash_input "gh pr create --title '&&' --body-file '$TEST_PROJECT_DIR/pr-body.md'")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "unquoted chained command stays ambiguous" {
+  local body='Reviewed file only.' key
+  printf '%s\n' "$body" > "$TEST_PROJECT_DIR/pr-body.md"
+  key="$(source "$HOOKS_DIR/lib/external-comms-key.sh"; compute_external_comms_key "$body" gh-pr-create)"
+  touch "$RDIR/external-comms-risk-reviewed-$key"
+  INPUT=$(build_bash_input "gh pr create --title T --body-file '$TEST_PROJECT_DIR/pr-body.md'&&echo done")
+  run_hook "$INPUT"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+}
+
 @test "deny names both runtime recovery paths when CODEX_THREAD_ID is absent" {
   INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure on Node 20'")
   run_hook "$INPUT"

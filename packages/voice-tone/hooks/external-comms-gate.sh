@@ -159,6 +159,7 @@ EOF
 # ---------- Surface detection ----------
 SURFACE=""
 DRAFT=""
+BODY_FILE_ERROR=0
 
 case "$TOOL_NAME" in
     Bash)
@@ -166,6 +167,15 @@ case "$TOOL_NAME" in
 import sys, json
 try:
     print(json.load(sys.stdin).get('tool_input', {}).get('command', ''))
+except Exception:
+    print('')
+" 2>/dev/null || echo "")
+        TOOL_CWD=$(printf '%s' "$INPUT" | python3 -c "
+import sys, json
+try:
+    event = json.load(sys.stdin)
+    tool = event.get('tool_input', {})
+    print(tool.get('cwd') or tool.get('workdir') or event.get('cwd') or '')
 except Exception:
     print('')
 " 2>/dev/null || echo "")
@@ -230,13 +240,78 @@ except Exception:
         #   Then --body / --field for the gh + npm + security-advisories surfaces.
         #   Then -m / --message for git commit (single-line literal forms).
         #
-        # When absent (npm publish, --body-file, editor flow already filtered),
-        # DRAFT="" is acceptable: the agent will be invoked with command
-        # context and read whatever body source the call uses.
-        DRAFT=$(printf '%s' "$COMMAND" | python3 -c "
-import sys, re
+        # When absent (npm publish, editor flow already filtered), DRAFT=""
+        # is acceptable. A named body file must be readable before review.
+        if ! DRAFT=$(printf '%s' "$COMMAND" | python3 -c "
+import sys, re, os, shlex
 cmd = sys.stdin.read()
 surface = sys.argv[1]
+tool_cwd = sys.argv[2]
+if surface.startswith('gh-'):
+    try:
+        lexer = shlex.shlex(cmd, posix=True, punctuation_chars=';&|')
+        lexer.whitespace_split = True
+        lexer.commenters = ''
+        args = list(lexer)
+    except ValueError:
+        if '--body-file' in cmd or ' -F' in cmd or ' -b' in cmd:
+            raise SystemExit(2)
+        args = []
+    try:
+        base = os.path.abspath(tool_cwd) if os.path.isabs(tool_cwd) else ''
+        if len(args) >= 4 and args[0] == 'cd' and args[2] == '&&':
+            if os.path.isabs(args[1]):
+                base = os.path.abspath(args[1])
+            elif base:
+                base = os.path.abspath(os.path.join(base, args[1]))
+            args = args[3:]
+        # Skip known option values so a quoted title/body beginning with -F
+        # cannot be mistaken for a second body source.
+        valued = {'--title', '-t', '--template', '-T', '--repo', '-R',
+                  '--assignee', '-a', '--label', '-l', '--reviewer', '-r',
+                  '--milestone', '-m', '--project', '-p', '--base', '-B', '--head', '-H'}
+        sources = []
+        i = 3
+        while i < len(args):
+            arg = args[i]
+            if arg and all(ch in ';&|' for ch in arg):
+                raise ValueError('ambiguous command')
+            if arg in ('--body-file', '-F', '--body', '-b'):
+                sources.append(('file' if arg in ('--body-file', '-F') else 'body',
+                                args[i + 1] if i + 1 < len(args) else '', arg))
+                i += 2
+            elif arg.startswith('--body-file=') or arg.startswith('--body='):
+                sources.append(('file' if arg.startswith('--body-file=') else 'body',
+                                arg.split('=', 1)[1], arg.split('=', 1)[0]))
+                i += 1
+            elif arg.startswith('-F') or arg.startswith('-b'):
+                sources.append(('file' if arg.startswith('-F') else 'body',
+                                arg[3:] if arg[2:3] == '=' else arg[2:], arg[:2]))
+                i += 1
+            elif arg in valued:
+                i += 2
+            else:
+                i += 1
+        files = [value for kind, value, _ in sources if kind == 'file']
+        short_bodies = [value for kind, value, flag in sources if kind == 'body' and flag == '-b']
+        if files or short_bodies:
+            if args[:2] not in (['gh', 'issue'], ['gh', 'pr']):
+                raise ValueError('ambiguous command')
+            if files:
+                if len(files) != 1 or len(sources) != 1 or not files[0] or files[0] == '-':
+                    raise ValueError('ambiguous body file')
+                if not os.path.isabs(files[0]) and not base:
+                    raise ValueError('unknown command checkout')
+                path = files[0] if os.path.isabs(files[0]) else os.path.join(base, files[0])
+                with open(path, encoding='utf-8') as body_file:
+                    print(body_file.read(), end='')
+            else:
+                if len(sources) != 1 or not short_bodies[0]:
+                    raise ValueError('ambiguous body')
+                print(short_bodies[0], end='')
+            raise SystemExit
+    except (OSError, UnicodeError, ValueError):
+        raise SystemExit(2)
 # P364: bash double-quote unescape. The double-quoted body capture groups
 # carry RAW shell-escaped command text — an orchestrator must backslash-escape
 # backticks (and \$, \", \\) inside \"...\" to survive bash parsing, e.g.
@@ -310,7 +385,9 @@ for pat, flags, unescape in patterns:
             body = unescape_dq(body)
         print(body)
         break
-" "$SURFACE" 2>/dev/null || echo "")
+" "$SURFACE" "$TOOL_CWD" 2>/dev/null); then
+            BODY_FILE_ERROR=1
+        fi
         ;;
 
     Write|Edit)
@@ -361,6 +438,11 @@ print(json.dumps({
 }))
 " "$reason"
 }
+
+if [ "$BODY_FILE_ERROR" -eq 1 ]; then
+    deny_with_reason "BLOCKED (external-comms gate): body-file could not be read unambiguously from the command checkout. Use one readable UTF-8 --body-file path and review its exact contents before retrying."
+    exit 0
+fi
 
 permit_with_advisory() {
     local msg="$1"
