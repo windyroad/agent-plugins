@@ -31,7 +31,25 @@ build_input() {
     "command": "$cmd"
   }
 }
+
 ENDJSON
+}
+
+@test "bare push guidance names the feature-branch path and PR watch" {
+  INPUT=$(build_input "git push")
+  run bash -c "cd '$TEST_PROJECT_DIR' && echo '$INPUT' | '$HOOK'"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"npm run push:watch"* ]]
+  [[ "$output" == *"git push origin <branch>"* ]]
+  [[ "$output" == *"gh pr checks <PR> --watch"* ]]
+}
+
+@test "explicit feature-branch push is allowed" {
+  INPUT=$(build_input "git push origin codex/example")
+  run bash -c "cd '$TEST_PROJECT_DIR' && echo '$INPUT' | '$HOOK'"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "gh pr merge is blocked with release:watch guidance when script exists" {
