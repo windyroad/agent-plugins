@@ -1,6 +1,6 @@
 #!/bin/bash
 # PreToolUse hook for pipeline discipline:
-# - Blocks bare `git push` and directs to npm run push:watch.
+# - Blocks bare/protected-branch `git push`; gives main and feature-branch paths.
 # - Gates `npm run push:watch` and `npm run merge:watch` on push risk score
 #   (TTL + drift + threshold), while letting those watchers wait on pending CI.
 # - Gates `npx changeset` / `npm run changeset` on release + push risk (back-pressure).
@@ -43,7 +43,7 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*git push(\s|$)'; then
        ! echo "$COMMAND" | grep -qE 'git push\s+\S+\s+(master|main|publish|changeset-release/)'; then
         exit 0
     fi
-    risk_gate_deny "Use \`npm run push:watch\` instead of \`git push\`. It pushes, watches the pipeline, and then surfaces either the release PR URL (if there are pending changesets) or the test deploy URL so you can review before releasing. The publish and changeset-release/* branches are managed by the pipeline -- do not push to them directly."
+    risk_gate_deny "For main, run \`npm run push:watch\`. For a feature branch, run \`git push origin <branch>\`, open its PR, then \`gh pr checks <PR> --watch\`. Direct pushes to main, publish, and changeset-release/* are blocked."
     exit 0
 fi
 
