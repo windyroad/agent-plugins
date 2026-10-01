@@ -142,6 +142,58 @@ native_array_close_payload() {
   [ -f "$marker" ]
 }
 
+@test "all packed reviewers resolve nested relative targets without crossing registrations" {
+  local package root helper role verdict session marker key scenario target before
+  key="$(printf 'a%.0s' {1..64})"
+  for package in architect jtbd style-guide voice-tone risk-scorer; do
+    root="$(pack_plugin "$package")"
+    helper="$root/hooks-codex/codex-agent-completion.mjs"
+    case "$package" in
+      architect) helper="$root/hooks/codex-agent-completion.mjs"; role='wr-architect:agent'; verdict='**Architecture Review: PASS**' ;;
+      jtbd) role='wr-jtbd:agent'; verdict='**JTBD Review: PASS**' ;;
+      style-guide) role='wr-style-guide:agent'; verdict='**Style Guide Review: PASS**' ;;
+      voice-tone) role='wr-voice-tone:agent'; verdict='**Voice & Tone Review: PASS**' ;;
+      risk-scorer) helper="$root/hooks/codex-agent-completion.mjs"; role='wr-risk-scorer:external-comms'; verdict="EXTERNAL_COMMS_RISK_VERDICT: PASS
+EXTERNAL_COMMS_RISK_KEY: $key" ;;
+    esac
+    for scenario in short relative canonical ambiguous unknown mismatch other-session duplicate; do
+      session="bats-nested-$package-$scenario-$$"
+      marker="/tmp/$package-reviewed-$session"
+      [ "$package" != risk-scorer ] || marker="$TMPDIR/claude-risk-$session/external-comms-risk-reviewed-$key"
+      rm -f "$marker" "$marker.hash"
+      send_event "$helper" "$(spawn_payload "$session" "$REPO_ROOT" "$role" '/root/capture/review')"
+      case "$scenario" in
+        short|duplicate|other-session) target='review' ;;
+        relative) target='capture/review' ;;
+        canonical) target='/root/capture/review' ;;
+        ambiguous) target='review'; send_event "$helper" "$(spawn_payload "$session" "$REPO_ROOT" "$role" '/root/other/review')" ;;
+        unknown) target='unknown' ;;
+        mismatch) target='/root/review' ;;
+      esac
+      [ "$package" != jtbd ] || printf 'PASS\n' > /tmp/jtbd-verdict
+      if [ "$scenario" = other-session ]; then
+        send_event "$helper" "$(close_payload "$session-other" "$REPO_ROOT" "$target" "$verdict")"
+      else
+        send_event "$helper" "$(close_payload "$session" "$REPO_ROOT" "$target" "$verdict")"
+      fi
+      case "$scenario" in
+        short|relative|canonical|duplicate) [ -f "$marker" ] ;;
+        *) [ ! -e "$marker" ] ;;
+      esac
+      if [ "$scenario" = duplicate ]; then
+        before="$(marker_time "$marker")"
+        send_event "$helper" "$(wait_payload "$session" "$REPO_ROOT" 'review' "$verdict")"
+        [ "$(marker_time "$marker")" = "$before" ]
+        send_event "$helper" "$(spawn_payload "$session" "$REPO_ROOT" "$role" '/root/other/review')"
+        rm -f "$marker" "$marker.hash"
+        send_event "$helper" "$(close_payload "$session" "$REPO_ROOT" 'review' "$verdict")"
+        [ ! -e "$marker" ]
+      fi
+      rm -f "$marker" "$marker.hash"
+    done
+  done
+}
+
 @test "packed non-risk reviewers accept one same-parent stop with a distinct agent id" {
   local package root role verdict session marker helper
   for package in architect jtbd style-guide voice-tone; do

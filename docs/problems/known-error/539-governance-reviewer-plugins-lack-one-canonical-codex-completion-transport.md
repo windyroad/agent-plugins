@@ -1,11 +1,12 @@
 # Problem 539: Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate
 
-**Status**: Closed (closed-on-evidence 2026-09-14 — a fresh Codex task loaded the released reviewer plugins, persisted native completion markers, and admitted the governed lifecycle commit without manual recovery. Recovery: `/wr-itil:transition-problem 539 known-error`)
+**Status**: Known Error (reopened 2026-10-01 after a confirmed nested completion recurrence; prior installed-runtime closure did not exercise relative names below the root task)
 **Reported**: 2026-09-14
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5 — derived at capture from repeated fail-closed delivery blocks across multiple governance plugins and fresh tasks
 **Origin**: internal (user-reported recurrence)
 **Effort**: L — cross-package shared generator, generated surfaces, behavioural fixtures, releases, and installed-runtime verification
 **JTBD**: JTBD-001
+**WSJF**: 10 — (20 × 2.0) / 4 (Known Error; Effort L unchanged)
 **Persona**: developer
 
 ## Description
@@ -101,3 +102,22 @@ The post-release fresh-task journey succeeded on 2026-09-14. Published-package t
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-089 | STORY-089: I can continue after a reviewer passes, without plugin-specific recovery | done |
+
+
+## Nested completion recurrence — 2026-10-01
+
+A nested reviewer returned PASS through its short completion name, but the bridge registered its full task path. Literal lookup left the registration unconsumed and the next commit rejected the missing marker. The affected task loaded Risk Scorer 0.19.13 in its plugin catalog; the installed hook executable version is not independently established.
+
+The current-session registration remained under `retro_capture/comms_capture` after completion used `comms_capture`. Applicable review, completion, then missing-marker rejection occurred in that order. The parent later persisted a marker through a separate canonical completion; this does not repair the nested lookup. No private transcript content is published here.
+
+Packed behavioural tests reproduce the failure before the repair and cover all five reviewer plugins after it. The shared resolver uses exact matches first and permits only unique segment-boundary suffix matches for relative names. Canonical mismatches, ambiguity, unknown names, different sessions, and duplicate delivery remain rejected. Existing role, checkout, policy, TTL and verdict validation remains in place.
+
+- [x] Reproduce the missing nested marker with the packed architect plugin before implementation.
+- [x] Verify the nested resolver across all five packed plugins and retained rejection controls.
+- [x] Run the 56 focused completion and shared-decoder checks successfully.
+- [ ] Release and install the repaired plugins.
+- [ ] Observe a genuine nested completion in the updated installed runtime; do not create activity in unrelated tasks solely to test it.
+
+**Workaround for this recurrence:** use the full canonical task path returned by spawn when completing the reviewer. Do not manufacture markers or reuse a completed reviewer for a new assessment.
+
+The repair remains within RFC-093 and STORY-089. Fresh installed-runtime verification remains pending.

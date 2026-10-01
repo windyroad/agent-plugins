@@ -207,7 +207,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameS
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, response } from "../hooks/lib/codex-completion-input.mjs";
+import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response } from "../hooks/lib/codex-completion-input.mjs";
 
 const hookDir = dirname(fileURLToPath(import.meta.url));
 const role = ${JSON.stringify(completion.role)};
@@ -448,7 +448,7 @@ function writeMarker(input, registered, target, output, completedAt, claimed) {
 }
 
 function complete(input, target, output) {
-  target = normalizeTarget(target);
+  target = completionTarget(target, stateDir(input.session_id), "codex-review-", role + ":");
   if (!target || typeof output !== "string" || !output) return;
   const path = statePath(input, target);
   if (existsSync(statePath(input, target, ".done"))) return;
