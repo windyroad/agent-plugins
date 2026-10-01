@@ -1,12 +1,12 @@
 # Problem 539: Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate
 
-**Status**: Known Error (reopened 2026-10-01 after a confirmed nested completion recurrence; prior installed-runtime closure did not exercise relative names below the root task)
+**Status**: Verification Pending (nested completion repair released and installed 2026-10-01; genuine desktop nested completion after restart remains outstanding)
 **Reported**: 2026-09-14
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5 — derived at capture from repeated fail-closed delivery blocks across multiple governance plugins and fresh tasks
 **Origin**: internal (user-reported recurrence)
 **Effort**: L — cross-package shared generator, generated surfaces, behavioural fixtures, releases, and installed-runtime verification
 **JTBD**: JTBD-001
-**WSJF**: 10 — (20 × 2.0) / 4 (Known Error; Effort L unchanged)
+**WSJF**: 0 — Verification Pending; excluded from delivery rankings
 **Persona**: developer
 
 ## Description
@@ -77,7 +77,7 @@ Fresh installed-runtime verification completed in Codex session `01a09e85-1e48-7
 
 ## Verification
 
-The post-release fresh-task journey succeeded on 2026-09-14. Published-package transport, installed plugin versions, native completion marker persistence, and the next guarded operation were independently observed. CI run `34812540341` passed after the verification-pending commit. P539 is closed on that evidence; the supported recovery is `/wr-itil:transition-problem 539 known-error`.
+The post-release fresh-task journey succeeded on 2026-09-14. Published-package transport, installed plugin versions, native completion marker persistence, and the next guarded operation were independently observed. CI run `34812540341` passed after the verification-pending commit. P539 was previously closed on that root-level evidence; the 2026-10-01 nested recurrence reopened it. The supported recovery is `/wr-itil:transition-problem 539 known-error`.
 
 ## Dependencies
 
@@ -115,9 +115,15 @@ Packed behavioural tests reproduce the failure before the repair and cover all f
 - [x] Reproduce the missing nested marker with the packed architect plugin before implementation.
 - [x] Verify the nested resolver across all five packed plugins and retained rejection controls.
 - [x] Run the 56 focused completion and shared-decoder checks successfully.
-- [ ] Release and install the repaired plugins.
+- [x] Release and install the repaired plugins.
 - [ ] Observe a genuine nested completion in the updated installed runtime; do not create activity in unrelated tasks solely to test it.
 
 **Workaround for this recurrence:** use the full canonical task path returned by spawn when completing the reviewer. Do not manufacture markers or reuse a completed reviewer for a new assessment.
 
 The repair remains within RFC-093 and STORY-089. Fresh installed-runtime verification remains pending.
+
+## Fix Released — nested completion repair, 2026-10-01
+
+Published and installed `@windyroad/architect@0.23.9`, `@windyroad/jtbd@0.14.11`, `@windyroad/risk-scorer@0.19.15`, `@windyroad/style-guide@0.6.9`, and `@windyroad/voice-tone@0.9.7`. PR #520 contains the source repair; PR #521 merged the version update as `433c80761601abf065aab95a43740880072eb977`. Release run `36832821096` succeeded and registry readback confirmed the exact versions and latest tags.
+
+All five Codex plugins are enabled at those versions, and their installed canonical completion helpers match the released source. The 56 focused completion checks passed; source revision CI `36831561999` passed both quality gates and behavioral evaluations after the scoped P459 fixture repair. Publication and installed files are verified; activation requires restarting Codex. Closing this recurrence requires a genuine nested reviewer completion in the updated desktop runtime followed by the applicable guarded operation. That evidence remains pending.

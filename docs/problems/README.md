@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-10-01 **P539 reopened** — nested relative reviewer completions leave their canonical registration unconsumed; the shared repair is awaiting release and installed-runtime verification.
+> Last reviewed: 2026-10-01 **P539 Verification Pending** — nested reviewer completion repair published and installed across all five governance plugins; genuine desktop verification awaits restart.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -13,7 +13,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) — stamped 2026-08-21 review; upstream issue *"wr-itil evaluate-relevance matches ADR numbers across repos and treats Composes-with as fix evidence"* is the external filing of this defect |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
-| 10 | P539 | Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate | 20 (Very High) | Known Error | L | 2026-09-14 | internal (user-reported recurrence) |
 | 5 | P160 | Ship quota-pacing surface to prevent weekly-quota exhaustion — advisory or blocking nudge when burn rate exceeds sustainable pace, so users retain Claude tokens for non-Claude-Code surfaces (chat, cowork) for the full week | 20 (Very High) | Known Error | XL | 2026-05-03 | internal |
 | | | **Tier 1 — Inbound-reported** (`**Origin**: inbound-reported` — an external user hit this) | | | | | |
 | 18 | P437 | wr-wardley exposes no version-stable invocation path for its owm-to-svg converter (consumers pin the cache version and break on bump) | 9 (Medium) | Known Error | S | 2026-07-06 | inbound-reported (#325) |
@@ -313,6 +312,8 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P537 | External-comms publication guard blocks npm publish dry runs | 2026-09-11 (`@windyroad/risk-scorer@0.19.2`, `@windyroad/voice-tone@0.8.5`; version-packages commit `4d66e3ab`, merge `99c720b9`, PR #475) | no — not observed |
 | P402 | external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS | 2026-09-12 (`@windyroad/risk-scorer@0.19.3`, `@windyroad/voice-tone@0.8.6`; version commit `8c9e4f4c`, merge `9cc26afc`, PR #477, workflow 34684064046) | no — not observed |
 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight contexts — the authorised set is now stated outright in `/wr-itil:work-problems`, with the one restrained shape (P363's held batch cadence) named beside it | pending — `@windyroad/itil` patch committed, ships next release | no — not observed |
+| P539 | Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate | 2026-10-01 (Architect 0.23.9, JTBD 0.14.11, Risk Scorer 0.19.15, Style Guide 0.6.9, Voice Tone 0.9.7; nested target resolver) | no — not observed |
+
 
 ## Inbound Upstream Reports
 
