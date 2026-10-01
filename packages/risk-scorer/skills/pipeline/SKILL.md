@@ -29,7 +29,10 @@ prevents the completion bridge from binding the returned verdict. `$ARGUMENTS`
 is already self-contained, so no forked conversation context is required.
 After the Codex agent reports completion, invoke `interrupt_agent` exactly once
 on that completed target so the compatibility hook receives the structured
-result. Do not relaunch or inspect a transcript.
+result. After remediation changes the assessed risk, spawn a **new** typed
+reviewer with the updated state. `followup_task` on a completed reviewer does
+not create a new marker generation, so its later score cannot replace the
+recorded score. Do not relaunch the same target or inspect a transcript.
 
 ```
 subagent_type: wr-risk-scorer:pipeline

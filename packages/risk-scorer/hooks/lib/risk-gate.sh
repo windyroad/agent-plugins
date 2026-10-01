@@ -39,7 +39,7 @@ check_risk_gate() {
   # 1. Score file must exist (fail-closed)
   if [ ! -f "$SCORE_FILE" ]; then
     RISK_GATE_CATEGORY="missing"
-    RISK_GATE_REASON="No ${ACTION} risk score found. Delegate to wr-risk-scorer:pipeline to assess cumulative pipeline risk. On Codex, wait for the reviewer and confirm that exact target is completed; then invoke \`interrupt_agent\` exactly once on the completed target before retrying. If it is still running, keep waiting. The compatibility hook persists the completed structured verdict; no transcript parsing or nested codex exec is required. On Claude Code, dispatch the reviewer synchronously (\`run_in_background: false\`) before retrying."
+    RISK_GATE_REASON="No ${ACTION} risk score found. Delegate to wr-risk-scorer:pipeline to assess cumulative pipeline risk. On Codex, spawn a fresh typed reviewer for each new assessment; followup_task cannot refresh a completed review marker. Wait for the reviewer and confirm that exact target is completed; then invoke \`interrupt_agent\` exactly once on the completed target before retrying. If it is still running, keep waiting. The compatibility hook persists the completed structured verdict; no transcript parsing or nested codex exec is required. On Claude Code, dispatch the reviewer synchronously (\`run_in_background: false\`) before retrying."
     return 1
   fi
 
@@ -163,7 +163,7 @@ print(('yes' if score > N else 'no') + ' ' + str(N))
   if [ "$DENIED" = "yes" ]; then
     RISK_GATE_CATEGORY="threshold"
     RISK_GATE_SCORE="$SCORE"
-    RISK_GATE_REASON="${ACTION} risk score ${SCORE}/25 exceeds the project appetite of ${APPETITE}/25 (RISK-POLICY.md). Reduce risk or halt — there is no proceed-anyway path (P377/RFC-029). To proceed within appetite: (1) split the ${ACTION}, (2) add risk-reducing measures and re-score, or (3) if this is incident response, delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') with incident context — it scores the change against the live realised-risk baseline (ADR-042 Rule 1b) and clears it via the risk-reducing path if it is net-risk-reducing."
+    RISK_GATE_REASON="${ACTION} risk score ${SCORE}/25 exceeds the project appetite of ${APPETITE}/25 (RISK-POLICY.md). Reduce risk or halt — there is no proceed-anyway path (P377/RFC-029). After remediation on Codex, spawn a fresh typed wr-risk-scorer:pipeline reviewer for this checkout; followup_task does not refresh the recorded score. To proceed within appetite: (1) split the ${ACTION}, (2) add risk-reducing measures and re-score, or (3) if this is incident response, delegate to wr-risk-scorer:pipeline (subagent_type: 'wr-risk-scorer:pipeline') with incident context — it scores the change against the live realised-risk baseline (ADR-042 Rule 1b) and clears it via the risk-reducing path if it is net-risk-reducing."
     return 1
   fi
 
