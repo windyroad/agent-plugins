@@ -1,5 +1,12 @@
 # @windyroad/voice-tone
 
+## 0.9.6
+
+### Patch Changes
+
+- 947ec42: Read GitHub CLI body files from the command checkout before external communications review. Handle short body flags and deny ambiguous or unbound sources.
+- 1b3b73c: Guide Codex agents to start a fresh typed reviewer after remediation or review expiry. Completed-agent follow-ups do not produce a new bound marker, so the gates now explain the safe recovery path. Risk scorer also verifies that a fresh lower score replaces the earlier result while an opaque follow-up leaves the earlier score unchanged.
+
 ## 0.9.5
 
 ### Patch Changes

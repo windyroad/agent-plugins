@@ -1,5 +1,11 @@
 # @windyroad/jtbd
 
+## 0.14.10
+
+### Patch Changes
+
+- 1b3b73c: Guide Codex agents to start a fresh typed reviewer after remediation or review expiry. Completed-agent follow-ups do not produce a new bound marker, so the gates now explain the safe recovery path. Risk scorer also verifies that a fresh lower score replaces the earlier result while an opaque follow-up leaves the earlier score unchanged.
+
 ## 0.14.9
 
 ### Patch Changes
