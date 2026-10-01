@@ -1546,3 +1546,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-09-29
 
 > Last reviewed: 2026-09-28 **P554 known error** — the installed commit hook forces release metadata onto ordinary implementation commits; ADR-390 requires changesets only at intentional release preparation. Prior: **P553 captured** — the RFC stories section's recorded contract and implementation disagree.
+
+## 2026-10-01
+
+> Last reviewed: 2026-09-29 **P554 closed** — `@windyroad/itil@2.5.1` removes the premature commit-time changeset gate while preserving cumulative metadata at intentional release preparation.

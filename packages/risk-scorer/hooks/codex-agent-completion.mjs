@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameS
 import { dirname, isAbsolute, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, response } from "./lib/codex-completion-input.mjs";
+import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response } from "./lib/codex-completion-input.mjs";
 
 const hookDir = dirname(fileURLToPath(import.meta.url));
 const markedPipelineRoots = new Set();
@@ -258,6 +258,8 @@ function stateHash(root) {
 
 function markTarget(input, target, output) {
   if (typeof target !== "string" || typeof output !== "string" || !output) return;
+  target = completionTarget(target, riskDir(input.session_id), "codex-agent-");
+  if (!target) return;
 
   const state = statePath(input, target);
   if (!existsSync(state)) return;

@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameS
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, response } from "./lib/codex-completion-input.mjs";
+import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response } from "./lib/codex-completion-input.mjs";
 
 const hookDir = dirname(fileURLToPath(import.meta.url));
 const role = "wr-architect:agent";
@@ -134,7 +134,7 @@ function writeMarker(input, registered, target, output, completedAt, claim, done
 }
 
 function complete(input, rawTarget, output) {
-  const target = normalizeTarget(rawTarget);
+  const target = completionTarget(rawTarget, riskDir(input.session_id), "codex-architect-");
   if (!target || typeof output !== "string" || !output) return;
   const state = statePath(input.session_id, target);
   if (!existsSync(state) || existsSync(`${state}.done`)) return;
