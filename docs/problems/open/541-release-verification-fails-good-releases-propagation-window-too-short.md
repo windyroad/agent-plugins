@@ -40,7 +40,7 @@ All in `scripts/verify-release-dist-tags.sh` unless noted.
 
 - `packages/shared/test/release-trusted-publishing.bats:41` asserts the failure message byte-for-byte, and that fixture's fake `npm` echoes one value for every invocation — so it would silently take the wrong branch once a version probe is added. Update the assertion, split the fixture's probes so the version and dist-tag lookups answer independently, and add a case for the absent-from-registry branch. Prove both RED first.
 - Any new `npm view` probe needs `|| true`: the script runs under `set -eu` and `npm view` exits non-zero on an absent version. Place it on the failure branch only, to avoid doubling registry reads.
-- **Unverified**: whether repeated `npm view` calls within the window actually reach the registry or are served from the local metadata cache. If the latter, a wider window buys nothing. Consider `--prefer-online` or a per-run `npm_config_cache`. This needs an empirical check before the widened window is trusted.
+- **Verified 2026-10-01**: two consecutive `npm view @windyroad/architect@0.23.8 version --workspaces=false --prefer-online --loglevel=http` calls both returned HTTP GET 200 from `registry.npmjs.org`; the second reported `cache revalidated` (87ms). Repeated `--prefer-online` probes therefore revalidate cached metadata against the registry.
 
 ### Prior art
 
@@ -101,7 +101,7 @@ Post-publish verification treats registry visibility as immediate when it is eve
 
 ### Investigation Tasks
 
-- [ ] Verify empirically whether repeated `npm view` calls within the window reach the registry or are served from cache (blocks trusting any widened window).
+- [x] Verify empirically whether repeated `npm view` calls within the window reach the registry or are served from cache (two HTTP 200 requests; second cache revalidated, 2026-10-01).
 - [ ] Restructure the retry to a single run-level deadline computed before the per-package loop, or a round-robin over the not-yet-confirmed set.
 - [ ] Widen the window to a real multiple of observed propagation, keeping the env override.
 - [ ] Split the failure message into absent-from-registry vs present-but-not-latest.
