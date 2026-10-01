@@ -123,7 +123,7 @@ Post-publish verification treats registry visibility as immediate when it is eve
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-103 | STORY-103: Trust stable npm release verification | draft |
+| STORY-103 | STORY-103: Trust stable npm release verification | accepted |
 
 ## Related
 
