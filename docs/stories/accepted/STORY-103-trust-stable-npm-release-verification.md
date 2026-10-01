@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: trust-stable-npm-release-verification
 reported: 2026-10-01
 decision-makers: [Tom Howard]
