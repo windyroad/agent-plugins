@@ -1,5 +1,11 @@
 # @windyroad/jtbd
 
+## 0.14.11
+
+### Patch Changes
+
+- d0a0b30: Resolve nested Codex reviewer completion names within the current session. Preserve canonical target checks and reject ambiguous or cross-session matches.
+
 ## 0.14.10
 
 ### Patch Changes
