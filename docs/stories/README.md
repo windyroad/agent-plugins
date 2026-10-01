@@ -178,6 +178,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | in-progress | STORY-098 | The loop I left running is still running when I get back | S | P543 | RFC-099 | STORY-MAP-011 |
 | accepted | STORY-099 | A clean reconciler result means the tier really is clean | M | P472 | RFC-100 | STORY-MAP-002 |
 | accepted | STORY-101 | Trust agent-prose CI across model updates | S | P459 | RFC-102 | STORY-MAP-002 |
+| draft | STORY-103 | Trust stable npm release verification | M | P541 | RFC-104 | STORY-MAP-002 |
 | draft | STORY-091 | Invoke the Wardley map converter by a name that survives every upgrade | S | P437 | RFC-095 | STORY-MAP-008 |
 | draft | STORY-093 | Every conversion tells the reporter it landed | M | P432 | RFC-097 | STORY-MAP-004 |
 

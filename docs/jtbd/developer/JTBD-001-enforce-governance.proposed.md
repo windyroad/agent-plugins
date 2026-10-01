@@ -42,6 +42,7 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 
 | ID | Title | Status |
 |----|-------|--------|
+| STORY-103 | STORY-103: Trust stable npm release verification | draft |
 | STORY-054 | STORY-054: Lifecycle transitions preserve a story's ratification | accepted |
 | STORY-055 | STORY-055: One definition of what the oversight fingerprint ignores | accepted |
 | STORY-061 | STORY-061: See why a SubagentStop risk receipt was not written | accepted |

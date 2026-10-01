@@ -115,7 +115,19 @@ Post-publish verification treats registry visibility as immediate when it is eve
 - **Blocked by**: (none)
 - **Composes with**: P284 (release-pipeline sibling — different failure class: publish-auth, not verification false-negative)
 
+## RFCs
+
+- RFC-104 — Trust stable npm release verification (STORY-MAP-002; proposed)
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-103 | STORY-103: Trust stable npm release verification | draft |
+
 ## Related
+
+- Release run 36803247881 (2026-10-01) — five packages published, post-publish tag verification failed before npm propagated their `latest` tags; rerun passed once all tags were visible.
 
 - Run 35350964367 — the failing release; registry `time` map records 2.4.0 at 2026-09-18T13:37:45.239Z.
 - `docs/briefing/releases-and-ci.md` line 9 — recorded intent this fix continues.
