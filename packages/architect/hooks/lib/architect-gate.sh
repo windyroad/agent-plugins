@@ -22,7 +22,7 @@ check_architect_gate() {
   # P191 Phase 2: anchor the docs/decisions drift-hash on the project root,
   # not the hook's runtime CWD (see architect-enforce-edit.sh for rationale).
   local PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
-  local COMPLETION_GUIDANCE="On Codex, wait for the reviewer to finish, then invoke interrupt_agent exactly once with that completed task's exact target before retrying. On Claude Code, dispatch the reviewer synchronously. Do not create or edit review markers manually."
+  local COMPLETION_GUIDANCE="On Codex, spawn a fresh typed reviewer for each new assessment; followup_task on a completed reviewer cannot refresh its marker. Wait for completion, then invoke interrupt_agent exactly once with that target before retrying. On Claude Code, dispatch the reviewer synchronously. Do not create or edit review markers manually."
 
   if [ -n "$SESSION_ID" ] && [ -f "$MARKER" ]; then
     local NOW=$(date +%s)

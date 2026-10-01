@@ -141,6 +141,25 @@ dispatch_pretool() {
   [ "$(find "$TMPDIR/claude-risk-$SESSION" -name 'codex-agent-*.done' | wc -l | tr -d ' ')" = "1" ]
 }
 
+@test "a fresh typed review replaces an earlier score while an opaque follow-up does not" {
+  dispatch "$(pipeline_spawn_input)"
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input child-session child-agent 10)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "10" ]
+
+  followup="$(jq -cn --arg session "$SESSION" --arg cwd "$OTHER_REPO" \
+    '{session_id:$session,cwd:$cwd,tool_name:"collaboration.followup_task",tool_input:{target:"child-agent",message:"Reassess the current state"},tool_response:{message:"queued"}}')"
+  dispatch "$followup"
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input child-session child-agent 4)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "10" ]
+
+  dispatch "$(pipeline_spawn_input fresh-review)"
+  dispatch_subagent_stop "$(pipeline_subagent_stop_input fresh-session fresh-review 4)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
+}
+
 @test "background external-comms PASS is imported only by its parent session" {
   draft="Background receipt release note"
   review_key="$(source "$HOOK_DIR/lib/external-comms-key.sh" && compute_external_comms_key "$draft" changeset-author)"

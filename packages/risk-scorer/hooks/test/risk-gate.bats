@@ -325,6 +325,8 @@ _write_matching_hash() {
   printf '10' > "$SCORE_FILE"
   rm -f "$HASH_FILE"
   assert_gate_denies "$TEST_SESSION" "commit" "appetite of 9/25"
+  [[ "$RISK_GATE_REASON" == *"spawn a fresh typed wr-risk-scorer:pipeline reviewer"* ]]
+  [[ "$RISK_GATE_REASON" == *"followup_task does not refresh the recorded score"* ]]
 }
 
 @test "appetite via 'Threshold: 9' phrasing: score 9 PASSES, score 10 FAILS" {

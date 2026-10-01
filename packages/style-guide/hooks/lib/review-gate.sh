@@ -17,7 +17,7 @@ check_review_gate() {
   local MARKER="/tmp/${SYSTEM}-reviewed-${SESSION_ID}"
   local HASH_FILE="/tmp/${SYSTEM}-reviewed-${SESSION_ID}.hash"
   local TTL_SECONDS="${REVIEW_TTL:-3600}"
-  local COMPLETION_GUIDANCE="On Codex, wait for the reviewer to finish, then invoke interrupt_agent exactly once with that completed task's exact target before retrying. On Claude Code, dispatch the reviewer synchronously. Do not create or edit review markers manually."
+  local COMPLETION_GUIDANCE="On Codex, spawn a fresh typed reviewer for each new assessment; followup_task on a completed reviewer cannot refresh its marker. Wait for completion, then invoke interrupt_agent exactly once with that target before retrying. On Claude Code, dispatch the reviewer synchronously. Do not create or edit review markers manually."
 
   # 1. Marker must exist
   if [ ! -f "$MARKER" ]; then

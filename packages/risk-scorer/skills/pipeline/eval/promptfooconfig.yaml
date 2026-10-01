@@ -22,3 +22,18 @@ tests:
         value: 'interrupt_agent'
       - type: icontains
         value: 'exactly once'
+  - description: Codex starts a fresh typed reviewer after remediation
+    provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'
+    vars:
+      prompt: |
+        A completed pipeline reviewer recorded commit risk 10/25. The draft
+        has since been remediated. Explain how to obtain a new bound score on
+        Codex, give the exact agent_type, and state whether followup_task on
+        the completed reviewer suffices.
+    assert:
+      - type: icontains
+        value: 'fresh'
+      - type: contains
+        value: 'wr-risk-scorer:pipeline'
+      - type: icontains
+        value: 'followup_task'
