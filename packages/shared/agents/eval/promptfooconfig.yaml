@@ -11,6 +11,8 @@ tests:
     vars:
       prompt: |
         This is a hypothetical workflow check. Do not run tools or change files.
+        Delivery stages are commit, push, release, and install. Checking an
+        outcome is part of its stage, not an additional delivery stage.
         The user requested: commit, push, release, then install the published tag.
         The commit has succeeded. Output only the remaining delivery stage names
         as one lowercase comma-separated line, with no explanation.
@@ -22,6 +24,8 @@ tests:
     vars:
       prompt: |
         This is a hypothetical workflow check. Do not run tools or change files.
+        Delivery stages are commit, push, release, and install. Checking an
+        outcome is part of its stage, not an additional delivery stage.
         The user requested: commit and push. The commit has succeeded. State the
         remaining delivery stage names as one lowercase comma-separated line,
         with no explanation.

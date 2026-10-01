@@ -11,6 +11,10 @@ setup() {
   cat > "$BIN/claude" <<'SH'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >> "$CLAUDE_LOG"
+if [[ -n "${CLAUDE_ARGV_LOG:-}" ]]; then
+  [[ "${CLAUDE_CODE_OAUTH_TOKEN:-}" == fixture-token ]] || exit 2
+  printf '%s\0' "$@" > "$CLAUDE_ARGV_LOG"
+fi
 if [[ " $* " == *" --output-format stream-json "* ]]; then
   printf '%s\n' '{"type":"assistant","parent_tool_use_id":null,"message":{"content":[{"type":"text","text":"JTBD Review: PASS"}]}}'
 elif [[ "${FAKE_CLAUDE_GRADER:-0}" == 1 ]]; then
@@ -27,6 +31,27 @@ printf 'agent=%s grader=%s argv=%s\n' \
   "${AGENT_EVAL_MODEL:-}" "${AGENT_EVAL_GRADER_MODEL:-}" "$*" > "$NPM_LOG"
 SH
   chmod +x "$BIN/npm"
+}
+
+@test "shared text eval disables tools and ambient hooks without disabling OAuth" {
+  run env PATH="$BIN:$PATH" CLAUDE_LOG="$CLAUDE_LOG" CLAUDE_ARGV_LOG="$TMP/argv" \
+    CLAUDE_CODE_OAUTH_TOKEN='fixture-token' \
+    "$REPO_ROOT/packages/shared/agents/eval/run-claude-eval.sh" 'hypothetical fixture'
+  [ "$status" -eq 0 ]
+  run python3 - "$TMP/argv" "$REPO_ROOT/CLAUDE.md" <<'PY'
+import json, pathlib, sys
+args = pathlib.Path(sys.argv[1]).read_bytes().decode().split('\0')[:-1]
+def value(flag): return args[args.index(flag) + 1]
+assert value('--tools') == ''
+assert value('--permission-mode') == 'dontAsk'
+assert value('--setting-sources') == ''
+assert json.loads(value('--settings'))['disableAllHooks'] is True
+assert '--no-session-persistence' in args
+assert '--bare' not in args
+assert value('--system-prompt') == pathlib.Path(sys.argv[2]).read_text().rstrip('\n')
+assert args[-1] == 'hypothetical fixture'
+PY
+  [ "$status" -eq 0 ]
 }
 
 teardown() {
