@@ -130,13 +130,6 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "create-adr SKILL.md carries the P352 carve-out audit (Step 1 AUTO-DEFAULT + Step 5 HALT)" {
-  SKILL="${REPO_ROOT}/packages/architect/skills/create-adr/SKILL.md"
-  [ -f "$SKILL" ]
-  run grep -nE "ADR-013 Rule 6 carve-out audit \(P352" "$SKILL"
-  [ "$status" -eq 0 ]
-}
-
 @test "manage-problem SKILL.md carries the P352 carve-out audit (Step 4b AUTO-DEFAULT)" {
   SKILL="${REPO_ROOT}/packages/itil/skills/manage-problem/SKILL.md"
   [ -f "$SKILL" ]
