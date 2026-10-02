@@ -15,6 +15,18 @@ An unsolicited adjacent suggestion is not a considered option. Omit it from the 
 
 This skill is the foreground-lightweight-capture variant of `/wr-architect:create-adr`'s new-ADR path per ADR-032 (P156 amendment, 2026-05-03). The deferred background-capture variant named in ADR-032's original taxonomy remains deferred per P088 settlement.
 
+## One headline, no riders
+
+Each ADR records only one independently changeable headline decision. Split multiple decisions into separate ADRs. Include context, alternatives, rationale, consequences and decision-level confirmation criteria. Keep implementation instructions, commands, resource configuration and delivery tasks outside ADRs. No riders: ratification covers only the single explicitly presented headline decision. Additional decisions, clauses or conditions require separate ratification. Context, rationale, consequences and confirmation criteria must not introduce additional mandatory choices. Preserve ratified substance; propose amendments through separate successor proposals rather than rewriting it unilaterally.
+
+## ADR lifecycle: propose, use, then accept
+
+A proposed ADR may guide implementation before human ratification. Keep it `status: proposed` and `human-oversight: unconfirmed` while building and learning; proposal implementation does not grant acceptance. Do not request final ratification merely to unblock implementation.
+
+Acceptance requires **both** explicit human ratification of the final decision substance **and** evidence of successful actual production use satisfying its Confirmation criteria. Confirmation must contain evidence that the chosen architecture has worked in actual production use, sufficient for a human to evaluate it. Operational receipts and delivery instructions belong in the delivery artifact. Local tests, CI, publication, previews, staging, and synthetic evaluations alone are insufficient. Missing either condition means the ADR stays proposed. Do not invent evidence or automatically promote historical ADRs.
+
+Once production evidence is complete, finish the draft, obtain cognitive accessibility review, present the complete substance, and seek human ratification through the existing ratification flow. Only then record acceptance; preserve existing supersession procedures. Direction to experiment or build is not final ratification. Existing architecture, story-map, job, risk, and release gates still apply.
+
 ## When to invoke
 
 - **Mid-iter design decision**: agent or user lands on a design choice during foreground work and cannot afford the ~10-15 turn ceremony of `/wr-architect:create-adr`.
@@ -24,7 +36,7 @@ This skill is the foreground-lightweight-capture variant of `/wr-architect:creat
 **Use `/wr-architect:create-adr` instead** when:
 - The user wants to walk the full interactive intake flow and author the sections themselves (Considered Options ≥2, Decision Drivers, full Consequences, Confirmation criteria, Pros/Cons of Options via AskUserQuestion).
 - The decision is contested or under-specified in-session — silent derivation needs a real decision context to derive FROM; if the options were never actually weighed, create-adr's interactive intake is the honest surface.
-- The decision needs immediate architect review + acceptance (capture-adr writes `.proposed.md`; acceptance review is a follow-up via `/wr-architect:create-adr` or direct architect-agent review).
+- The decision has production evidence and needs final architect review + acceptance (capture-adr writes `.proposed.md`; acceptance review is a follow-up via `/wr-architect:create-adr` or direct architect-agent review).
 
 ## Rule 6 audit (per ADR-032 + ADR-013)
 
@@ -35,7 +47,7 @@ This skill has **zero AskUserQuestion branches** by design. Each potentially-int
 | Considered Options ≥2 | Silent derivation (ADR-044 category-4): write the chosen option PLUS every alternative the decision-maker actually weighed and rejected in the decision context (`$ARGUMENTS` + the invoking session). An unsolicited adjacent suggestion is not an option. Real options with one-line summaries — never a placeholder sibling. If the context genuinely weighed only one option, derive the strongest do-nothing / status-quo alternative and say why it lost. |
 | Decision drivers | Silent derivation: extract the forces that actually drove the decision from the context (the problem's symptoms, the constraint that ruled options out, the user's stated priorities). |
 | Consequences | Silent derivation: real Good/Neutral/Bad trade-off analysis of the chosen option. The invoking agent performs the analysis at capture — it has more decision context in-session than any later expansion pass would. |
-| Confirmation criteria | Silent derivation: testable criteria (a command, an observable behaviour, a hook that fires) confirming the decision is implemented and holding. |
+| Confirmation criteria | Silent derivation: decision-level criteria (observable behavior demonstrating the chosen architecture) confirming the decision is implemented and holding. |
 | Reassessment criteria | Silent derivation: real conditions that would reopen the decision, plus `reassessment-date` default 3 months from today (matches `create-adr` Step 4 default). |
 | Decision-makers / consulted / informed | Silent derivation: `decision-makers: [<git config user.name>]` plus any decision-owner named in `$ARGUMENTS`; `consulted`/`informed` from context or `[]`. Never a sentinel string. |
 | Empty `$ARGUMENTS` | Halt-with-stderr-directive: print "capture-adr requires Title + 1-line Context + 1-line Decision in $ARGUMENTS — invoke /wr-architect:create-adr instead for the full intake flow" and exit. AFK orchestrators MUST NOT invoke capture-adr with empty arguments — caller-side contract. |
@@ -143,7 +155,7 @@ Chosen option: **"<Chosen option>"**, because <the real reason from $ARGUMENTS/c
 
 ## Confirmation
 
-<testable criteria: a command, an observable behaviour, a gate that fires — how a future reader verifies the decision is implemented and holding>
+<decision-level observable outcomes demonstrating the chosen architecture; keep commands and delivery tasks in the delivery artifact>
 
 ## Pros and Cons of the Options
 
@@ -204,12 +216,12 @@ The `capture` verb is the audit signal that this ADR landed via the lightweight 
 After the commit, report:
 
 - The new ADR file path and ID.
-- Trailing pointer: `ADR-<NNN> was captured with derived substance and is human-oversight: unconfirmed — the SessionStart oversight nudge will surface it for ratification at /wr-architect:review-decisions (or ratify now if interactive).`
+- Trailing pointer: `ADR-<NNN> was captured with derived substance and is human-oversight: unconfirmed — the SessionStart oversight nudge will surface it for ratification at /wr-architect:review-decisions (after successful actual production-use evidence is available).`
 - Note any renumber-from-origin-collision log line from Step 2.
 
 The trailing pointer is **not optional** — it is the user-visible signal that the derived substance awaits human ratification. Unlike the pre-RFC-045 contract there is no expansion step: the sections are already real; the drain confirms or amends them.
 
-**Confirm-every-ADR gate (ADR-064):** a capture-adr ADR is recorded `proposed` with derived substance but WITHOUT human review of that substance. It must NOT be promoted to `accepted` until a human has ratified the derived content via `/wr-architect:review-decisions` (or a `/wr-architect:create-adr` review-and-confirm pass). Capture records the decision quickly; the ratification — not the capture — is what gives it human oversight. This is prong 1 of P283 (lift auto-/quick-recorded decisions to human-confirmed before they stand).
+**Confirm-every-ADR gate (ADR-064):** a capture-adr ADR is recorded `proposed` with derived substance but WITHOUT human review of that substance. It must NOT be promoted to `accepted` until successful actual production use is evidenced and a human has ratified the final derived content via `/wr-architect:review-decisions` (or a `/wr-architect:create-adr` review-and-confirm pass). Capture records the decision quickly; the ratification — not the capture — is what gives it human oversight. This is prong 1 of P283 (lift auto-/quick-recorded decisions to human-confirmed before they stand).
 
 **Oversight marker discipline (ADR-110 / P348).** A capture-adr ADR MUST be born `human-oversight: unconfirmed` — NOT `confirmed`. Capture is the AFK-friendly aside surface; there is no substance-confirm `AskUserQuestion` pass in this flow, so `confirmed` would be a hollow marker (the P348 bug class). The `architect-oversight-marker-discipline.sh` PreToolUse hook will DENY any Edit/Write that introduces `human-oversight: confirmed` without a matching session-scoped evidence marker. The frontmatter (Step 3 above) MUST include `human-oversight: unconfirmed` so the ADR enters the world honestly self-identified as needing user confirmation. The drain (`/wr-architect:review-decisions`) and a `/wr-architect:create-adr <NNN>` review pass are the surfaces that legitimately promote it to `confirmed` via `wr-architect-mark-oversight-confirmed` + the gated marker write.
 

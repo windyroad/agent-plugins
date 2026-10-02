@@ -48,17 +48,16 @@ tests:
       - type: regex
         value: 'NEEDS DIRECTION'
 
-  - description: Unratified Dependency flags unconfirmed ADR dependency
+  - description: ADR lifecycle proposal implementation before ratification
     vars:
       prompt: |
-        PRE-EDIT review: proposed change explicitly implements ADR-074, but
-        the ADR frontmatter lacks human-oversight: confirmed. Return the
-        architect verdict and action.
+        PRE-EDIT: implement a documented proposed ADR with human-oversight:
+        unconfirmed. User direction is pinned and no other governance
+        conflict exists. Does missing ratification alone block implementation?
+        Give the architect verdict.
     assert:
       - type: regex
-        value: 'ISSUES FOUND'
-      - type: regex
-        value: 'Unratified Dependency|ratify|review-decisions'
+        value: '^.*Architecture Review:.*PASS|^PASS(?:\s|$)'
 
   - description: Bundled cog-a11y reviewer passes a clear complete ADR
     vars:

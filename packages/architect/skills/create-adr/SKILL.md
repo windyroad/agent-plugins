@@ -13,6 +13,18 @@ The user's pinned subject bounds every ADR section: do not add adjacent populati
 When asked for the ADR file body, output only that body. Do not append a recap of excluded rollout work or unsolicited suggestions after it.
 An unsolicited adjacent suggestion is not a considered option. Omit it from the entire ADR, including reassessment criteria, and do not revive it in post-ADR notes or follow-up offers unless the decision-maker actually chose to consider it.
 
+## One headline, no riders
+
+Each ADR records only one independently changeable headline decision. Split multiple decisions into separate ADRs. Include context, alternatives, rationale, consequences and decision-level confirmation criteria. Keep implementation instructions, commands, resource configuration and delivery tasks outside ADRs. No riders: ratification covers only the single explicitly presented headline decision. Additional decisions, clauses or conditions require separate ratification. Context, rationale, consequences and confirmation criteria must not introduce additional mandatory choices. Preserve ratified substance; propose amendments through separate successor proposals rather than rewriting it unilaterally.
+
+## ADR lifecycle: propose, use, then accept
+
+A proposed ADR may guide implementation before human ratification. Keep it `status: proposed` and `human-oversight: unconfirmed` while building and learning; proposal implementation does not grant acceptance. Do not request final ratification merely to unblock implementation.
+
+Acceptance requires **both** explicit human ratification of the final decision substance **and** evidence of successful actual production use satisfying its Confirmation criteria. Confirmation must contain evidence that the chosen architecture has worked in actual production use, sufficient for a human to evaluate it. Operational receipts and delivery instructions belong in the delivery artifact. Local tests, CI, publication, previews, staging, and synthetic evaluations alone are insufficient. Missing either condition means the ADR stays proposed. Do not invent evidence or automatically promote historical ADRs.
+
+Once production evidence is complete, finish the draft, obtain cognitive accessibility review, present the complete substance, and seek human ratification through the existing ratification flow. Only then record acceptance; preserve existing supersession procedures. Direction to experiment or build is not final ratification. Existing architecture, story-map, job, risk, and release gates still apply.
+
 ## Needs-Direction handoff + confirm-every-ADR (ADR-064)
 
 When a `wr-architect:agent` review returns a **NEEDS DIRECTION** verdict (a new decision with 2+ viable options and no pinned direction, per ADR-064), the option choice is the user's, not the agent's — this skill is the translation surface. The architect's named question + options become the Step 2 cat-1 `AskUserQuestion` calls (Considered Options / Decision Outcome), and the Step 5 confirm is the load-bearing **review-and-confirm-every-ADR** gate: an ADR must not stand as a human-oversighted decision (reach `accepted`) without that confirm pass. A `/wr-architect:capture-adr` ADR — zero-ask, with its decision pre-pinned in `$ARGUMENTS` and its remaining sections silently DERIVED at capture per the ADR-032 derived-substance amendment (RFC-045) — must still have its derived substance human-ratified (via `/wr-architect:review-decisions` or this skill's confirm) before promotion to `accepted`. When direction IS already pinned (same-turn / same-session / accepted ADR / RISK-POLICY.md / CLAUDE.md mandatory rule), act on it — do not re-ask (P132 inverse-P078 guard).
@@ -96,30 +108,9 @@ ADR titles must name the **decision outcome** as a short noun phrase, not the qu
 
 (Serves JTBD-001 — skimmable titles speed the read path for the governance-enforcement persona.)
 
-### 2b. Decision-boundary analysis (multi-decision check)
+### 2b. Decision-boundary analysis — mandatory split
 
-Before writing the ADR file, perform a decision-boundary analysis on the gathered context to prevent conflated ADRs that block independent status transitions and weaken auditability (P017).
-This check applies only to decisions the user actually asked to make; splitting or keeping decisions together never authorizes an unrequested rider.
-
-**Self-check**: Read the context gathered in step 2. Answer: "How many distinct decisions are present? If each could be independently accepted, rejected, or superseded without affecting the others, they are distinct."
-
-- **Single decision** (one coherent question with one chosen option): proceed directly to step 3.
-- **Multiple decisions** (two or more distinct questions, different components, or different decision drivers that do not share the same trade-off): present a split prompt.
-
-**Split prompt** — use `AskUserQuestion`:
-- `header: "Multi-decision input"`
-- `multiSelect: false`
-- Options:
-  1. `Split into separate ADRs (Recommended)` — description: "Create one ADR per distinct decision, with consecutive IDs. Each ADR can be accepted, rejected, or superseded independently."
-  2. `Keep as a single ADR` — description: "Create one ADR covering all decisions. Use this only if the decisions are so tightly coupled that they cannot be made independently."
-
-**Non-interactive fallback**: When `AskUserQuestion` is unavailable (e.g., non-interactive/AFK mode), automatically split into separate ADRs with consecutive IDs and note the auto-split in output. Do not block creation.
-
-**ADR-013 Rule 6 carve-out audit (P352, 2026-06-06 amendment)**: the universal AFK default is **queue-and-continue**; this site is a documented **AUTO-DEFAULT** carve-out. Authorising principle: policy-authorised safe default per ADR-044 category 4 (silent framework). Splitting is fully reversible (manual combine via supersession), the framework's WSJF / lifecycle model rewards explicit per-decision ranking, and "split when in doubt" is the persona-correct safe heuristic for JTBD-006 (the loop progresses; over-splits are cheap to combine; halt would cost more loop throughput than the over-split risk). Note: the Step 5 substance-confirm HALT below is a separate carve-out authorised by ADR-074 — substance-confirm cannot AUTO-DEFAULT because the dependent work (Decision Outcome / Consequences / Confirmation / Pros and Cons drafting) is built ON the chosen option.
-
-**Split implementation**: When splitting, assign consecutive IDs. Cross-reference each ADR in the other's Related section or as a linked decision in the consequences.
-
-**Scope**: Scoped to new ADR creation only (steps 2–5). Does not apply to supersession handling (step 6), where the scope of the new decision is already known and bounded.
+Read the gathered context and identify independently changeable headline decisions. Split each into its own ADR with consecutive IDs. This is mechanical; do not ask whether to keep several independent choices in one ADR, including in unattended runs. Explain the split in the report. Supporting sections cannot add mandatory choices or expand the scope of ratification. Apply the same check to successor proposals.
 
 ### 3. Determine sequence number and filename
 
@@ -237,6 +228,10 @@ Use this runtime-specific review path. Supply the shared rubric and complete ADR
 
 After the final `PASS`, do not edit the ADR before presenting the summary, ADR file, and structured substance question. If any later answer requires an ADR edit, return to this step and obtain another `PASS` before re-presentation.
 
+### 4.6 Check production evidence before final ratification
+
+If successful actual production use has not yet been evidenced in Confirmation, save and commit the complete ADR as proposed/unconfirmed, refresh the compendium, report the missing evidence, and continue authorized implementation. Skip Step 5 and do not retire predecessors. Intake option selection pins an experiment; it does not approve the architecture permanently.
+
 ### 5. Confirm the substance with the user (P339 + P340)
 
 The optional draft-quality question occurred before cognitive review and does not gate the marker. Step 5 now fires only the separate substance-confirm question: the user picks the chosen option from the considered-options set, and that answer gates the born-confirmed marker write.
@@ -273,7 +268,7 @@ options:
 
 **Defer the marker write until the draft is final.** Complete the retitle, optional draft-quality edits, and any `supersedes:` declaration before cognitive review. A matching substance-confirm answer then authorises `human-oversight: confirmed` as the final content write in Step 5b. This ordering is required because a confirmed ADR is immutable. AFK iter subprocesses spawned via `claude -p` have no `AskUserQuestion` access; they MUST leave `human-oversight: unconfirmed` for the interactive drain.
 
-**ADR-013 Rule 6 carve-out audit (P352, 2026-06-06 amendment)**: the universal AFK default is queue-and-continue. This Step 5 substance-confirm HALT-and-write-`human-oversight: unconfirmed` shape is a documented carve-out, authorised by **ADR-074** (Confirm decision substance before building dependent work). Rationale: an ADR with `human-oversight: confirmed` enters the world born-confirmed (it does not appear in `/wr-architect:review-decisions`' unoversighted set), so dependent work — every implementation that cites this ADR as authority — would be built on substance that was never user-affirmed. AFK writing `human-oversight: unconfirmed` IS the queue-and-continue shape: the loop continues; the substance-confirm decision is queued to the next interactive drain. Persona-correct for JTBD-006 ("queued for my return, not guessed at"); the carve-out is from the auto-confirm shape, not from queue-and-continue itself.
+**AFK rule:** leave `human-oversight: unconfirmed`, keep the ADR proposed, and continue authorized implementation. Queue final ratification only after successful actual production-use evidence is available. Missing a ratification interaction is not an ADR implementation blocker.
 
 **Mismatch handling.** If the substance-confirm answer selects a DIFFERENT option than the draft was authored against:
 
@@ -313,7 +308,7 @@ human-oversight: confirmed
 oversight-date: YYYY-MM-DD   # today
 ```
 
-The PostToolUse hook writes the session-scoped evidence marker consumed by `architect-oversight-marker-discipline.sh`. Calling the helper without a real substance-confirm event is forbidden. Once these lines land, do not edit the ADR body or clear the marker; a later choice requires a new superseding ADR.
+The PostToolUse hook writes the session-scoped evidence marker consumed by `architect-oversight-marker-discipline.sh`. Calling the helper without a real substance-confirm event is forbidden. After recording these lines, set `status: accepted` as part of the same final acceptance write; both production evidence and human ratification must already exist. Do not subsequently edit the accepted ADR body or clear its marker; a later choice requires a new superseding ADR. Rename the newly accepted file from `*.proposed.md` to `*.accepted.md` with `git mv` so filename-based readers observe the same accepted state.
 
 If the new ADR supersedes an older decision, now rename the older file to `*.superseded.md` with `git mv`. Do not edit the old decision's frontmatter or body. This eliminates the P057 staging trap: there is no post-rename edit.
 

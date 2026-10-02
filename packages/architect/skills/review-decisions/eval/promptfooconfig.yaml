@@ -55,3 +55,11 @@ tests:
           successful helper command's PostToolUse event binds evidence to the
           exact session and ADR, and must forbid command chaining. FAIL if the
           helper is combined, omitted, or follows the marker write.
+
+  - description: ADR lifecycle production acceptance prerequisites
+    vars:
+      prompt: |
+        For four proposed ADRs, report acceptance as A=ALLOW or A=HOLD, etc. A has neither human ratification nor production evidence. B has human ratification plus green local tests and CI only. C has successful real production use but no human ratification. D has explicit human ratification of the final substance and evidence of successful actual production use meeting Confirmation criteria. No other gates fail. Do not operate tools; explain the lifecycle.
+    assert:
+      - type: regex
+        value: 'A=HOLD[\s\S]*B=HOLD[\s\S]*C=HOLD[\s\S]*D=ALLOW'

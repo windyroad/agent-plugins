@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 132 (117 in-force, 15 historical)
+**Total ADRs:** 134 (119 in-force, 15 historical)
 
 ---
 
 ## In-force decisions
 
-_117 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_119 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -600,6 +600,14 @@ _117 ADRs. These are the current rules. The architect agent reads this section f
 **Status:** proposed | **Oversight:** confirmed | **Supersedes:** ["ADR-103 (in part — the pre-creation human gate for a new map)", "ADR-119 (in part — the pre-creation human gate when a fix needs its first map)"]
 **Chosen:** Chosen option: **"Author the map proposal, then ask for ratification"**, because ratification is meaningful only after the user can review the substance being ratified.
 **Confirmation:** When a repository has no suitable story map, the problem workflow authors a complete unconfirmed map proposal ...; The proposal includes any initial release row, cards, and story files required to present a valid fix proposal...; The completed map proposal is presented for ratification, and only that ratification writes the confirmed over...; Source changes and story-implementation commits depending on the map are refused while it remains unratified.; Initial release rows and cards remain outside the oversight fingerprint, and later row/card edits do not reope...; In unattended mode, map proposal creation completes, exactly one ratification item for the completed map is qu...; Behavioural evaluations reject responses that ask permission to create a map, skip map authoring, auto-ratify,...
+
+### ADR-135 — ADR acceptance after production use and human ratification
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Chosen option: **"Acceptance after both human ratification and successful production use"**, following Tom's direction on 2026-10-02. This document remains a proposal; direction to draft or build is not final ratification.
+
+### ADR-136 — Implementation against proposed ADRs
+**Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** [ADR-074, ADR-066]
+**Chosen:** Chosen option: **"Allow authorized implementation against a documented proposal"**, following Tom's direction on 2026-10-02. This document remains a proposal; direction to draft or build is not final ratification.
 
 ---
 

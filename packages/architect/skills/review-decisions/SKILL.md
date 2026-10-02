@@ -10,6 +10,18 @@ Lift auto-made architecture decisions to human decisions. Many ADRs were recorde
 
 This is the P283 prong-2 drain surface. It is the eat-our-own-dogfood loop: confirming a decision is itself a human decision, so it goes through `AskUserQuestion`.
 
+## One headline, no riders
+
+Each ADR records only one independently changeable headline decision. Split multiple decisions into separate ADRs. Include context, alternatives, rationale, consequences and decision-level confirmation criteria. Keep implementation instructions, commands, resource configuration and delivery tasks outside ADRs. No riders: ratification covers only the single explicitly presented headline decision. Additional decisions, clauses or conditions require separate ratification. Context, rationale, consequences and confirmation criteria must not introduce additional mandatory choices. Preserve ratified substance; propose amendments through separate successor proposals rather than rewriting it unilaterally.
+
+## ADR lifecycle: propose, use, then accept
+
+A proposed ADR may guide implementation before human ratification. Keep it `status: proposed` and `human-oversight: unconfirmed` while building and learning; proposal implementation does not grant acceptance. Do not request final ratification merely to unblock implementation.
+
+Acceptance requires **both** explicit human ratification of the final decision substance **and** evidence of successful actual production use satisfying its Confirmation criteria. Confirmation must contain evidence that the chosen architecture has worked in actual production use, sufficient for a human to evaluate it. Operational receipts and delivery instructions belong in the delivery artifact. Local tests, CI, publication, previews, staging, and synthetic evaluations alone are insufficient. Missing either condition means the ADR stays proposed. Do not invent evidence or automatically promote historical ADRs.
+
+Once production evidence is complete, finish the draft, obtain cognitive accessibility review, present the complete substance, and seek human ratification through the existing ratification flow. Only then record acceptance; preserve existing supersession procedures. Direction to experiment or build is not final ratification. Existing architecture, story-map, job, risk, and release gates still apply.
+
 ## When to use
 
 - The session-start nudge reported `N decisions lack human oversight`.
@@ -34,6 +46,10 @@ The `wr-architect-detect-unoversighted` command is a `$PATH`-resolved shim (ADR-
 ### Step 2: Cluster + order
 
 Read **only the frontmatter + title + Decision Outcome** of each unoversighted ADR (not full bodies — keep it cheap). Group by topic cluster (e.g. release-cadence, governance-gates, AFK-orchestration, decision-recording) and order **load-bearing first**: ADRs that other ADRs cite as parents, that are `accepted` (already shipped — highest drift cost if the auto-pick was wrong), or that govern a hook/gate the user interacts with daily. Defer narrow / low-coupling ADRs.
+
+### Step 2.4: Check production evidence
+
+Before the ratification review, read each ADR's Confirmation section. Missing successful actual production-use evidence means HOLD: leave it proposed/unconfirmed, report the evidence gap, and continue authorized implementation. Do not ask for final ratification of an unproven proposal. For an ADR whose production use is evidenced, proceed to cognitive review and human ratification of the final substance. Ratification alone, or production evidence alone, never grants acceptance.
 
 ### Step 2.5: Cognitive-accessibility review before ratification
 
@@ -76,7 +92,7 @@ This is a genuine human-decision surface (the whole point of P283) — `AskUserQ
 
 ### Step 4: Apply the outcome
 
-- **Confirm**: run `wr-architect-mark-oversight-confirmed <adr-path>` as a standalone Bash command; do not combine it with another command, because its PostToolUse event binds the evidence to this exact session and ADR. Then write `human-oversight: confirmed` + `oversight-date: <today, YYYY-MM-DD>` into the ADR's frontmatter (insert after the `date:` line if absent; never duplicate). Confirmation is the final content write.
+- **Confirm**: run `wr-architect-mark-oversight-confirmed <adr-path>` as a standalone Bash command; do not combine it with another command, because its PostToolUse event binds the evidence to this exact session and ADR. Then write `human-oversight: confirmed` + `oversight-date: <today, YYYY-MM-DD>` into the ADR's frontmatter (insert after the `date:` line if absent; never duplicate). Confirmation and `status: accepted` form the final acceptance write, after the production evidence check and explicit human ratification. Rename the newly accepted file from `*.proposed.md` to `*.accepted.md` with `git mv` so filename-based readers observe acceptance. Preserve the existing supersession procedure without rewriting historical bodies.
 - **Amend**: apply the directed change, then return to Step 2.5. Obtain another cognitive accessibility `PASS` and re-present the summary, ADR file, and structured question. Do not write the oversight marker until a later Confirm answer matches the reviewed ADR.
 - **Reject / supersede** (ADR-066 amendment per P316):
   1. Capture the supersede ticket via a follow-up `AskUserQuestion`: "Which problem ticket tracks the supersede?" — options: existing `P<NNN>` IDs surfaced from `docs/problems/`, **Capture a new ticket** (delegate to `/wr-itil:capture-problem`), or **Defer (leave un-tracked for now)**.
@@ -115,7 +131,7 @@ Commit the drained batch per ADR-014 (one commit for the sitting's drained batch
 
 - **Never re-ask or rewrite** — a confirmed ADR carries the marker permanently and is excluded from future runs (ADR-009 never-re-ask principle). Ratification closes that document: do not clear its marker or edit its body. A later choice belongs in a new ADR that supersedes it. The same write-once permanence applies to `rejected-pending-supersede`: once the user rejects an unconfirmed ADR with a tracked ticket, the drain stops asking. When the successor lands, renaming the original to `*.superseded.md` retires it without rewriting its confirmed or rejected content.
 - **AFK** — this skill is interactive by construction (the confirm IS the human decision). It is not dispatched inside AFK iteration subprocesses; the session-start nudge self-suppresses there (`WR_SUPPRESS_OVERSIGHT_NUDGE=1`) so the drain is never half-run by an absent user.
-- **Born-confirmed going forward** — `/wr-architect:create-adr` writes the marker at its Step 5 confirm, so new ADRs enter the set already oversighted and the unoversighted count only shrinks.
+- **Proposed going forward** — new ADRs remain proposed/unconfirmed during implementation; the final acceptance flow runs only after successful actual production-use evidence is available.
 
 ## Related
 

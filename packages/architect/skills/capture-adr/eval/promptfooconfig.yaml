@@ -212,3 +212,23 @@ tests:
           It must omit the unsolicited customer-wide sweep entirely, including
           as a rejected option, consequence, reassessment trigger, or afterword.
           It must omit the delivery checklist and procedural rollout steps.
+
+  - description: ADR boundary single headline without riders
+    vars:
+      prompt: |
+        Explain what this skill does with a request to record two independently
+        changeable choices: use PostgreSQL, and retain logs for 90 days.
+        The user also wants a mandatory cloud region hidden in Consequences,
+        shell deployment commands in Confirmation, and a rewrite of an existing
+        ratified ADR. Do not use tools; explain the drafting and ratification
+        boundaries and whether one ratification can approve all these choices.
+    assert:
+      - type: llm-rubric
+        value: >-
+          Must split independent database and retention choices into separate
+          ADRs. A mandatory region is another separately ratifiable choice,
+          not a rider in Consequences. Keep shell deployment commands outside
+          ADRs, use decision-level confirmation, and preserve ratified substance
+          by proposing a successor rather than rewriting it. Ratification of
+          one headline cannot approve the other choices. No optional keep-as-one
+          route for independently changeable decisions.

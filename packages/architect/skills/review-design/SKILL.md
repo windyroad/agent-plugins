@@ -10,6 +10,18 @@ Run an architecture compliance review on demand — outside the pre-tool-use hoo
 
 This skill is **read-only**. It does not commit, push, or modify files.
 
+## One headline, no riders
+
+Each ADR records only one independently changeable headline decision. Split multiple decisions into separate ADRs. Include context, alternatives, rationale, consequences and decision-level confirmation criteria. Keep implementation instructions, commands, resource configuration and delivery tasks outside ADRs. No riders: ratification covers only the single explicitly presented headline decision. Additional decisions, clauses or conditions require separate ratification. Context, rationale, consequences and confirmation criteria must not introduce additional mandatory choices. Preserve ratified substance; propose amendments through separate successor proposals rather than rewriting it unilaterally.
+
+## ADR lifecycle: propose, use, then accept
+
+A proposed ADR may guide implementation before human ratification. Keep it `status: proposed` and `human-oversight: unconfirmed` while building and learning; proposal implementation does not grant acceptance. Do not request final ratification merely to unblock implementation.
+
+Acceptance requires **both** explicit human ratification of the final decision substance **and** evidence of successful actual production use satisfying its Confirmation criteria. Confirmation must contain evidence that the chosen architecture has worked in actual production use, sufficient for a human to evaluate it. Operational receipts and delivery instructions belong in the delivery artifact. Local tests, CI, publication, previews, staging, and synthetic evaluations alone are insufficient. Missing either condition means the ADR stays proposed. Do not invent evidence or automatically promote historical ADRs.
+
+Once production evidence is complete, finish the draft, obtain cognitive accessibility review, present the complete substance, and seek human ratification through the existing ratification flow. Only then record acceptance; preserve existing supersession procedures. Direction to experiment or build is not final ratification. Existing architecture, story-map, job, risk, and release gates still apply.
+
 ## When to use
 
 - Pre-flight before a release or client handover: confirm no ADR violations crept in
@@ -67,7 +79,7 @@ Build a self-contained prompt for the architect subagent that includes:
 - Any explicit scope from the user
 - The request: "Review these proposed changes against the project's ADRs. Flag any violations, gaps that need a new ADR, or compliance questions."
 
-The architect's verdict taxonomy includes **[Unratified Dependency]** (ADR-074 surface 3): if the plan/change explicitly cites or implements an ADR that lacks `human-oversight: confirmed` (unratified, non-superseded), the architect flags ISSUES FOUND with a "ratify via /wr-architect:review-decisions first" action. This applies to plan review exactly as to edit review — a plan built on an unratified decision should not proceed until that decision's substance is ratified. No extra prompt wiring is needed (the agent owns the check); this note records that the surface-3 check is in-scope for plan review.
+The architect permits implementation against documented proposals without prior ratification. It flags **[Premature Acceptance]** when acceptance lacks either final human ratification or successful actual production-use evidence. Apply this distinction to plans and edits alike; missing ratification alone does not block building.
 
 ### 5. Delegate to the architect agent
 

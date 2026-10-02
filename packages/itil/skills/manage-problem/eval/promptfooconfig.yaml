@@ -562,3 +562,11 @@ tests:
         value: '2\.0[\s\S]{0,200}(9(\.0)?|WSJF)|WSJF[\s\S]{0,200}9(\.0)?'
       - type: not-regex
         value: 'persist(ed|s)?[\s\S]{0,80}4\.5'
+
+  - description: ADR lifecycle proposal implementation before ratification
+    vars:
+      prompt: |
+        A fix builds on a proposed unconfirmed ADR. User direction is pinned and every story-map, job, risk and release gate passes. Should the ADR marker alone halt implementation? Begin with BUILD=ALLOW or BUILD=HOLD. Do not operate tools.
+    assert:
+      - type: regex
+        value: '^\s*(?:\*\*)?BUILD=ALLOW'

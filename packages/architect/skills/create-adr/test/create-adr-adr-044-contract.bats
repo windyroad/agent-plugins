@@ -156,16 +156,6 @@ setup() {
 # confirm-with-user remain unchanged.
 # ----------------------------------------------------------------------
 
-@test "SKILL.md Step 2b multi-decision AskUserQuestion is preserved (cat-1 direction-setting, not touched by Phase 2a-iii-B)" {
-  # Step 2b is a separate cat-1 direction-setting surface — only the
-  # user knows whether multiple decisions can be independently accepted.
-  # The Phase 2a-iii-B refactor MUST NOT touch Step 2b's AskUserQuestion gate.
-  run awk '/^### 2b\. /,/^### 3\. /' "$SKILL_FILE"
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"AskUserQuestion"* ]]
-  [[ "$output" == *"decision"* ]] || [[ "$output" == *"split"* ]]
-}
-
 @test "SKILL.md Step 5 confirm-with-user AskUserQuestion is preserved (post-write review surface)" {
   # Step 5 is the genuine cat-2 deviation-approval post-write review
   # surface (analogous to manage-incident Step 6 evidence-first gate).

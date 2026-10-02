@@ -262,3 +262,11 @@ tests:
           The response passes this unique-by-construction lookup and does NOT
           raise a [First-Match Footgun] finding. A primary-key lookup with a
           declared uniqueness invariant is the explicit over-fire guard.
+
+  - description: ADR lifecycle proposal implementation before ratification
+    vars:
+      prompt: |
+        PRE-EDIT: implement a documented proposed ADR with human-oversight: unconfirmed. The user has pinned the direction; no other governance conflict exists. Does missing ratification block implementation? Give PASS or ISSUES FOUND.
+    assert:
+      - type: regex
+        value: '^.*Architecture Review:.*PASS|^PASS(?:\s|$)'
