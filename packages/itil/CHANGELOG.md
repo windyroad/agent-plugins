@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 3.0.0
+
+### Major Changes
+
+- 6607f30: Allow implementation against proposed ADRs. Require human ratification and successful production use before acceptance. Keep each ADR to one independently changeable headline, without riders or delivery instructions. Replace retired preapproval assertions with behavioral lifecycle checks.
+
 ## 2.5.1
 
 ### Patch Changes
