@@ -147,6 +147,7 @@ if (existsSync(hooks)) {
     config.hooks.PreToolUse ||= [];
     config.hooks.PostToolUse ||= [];
     config.hooks.SubagentStop ||= [];
+    config.hooks.SubagentStart ||= [];
     const completionCommands = reviewerCompletions.map((_completion, index) => {
       const filename = index === 0 ? "codex-agent-completion.mjs" : `codex-agent-completion-${index + 1}.mjs`;
       return { type: "command", command: `node "\${PLUGIN_ROOT}/hooks-codex/${filename}"` };
@@ -163,6 +164,10 @@ if (existsSync(hooks)) {
     for (const [index, completion] of reviewerCompletions.entries()) {
       const filename = index === 0 ? "codex-agent-completion.mjs" : `codex-agent-completion-${index + 1}.mjs`;
       const command = `node "\${PLUGIN_ROOT}/hooks-codex/${filename}"`;
+      if (completion.role !== "wr-voice-tone:external-comms") config.hooks.SubagentStart.push({
+        matcher: `^${completion.role}$`,
+        hooks: [{ type: "command", command }],
+      });
       config.hooks.SubagentStop.push({
         matcher: `^${completion.role}$`,
         hooks: [{ type: "command", command }],
@@ -238,6 +243,10 @@ function transportId(sessionId, target) {
 function registrationPath(sessionId, target) {
   return join(transportDir(), \`registration-\${transportId(sessionId, target)}.json\`);
 }
+
+function registeredPath(value) { return registrationPath(value.parentSession, value.source === "subagent-start" ? "native:" + value.target : value.target); }
+function nativePath(sessionId) { return join(stateDir(sessionId), "native-review-" + role); }
+function nativeEnabled(input) { return role !== "wr-voice-tone:external-comms" && existsSync(nativePath(input.session_id)); }
 
 function receiptPath(sessionId, target, suffix = "") {
   return join(transportDir(), \`receipt-\${transportId(sessionId, target)}.json\${suffix}\`);
@@ -338,7 +347,30 @@ function clear(input, target) {
   for (const suffix of ["", ".claim", ".done"]) rmSync(receiptPath(input.session_id, target, suffix), { force: true });
 }
 
+function rememberNative(input) {
+  if (role === "wr-voice-tone:external-comms" || input.agent_type !== role || typeof input.agent_id !== "string" || !/^[A-Za-z0-9-]+$/.test(input.agent_id)) return;
+  const bound = checkout(input.cwd);
+  const hash = bound && policyHash(bound.root);
+  if (!bound || !hash) return diagnostic("invalid-native-binding", input);
+  const target = input.agent_id;
+  if (existsSync(receiptPath(input.session_id, target, ".done")) || existsSync(statePath(input, target, ".done"))) return;
+  const registered = { source: "subagent-start", parentSession: input.session_id, role, target, ...bound, policyHash: hash, createdAt: Date.now() };
+  mkdirSync(transportDir(), { recursive: true, mode: 0o700 });
+  try { writeFileSync(registeredPath(registered), JSON.stringify(registered), { flag: "wx", mode: 0o600 }); }
+  catch (error) {
+    if (error?.code !== "EEXIST") throw error;
+    const previous = JSON.parse(readFileSync(registeredPath(registered), "utf8"));
+    for (const key of ["source", "parentSession", "role", "target", "root", "physical", "policyHash"]) {
+      if (previous[key] !== registered[key]) return diagnostic("native-registration-conflict", input);
+    }
+  }
+  mkdirSync(stateDir(input.session_id), { recursive: true });
+  try { writeFileSync(nativePath(input.session_id), "", { flag: "wx", mode: 0o600 }); }
+  catch (error) { if (error?.code !== "EEXIST") throw error; }
+}
+
 function remember(input) {
+  if (nativeEnabled(input)) return;
   reapTransport();
   const target = normalizeTarget(targetFromSpawn(input));
   if (!target) return;
@@ -428,7 +460,7 @@ function writeMarker(input, registered, target, output, completedAt, claimed) {
   }
   renameSync(claimed.path, claimed.done);
   rmSync(statePath({ session_id: registered.parentSession }, target), { force: true });
-  rmSync(registrationPath(registered.parentSession, target), { force: true });
+  rmSync(registeredPath(registered), { force: true });
   const assessedAt = new Date(completedAt);
   for (const candidate of [
     join(process.env.TMPDIR || "/tmp", \`${packageName}-reviewed-\${registered.parentSession}\`),
@@ -448,6 +480,7 @@ function writeMarker(input, registered, target, output, completedAt, claimed) {
 }
 
 function complete(input, target, output) {
+  if (nativeEnabled(input)) return;
   target = completionTarget(target, stateDir(input.session_id), "codex-review-", role + ":");
   if (!target || typeof output !== "string" || !output) return;
   const path = statePath(input, target);
@@ -500,8 +533,11 @@ function persistPending(input, target, output) {
   target = normalizeTarget(target);
   if (!target || typeof output !== "string" || !output) return;
   const registrationsForCheckout = registrations(input, target);
-  const exact = registrationsForCheckout.filter(({ registered }) => registered.target === target);
-  const candidates = exact.length ? exact : registrationsForCheckout.filter(({ registered }) => registered.parentSession === input.session_id);
+  const native = registrationsForCheckout.filter(({ registered }) => registered.source === "subagent-start");
+  const nativeExact = native.filter(({ registered }) => registered.parentSession === input.session_id && registered.target === input.agent_id);
+  const legacy = registrationsForCheckout.filter(({ registered }) => registered.source !== "subagent-start");
+  const exact = legacy.filter(({ registered }) => registered.target === target);
+  const candidates = nativeEnabled(input) || nativeExact.length ? nativeExact : exact.length ? exact : legacy.filter(({ registered }) => registered.parentSession === input.session_id);
   if (candidates.length !== 1) {
     diagnostic(candidates.length ? "ambiguous-parent-registration" : "missing-parent-registration", input);
     return;
@@ -537,6 +573,7 @@ function consumePending(input) {
       continue;
     }
     if (pending.parentSession !== input.session_id || pending.role !== role) continue;
+    if (nativeEnabled(input) && pending.source !== "subagent-start") continue;
     if (!validRegistration(pending, input, pending.target, age)) continue;
     const claimPath = path + ".claim";
     const donePath = path + ".done";
@@ -571,6 +608,7 @@ if (!/^[0-9]+$/.test(ttlSeconds) || !Number.isSafeInteger(ttl) || ttl <= 0) {
 }
 
 try {
+  if (input.hook_event_name === "SubagentStart") rememberNative(input);
   if (SPAWN_TOOLS.has(input.tool_name)) remember(input);
   if (CLOSE_TOOLS.has(input.tool_name)) close(input);
   if (WAIT_TOOLS.has(input.tool_name)) wait(input);
@@ -580,7 +618,7 @@ try {
     else {
       const target = input.task_name || input.agent_name || input.agent_id;
       const local = statePath(input, normalizeTarget(target));
-      if (existsSync(local)) complete(input, target, input.last_assistant_message);
+      if (!nativeEnabled(input) && existsSync(local)) complete(input, target, input.last_assistant_message);
       else persistPending(input, target, input.last_assistant_message);
     }
   }

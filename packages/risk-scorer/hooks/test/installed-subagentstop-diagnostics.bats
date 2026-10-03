@@ -64,3 +64,17 @@ input() {
   [ "$(cat "$TMPDIR/claude-risk-parent-session/push")" = "4" ]
   [ "$(cat "$TMPDIR/claude-risk-parent-session/release")" = "4" ]
 }
+
+@test "packed native pipeline lifecycle reaches the parent gate without spawn tool events" {
+  start="$(input | jq -c '.session_id = "parent-session" | .hook_event_name = "SubagentStart" | del(.last_assistant_message)')"
+  command="$(jq -r '.hooks.SubagentStart[0].hooks[0].command' "$TMP/packed/hooks/hooks.json")"
+  [ "$(jq -r '.hooks.SubagentStart[0].matcher' "$TMP/packed/hooks/hooks.json")" = '^wr-risk-scorer:pipeline$' ]
+  command="${command//\$\{CLAUDE_PLUGIN_ROOT\}/$TMP/packed}"
+  printf '%s' "$start" | bash -c "$command"
+  dispatch "$(input | jq -c '.session_id = "parent-session"')"
+  gate="$(jq -cn --arg cwd "$TMP/repo" '{session_id:"parent-session",hook_event_name:"PreToolUse",cwd:$cwd,tool_name:"Bash",tool_input:{command:("cd " + $cwd + " && git commit --dry-run")}}')"
+  run bash -c 'printf "%s" "$1" | "$2" pre-tool' _ "$gate" "$DISPATCH"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"Commit blocked"* ]]
+  [ "$(cat "$TMPDIR/claude-risk-parent-session/commit")" = "4" ]
+}

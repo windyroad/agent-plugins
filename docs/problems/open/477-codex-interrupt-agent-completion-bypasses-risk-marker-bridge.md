@@ -1,6 +1,6 @@
 # Problem 477: Codex collaboration completion bypasses the risk-marker bridge
 
-**Status**: Closed (closed-on-evidence 2026-09-13 - a fresh Codex session completed the installed `wr-risk-scorer:pipeline`, automatically persisted checkout-bound 0/0/0 markers through `collaboration.interrupt_agent`, and admitted the following governed command. Recovery: `/wr-itil:transition-problem 477 known-error`)
+**Status**: Open (reopened 2026-10-03 after a genuine completed native pipeline review was followed by a missing-score commit denial; current desktop recovery remains unverified)
 **Reported**: 2026-08-12
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5
 **Origin**: internal
@@ -44,6 +44,28 @@ for the observability slice rather than a defect in this fix — carried by RFC-
 STORY-061.
 
 ## Fix and Verification
+
+### Architecture approval recurrence on 2026-10-03
+
+A fresh typed architecture reviewer completed with PASS at 21:47:40 UTC. The next edit at 21:47:54 was denied because no architecture approval marker existed. The same failure occurred in the repair task after its own fresh architecture PASS. These are actual gate denials, not quoted reports or reused reviewer completions. The native spawn-registration dependency also exists in the architecture bridge and generated JTBD, Style Guide and Voice Tone edit-reviewer bridges.
+
+The repair extends immutable native start registration to those four exact edit-reviewer roles. Native stops require the opaque runtime ID and parent session; task aliases and singleton fallback cannot select native registrations. Old legacy receipts cannot refresh a session using native transport. Voice Tone external-comms retains its prompt-bound draft-key path because native start has no reviewed draft prompt.
+
+The maintainer explicitly authorized bypassing the broken mechanical transport on 2026-10-03 so valid completed reviews can support delivery. This exception does not represent successful transport or authorize absent, failed, mismatched or stale substantive reviews. Source, package tests, publication and installation remain separate evidence stages. Installed runtime recovery still requires a fresh natural review followed by its actual gate.
+
+### Recurrence on 2026-10-03: native lifecycle has no spawn registration
+
+A user-reported delivery block was confirmed from private local event evidence. A fresh typed pipeline reviewer started at 07:50:57 UTC, completed with commit/push/release scores 4/0/0 for the intended isolated checkout, and returned that same completed assessment through `interrupt_agent` at 07:52:52. At 07:52:58, the following commit used an explicit leading `cd` and the matching tool working directory, but was denied with "No commit risk score found." Waiting for foreground completion also did not recover delivery. Private transcript contents are not copied into this ticket.
+
+No parent registration was present. The current bridge creates that registration only through a spawn tool event; an unregistered native completion correctly fails closed. The bounded source reproduction omits `PostToolUse` entirely, supplies native lifecycle events, then exercises the parent gate. It failed before the repair.
+
+The repair registers only native pipeline reviewers through `SubagentStart`, using the runtime-owned parent session and opaque agent ID. Native completion must match that exact parent, ID and role before the existing checkout, policy, state, age and atomic receipt checks can authorize the parent gate. Repeated starts preserve the original binding; completed claims cannot be reused. Once native pipeline transport is present in a session, delayed legacy completion cannot refresh its authorization. Legacy-only sessions retain their existing completion path.
+
+The [Codex hook contract](https://developers.openai.com/codex/hooks) documents parent `session_id`, subagent `agent_id` and typed `agent_type` on native lifecycle events. No transcript parser, manual receipt replay or handwritten risk marker is part of this repair.
+
+Fresh-context capture arbitration returned `HANG_OFF: P477`: the missing native spawn-registration boundary is already owned here. P539 continues to own shared decoding and nested-name transport. The monitor's separate error-wrapper parsing gap is not treated as this repair's root cause.
+
+No currently verified desktop workaround exists. Source and packed-artifact tests do not establish runtime restoration. Closure requires a fresh installed native typed review followed by a successful guarded command with the exact assessed checkout and unchanged state.
 
 ### Recurrence on 2026-09-13
 

@@ -98,6 +98,9 @@ if messages:
         ;;
     esac
     ;;
+  subagent-start)
+    printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs" --subagent-start
+    ;;
   subagent-stop)
     printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs" --subagent-stop
     ;;

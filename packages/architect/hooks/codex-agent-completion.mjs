@@ -23,6 +23,8 @@ function statePath(sessionId, target, suffix = "") {
   return join(riskDir(sessionId), `codex-architect-${Buffer.from(target).toString("base64url")}${suffix}`);
 }
 function registrationPath(sessionId, target) { return join(transportDir(), `registration-${id(sessionId, target)}.json`); }
+function registeredPath(value) { return registrationPath(value.parentSession, value.source === "subagent-start" ? `native:${value.target}` : value.target); }
+function nativePath(sessionId) { return join(riskDir(sessionId), "native-architect-transport"); }
 function receiptPath(sessionId, target, suffix = "") { return join(transportDir(), `receipt-${id(sessionId, target)}.json${suffix}`); }
 
 function checkout(cwd) {
@@ -87,7 +89,30 @@ function clear(sessionId, target) {
   for (const suffix of ["", ".claim", ".done"]) rmSync(receiptPath(sessionId, target, suffix), { force: true });
 }
 
+function rememberNative(input) {
+  if (input.agent_type !== role || typeof input.agent_id !== "string" || !/^[A-Za-z0-9-]+$/.test(input.agent_id)) return;
+  const bound = checkout(input.cwd);
+  const hash = bound && policyHash(bound.root);
+  if (!bound || !hash) return diagnostic("invalid-native-binding", input);
+  const target = input.agent_id;
+  if (existsSync(receiptPath(input.session_id, target, ".done")) || existsSync(statePath(input.session_id, target, ".done"))) return;
+  const registered = { source: "subagent-start", parentSession: input.session_id, role, target, ...bound, policyHash: hash, createdAt: Date.now() };
+  mkdirSync(transportDir(), { recursive: true, mode: 0o700 });
+  try { writeFileSync(registeredPath(registered), JSON.stringify(registered), { flag: "wx", mode: 0o600 }); }
+  catch (error) {
+    if (error?.code !== "EEXIST") throw error;
+    const previous = JSON.parse(readFileSync(registeredPath(registered), "utf8"));
+    for (const key of ["source", "parentSession", "role", "target", "root", "physical", "policyHash"]) {
+      if (previous[key] !== registered[key]) return diagnostic("native-registration-conflict", input);
+    }
+  }
+  mkdirSync(riskDir(input.session_id), { recursive: true });
+  try { writeFileSync(nativePath(input.session_id), "", { flag: "wx", mode: 0o600 }); }
+  catch (error) { if (error?.code !== "EEXIST") throw error; }
+}
+
 function remember(input) {
+  if (existsSync(nativePath(input.session_id))) return;
   reapTransport();
   const result = response(input);
   const target = normalizeTarget(result.agent_id ?? result.task_name);
@@ -125,7 +150,7 @@ function writeMarker(input, registered, target, output, completedAt, claim, done
   }
   renameSync(claim, done);
   rmSync(statePath(registered.parentSession, target), { force: true });
-  rmSync(registrationPath(registered.parentSession, target), { force: true });
+  rmSync(registeredPath(registered), { force: true });
   const assessedAt = new Date(completedAt);
   for (const marker of [`/tmp/architect-reviewed-${registered.parentSession}`, `/tmp/architect-reviewed-${registered.parentSession}.hash`, `/tmp/architect-plan-reviewed-${registered.parentSession}`]) {
     if (existsSync(marker)) utimesSync(marker, assessedAt, assessedAt);
@@ -134,6 +159,7 @@ function writeMarker(input, registered, target, output, completedAt, claim, done
 }
 
 function complete(input, rawTarget, output) {
+  if (existsSync(nativePath(input.session_id))) return;
   const target = completionTarget(rawTarget, riskDir(input.session_id), "codex-architect-");
   if (!target || typeof output !== "string" || !output) return;
   const state = statePath(input.session_id, target);
@@ -171,8 +197,11 @@ function persist(input) {
   if (!target || typeof output !== "string" || !output) return;
   if (parsedVerdict(output) !== "PASS") return diagnostic("non-pass-output", input);
   const registrationsForCheckout = registrations(input, target);
-  const exact = registrationsForCheckout.filter(({ registered }) => registered.target === target);
-  const candidates = exact.length ? exact : registrationsForCheckout.filter(({ registered }) => registered.parentSession === input.session_id);
+  const native = registrationsForCheckout.filter(({ registered }) => registered.source === "subagent-start");
+  const nativeExact = native.filter(({ registered }) => registered.parentSession === input.session_id && registered.target === input.agent_id);
+  const legacy = registrationsForCheckout.filter(({ registered }) => registered.source !== "subagent-start");
+  const exact = legacy.filter(({ registered }) => registered.target === target);
+  const candidates = existsSync(nativePath(input.session_id)) || nativeExact.length ? nativeExact : exact.length ? exact : legacy.filter(({ registered }) => registered.parentSession === input.session_id);
   if (candidates.length !== 1) return diagnostic(candidates.length ? "ambiguous-parent-registration" : "missing-parent-registration", input);
   const { registered, age } = candidates[0];
   target = registered.target;
@@ -191,6 +220,7 @@ function consume(input) {
     let pending;
     try { pending = JSON.parse(readFileSync(path, "utf8")); } catch { diagnostic("malformed-receipt", input); continue; }
     if (pending.parentSession !== input.session_id || pending.role !== role) continue;
+    if (existsSync(nativePath(input.session_id)) && pending.source !== "subagent-start") continue;
     if (!valid(pending, input, pending.target, Date.now() - pending.completedAt)) continue;
     const claim = `${path}.claim`;
     try { writeFileSync(claim, "", { flag: "wx", mode: 0o600 }); }
@@ -215,13 +245,14 @@ if (!/^[A-Za-z0-9-]+$/.test(input.session_id || "")) process.exit(0);
 if (!/^[0-9]+$/.test(ttlText) || !Number.isSafeInteger(ttl) || ttl <= 0) process.exit(0);
 
 try {
+  if (input.hook_event_name === "SubagentStart") rememberNative(input);
   if (SPAWN_TOOLS.has(input.tool_name)) remember(input);
   if (CLOSE_TOOLS.has(input.tool_name)) close(input);
   if (WAIT_TOOLS.has(input.tool_name)) wait(input);
   if (input.hook_event_name === "UserPromptSubmit" || input.hook_event_name === "PreToolUse" || ["Bash", "Edit", "Write", "ExitPlanMode"].includes(input.tool_name)) consume(input);
   if (input.hook_event_name === "SubagentStop") {
     if (input.agent_type !== role) diagnostic("unrelated-subagent-stop", input);
-    else if (existsSync(statePath(input.session_id, normalizeTarget(input.agent_id)))) complete(input, input.agent_id, input.last_assistant_message);
+    else if (!existsSync(nativePath(input.session_id)) && existsSync(statePath(input.session_id, normalizeTarget(input.agent_id)))) complete(input, input.agent_id, input.last_assistant_message);
     else persist(input);
   }
 } catch {

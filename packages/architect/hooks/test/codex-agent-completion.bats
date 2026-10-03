@@ -121,3 +121,83 @@ guarded_edit() {
   dispatch "$(close '**Architecture Review: PASS**')"
   [ ! -e "$MARKER" ]
 }
+
+
+native_start() {
+  jq -cn --arg session "$SESSION" --arg cwd "$CLAUDE_PROJECT_DIR" --arg id "${1:-$TARGET}" '{session_id:$session,cwd:$cwd,hook_event_name:"SubagentStart",agent_type:"wr-architect:agent",agent_id:$id}'
+}
+native_stop() {
+  jq -cn --arg session "$SESSION" --arg cwd "$CLAUDE_PROJECT_DIR" --arg id "${1:-$TARGET}" '{session_id:$session,cwd:$cwd,hook_event_name:"SubagentStop",agent_type:"wr-architect:agent",agent_id:$id,last_assistant_message:"**Architecture Review: PASS**"}'
+}
+@test "native architecture lifecycle authorizes parent edit without spawn tool events" {
+  dispatch "$(native_start)"
+  dispatch "$(native_stop)"
+  [ ! -e "$MARKER" ]
+  dispatch "$(guarded_edit)"
+  [ -f "$MARKER" ]
+  run bash -c 'printf "%s" "$1" | "$2/architect-enforce-edit.sh"' -- "$(guarded_edit)" "$HOOK_DIR"
+  [ "$status" -eq 0 ]
+}
+@test "native architecture stop cannot use task alias to mask wrong opaque id" {
+  dispatch "$(native_start)"
+  dispatch "$(native_stop wrong-id | jq -c --arg alias "$TARGET" '.task_name=$alias')"
+  dispatch "$(guarded_edit)"
+  [ ! -e "$MARKER" ]
+}
+@test "native architecture stop cannot select another parent" {
+  dispatch "$(native_start)"
+  dispatch "$(native_stop | jq -c '.session_id="other-parent"')"
+  dispatch "$(guarded_edit)"
+  [ ! -e "$MARKER" ]
+}
+@test "native architecture duplicate start preserves age and binding" {
+  dispatch "$(native_start)"
+  first="$(cat "$TMPDIR"/codex-review-transport/registration-*.json)"
+  dispatch "$(native_start)"
+  [ "$(cat "$TMPDIR"/codex-review-transport/registration-*.json)" = "$first" ]
+  echo changed > "$CLAUDE_PROJECT_DIR/docs/decisions/new.md"
+  dispatch "$(native_start)"
+  [ "$(cat "$TMPDIR"/codex-review-transport/registration-*.json)" = "$first" ]
+  dispatch "$(native_stop)"
+  dispatch "$(guarded_edit)"
+  [ ! -e "$MARKER" ]
+}
+@test "native architecture completion is not refreshed by late legacy close" {
+  dispatch "$(spawn wr-architect:agent)"
+  dispatch "$(native_start)"
+  dispatch "$(native_stop)"
+  dispatch "$(guarded_edit)"
+  [ -f "$MARKER" ]
+  rm -f "$MARKER" "$HASH" "$PLAN"
+  dispatch "$(close '**Architecture Review: PASS**')"
+  dispatch "$(native_start)"
+  dispatch "$(native_stop)"
+  dispatch "$(guarded_edit)"
+  [ ! -e "$MARKER" ]
+}
+
+@test "native architecture availability cannot consume an old legacy pending receipt" {
+  dispatch "$(spawn wr-architect:agent)"
+  dispatch "$(stop '**Architecture Review: PASS**')"
+  dispatch "$(native_start)"
+  dispatch "$(guarded_edit)"
+  [ ! -e "$MARKER" ]
+}
+@test "native architecture expired registration cannot authorize an edit" {
+  dispatch "$(native_start)"
+  node -e 'const fs=require("fs");const p=process.argv[1];const d=JSON.parse(fs.readFileSync(p));d.createdAt=Date.now()-4000000;fs.writeFileSync(p,JSON.stringify(d));' "$TMPDIR"/codex-review-transport/registration-*.json
+  dispatch "$(native_stop)"
+  dispatch "$(guarded_edit)"
+  [ ! -e "$MARKER" ]
+}
+@test "native architecture registrations support concurrent exact identities" {
+  dispatch "$(native_start first-id)"
+  dispatch "$(native_start second-id)"
+  dispatch "$(native_stop second-id)"
+  dispatch "$(guarded_edit)"
+  [ -f "$MARKER" ]
+  rm -f "$MARKER" "$HASH" "$PLAN"
+  dispatch "$(native_stop first-id)"
+  dispatch "$(guarded_edit)"
+  [ -f "$MARKER" ]
+}

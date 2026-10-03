@@ -43,6 +43,11 @@ function transportRegistrationPath(sessionId, role, target) {
   return join(transportDir(), `registration-${transportId(sessionId, role, target)}.json`);
 }
 
+function registeredPath(registered) {
+  const target = registered.source === "subagent-start" ? `native:${registered.target}` : registered.target;
+  return transportRegistrationPath(registered.parentSession, registered.role, target);
+}
+
 function transportReceiptPath(sessionId, role, target, suffix = "") {
   return join(transportDir(), `risk-receipt-${transportId(sessionId, role, target)}.json${suffix}`);
 }
@@ -145,9 +150,49 @@ function spawnTarget(input) {
   return result.agent_id ?? result.task_name;
 }
 
+function nativePipelinePath(sessionId) {
+  return join(riskDir(sessionId), "native-pipeline-transport");
+}
+
+// Native lifecycle events carry the runtime-owned parent session and agent ID.
+// They do not depend on the spawn tool being visible to PostToolUse.
+function rememberNativePipeline(input) {
+  if (input.agent_type !== "wr-risk-scorer:pipeline" ||
+      typeof input.agent_id !== "string" || !/^[A-Za-z0-9-]+$/.test(input.agent_id)) return;
+  const bound = directoryBinding(input.cwd);
+  if (!bound) return;
+  const policy = policyBinding(bound.root);
+  if (!policy) return;
+  const target = input.agent_id;
+  if (existsSync(statePath(input, target, ".done")) ||
+      existsSync(transportReceiptPath(input.session_id, input.agent_type, target, ".done"))) return;
+  const registered = {
+    source: "subagent-start", parentSession: input.session_id,
+    role: input.agent_type, target, ...bound, policy, createdAt: Date.now(),
+  };
+  mkdirSync(transportDir(), { recursive: true, mode: 0o700 });
+  const path = registeredPath(registered);
+  try {
+    writeFileSync(path, JSON.stringify(registered), { flag: "wx", mode: 0o600 });
+  } catch (error) {
+    if (error?.code !== "EEXIST") throw error;
+    const previous = JSON.parse(readFileSync(path, "utf8"));
+    for (const key of ["source", "parentSession", "role", "target", "root", "physical"]) {
+      if (previous[key] !== registered[key]) return;
+    }
+    if (JSON.stringify(previous.policy) !== JSON.stringify(policy)) return;
+  }
+  // This records transport availability, not assessment authorization. Keep it
+  // after receipt cleanup so delayed legacy delivery cannot refresh scores.
+  mkdirSync(riskDir(input.session_id), { recursive: true });
+  try { writeFileSync(nativePipelinePath(input.session_id), "", { flag: "wx", mode: 0o600 }); }
+  catch (error) { if (error?.code !== "EEXIST") throw error; }
+}
+
 function rememberSpawn(input) {
   reapRegisteredTransport();
   const role = input.tool_input?.agent_type;
+  if (role === "wr-risk-scorer:pipeline" && existsSync(nativePipelinePath(input.session_id))) return;
   const target = spawnTarget(input);
   if (typeof target !== "string" || !target) return;
   mkdirSync(riskDir(input.session_id), { recursive: true });
@@ -265,6 +310,7 @@ function markTarget(input, target, output) {
   if (!existsSync(state)) return;
   const role = readFileSync(state, "utf8");
   if (!riskAgentRoles.has(role)) return;
+  if (role === "wr-risk-scorer:pipeline" && existsSync(nativePipelinePath(input.session_id))) return;
   const claim = claimTarget(input, target);
   if (!claim) return;
 
@@ -352,16 +398,23 @@ function registrationCandidates(input, role, target) {
       try {
         const registered = JSON.parse(readFileSync(path, "utf8"));
         if (registered.role !== role) return [];
+        if (role === "wr-risk-scorer:pipeline" && existsSync(nativePipelinePath(input.session_id)) &&
+            registered.source !== "subagent-start") return [];
+        if (registered.source === "subagent-start" &&
+            (registered.parentSession !== input.session_id || registered.target !== input.agent_id)) return [];
         if (role !== "wr-risk-scorer:pipeline" && (!current || registered.root !== current.root || registered.physical !== current.physical)) return [];
         return [{ path, registered }];
       } catch { return []; }
     });
+  const native = registrations.filter(({ registered }) => registered.source === "subagent-start");
+  if (native.length) return native;
   const exact = registrations.filter(({ registered }) => registered.target === target);
   if (exact.length) return exact;
   // Current Codex returns a task name at spawn and a child UUID at stop.
   // The runtime parent session plus one invoking-checkout registration binds them.
   if (input.hook_event_name !== "SubagentStop" || !current) return [];
   return registrations.filter(({ registered }) =>
+    registered.source !== "subagent-start" &&
     registered.parentSession === input.session_id &&
     registered.root === current.root && registered.physical === current.physical);
 }
@@ -473,6 +526,7 @@ function consumeRegisteredPending(input) {
     let pending;
     try { pending = JSON.parse(readFileSync(path, "utf8")); } catch { continue; }
     if (pending.parentSession !== input.session_id || !riskAgentRoles.has(pending.role)) continue;
+    if (pending.role === "wr-risk-scorer:pipeline" && existsSync(nativePipelinePath(input.session_id)) && pending.source !== "subagent-start") continue;
     if (!registrationValid(input, pending)) continue;
     if (pending.role === "wr-risk-scorer:pipeline") {
       if (!current || checkoutId(current.root) !== pending.checkoutId || stateHash(current.root) !== pending.stateHash) continue;
@@ -492,7 +546,7 @@ function consumeRegisteredPending(input) {
       if (!targetClaim) {
         if (existsSync(statePath(targetInput, pending.target, ".done"))) {
           renameSync(path, `${path}.done`);
-          rmSync(transportRegistrationPath(pending.parentSession, pending.role, pending.target), { force: true });
+          rmSync(registeredPath(pending), { force: true });
         }
         continue;
       }
@@ -508,7 +562,7 @@ function consumeRegisteredPending(input) {
       for (const marker of markerPaths(pending.role, pending.parentSession, pending)) if (existsSync(marker)) utimesSync(marker, assessedAt, assessedAt);
       renameSync(targetClaim.claim, targetClaim.done);
       renameSync(path, `${path}.done`);
-      rmSync(transportRegistrationPath(pending.parentSession, pending.role, pending.target), { force: true });
+      rmSync(registeredPath(pending), { force: true });
       rmSync(statePath(targetInput, pending.target), { force: true });
     } finally {
       if (targetClaim) rmSync(targetClaim.claim, { force: true });
@@ -518,6 +572,10 @@ function consumeRegisteredPending(input) {
 }
 
 function markSubagentStop(input) {
+  if (input.agent_type === "wr-risk-scorer:pipeline" && existsSync(nativePipelinePath(input.session_id))) {
+    persistRegisteredPending(input);
+    return;
+  }
   const state = typeof input.agent_id === "string" ? statePath(input, input.agent_id) : "";
   if (state && existsSync(state)) {
     markTarget(input, input.agent_id, input.last_assistant_message);
@@ -551,6 +609,7 @@ try {
   } else if (!/^[A-Za-z0-9-]+$/.test(input.session_id || "")) {
     if (process.argv.includes("--subagent-stop")) diagnoseSubagentStop(input, "rejected", "invalid-session-id");
   } else {
+    if (input.hook_event_name === "SubagentStart") rememberNativePipeline(input);
     if (SPAWN_TOOLS.has(input.tool_name)) rememberSpawn(input);
     if (CLOSE_TOOLS.has(input.tool_name)) markClose(input);
     if (WAIT_TOOLS.has(input.tool_name)) markWait(input);

@@ -63,7 +63,7 @@ if messages:
     [ -z "$detect_output" ] || printf '%s\n' "$detect_output"
     [ -z "$stale_output" ] || printf '%s\n' "$stale_output"
     ;;
-  subagent-stop)
+  subagent-start|subagent-stop)
     printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs"
     ;;
   pre-tool)

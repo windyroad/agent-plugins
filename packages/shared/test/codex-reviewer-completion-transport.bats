@@ -508,3 +508,39 @@ EXTERNAL_COMMS_VOICE_TONE_KEY: $key")"
   [ "$status" -eq 0 ]
   [ ! -e "$marker" ]
 }
+
+
+@test "packed edit reviewers authorize native lifecycle without spawn tool visibility" {
+  local package root role verdict session marker helper payload command
+  for package in architect jtbd style-guide voice-tone; do
+    root="$(pack_plugin "$package")"
+    session="bats-native-$package-$$"
+    marker="/tmp/$package-reviewed-$session"
+    case "$package" in
+      architect) role='wr-architect:agent'; verdict='**Architecture Review: PASS**'; helper="$root/hooks/codex-agent-completion.mjs" ;;
+      jtbd) role='wr-jtbd:agent'; verdict='**JTBD Review: PASS**'; helper="$root/hooks-codex/codex-agent-completion.mjs"; printf 'PASS\n' > /tmp/jtbd-verdict ;;
+      style-guide) role='wr-style-guide:agent'; verdict='**Style Guide Review: PASS**'; helper="$root/hooks-codex/codex-agent-completion.mjs" ;;
+      voice-tone) role='wr-voice-tone:agent'; verdict='**Voice & Tone Review: PASS**'; helper="$root/hooks-codex/codex-agent-completion.mjs" ;;
+    esac
+    rm -f "$marker" "$marker.hash"
+    payload="$(jq -cn --arg session "$session" --arg cwd "$REPO_ROOT" --arg role "$role" '{session_id:$session,cwd:$cwd,hook_event_name:"SubagentStart",agent_type:$role,agent_id:"runtime-id"}')"
+    if [ "$package" = architect ]; then
+      command="$(jq -r '.hooks.SubagentStart[0].hooks[0].command' "$root/hooks/hooks.json")"
+      [ "$command" != null ]
+      printf '%s' "$payload" | CLAUDE_PLUGIN_ROOT="$root" bash -c "$command"
+    else
+      send_configured_event "$root" SubagentStart "$payload"
+    fi
+    send_event "$helper" "$(stop_payload "$session" "$REPO_ROOT" "$role" wrong-id "$verdict" | jq -c '.task_name="runtime-id"')"
+    send_event "$helper" "$(parent_prompt_payload "$session" "$REPO_ROOT")"
+    [ ! -e "$marker" ]
+    send_event "$helper" "$(stop_payload "$session-other" "$REPO_ROOT" "$role" runtime-id "$verdict")"
+    send_event "$helper" "$(parent_prompt_payload "$session" "$REPO_ROOT")"
+    [ ! -e "$marker" ]
+    send_event "$helper" "$(stop_payload "$session" "$REPO_ROOT" "$role" runtime-id "$verdict")"
+    [ ! -e "$marker" ]
+    send_event "$helper" "$(parent_prompt_payload "$session" "$REPO_ROOT")"
+    [ -f "$marker" ]
+    rm -f "$marker" "$marker.hash"
+  done
+}

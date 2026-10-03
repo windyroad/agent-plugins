@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-10-01 **P539 Verification Pending** — nested reviewer completion repair published and installed across all five governance plugins; genuine desktop verification awaits restart.
+> Last reviewed: 2026-10-03 **P477 reopened** — native pipeline completion still fails to persist its score; lifecycle registration repair awaits delivery and desktop verification.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -10,6 +10,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | WSJF | ID | Title | Severity | Status | Effort | Reported | Origin |
 |------|-----|-------|----------|--------|--------|----------|--------|
 | | | **Tier 0 — Critical-bypass** (Severity Very High ≥17, security-classified, or incident-linked) | | | | | |
+| 40 | P477 | Codex collaboration completion bypasses the risk-marker bridge | 20 (Very High) | Open | S | 2026-08-12 | internal |
 | 20 | P463 | Relevance-close evaluator over-fires — a bare ADR/skill citation is read as "fix shipped", so live tickets return CLOSE-CANDIDATE | 20 (Very High) | Known Error | M | 2026-07-26 | inbound-reported (#414) — stamped 2026-08-21 review; upstream issue *"wr-itil evaluate-relevance matches ADR numbers across repos and treats Composes-with as fix evidence"* is the external filing of this defect |
 | 20 | P506 | Staleness-check never asks the registry, so a months-behind install reports as current forever | 20 (Very High) | Known Error | M | 2026-08-20 | internal |
 | 10 | P509 | Story-map capture produces a work breakdown, not the persona's journey | 20 (Very High) | Known Error | L | 2026-08-21 | internal |
@@ -420,7 +421,6 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 | P450 | VQ evidence cells have no write path from subsequent sessions — drain starved | Relevance-closed 2026-09-18 by the Step 4.6 pass (ADR-079 Phase 1 + Phase 2), shapes `ADR-shipped-confirmed, named-skill-or-feature-exists, driver-child-ticket-closed`. Reversible: `git revert` the relevance-close commit, or `git mv` back to `known-error/`. |
 | P425 | Architect edit gate relitigates a same-session pass — unratified-dependency overfire | Relevance-closed 2026-09-18 by the Step 4.6 pass (ADR-079 Phase 1 + Phase 2), shapes `ADR-shipped-confirmed, named-skill-or-feature-exists, driver-child-ticket-closed`. Reversible: `git revert` the relevance-close commit, or `git mv` back to `known-error/`. |
 | P540 | Assistant responses cannot opt into project voice-and-tone guidance | Closed 2026-09-17 on fresh published-artifact evidence: `@windyroad/voice-tone@0.9.1` installed into an isolated Codex home and produced a non-empty final response containing the required guide marker; release workflow 35218418697 passed on rerun. Recovery: `/wr-itil:transition-problem 540 known-error`. |
-| P477 | Codex collaboration completion bypasses the risk-marker bridge | Closed 2026-09-13 on fresh-session installed-artifact evidence: native `collaboration.interrupt_agent` completion automatically persisted checkout-bound 0/0/0 markers and admitted the following governed command. No manual replay or bypass. Recovery: `/wr-itil:transition-problem 477 known-error`. |
 | P538 | Problem creation is gated on the problem index existing | Closed 2026-09-11 after the published `@windyroad/itil` 2.2.1 skill created a ticket and canonical index together in a fresh missing-index adopter fixture; the published reconciler passed and exact two-file commit `a0d10e4` completed. Recovery: `/wr-itil:transition-problem 538 known-error`. |
 | P426 | wr-architect review agent lacks a "first-match on a non-unique collection" review heuristic (identity/auth/data-binding footgun) | Closed 2026-08-31 on installed published-artifact evidence from `@windyroad/architect@0.22.0`: the non-unique fixture raised `[First-Match Footgun]`, while the primary-key fixture passed without the finding. Recovery: `/wr-itil:transition-problem 426 known-error`. |
 | P499 | Architect ADR pairing hook reads the task checkout instead of the command checkout | Closed 2026-08-21 (run-retro Step 4a sub-step 9 prior-session evidence drain per P282). Fix released `@windyroad/architect@0.21.1` 2026-08-17, live in published 0.21.3. Evidence: `yes — observed: installed v0.21.3 hook permits a clean declared checkout and denies an unpaired one, both from the target index`; regression suite 24/24 green. Recovery: `/wr-itil:transition-problem 499 known-error`. |

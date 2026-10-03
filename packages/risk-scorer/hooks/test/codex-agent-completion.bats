@@ -130,6 +130,117 @@ dispatch_pretool() {
   printf '%s' "$1" | "$HOOK_DIR/risk-scorer-dispatch.sh" pre-tool
 }
 
+native_start_input() {
+  current_pipeline_subagent_stop_input | jq -c 'del(.last_assistant_message) | .hook_event_name = "SubagentStart"'
+}
+
+dispatch_native_start() {
+  printf '%s' "$1" | "$HOOK_DIR/risk-scorer-dispatch.sh" subagent-start
+}
+
+@test "native pipeline lifecycle authorizes the assessed checkout without a spawn tool event" {
+  dispatch_native_start "$(native_start_input)"
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input)"
+  run dispatch_pretool "$(parent_hidden_workdir_input)"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"Commit blocked"* ]]
+  [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
+}
+
+@test "native pipeline registrations require exact parent opaque id and role" {
+  dispatch_native_start "$(native_start_input)"
+  for mutation in '.session_id = "wrong-parent"' '.agent_id = "wrong-agent"' '.agent_type = "wr-risk-scorer:plan"'; do
+    dispatch_subagent_stop "$(current_pipeline_subagent_stop_input | jq -c "$mutation")"
+    printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+    [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+  done
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
+}
+
+@test "native pipeline starts preserve binding and completed claims against repeats" {
+  dispatch_native_start "$(native_start_input)"
+  registration="$(find "$TMPDIR/codex-review-transport" -name 'registration-*.json')"
+  original="$(cat "$registration")"
+  dispatch_native_start "$(native_start_input)"
+  dispatch_native_start "$(native_start_input | jq -c --arg cwd "$PIPELINE_REPO" '.cwd = $cwd')"
+  [ "$(cat "$registration")" = "$original" ]
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  rm "$TMPDIR/claude-risk-$SESSION/commit"
+  dispatch_native_start "$(native_start_input)"
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+}
+
+@test "native pipeline route suppresses legacy completion before and after import" {
+  dispatch_native_start "$(native_start_input)"
+  dispatch "$(pipeline_spawn_input "$TARGET")"
+  dispatch "$(direct_pipeline_interrupt_input)"
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
+  touch -t 202601010101 "$TMPDIR/claude-risk-$SESSION/commit"
+  before="$(python3 -c 'import os,sys; print(os.stat(sys.argv[1]).st_mtime_ns)' "$TMPDIR/claude-risk-$SESSION/commit")"
+  dispatch "$(direct_pipeline_interrupt_input)"
+  [ "$(python3 -c 'import os,sys; print(os.stat(sys.argv[1]).st_mtime_ns)' "$TMPDIR/claude-risk-$SESSION/commit")" = "$before" ]
+}
+
+@test "native pipeline rejects expired starts and changed invoking policy" {
+  dispatch_native_start "$(native_start_input)"
+  registration="$(find "$TMPDIR/codex-review-transport" -name 'registration-*.json')"
+  jq '.createdAt = 0' "$registration" > "$TMP/expired"
+  mv "$TMP/expired" "$registration"
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+
+  dispatch_native_start "$(native_start_input | jq -c '.agent_id = "new-agent"')"
+  printf '# Changed risk policy\n' > "$OTHER_REPO/RISK-POLICY.md"
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input | jq -c '.agent_id = "new-agent"')"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+}
+
+@test "native pipeline receipt rejects assessed state and checkout drift" {
+  dispatch_native_start "$(native_start_input)"
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input)"
+  printf '%s' "$(parent_bash_input | jq -c --arg cwd "$OTHER_REPO" '.cwd = $cwd | .tool_input.cwd = $cwd')" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+  printf 'changed\n' >> "$PIPELINE_REPO/state"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
+}
+
+@test "native pipeline keeps concurrent opaque reviewers distinct" {
+  dispatch_native_start "$(native_start_input)"
+  dispatch_native_start "$(native_start_input | jq -c '.agent_id = "second-agent"')"
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input | jq -c '.agent_id = "unregistered-agent"')"
+  [ "$(find "$TMPDIR/codex-review-transport" -name 'risk-receipt-*.json' | wc -l | tr -d ' ')" = "0" ]
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input)"
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input | jq -c '.agent_id = "second-agent"')"
+  [ "$(find "$TMPDIR/codex-review-transport" -name 'risk-receipt-*.json' | wc -l | tr -d ' ')" = "2" ]
+}
+
+@test "native pipeline rejects a task alias masking the wrong opaque id" {
+  dispatch_native_start "$(native_start_input)"
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input | jq -c '.task_name = .agent_id | .agent_id = "wrong-agent"')"
+  [ "$(find "$TMPDIR/codex-review-transport" -name 'risk-receipt-*.json' | wc -l | tr -d ' ')" = "0" ]
+}
+
+@test "native pipeline stop survives legacy state created before its start" {
+  opaque="$(native_start_input | jq -r '.agent_id')"
+  dispatch "$(pipeline_spawn_input "$opaque")"
+  dispatch_native_start "$(native_start_input)"
+  [ -e "$TMPDIR/claude-risk-$SESSION/native-pipeline-transport" ]
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ "$(cat "$TMPDIR/claude-risk-$SESSION/commit")" = "4" ]
+}
+
 @test "desktop SubagentStop marks completion before agent close" {
   dispatch "$(current_spawn_input)"
   dispatch_subagent_stop "$(subagent_stop_input)"
@@ -530,4 +641,13 @@ dispatch_pretool() {
   dispatch "$(close_input)"
 
   [ ! -e "$TMPDIR/claude-risk-$SESSION/external-comms-risk-reviewed-$KEY" ]
+}
+
+
+@test "native pipeline availability rejects old legacy pending receipt" {
+  dispatch "$(pipeline_spawn_input "$TARGET")"
+  dispatch_subagent_stop "$(current_pipeline_subagent_stop_input)"
+  dispatch_native_start "$(native_start_input)"
+  printf '%s' "$(parent_bash_input)" | "$HOOK_DIR/risk-pending-receipt.sh"
+  [ ! -e "$TMPDIR/claude-risk-$SESSION/commit" ]
 }

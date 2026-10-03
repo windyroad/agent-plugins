@@ -41,14 +41,14 @@ run_fake() {
   return "$status"
 }
 
-@test "hooks.json registers five command hooks" {
+@test "hooks.json registers six command hooks" {
   run python3 - "$HOOKS/hooks.json" <<'PY'
 import json, sys
 data = json.load(open(sys.argv[1]))
 print(sum(len(entry["hooks"]) for entries in data["hooks"].values() for entry in entries))
 PY
   [ "$status" -eq 0 ]
-  [ "$output" = "5" ]
+  [ "$output" = "6" ]
 }
 
 @test "dispatcher retains all thirteen child hook routes" {
