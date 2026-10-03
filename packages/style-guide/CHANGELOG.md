@@ -1,5 +1,11 @@
 # @windyroad/style-guide
 
+## 0.6.10
+
+### Patch Changes
+
+- 8db7bbf: Register native Codex reviewers at start so completed risk and edit reviews can reach their parent gates. Preserve exact reviewer identity, checkout and policy checks, and prevent delayed legacy completions from refreshing native approvals.
+
 ## 0.6.9
 
 ### Patch Changes
