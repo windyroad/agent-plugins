@@ -138,10 +138,11 @@ tests:
   - description: Recommendation review passes aligned options without choosing for the user
     vars:
       prompt: |
-        RECOMMENDATION REVIEW. Review these options against confirmed JTBD-001
-        and the developer persona. Option A runs the existing automatic reviewer
-        before edits. Option B runs that reviewer before edits and before
-        user-facing capability recommendations. Both keep review automatic.
+        RECOMMENDATION REVIEW. Review these options against confirmed JTBD-003
+        (Compose Only the Guardrails I Need) and the developer persona.
+        Option A installs architecture and TDD plugins individually.
+        Option B uses the meta-installer to select those same two plugins.
+        Both preserve independent and selective plugin installation.
 
         Begin with the `JTBD Recommendation Review:` verdict line. Do not choose
         between viable aligned options.
