@@ -1,5 +1,11 @@
 # @windyroad/tdd
 
+## 0.7.0
+
+### Minor Changes
+
+- 1a4b5fd: Allow actions with an advisory when mechanical governance review or CI evidence is unavailable or unusable. Preserve enforcement of applicable risk scores exceeding the limits in RISK-POLICY.md, observed failed or pending CI, and detected disclosure risks.
+
 ## 0.6.1
 
 ### Patch Changes
