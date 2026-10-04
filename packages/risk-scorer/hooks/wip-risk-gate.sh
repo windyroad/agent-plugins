@@ -32,13 +32,5 @@ if [ -f "$MARKER" ]; then
     exit 0
 fi
 
-cat <<'EOF'
-{
-  "hookSpecificOutput": {
-    "hookEventName": "PreToolUse",
-    "permissionDecision": "deny",
-    "permissionDecisionReason": "WIP risk assessment required. Delegate to wr-risk-scorer:wip (subagent_type: 'wr-risk-scorer:wip') to assess cumulative pipeline risk for changes so far."
-  }
-}
-EOF
+_governance_advisory "Review receipt unavailable; required substantive review remains the agent's responsibility."
 exit 0

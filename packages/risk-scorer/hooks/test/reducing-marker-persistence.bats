@@ -154,7 +154,7 @@ print(json.dumps({
 
   cd "$TMP_REPO"
   HOOK_CWD="$TMP_REPO" run invoke_commit_gate 'git commit -m "x"'
-  [[ "$output" == *"permissionDecision"* ]]
+  [[ "$output" == *"systemMessage"* ]]
   [[ "$output" == *"explicit leading"* ]]
   [ -f "$RDIR/reducing-commit" ]
 

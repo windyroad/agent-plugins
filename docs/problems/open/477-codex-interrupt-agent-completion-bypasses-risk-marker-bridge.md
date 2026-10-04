@@ -17,11 +17,13 @@ The direct downstream witness scored its actual delivery checkout correctly, the
 
 ## Workaround
 
-Do not hand-edit markers or bypass hooks. In Codex, put an explicit leading
-`cd /absolute/path/to/the/assessed-checkout &&` inside governed commit, push,
-release, and changeset commands; a tool `workdir` alone may be hidden from the
-checkout-binding hook. Rescore only if the assessed checkout actually changed
-or the binding is missing.
+The maintainer authorized bypassing broken mechanical approval transport after
+fresh valid substantive reviews. The fail-open repair permits unavailable or
+unusable review and CI evidence with an advisory; valid applicable above-appetite
+scores, observed failed or pending CI, and detected leaks still enforce policy.
+Do not manufacture receipts or modify transcripts. Keep explicit leading
+`cd /absolute/path/to/the/assessed-checkout &&` in governed commands and preserve
+checkout binding. Installation and active runtime verification remain distinct.
 
 ## Root Cause Analysis
 
@@ -271,3 +273,7 @@ reason and a field-type map.
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-061 | STORY-061: See why a SubagentStop risk receipt was not written | accepted |
+
+## Failure-policy correction, 2026-10-04
+
+The maintainer reported that the earlier requested fail-open policy was not delivered. The native registration repair improved transport but preserved missing-marker denials. The maintainer explicitly directed default fail-open implementation, release and installation. The repair now distinguishes unverifiable mechanical evidence (warn and permit) from successfully evaluated substantive failures (retain enforcement), without synthesizing review receipts. See proposed ADR-137. Release and active runtime verification remain separate evidence requirements.

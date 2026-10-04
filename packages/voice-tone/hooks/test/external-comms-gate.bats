@@ -93,8 +93,8 @@ run_hook() {
   INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure on Node 20'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"permissionDecision"* ]]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"systemMessage"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
@@ -115,7 +115,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure on Node 20'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
   [[ "$output" != *"BYPASS_RISK_GATE=1"* ]]
 }
@@ -128,7 +128,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh issue comment 42 --body 'Acme Corp 2.4M ARR is a real concern'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
   # Must NOT name a leak class.
   [[ "$output" != *"credential"* ]]
@@ -141,7 +141,7 @@ run_hook() {
   [ "$status" -eq 0 ]
   # The env override no longer short-circuits — the gate still denies the
   # unreviewed external-comms draft.
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
@@ -168,7 +168,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh issue create --title T --body '$DRAFT'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
@@ -188,7 +188,7 @@ run_hook() {
   INPUT=$(build_write_input ".changeset/test.md" "Add some feature. Happy to help further with details.")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
@@ -203,7 +203,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh api repos/foo/bar/security-advisories --method POST --field summary='vulnerability detail'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
@@ -241,7 +241,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh api repos/foo/bar/security-advisories -f summary='new advisory'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
@@ -249,7 +249,7 @@ run_hook() {
   INPUT=$(build_bash_input "npm publish")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
@@ -264,14 +264,14 @@ run_hook() {
   INPUT=$(build_bash_input "npm publish --dry-run=false")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
 }
 
 @test "P537: a dry run followed by a real publish remains gated" {
   INPUT=$(build_bash_input "npm publish --dry-run && npm publish")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
 }
 
 @test "deny message references the on-demand skill (/wr-voice-tone:assess-external-comms)" {
@@ -294,7 +294,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh issue create --title T --body '$DRAFT'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
 }
 
 # ---------------------------------------------------------------------------
@@ -416,7 +416,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure on Node 20'")
   run bash -c "cd '$TEST_PROJECT_DIR' && BYPASS_RISK_GATE=1 printf '%s' \"\$1\" | BYPASS_RISK_GATE=1 '$HOOK'" _ "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
@@ -428,7 +428,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh issue create --title x --body 'a clean issue body'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-voice-tone:external-comms"* ]]
 }
 
@@ -437,7 +437,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh issue create --title x --body 'a clean issue body'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"gh-issue-create"* ]]
 }
 

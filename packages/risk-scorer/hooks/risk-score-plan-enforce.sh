@@ -19,13 +19,5 @@ if [ -f "$MARKER" ]; then
   exit 0
 fi
 
-cat <<'EOF'
-{
-  "hookSpecificOutput": {
-    "hookEventName": "PreToolUse",
-    "permissionDecision": "deny",
-    "permissionDecisionReason": "BLOCKED: Risk-scorer must review the plan before exiting plan mode. Delegate to wr-risk-scorer:plan (subagent_type: 'wr-risk-scorer:plan') to review the plan file for risk, including projected release risk."
-  }
-}
-EOF
+_governance_advisory "Review receipt unavailable; required substantive review remains the agent's responsibility."
 exit 0

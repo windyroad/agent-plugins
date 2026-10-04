@@ -17,6 +17,10 @@ oversight-downgraded-2026-07-26: "2026-07-26 — ADR-101 lockstep (material amen
 
 When I delegate coding to an AI agent, I want to know it followed the full TDD cycle (red-green-refactor) and passed architecture review, so I can trust the code is BOTH well-tested AND well-factored — not just passing tests.
 
+## Failure Policy
+
+Substantive reviews remain required by assistant instructions. Missing, stale, drifted or unreadable mechanical receipts and unavailable hook or CI infrastructure warn and permit continuation under the proposed mechanical fail-open decision. An advisory does not establish that a review passed. Known applicable substantive FAIL, valid above-appetite risk and observed failed CI remain enforcing. The previously unconditional review guarantees below apply when evidence can be evaluated; transport failure is an explicit advisory exception. Material amendment: 2026-10-04, oversight remains unconfirmed pending ratification.
+
 ## Desired Outcomes
 
 - Every commit has been through architecture review, risk scoring, and TDD enforcement

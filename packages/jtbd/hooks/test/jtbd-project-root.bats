@@ -40,21 +40,22 @@ run_hook_with_file() {
   json="{\"tool_input\":{\"file_path\":\"${proj}/packages/x/foo.sh\"},\"session_id\":\"test-$$\"}"
   # Fire the hook from `other` (wrong CWD) but with CLAUDE_PROJECT_DIR set to
   # the real project. Pre-fix this emitted "no JTBD documentation exists";
-  # post-fix the gate is ACTIVE and denies for the missing review marker.
+  # The active gate reports the missing receipt as advisory.
   run env CLAUDE_PROJECT_DIR="$proj" bash -c "cd '$other' && printf '%s' '$json' | bash '$HOOK'"
   rm -rf "$proj" "$other"
   [[ "$output" != *"no JTBD documentation exists"* ]]
-  [[ "$output" == *"without JTBD review"* ]]
+  [[ "$output" == *"unavailable"* ]]
+  [[ "$output" != *'"deny"'* ]]
 }
 
 # P191 regression guard: when docs/jtbd genuinely does not exist under the
-# project root, the fail-closed "no JTBD documentation" deny is preserved
-# (the fix narrows the false-negative; it must not silence true-absence).
-@test "jtbd project-root: genuinely-absent docs/jtbd still denies (fail-closed preserved, P191)" {
+# project root, the advisory still names true absence.
+@test "jtbd project-root: genuinely-absent docs/jtbd emits advisory (P191)" {
   local proj json
   proj="$(mktemp -d)"         # no docs/jtbd created
   json="{\"tool_input\":{\"file_path\":\"${proj}/foo.sh\"},\"session_id\":\"test-$$\"}"
   run env CLAUDE_PROJECT_DIR="$proj" bash -c "printf '%s' '$json' | bash '$HOOK'"
   rm -rf "$proj"
   [[ "$output" == *"no JTBD documentation exists"* ]]
+  [[ "$output" != *'"deny"'* ]]
 }

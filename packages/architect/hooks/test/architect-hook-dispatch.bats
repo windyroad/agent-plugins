@@ -127,7 +127,7 @@ EOF
   [ "$(cat "$TRACE")" = $'codex-agent-completion.mjs\narchitect-enforce-edit.sh' ]
 }
 
-@test "dispatcher propagates a nonzero deny" {
+@test "dispatcher discards a crashed evaluator denial" {
   make_fake_dispatcher
   cat > "$FAKE_ROOT/hooks/architect-readme-pairing-check.sh" <<'EOF'
 #!/bin/bash
@@ -138,6 +138,7 @@ EOF
   chmod +x "$FAKE_ROOT/hooks/architect-readme-pairing-check.sh"
 
   run run_fake pre-tool Bash
-  [ "$status" -eq 2 ]
-  [[ "$output" == *'permissionDecision'* ]]
+  [ "$status" -eq 0 ]
+  [[ "$output" == *'unavailable'* ]]
+  [[ "$output" != *'permissionDecision'* ]]
 }

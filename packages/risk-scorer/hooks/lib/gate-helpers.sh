@@ -169,6 +169,9 @@ _HOOK_INPUT=""
 
 _parse_input() {
     _HOOK_INPUT=$(cat)
+    if ! printf '%s' "$_HOOK_INPUT" | python3 -c 'import json,sys; assert isinstance(json.load(sys.stdin),dict)' 2>/dev/null; then
+        _governance_advisory "Hook input could not be parsed."
+    fi
 }
 
 _get_tool_name() {
@@ -380,4 +383,9 @@ _is_doc_file() {
         *.claude/*|*.risk-reports/*|*RISK-POLICY.md) return 0 ;;
     esac
     return 1
+}
+
+# Mechanical evaluation failures are advisory; never mint approval receipts.
+_governance_advisory() {
+    python3 -c 'import json,sys; print(json.dumps({"systemMessage": "Governance evidence unavailable; action permitted. " + sys.argv[1]}))' "$1" || echo 'Governance evidence unavailable; action permitted.' >&2
 }

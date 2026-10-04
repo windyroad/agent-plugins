@@ -40,7 +40,7 @@ Plain. Direct. Concise.
 Plain. Direct. Concise.
 " > "$POLICY_FILE"
 
-  run check_review_gate "$TEST_SESSION" "$SYSTEM" "$POLICY_FILE"
+  run _check_review_receipt "$TEST_SESSION" "$SYSTEM" "$POLICY_FILE"
   [ "$status" -eq 0 ]
 }
 
@@ -54,7 +54,7 @@ Plain. Direct. Concise.
 Plain. Direct. Concise. Friendly.
 " > "$POLICY_FILE"
 
-  run check_review_gate "$TEST_SESSION" "$SYSTEM" "$POLICY_FILE"
+  run _check_review_receipt "$TEST_SESSION" "$SYSTEM" "$POLICY_FILE"
   [ "$status" -ne 0 ]
   [ ! -f "$MARKER" ]
 }
@@ -81,6 +81,6 @@ Sentences should be at most 20 words.
 Sentences should be at most 25 words.
 " > "$POLICY_FILE"
 
-  run check_review_gate "$TEST_SESSION" "$SYSTEM" "$POLICY_FILE"
+  run _check_review_receipt "$TEST_SESSION" "$SYSTEM" "$POLICY_FILE"
   [ "$status" -ne 0 ]
 }

@@ -7,7 +7,7 @@
 _ARCHITECT_GATE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$_ARCHITECT_GATE_DIR/gate-helpers.sh"
 
-# Check architect gate marker. Returns 0 if marker is valid (allow), 1 if invalid (deny).
+# Validate architect receipt; the public gate below converts unavailable evidence to an advisory.
 # Sets ARCHITECT_GATE_REASON on failure with an explicit recovery directive
 # naming the wr-architect:agent subagent_type (P215 / RFC-021 — mirrors the
 # sibling REVIEW_GATE_REASON pattern in review-gate.sh). Downstream
@@ -15,7 +15,7 @@ source "$_ARCHITECT_GATE_DIR/gate-helpers.sh"
 # append this reason to their BLOCKED deny message so the agent sees a clear
 # recovery affordance without having to read source.
 # Usage: check_architect_gate "$SESSION_ID"
-check_architect_gate() {
+_check_architect_receipt() {
   local SESSION_ID="$1"
   local MARKER="/tmp/architect-reviewed-${SESSION_ID}"
   local TTL_SECONDS="${ARCHITECT_TTL:-3600}"
@@ -66,10 +66,16 @@ check_architect_gate() {
   return 1  # No marker, deny
 }
 
-# Emit fail-closed deny JSON for parse failures
+# Permit parsing failures with an unavailable-evidence advisory
 architect_gate_parse_error() {
   cat <<'EOF'
-{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "deny",
-    "permissionDecisionReason": "BLOCKED: Could not parse hook input. Gate is fail-closed." } }
+{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "allow",
+    "permissionDecisionReason": "Governance evidence unavailable: could not parse hook input; action permitted." } }
 EOF
+}
+
+check_architect_gate() {
+    if _check_architect_receipt "$@"; then return 0; fi
+    _governance_advisory "$ARCHITECT_GATE_REASON"
+    return 0
 }

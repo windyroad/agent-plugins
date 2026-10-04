@@ -39,7 +39,7 @@ assert_path_blocked() {
   local file_path="$1"
   run run_hook_with_file "$file_path"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"unavailable"* ]]
 }
 
 @test "JTBD: Codex missing-marker denial gives an identity-bound recovery" {
@@ -147,22 +147,22 @@ assert_path_blocked() {
   echo "# Index" > docs/jtbd/README.md
   run run_hook_with_file "docs/JOBS_TO_BE_DONE.md"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"unavailable"* ]]
 }
 
-@test "functional: blocks src/index.ts when no JTBD docs exist" {
+@test "functional: warns for src/index.ts when no JTBD docs exist" {
   run run_hook_with_file "src/index.ts"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"unavailable"* ]]
   [[ "$output" == *"wr-jtbd:update-guide"* ]]
 }
 
-@test "functional: blocks src/index.ts when docs/jtbd exists (needs review)" {
+@test "functional: warns for src/index.ts when docs/jtbd exists without receipt" {
   mkdir -p docs/jtbd
   echo "# Index" > docs/jtbd/README.md
   run run_hook_with_file "src/index.ts"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"unavailable"* ]]
   [[ "$output" == *"wr-jtbd:agent"* ]]
 }
 

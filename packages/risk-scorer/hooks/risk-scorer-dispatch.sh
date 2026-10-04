@@ -7,13 +7,34 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 EVENT="${1:-}"
 INPUT="$(cat)"
 
-run_hook() {
-  local output
-  output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/$1")"
-  if [ -n "$output" ]; then
-    printf '%s\n' "$output"
+ADVISORIES=""
+collect_gate_output() {
+  local output="$1" parsed
+  [ -n "$output" ] || return 0
+  if ! parsed="$(printf '%s' "$output" | jq -cs '
+    if any(.[]; .hookSpecificOutput.permissionDecision == "deny")
+    then map(select(.hookSpecificOutput.permissionDecision == "deny"))[0]
+    else {systemMessage: map(.systemMessage // .hookSpecificOutput.permissionDecisionReason // "Governance evidence unavailable; action permitted.") | join("\n")} end' 2>/dev/null)"; then
+    parsed='{"systemMessage":"Governance evidence unavailable: malformed evaluator output; action permitted."}'
+  fi
+  if printf '%s' "$parsed" | jq -e '.hookSpecificOutput.permissionDecision == "deny"' >/dev/null 2>&1; then
+    printf '%s\n' "$parsed"
     exit 0
   fi
+  ADVISORIES="$ADVISORIES
+$parsed"
+}
+flush_advisories() {
+  [ -n "$ADVISORIES" ] || return 0
+  printf '%s' "$ADVISORIES" | jq -s '{systemMessage: map(.systemMessage // .hookSpecificOutput.permissionDecisionReason // "Governance evidence unavailable; action permitted.") | join("\n")}'
+}
+run_hook() {
+  local output
+  if ! output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/$1" 2>/dev/null)"; then
+    collect_gate_output '{"systemMessage":"Governance evaluator unavailable; action permitted. A crashed hook output was discarded."}'
+    return 0
+  fi
+  collect_gate_output "$output"
 }
 
 tool_name() {
@@ -108,3 +129,5 @@ if messages:
     exit 0
     ;;
 esac
+
+flush_advisories

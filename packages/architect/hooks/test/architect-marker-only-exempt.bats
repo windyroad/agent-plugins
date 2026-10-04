@@ -121,7 +121,7 @@ EOF
     '{tool_name:"Edit",session_id:$s,tool_input:{file_path:$p,old_string:$o,new_string:$n}}' > "$json_file"
   run run_hook_json "$json_file"
   rm -f "$json_file"
-  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"unavailable"* ]]
 }
 
 @test "P301: Edit changing status field (not a marker line) still gates" {
@@ -140,7 +140,7 @@ EOF
     '{tool_name:"Edit",session_id:$s,tool_input:{file_path:$p,old_string:$o,new_string:$n}}' > "$json_file"
   run run_hook_json "$json_file"
   rm -f "$json_file"
-  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"unavailable"* ]]
 }
 
 # ── Pure body change: must still gate (no marker involvement) ────────────
@@ -163,7 +163,7 @@ EOF
     '{tool_name:"Edit",session_id:$s,tool_input:{file_path:$p,old_string:$o,new_string:$n}}' > "$json_file"
   run run_hook_json "$json_file"
   rm -f "$json_file"
-  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"unavailable"* ]]
 }
 
 # ── Scope: exemption is narrow to docs/decisions/*.md ────────────────────
@@ -179,5 +179,5 @@ EOF
     '{tool_name:"Edit",session_id:$s,tool_input:{file_path:$p,old_string:$o,new_string:$n}}' > "$json_file"
   run run_hook_json "$json_file"
   rm -f "$json_file"
-  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"unavailable"* ]]
 }

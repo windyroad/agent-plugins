@@ -30,7 +30,7 @@ _watchers_own_ci_wait() {
 
 if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*(git push|npm run (push:watch|merge:watch|release:watch)|npx changeset|npm run changeset|gh pr merge)(\s|$)'; then
     if ! _enter_hook_cwd; then
-        risk_gate_deny "Pipeline action blocked: the command checkout could not be validated. Run the command from an absolute Git working directory and rescore that checkout."
+        _governance_advisory "Pipeline checkout could not be validated. Run the command from an absolute Git working directory and rescore that checkout."
         exit 0
     fi
 fi
@@ -63,10 +63,9 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run (push:watch|merge:watch)(
             AGE=$(( NOW - MARK_TIME ))
             TTL_SECONDS="${RISK_TTL:-3600}"
             if [ "$AGE" -lt "$TTL_SECONDS" ] && ! _checkout_matches "${RDIR}/checkout-id"; then
-                risk_gate_deny "Push blocked: this event resolved to a different Git checkout than the valid risk assessment. Retry the same command with an explicit leading \`cd /absolute/path/to/the/assessed-checkout && npm run push:watch\`; the marker was preserved, so do not rescore unless that checkout changed."
-                exit 0
+                _governance_advisory "Push receipt unavailable: this event resolved to a different Git checkout than the valid risk assessment. Retry the same command with an explicit leading \`cd /absolute/path/to/the/assessed-checkout && npm run push:watch\`; the marker was preserved, so do not rescore unless that checkout changed."
             fi
-            if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ]; then
+            if [ "$AGE" -lt "$TTL_SECONDS" ] && _checkout_matches "${RDIR}/checkout-id" && [ -f "${RDIR}/state-hash" ]; then
                 STORED_HASH=$(cat "${RDIR}/state-hash")
                 CURRENT_HASH=$("$SCRIPT_DIR/lib/pipeline-state.sh" --hash-inputs 2>/dev/null | _hashcmd | cut -d' ' -f1)
                 if [ "$STORED_HASH" = "$CURRENT_HASH" ]; then
@@ -151,10 +150,9 @@ if echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*npm run release:watch(\s|$)'; the
             AGE=$(( NOW - MARK_TIME ))
             TTL_SECONDS="${RISK_TTL:-3600}"
             if [ "$AGE" -lt "$TTL_SECONDS" ] && ! _checkout_matches "${RDIR}/checkout-id"; then
-                risk_gate_deny "Release blocked: this event resolved to a different Git checkout than the valid risk assessment. Retry the same command with an explicit leading \`cd /absolute/path/to/the/assessed-checkout && npm run release:watch\`; the marker was preserved, so do not rescore unless that checkout changed."
-                exit 0
+                _governance_advisory "Release receipt unavailable: this event resolved to a different Git checkout than the valid risk assessment. Retry the same command with an explicit leading \`cd /absolute/path/to/the/assessed-checkout && npm run release:watch\`; the marker was preserved, so do not rescore unless that checkout changed."
             fi
-            if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ]; then
+            if [ "$AGE" -lt "$TTL_SECONDS" ] && _checkout_matches "${RDIR}/checkout-id" && [ -f "${RDIR}/state-hash" ]; then
                 STORED_HASH=$(cat "${RDIR}/state-hash")
                 CURRENT_HASH=$("$SCRIPT_DIR/lib/pipeline-state.sh" --hash-inputs 2>/dev/null | _hashcmd | cut -d' ' -f1)
                 if [ "$STORED_HASH" = "$CURRENT_HASH" ]; then

@@ -51,22 +51,22 @@ print(json.dumps({
   run invoke_gate "$cmd"
   [ "$status" -eq 0 ]
   # Gate should emit NO deny JSON when bypassed (silent allow).
-  [[ "$output" != *"permissionDecision"* ]] || [[ "$output" != *"deny"* ]]
+  [ -z "$output" ]
 }
 
 @test "T11: commit message body containing RISK_BYPASS marker (multi-paragraph -m sequence) bypasses" {
   local cmd='git commit -m "docs(problems): auto-migrate to per-state subdirectory layout (ADR-031)" -m "See: docs/decisions/031-problem-ticket-directory-layout.accepted.md" -m "RISK_BYPASS: adr-031-migration"'
   run invoke_gate "$cmd"
   [ "$status" -eq 0 ]
-  [[ "$output" != *"permissionDecision"* ]] || [[ "$output" != *"deny"* ]]
+  [ -z "$output" ]
 }
 
-@test "T11: normal commit without RISK_BYPASS marker still gated (no score = deny)" {
+@test "T11: normal commit without RISK_BYPASS marker emits unavailable-score advisory" {
   local cmd='git commit -m "feat: normal commit"'
   run invoke_gate "$cmd"
-  # Either exits with deny JSON output OR exits non-zero — both indicate the
-  # gate didn't silently allow. We assert deny JSON appears in the output.
-  [[ "$output" == *"deny"* ]]
+  # Missing evidence permits the command with an honest advisory.
+  [[ "$output" != *'"deny"'* ]]
+  [[ "$output" == *'unavailable'* ]]
 }
 
 @test "T11: heredoc-style git commit -m with embedded RISK_BYPASS marker bypasses" {
@@ -76,13 +76,14 @@ print(json.dumps({
   local cmd=$'git commit -m "$(cat <<\'EOF\'\ndocs(problems): auto-migrate\n\nRISK_BYPASS: adr-031-migration\nEOF\n)"'
   run invoke_gate "$cmd"
   [ "$status" -eq 0 ]
-  [[ "$output" != *"permissionDecision"* ]] || [[ "$output" != *"deny"* ]]
+  [ -z "$output" ]
 }
 
 @test "T11: marker is case-sensitive (adr-031-MIGRATION not recognised — security guard)" {
   local cmd='git commit -m "RISK_BYPASS: adr-031-MIGRATION"'
   run invoke_gate "$cmd"
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
+  [[ "$output" == *'unavailable'* ]]
 }
 
 @test "T11: unrelated RISK_BYPASS token (e.g. reducing) does NOT match adr-031-migration path" {
@@ -94,5 +95,6 @@ print(json.dumps({
   # markers added explicitly).
   local cmd='git commit -m "RISK_BYPASS: reducing"'
   run invoke_gate "$cmd"
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
+  [[ "$output" == *'unavailable'* ]]
 }

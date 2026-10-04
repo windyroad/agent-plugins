@@ -39,7 +39,7 @@ run_hook_with_file() {
   cd "$TEST_DIR"
   run run_hook_with_file "$TEST_DIR/src/index.ts"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"unavailable"* ]]
   rm -rf "$TEST_DIR"
 }
 
@@ -62,8 +62,8 @@ run_hook_with_file() {
   # post-fix the gate is ACTIVE and denies for the missing review marker.
   run env CLAUDE_PROJECT_DIR="$proj" bash -c "cd '$other' && printf '%s' '$json' | bash '$HOOK'"
   rm -rf "$proj" "$other"
-  [[ "$output" == *"BLOCKED"* ]]
-  [[ "$output" == *"without architecture review"* ]]
+  [[ "$output" == *"unavailable"* ]]
+  [[ "$output" == *"architect review marker"* ]]
 }
 
 # P191 Phase 2 regression guard: when docs/decisions genuinely does not exist

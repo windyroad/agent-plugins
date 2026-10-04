@@ -136,10 +136,10 @@ _run_check() {
   export FAKE_GH_OUTPUT=''
   export FAKE_GH_EXIT=1
   result=$(_run_check "push")
-  [[ "$result" == DENY:* ]]
+  [[ "$result" == *ALLOW* ]]
   # P377/RFC-029: ci-bypass removed — the deny states there is no override
   # and does not instruct the user to create/touch a bypass marker.
-  [[ "$result" == *"no override"* ]]
+  [[ "$result" == *"unavailable"* ]]
   [[ "$result" != *"touch "* ]]
 }
 
@@ -236,8 +236,8 @@ _enable_wait_capable_watchers() {
   output=$( cd "$TEST_REPO" && echo "$INPUT" | \
     FAKE_GH_OUTPUT="$FAKE_GH_OUTPUT" PATH="$STUB_DIR:$PATH" \
     "$HOOKS_DIR/git-push-gate.sh" )
-  [[ "$output" == *"permissionDecision"* ]]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *"permissionDecision"* ]]
+  [[ "$output" == *"unavailable"* ]]
 }
 
 @test "git-push-gate.sh denies pending CI unless the project declares wait-capable watchers" {
@@ -271,8 +271,8 @@ _enable_wait_capable_watchers() {
   output=$( cd "$TEST_REPO" && echo "$INPUT" | \
     FAKE_GH_EXIT=1 PATH="$STUB_DIR:$PATH" \
     "$HOOKS_DIR/git-push-gate.sh" )
-  [[ "$output" == *"permissionDecision"* ]]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *"permissionDecision"* ]]
+  [[ "$output" == *"unavailable"* ]]
 }
 
 @test "git-push-gate.sh still denies a direct protected push" {
@@ -339,4 +339,16 @@ _enable_wait_capable_watchers() {
     FAKE_GH_OUTPUT="$FAKE_GH_OUTPUT" PATH="$STUB_DIR:$PATH" \
     "$HOOKS_DIR/git-push-gate.sh" )
   [[ "$output" != *"permissionDecision"* ]]
+}
+
+@test "mismatched reducing receipt cannot suppress observed failed CI" {
+  echo wrong-checkout > "$RDIR/checkout-id"
+  export FAKE_GH_OUTPUT='[{"status":"completed","conclusion":"failure","databaseId":2,"url":"https://github.com/x/y/actions/runs/2"}]'
+  for action in push release; do
+    touch "$RDIR/reducing-$action"
+    INPUT=$(_build_input "npm run $action:watch")
+    output=$( cd "$TEST_REPO" && echo "$INPUT" | PATH="$STUB_DIR:$PATH" "$HOOKS_DIR/git-push-gate.sh" )
+    [[ "$output" == *'"deny"'* ]]
+    [[ "$output" == *'failure'* ]]
+  done
 }

@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 134 (119 in-force, 15 historical)
+**Total ADRs:** 135 (120 in-force, 15 historical)
 
 ---
 
 ## In-force decisions
 
-_119 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_120 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -608,6 +608,10 @@ _119 ADRs. These are the current rules. The architect agent reads this section f
 ### ADR-136 — Implementation against proposed ADRs
 **Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** [ADR-074, ADR-066]
 **Chosen:** Chosen option: **"Allow authorized implementation against a documented proposal"**, following Tom's direction on 2026-10-02. This document remains a proposal; direction to draft or build is not final ratification.
+
+### ADR-137 — Mechanical governance checks fail open when evidence cannot be evaluated
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Chosen option: warn and permit execution when mechanical evidence cannot be evaluated. Architecture, JTBD, Style, Voice and Risk receipt checks permit execution on missing, expired, drifted, mismatched, malformed or unreadable receipts. Par...
 
 ---
 

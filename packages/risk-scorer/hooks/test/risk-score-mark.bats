@@ -105,10 +105,10 @@ EOF
   [ ! -f "$RDIR/checkout-id" ]
 
   cd "$TEST_DIR"
-  run check_risk_gate "$SESSION_ID" commit
+  run _check_risk_receipt "$SESSION_ID" commit
   [ "$status" -ne 0 ]
   cd "$OTHER_DIR"
-  run check_risk_gate "$SESSION_ID" commit
+  run _check_risk_receipt "$SESSION_ID" commit
   [ "$status" -ne 0 ]
   rm -rf "$OTHER_DIR"
 }

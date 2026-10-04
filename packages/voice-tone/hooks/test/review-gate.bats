@@ -15,20 +15,20 @@ teardown() {
   rm -rf "$TMPDIR_ORIG"
 }
 
-@test "gate denies when no marker exists" {
-  run check_review_gate "$TEST_SESSION" "voice-tone" "docs/VOICE-AND-TONE.md"
+@test "receipt rejects when no marker exists" {
+  run _check_review_receipt "$TEST_SESSION" "voice-tone" "docs/VOICE-AND-TONE.md"
   [ "$status" -ne 0 ]
 }
 
-@test "gate allows when marker exists and is fresh" {
+@test "receipt validates when marker exists and is fresh" {
   touch "/tmp/voice-tone-reviewed-${TEST_SESSION}"
-  run check_review_gate "$TEST_SESSION" "voice-tone" "docs/VOICE-AND-TONE.md"
+  run _check_review_receipt "$TEST_SESSION" "voice-tone" "docs/VOICE-AND-TONE.md"
   [ "$status" -eq 0 ]
 }
 
-@test "gate denies when marker is expired" {
+@test "receipt rejects when marker is expired" {
   touch "/tmp/voice-tone-reviewed-${TEST_SESSION}"
-  REVIEW_TTL=0 run check_review_gate "$TEST_SESSION" "voice-tone" "docs/VOICE-AND-TONE.md"
+  REVIEW_TTL=0 run _check_review_receipt "$TEST_SESSION" "voice-tone" "docs/VOICE-AND-TONE.md"
   [ "$status" -ne 0 ]
 }
 
@@ -54,7 +54,7 @@ teardown() {
 
 @test "REVIEW_GATE_REASON names re-delegate directive when no marker" {
   REVIEW_GATE_REASON=""
-  check_review_gate "$TEST_SESSION" "voice-tone" "docs/VOICE-AND-TONE.md" || true
+  _check_review_receipt "$TEST_SESSION" "voice-tone" "docs/VOICE-AND-TONE.md" || true
   [[ "$REVIEW_GATE_REASON" == *"wr-voice-tone:agent"* ]]
   [[ "$REVIEW_GATE_REASON" == *"Agent tool"* ]]
   [[ "$REVIEW_GATE_REASON" == *"interrupt_agent"* ]]
@@ -63,7 +63,7 @@ teardown() {
 @test "REVIEW_GATE_REASON names refresh-the-marker directive when TTL expired" {
   touch "/tmp/voice-tone-reviewed-${TEST_SESSION}"
   REVIEW_GATE_REASON=""
-  REVIEW_TTL=0 check_review_gate "$TEST_SESSION" "voice-tone" "docs/VOICE-AND-TONE.md" || true
+  REVIEW_TTL=0 _check_review_receipt "$TEST_SESSION" "voice-tone" "docs/VOICE-AND-TONE.md" || true
   [[ "$REVIEW_GATE_REASON" == *"expired"* ]]
   [[ "$REVIEW_GATE_REASON" == *"wr-voice-tone:agent"* ]]
   [[ "$REVIEW_GATE_REASON" == *"refresh the marker"* ]]
@@ -76,7 +76,7 @@ teardown() {
   touch "/tmp/voice-tone-reviewed-${TEST_SESSION}"
   echo "stale-hash" > "/tmp/voice-tone-reviewed-${TEST_SESSION}.hash"
   REVIEW_GATE_REASON=""
-  check_review_gate "$TEST_SESSION" "voice-tone" "$POLICY_FILE" || true
+  _check_review_receipt "$TEST_SESSION" "voice-tone" "$POLICY_FILE" || true
   [[ "$REVIEW_GATE_REASON" == *"changed"* ]] || [[ "$REVIEW_GATE_REASON" == *"drift"* ]]
   [[ "$REVIEW_GATE_REASON" == *"wr-voice-tone:agent"* ]]
   [[ "$REVIEW_GATE_REASON" == *"refresh the marker"* ]]

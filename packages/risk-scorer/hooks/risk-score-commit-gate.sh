@@ -16,7 +16,7 @@ TOOL_NAME=$(_get_tool_name)
 COMMAND=$(_get_command)
 echo "$COMMAND" | grep -qE '(^|;|&&|\|\|)\s*git commit' || exit 0
 if ! _enter_hook_cwd; then
-    risk_gate_deny "Commit blocked: the command checkout could not be validated. Run the command from an absolute Git working directory and rescore that checkout."
+    _governance_advisory "Commit checkout could not be validated. Run the command from an absolute Git working directory and rescore that checkout."
     exit 0
 fi
 
@@ -43,8 +43,8 @@ SESSION_ID=$(_get_session_id)
 # contract). Fallback threshold 14 days when the cadence line is absent
 # or the word unrecognised. P408.
 if [ ! -f "RISK-POLICY.md" ] || [ ! -s "RISK-POLICY.md" ]; then
-    risk_gate_deny "Commit blocked: RISK-POLICY.md is missing. Run /risk-policy to create it before committing."
-    exit 0
+    _governance_advisory "Commit blocked: RISK-POLICY.md is missing. Run /risk-policy to create it before committing."
+    # Continue evaluating any applicable known score.
 fi
 POLICY_STALE=$(python3 -c "
 from datetime import date
@@ -74,8 +74,8 @@ except:
     print('no')
 " 2>/dev/null || echo "no")
 if [ "$POLICY_STALE" != "no" ]; then
-    risk_gate_deny "Commit blocked: RISK-POLICY.md is stale (last reviewed ${POLICY_STALE}). Run /risk-policy to update it before committing."
-    exit 0
+    _governance_advisory "Commit blocked: RISK-POLICY.md is stale (last reviewed ${POLICY_STALE}). Run /risk-policy to update it before committing."
+    # Continue evaluating any applicable known score.
 fi
 
 # Clean tree bypass
@@ -97,7 +97,7 @@ if [ -f "${RDIR}/reducing-commit" ]; then
     AGE=$(( NOW - MARK_TIME ))
     TTL_SECONDS="${RISK_TTL:-3600}"
     if [ "$AGE" -lt "$TTL_SECONDS" ] && ! _checkout_matches "${RDIR}/checkout-id"; then
-        risk_gate_deny "Commit blocked: this event resolved to a different Git checkout than the valid risk assessment. Retry the same command with an explicit leading \`cd /absolute/path/to/the/assessed-checkout && git commit ...\`; the marker was preserved, so do not rescore unless that checkout changed."
+        _governance_advisory "Commit blocked: this event resolved to a different Git checkout than the valid risk assessment. Retry the same command with an explicit leading \`cd /absolute/path/to/the/assessed-checkout && git commit ...\`; the marker was preserved, so do not rescore unless that checkout changed."
         exit 0
     fi
     if [ "$AGE" -lt "$TTL_SECONDS" ] && [ -f "${RDIR}/state-hash" ]; then

@@ -11,22 +11,44 @@ tool_name() {
   printf '%s' "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null || true
 }
 
+ADVISORIES=""
+collect_gate_output() {
+  local output="$1" parsed
+  [ -n "$output" ] || return 0
+  if ! parsed="$(printf '%s' "$output" | jq -cs '
+    if any(.[]; .hookSpecificOutput.permissionDecision == "deny")
+    then map(select(.hookSpecificOutput.permissionDecision == "deny"))[0]
+    else {systemMessage: map(.systemMessage // .hookSpecificOutput.permissionDecisionReason // "Governance evidence unavailable; action permitted.") | join("\n")} end' 2>/dev/null)"; then
+    parsed='{"systemMessage":"Governance evidence unavailable: malformed evaluator output; action permitted."}'
+  fi
+  if printf '%s' "$parsed" | jq -e '.hookSpecificOutput.permissionDecision == "deny"' >/dev/null 2>&1; then
+    printf '%s\n' "$parsed"
+    exit 0
+  fi
+  ADVISORIES="$ADVISORIES
+$parsed"
+}
+flush_advisories() {
+  [ -n "$ADVISORIES" ] || return 0
+  printf '%s' "$ADVISORIES" | jq -s '{systemMessage: map(.systemMessage // .hookSpecificOutput.permissionDecisionReason // "Governance evidence unavailable; action permitted.") | join("\n")}'
+}
 run_gate() {
-  local output status
-  local child="$1"
+  local output status child="$1"
   shift
-  output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/$child" "$@")"
+  output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/$child" "$@" 2>/dev/null)"
   status=$?
-  [ -z "$output" ] || printf '%s\n' "$output"
-  [ "$status" -eq 0 ] || exit "$status"
-  [ -z "$output" ] || exit 0
+  if [ "$status" -ne 0 ]; then
+    collect_gate_output '{"systemMessage":"Governance evaluator unavailable; action permitted. A crashed hook output was discarded."}'
+    return 0
+  fi
+  collect_gate_output "$output"
 }
 
 run_side_effect() {
   local output status
   local child="$1"
   shift
-  output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/$child" "$@")"
+  output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/$child" "$@" 2>/dev/null)"
   status=$?
   [ -z "$output" ] || printf '%s\n' "$output"
   return "$status"
@@ -109,3 +131,5 @@ if messages:
     esac
     ;;
 esac
+
+[ "$EVENT" != pre-tool ] || flush_advisories

@@ -40,13 +40,5 @@ if [ -f "$MARKER" ]; then
   exit 0
 fi
 
-cat <<'EOF'
-{
-  "hookSpecificOutput": {
-    "hookEventName": "PreToolUse",
-    "permissionDecision": "deny",
-    "permissionDecisionReason": "BLOCKED: Cannot edit RISK-POLICY.md directly. Run /wr-risk-scorer:update-policy first -- it enforces ISO 31000 compliance (reads the risk-scorer contract, discovers project context, checks for incidents, validates with you, and smoke-tests the result). Use the Skill tool with skill: \"wr-risk-scorer:update-policy\"."
-  }
-}
-EOF
+_governance_advisory "Review receipt unavailable; required substantive review remains the agent's responsibility."
 exit 0

@@ -13,21 +13,21 @@ teardown() {
   rm -f "/tmp/architect-reviewed-${TEST_SESSION}.hash"
 }
 
-@test "gate denies when no marker exists" {
-  run check_architect_gate "$TEST_SESSION"
+@test "receipt rejects when no marker exists" {
+  run _check_architect_receipt "$TEST_SESSION"
   [ "$status" -ne 0 ]
 }
 
-@test "gate allows when marker exists and is fresh" {
+@test "receipt validates when marker exists and is fresh" {
   touch "/tmp/architect-reviewed-${TEST_SESSION}"
-  run check_architect_gate "$TEST_SESSION"
+  run _check_architect_receipt "$TEST_SESSION"
   [ "$status" -eq 0 ]
 }
 
-@test "gate denies when marker is expired" {
+@test "receipt rejects when marker is expired" {
   touch "/tmp/architect-reviewed-${TEST_SESSION}"
   # Set TTL to 0 to force expiry
-  ARCHITECT_TTL=0 run check_architect_gate "$TEST_SESSION"
+  ARCHITECT_TTL=0 run _check_architect_receipt "$TEST_SESSION"
   [ "$status" -ne 0 ]
 }
 
@@ -39,7 +39,7 @@ teardown() {
 
 @test "ARCHITECT_GATE_REASON names re-delegate directive when no marker" {
   ARCHITECT_GATE_REASON=""
-  check_architect_gate "$TEST_SESSION" || true
+  _check_architect_receipt "$TEST_SESSION" || true
   [[ "$ARCHITECT_GATE_REASON" == *"wr-architect:agent"* ]]
   [[ "$ARCHITECT_GATE_REASON" == *"Agent tool"* ]]
 }
@@ -50,7 +50,7 @@ teardown() {
 # manually manufacturing a marker.
 @test "ARCHITECT_GATE_REASON documents resumed-agent recovery when no marker" {
   ARCHITECT_GATE_REASON=""
-  check_architect_gate "$TEST_SESSION" || true
+  _check_architect_receipt "$TEST_SESSION" || true
   [[ "$ARCHITECT_GATE_REASON" == *"resuming the prior agent does not fire"* ]]
   [[ "$ARCHITECT_GATE_REASON" == *"fresh spawn"* ]]
   [[ "$ARCHITECT_GATE_REASON" == *"interrupt_agent"* ]]
@@ -60,7 +60,7 @@ teardown() {
 @test "ARCHITECT_GATE_REASON names re-delegate directive when TTL expired" {
   touch "/tmp/architect-reviewed-${TEST_SESSION}"
   ARCHITECT_GATE_REASON=""
-  ARCHITECT_TTL=0 check_architect_gate "$TEST_SESSION" || true
+  ARCHITECT_TTL=0 _check_architect_receipt "$TEST_SESSION" || true
   [[ "$ARCHITECT_GATE_REASON" == *"expired"* ]]
   [[ "$ARCHITECT_GATE_REASON" == *"wr-architect:agent"* ]]
   [[ "$ARCHITECT_GATE_REASON" == *"refresh the marker"* ]]
@@ -75,7 +75,7 @@ teardown() {
   touch "/tmp/architect-reviewed-${TEST_SESSION}"
   echo "stale-hash-that-will-not-match" > "/tmp/architect-reviewed-${TEST_SESSION}.hash"
   ARCHITECT_GATE_REASON=""
-  CLAUDE_PROJECT_DIR="$TEST_PROJECT_DIR" check_architect_gate "$TEST_SESSION" || true
+  CLAUDE_PROJECT_DIR="$TEST_PROJECT_DIR" _check_architect_receipt "$TEST_SESSION" || true
   rm -rf "$TEST_PROJECT_DIR"
   [[ "$ARCHITECT_GATE_REASON" == *"drift"* ]] || [[ "$ARCHITECT_GATE_REASON" == *"changed"* ]]
   [[ "$ARCHITECT_GATE_REASON" == *"wr-architect:agent"* ]]
@@ -93,7 +93,7 @@ teardown() {
   run bash -c "echo '$json' | bash '$HOOK'"
   cd "$ORIG_DIR"
   rm -rf "$TEST_DIR"
-  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"unavailable"* ]]
   [[ "$output" == *"wr-architect:agent"* ]]
   # No marker exists for this fresh session — deny reason must explicitly
   # name the re-delegate directive (not vague "review required").

@@ -62,7 +62,7 @@ assert_path_allowed() {
   # normal review rules.
   run run_hook_with_file "$PWD/docs/JOBS_TO_BE_DONE.md"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"BLOCKED"* ]]
+  [[ "$output" == *"unavailable"* ]]
 }
 
 @test "architect: exempts VCS-internal .git/ plumbing files (P458)" {

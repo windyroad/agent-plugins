@@ -25,7 +25,7 @@ teardown() {
 }
 
 # Write a RISK-POLICY.md whose § Risk Appetite carries $1 into a fresh temp
-# dir and cd into it, so check_risk_gate reads the appetite from cwd. Pass an
+# dir and cd into it, so _check_risk_receipt reads the appetite from cwd. Pass an
 # empty string to OMIT the file entirely (absent-policy default path).
 _use_policy() {
   local appetite_section="$1"
@@ -39,11 +39,11 @@ _use_policy() {
   _checkout_id > "$CHECKOUT_FILE"
 }
 
-# Helper: call check_risk_gate directly (not via run) so RISK_GATE_REASON is visible
+# Helper: call _check_risk_receipt directly (not via run) so RISK_GATE_REASON is visible
 assert_gate_denies() {
   local session="$1" action="$2" expected_reason="$3"
   RISK_GATE_REASON=""
-  if check_risk_gate "$session" "$action"; then
+  if _check_risk_receipt "$session" "$action"; then
     echo "Expected gate to deny but it allowed"
     return 1
   fi
@@ -55,7 +55,7 @@ assert_gate_denies() {
 
 assert_gate_allows() {
   local session="$1" action="$2"
-  if ! check_risk_gate "$session" "$action"; then
+  if ! _check_risk_receipt "$session" "$action"; then
     echo "Expected gate to allow but it denied: $RISK_GATE_REASON"
     return 1
   fi
@@ -281,7 +281,7 @@ _write_matching_hash() {
   _backdate "$SCORE_FILE" 3
   echo "staleold" > "$HASH_FILE"
   RISK_GATE_CATEGORY=""
-  ! check_risk_gate "$TEST_SESSION" "commit"
+  ! _check_risk_receipt "$TEST_SESSION" "commit"
   [ "$RISK_GATE_CATEGORY" = "drift" ]
 }
 
@@ -289,7 +289,7 @@ _write_matching_hash() {
   printf '3' > "$SCORE_FILE"
   _backdate "$SCORE_FILE" 10
   RISK_GATE_CATEGORY=""
-  ! check_risk_gate "$TEST_SESSION" "commit"
+  ! _check_risk_receipt "$TEST_SESSION" "commit"
   [ "$RISK_GATE_CATEGORY" = "expired" ]
 }
 
@@ -298,7 +298,7 @@ _write_matching_hash() {
   touch "$SCORE_FILE"
   RISK_GATE_CATEGORY=""
   RISK_GATE_SCORE=""
-  ! check_risk_gate "$TEST_SESSION" "commit"
+  ! _check_risk_receipt "$TEST_SESSION" "commit"
   [ "$RISK_GATE_CATEGORY" = "threshold" ]
   [ "$RISK_GATE_SCORE" = "7" ]
 }

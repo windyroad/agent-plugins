@@ -40,7 +40,7 @@ Use 2-space indentation.
 Use 2-space indentation.
 " > "$POLICY_FILE"
 
-  run check_review_gate "$TEST_SESSION" "$SYSTEM" "$POLICY_FILE"
+  run _check_review_receipt "$TEST_SESSION" "$SYSTEM" "$POLICY_FILE"
   [ "$status" -eq 0 ]
 }
 
@@ -55,7 +55,7 @@ Use 2-space indentation.
 Always trailing-comma.
 " > "$POLICY_FILE"
 
-  run check_review_gate "$TEST_SESSION" "$SYSTEM" "$POLICY_FILE"
+  run _check_review_receipt "$TEST_SESSION" "$SYSTEM" "$POLICY_FILE"
   [ "$status" -ne 0 ]
 }
 
@@ -81,6 +81,6 @@ Use 2-space indentation.
 Use 4-space indentation.
 " > "$POLICY_FILE"
 
-  run check_review_gate "$TEST_SESSION" "$SYSTEM" "$POLICY_FILE"
+  run _check_review_receipt "$TEST_SESSION" "$SYSTEM" "$POLICY_FILE"
   [ "$status" -ne 0 ]
 }

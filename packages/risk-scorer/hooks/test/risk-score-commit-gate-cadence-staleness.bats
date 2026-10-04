@@ -63,7 +63,7 @@ print(json.dumps({
   run invoke_gate
   # The gate still denies (no risk score for this session) but the reason
   # must NOT be policy staleness.
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" != *"stale"* ]]
 }
 
@@ -86,7 +86,7 @@ print(json.dumps({
   # derives 90 days and passes.
   write_policy 20 "> Reviewed quarterly."
   run invoke_gate
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" != *"stale"* ]]
 }
 

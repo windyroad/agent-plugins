@@ -7,7 +7,7 @@
 #
 # Cases ratified 2026-06-06: see substance-aware-drift.bats in the architect
 # package for the full contract. JTBD's tests cover the same four cases
-# through `check_review_gate` + `store_review_hash`.
+# through `_check_review_receipt` + `store_review_hash`.
 
 setup() {
   SCRIPT_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
@@ -50,7 +50,7 @@ A job-to-be-done description.
 A job-to-be-done description.
 " > "$POLICY_DIR/JTBD-001.proposed.md"
 
-  run check_review_gate "$TEST_SESSION" "$SYSTEM" "$POLICY_DIR"
+  run _check_review_receipt "$TEST_SESSION" "$SYSTEM" "$POLICY_DIR"
   [ "$status" -eq 0 ]
   [ -f "$MARKER" ]
 }
@@ -62,7 +62,7 @@ Body.
 "
   printf '# JTBD-001\r\n\r\nBody.\r\n' > "$POLICY_DIR/JTBD-001.proposed.md"
 
-  run check_review_gate "$TEST_SESSION" "$SYSTEM" "$POLICY_DIR"
+  run _check_review_receipt "$TEST_SESSION" "$SYSTEM" "$POLICY_DIR"
   [ "$status" -eq 0 ]
 }
 
@@ -80,7 +80,7 @@ A job-to-be-done description.
 A different job-to-be-done description.
 " > "$POLICY_DIR/JTBD-001.proposed.md"
 
-  run check_review_gate "$TEST_SESSION" "$SYSTEM" "$POLICY_DIR"
+  run _check_review_receipt "$TEST_SESSION" "$SYSTEM" "$POLICY_DIR"
   [ "$status" -ne 0 ]
   [ ! -f "$MARKER" ]
   [ ! -f "$HASH_FILE" ]
@@ -96,7 +96,7 @@ Body.
 New job.
 " > "$POLICY_DIR/JTBD-002.proposed.md"
 
-  run check_review_gate "$TEST_SESSION" "$SYSTEM" "$POLICY_DIR"
+  run _check_review_receipt "$TEST_SESSION" "$SYSTEM" "$POLICY_DIR"
   [ "$status" -ne 0 ]
 }
 
@@ -134,6 +134,6 @@ Threshold is 5 minutes.
 Threshold is 6 minutes.
 " > "$POLICY_DIR/JTBD-001.proposed.md"
 
-  run check_review_gate "$TEST_SESSION" "$SYSTEM" "$POLICY_DIR"
+  run _check_review_receipt "$TEST_SESSION" "$SYSTEM" "$POLICY_DIR"
   [ "$status" -ne 0 ]
 }

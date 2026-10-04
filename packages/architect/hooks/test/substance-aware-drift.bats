@@ -60,7 +60,7 @@ A line of policy content.
 A line of policy content.
 " > "$TEST_DIR/docs/decisions/123-test.proposed.md"
 
-  run check_architect_gate "$TEST_SESSION"
+  run _check_architect_receipt "$TEST_SESSION"
   [ "$status" -eq 0 ]
   [ -f "$MARKER" ]
   [ -f "$HASH_FILE" ]
@@ -75,7 +75,7 @@ A line of policy content.
   printf '# ADR-123\r\n\r\nA line of policy content.\r\n' \
     > "$TEST_DIR/docs/decisions/123-test.proposed.md"
 
-  run check_architect_gate "$TEST_SESSION"
+  run _check_architect_receipt "$TEST_SESSION"
   [ "$status" -eq 0 ]
   [ -f "$MARKER" ]
 }
@@ -94,7 +94,7 @@ A line of policy content.
 
 " > "$TEST_DIR/docs/decisions/123-test.proposed.md"
 
-  run check_architect_gate "$TEST_SESSION"
+  run _check_architect_receipt "$TEST_SESSION"
   [ "$status" -eq 0 ]
   [ -f "$MARKER" ]
 }
@@ -114,7 +114,7 @@ A line of policy content.
 A different line of policy content.
 " > "$TEST_DIR/docs/decisions/123-test.proposed.md"
 
-  run check_architect_gate "$TEST_SESSION"
+  run _check_architect_receipt "$TEST_SESSION"
   [ "$status" -ne 0 ]
   [ ! -f "$MARKER" ]
   [ ! -f "$HASH_FILE" ]
@@ -132,7 +132,7 @@ A line of policy content.
 A whole new paragraph of substantive change.
 " > "$TEST_DIR/docs/decisions/123-test.proposed.md"
 
-  run check_architect_gate "$TEST_SESSION"
+  run _check_architect_receipt "$TEST_SESSION"
   [ "$status" -ne 0 ]
   [ ! -f "$MARKER" ]
 }
@@ -148,7 +148,7 @@ Content.
 New ADR content.
 " > "$TEST_DIR/docs/decisions/124-new.proposed.md"
 
-  run check_architect_gate "$TEST_SESSION"
+  run _check_architect_receipt "$TEST_SESSION"
   [ "$status" -ne 0 ]
   [ ! -f "$MARKER" ]
 }
@@ -191,7 +191,7 @@ Policy content.
   hash=$(_substance_hash_path "$TEST_DIR/docs/decisions")
   _atomic_mark_with_hash "$MARKER" "$hash"
 
-  run check_architect_gate "$TEST_SESSION"
+  run _check_architect_receipt "$TEST_SESSION"
   [ "$status" -eq 0 ]
 }
 
@@ -211,7 +211,7 @@ Threshold is 5 minutes.
 Threshold is 6 minutes.
 " > "$TEST_DIR/docs/decisions/123-test.proposed.md"
 
-  run check_architect_gate "$TEST_SESSION"
+  run _check_architect_receipt "$TEST_SESSION"
   [ "$status" -ne 0 ]
   [ ! -f "$MARKER" ]
 }
@@ -237,7 +237,7 @@ date: 2026-06-07
 Body.
 " > "$TEST_DIR/docs/decisions/123-test.proposed.md"
 
-  run check_architect_gate "$TEST_SESSION"
+  run _check_architect_receipt "$TEST_SESSION"
   [ "$status" -ne 0 ]
   [ ! -f "$MARKER" ]
 }

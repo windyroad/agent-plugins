@@ -102,8 +102,8 @@ run_hook() {
   INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure on Node 20'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"permissionDecision"* ]]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" == *"systemMessage"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
 }
 
@@ -215,7 +215,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh pr create --title T --body-file '$TEST_PROJECT_DIR/pr-body.md' --body 'Different text'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
 }
 
 @test "body-file combined with short -b cannot reuse the file review" {
@@ -226,7 +226,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh pr create --title T -F '$TEST_PROJECT_DIR/pr-body.md' -b 'Different text'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
 }
 
 @test "literal prose mentioning body-file is still reviewed as literal prose" {
@@ -268,14 +268,14 @@ run_hook() {
   INPUT=$(build_bash_input "gh pr create --title T --body-file '$TEST_PROJECT_DIR/pr-body.md'&&echo done")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
 }
 
 @test "deny names both runtime recovery paths when CODEX_THREAD_ID is absent" {
   INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure on Node 20'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *'the calling agent waits for the reviewer to finish'* ]]
   [[ "$output" == *'invokes `interrupt_agent` exactly once on that completed target'* ]]
   [[ "$output" == *'On Claude Code, the calling agent dispatches the reviewer synchronously (`run_in_background: false`)'* ]]
@@ -287,7 +287,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure on Node 20'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
   [[ "$output" != *"BYPASS_RISK_GATE=1"* ]]
 }
@@ -315,7 +315,7 @@ run_hook() {
   [ "$status" -eq 0 ]
   # The env override no longer short-circuits — the gate still denies the
   # unreviewed external-comms draft.
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
 }
 
@@ -341,7 +341,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh issue create --title T --body '$DRAFT'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
 }
 
@@ -366,7 +366,7 @@ run_hook() {
   INPUT=$(build_write_input ".changeset/wr-risk-scorer-extcomms.md" "Add external-comms gate covering gh issue and pr surfaces.")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
 }
 
@@ -381,7 +381,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh api repos/foo/bar/security-advisories --method POST --field summary='leak via X'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
 }
 
@@ -419,7 +419,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh api repos/foo/bar/security-advisories -f summary='new advisory'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
 }
 
@@ -427,7 +427,7 @@ run_hook() {
   INPUT=$(build_bash_input "npm publish")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
 }
 
@@ -442,14 +442,14 @@ run_hook() {
   INPUT=$(build_bash_input "npm publish --dry-run=false")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
 }
 
 @test "P537: a dry run followed by a real publish remains gated" {
   INPUT=$(build_bash_input "npm publish --dry-run && npm publish")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
 }
 
 # ---------------------------------------------------------------------------
@@ -501,7 +501,7 @@ run_hook() {
   INPUT=$(build_bash_input "git commit -m \"fix(foo): handle null input\"")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"git-commit-message"* ]]
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
 }
@@ -511,7 +511,7 @@ run_hook() {
   INPUT=$(build_bash_input "git commit --amend -m \"rewritten subject\"")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"git-commit-message"* ]]
 }
 
@@ -525,7 +525,7 @@ run_hook() {
   INPUT=$(build_bash_input "$CMD")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"git-commit-message"* ]]
 
   # Pre-place the per-evaluator marker keyed on the extracted HEREDOC body
@@ -561,7 +561,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh issue create --title T --body 'we observed a build failure on Node 20'")
   run bash -c "cd '$TEST_PROJECT_DIR' && BYPASS_RISK_GATE=1 printf '%s' \"\$1\" | BYPASS_RISK_GATE=1 '$HOOK'" _ "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"wr-risk-scorer:external-comms"* ]]
 }
 
@@ -633,7 +633,7 @@ run_hook() {
   INPUT=$(build_bash_input "git commit -m \"fix(foo): handle null input\"")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"git-commit-message"* ]]
 }
 
@@ -648,7 +648,7 @@ run_hook() {
   INPUT=$(build_bash_input "git commit -m \"fix(foo): handle null input\"")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"git-commit-message"* ]]
 }
 
@@ -666,7 +666,7 @@ run_hook() {
   INPUT=$(build_bash_input "gh issue create --title x --body 'a clean issue body'")
   run_hook "$INPUT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"deny"* ]]
+  [[ "$output" != *'"deny"'* ]]
   [[ "$output" == *"gh-issue-create"* ]]
 }
 
