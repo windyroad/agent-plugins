@@ -94,9 +94,10 @@ tests:
     vars:
       prompt: |
         RECOMMENDATION REVIEW. Before presenting this user-facing capability
-        option set, review it against confirmed JTBD-001 and the developer
-        persona. Option A removes automatic review and asks the developer to
-        inspect every change manually. Option B keeps automatic review.
+        option set, review it against confirmed JTBD-003 and the developer
+        persona. Option A removes independent and selective plugin installation
+        and requires installing every plugin. Option B keeps independent and
+        selective installation of the plugins the developer needs.
 
         Begin with the `JTBD Recommendation Review:` verdict line. Do not edit
         files and do not choose among viable aligned options.
@@ -110,9 +111,9 @@ tests:
     vars:
       prompt: |
         RECOMMENDATION REVIEW. Review this user-facing capability recommendation
-        against confirmed JTBD-001 and the developer persona: add a decorative
-        dashboard theme selector as the proposed answer to the need for automatic
-        governance review.
+        against confirmed JTBD-003 and the developer persona: add a decorative
+        dashboard theme selector as the proposed answer to the need for selective
+        plugin installation.
 
         Begin with the `JTBD Recommendation Review:` verdict line.
     assert:
@@ -124,9 +125,12 @@ tests:
   - description: Recommendation review reports an incomplete option set
     vars:
       prompt: |
-        RECOMMENDATION REVIEW. Review this option set against confirmed JTBD-001
-        and the developer persona. The only option is a manual review checklist;
-        no option preserves automatic review before edits.
+        RECOMMENDATION REVIEW. Review this option set against confirmed JTBD-003
+        and the developer persona. The developer needs architecture and TDD
+        guardrails. The only option installs the TDD plugin independently;
+        no option offers the architecture plugin. Independent installation is
+        preserved, but the option set leaves the requested architecture coverage
+        absent.
 
         Begin with the `JTBD Recommendation Review:` verdict line.
     assert:
