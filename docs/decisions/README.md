@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 135 (120 in-force, 15 historical)
+**Total ADRs:** 136 (121 in-force, 15 historical)
 
 ---
 
 ## In-force decisions
 
-_120 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_121 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -612,6 +612,11 @@ _120 ADRs. These are the current rules. The architect agent reads this section f
 ### ADR-137 — Mechanical governance checks fail open when evidence cannot be evaluated
 **Status:** proposed | **Oversight:** unconfirmed
 **Chosen:** Chosen option: warn and permit execution when mechanical evidence cannot be evaluated. Architecture, JTBD, Style, Voice and Risk receipt checks permit execution on missing, expired, drifted, mismatched, malformed or unreadable receipts. Par...
+
+### ADR-138 — Authorized draft correction with fresh external-comms review
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Chosen option: Correct authorized drafts and obtain fresh external-comms reviews. The calling assistant corrects routine wording, formatting and tense failures, or safely removes detected confidential content, within the existing authorizat...
+**Confirmation:** Actual installed use corrects a release note rejected solely for sentence count and tense, obtains fresh revie...; Actual use retains a user decision when removing a disclosure would materially change the authorized message.; Changed drafts never reuse previous draft approval or publish after a substantive FAIL.
 
 ---
 
