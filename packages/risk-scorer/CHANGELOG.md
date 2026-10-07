@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.20.1
+
+### Patch Changes
+
+- 331b7b0: Allowed assistants to correct routine wording failures and safely redact confidential content in authorized drafts before obtaining fresh reviews without unnecessary approval.
+
 ## 0.20.0
 
 ### Minor Changes
