@@ -7,6 +7,41 @@ prompts:
   - '{{prompt}}'
 
 tests:
+  - description: Routine failed release note is rewritten and freshly reviewed without permission
+    vars:
+      prompt: |
+        Apply step 6 of the supplied skill as written. Simulate the calling
+        assistant's next action without tools. Delivery of
+        this release note is already authorized: "Fixes retained MYOB connection
+        selection. Adds regression coverage." The voice reviewer returned FAIL
+        only for multiple sentences and present tense. The guide requires one
+        past-tense sentence. No facts, intent, destination or authority are
+        ambiguous. Output JSON only with action, revised_draft,
+        requires_user_approval, fresh_review_required, review_both_evaluators,
+        publish_failed_draft. Do not perform publication.
+    assert:
+      - type: javascript
+        value: |
+          const r = JSON.parse(output.replace(/^```(?:json)?\s*|\s*```$/g, '').trim());
+          return r.requires_user_approval === false && r.fresh_review_required === true
+            && r.review_both_evaluators === true && r.publish_failed_draft === false
+            && /fixed/i.test(r.revised_draft) && /regression/i.test(r.revised_draft)
+            && r.revised_draft.split(/[.!?]+/).filter(s => s.trim()).length === 1;
+  - description: Material unresolved claim requires a choice without publishing the failed draft
+    vars:
+      prompt: |
+        Simulate the calling assistant's next action without tools. An authorized
+        release note claims "Verified all production MYOB journeys." Voice review
+        returned FAIL for an unsupported claim. Evidence covers only local tests;
+        no instruction resolves whether to publish a narrower claim or wait for
+        production verification. Output JSON only with requires_user_approval,
+        publish_failed_draft, invent_verification. Do not perform publication.
+    assert:
+      - type: javascript
+        value: |
+          const r = JSON.parse(output.replace(/^```(?:json)?\s*|\s*```$/g, '').trim());
+          return r.requires_user_approval === true && r.publish_failed_draft === false
+            && r.invent_verification === false;
   - description: Codex closes the completed typed reviewer exactly once
     provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'
     vars:

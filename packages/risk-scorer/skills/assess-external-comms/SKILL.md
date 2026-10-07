@@ -92,17 +92,12 @@ Present the full review report to the user. Highlight:
 - The exact substrings that triggered each finding (FAIL only).
 - Whether the gate is now pre-satisfied for the current session for this exact draft+surface key (PASS only): "The next attempt to <surface> with this draft body will proceed without re-prompting."
 
-### 6. Above-appetite handling (ADR-013 Rule 6)
+### 6. Correct the authorized draft and re-review (ADR-138; ADR-044)
 
-If the verdict is FAIL, do NOT auto-rewrite the draft. Use `AskUserQuestion`:
+A FAIL rejects the reviewed draft; it does not withdraw authorization to correct it. The calling assistant must automatically revise routine wording, sentence count, formatting and tense failures within the user's already-authorized intent. For a leak finding, safely redact the detected confidential content when that preserves the authorized message. Do not ask for rewrite permission when the instructions and findings resolve the correction.
 
-- header: "Leak detected — next step"
-- options:
-  1. `Rewrite the draft and re-review` — return to step 1 with the rewritten body.
-  2. `Move to a private channel` — direct the user to a non-public surface (vendor private email, internal Slack, etc.) where the leak does not apply.
-  3. `Re-review with context` — if the flag is a false positive (e.g. the "client name" is actually the user's own org), give that context to the `wr-risk-scorer:external-comms` reviewer and let it re-judge; a PASS verdict clears the gate via the review marker. There is no `BYPASS_RISK_GATE` env override (removed P377/RFC-029) — the reviewer's judgement, not an env knob, is the clearance path.
-  4. `Cancel` — abandon the post.
+This assessment and its reviewer remain read-only. The calling assistant prepares the revised draft in memory, then returns to step 3 with the exact revised text and the same surface. Run every applicable evaluator again, including both voice-tone and risk when installed. A previous PASS or receipt applies only to its original draft; never reuse it to clear changed text, write markers by hand, or fabricate a PASS. Continue the already-authorized action only after substantive reviews of the revised draft PASS. A substantive FAIL is not a mechanical transport failure and cannot be bypassed.
 
-Do not make the decision unilaterally — per ADR-013 Rule 1, all leak/no-leak judgement calls outside the regex pre-filter belong to the user.
+Ask for a substantive choice only when the correction would materially change the intended meaning, factual claims, destination or disclosure authority and the existing user instructions do not resolve that choice. Do not invent evidence, choose a new recipient, or publish the failed draft. If safe revisions still FAIL, report the unresolved finding and obtain only the missing substantive decision. In unattended work, queue unresolved choices and continue independent work per ADR-013 Rule 6; keep the failed communication unpublished.
 
 $ARGUMENTS
