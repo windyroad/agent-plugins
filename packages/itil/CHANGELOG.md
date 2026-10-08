@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 3.0.1
+
+### Patch Changes
+
+- f2ac589: Route incomplete features and initial deficiencies to problem management, and require an established service baseline before declaring an incident.
+
 ## 3.0.0
 
 ### Major Changes
