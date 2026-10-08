@@ -27,6 +27,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8 | P513 | The JTBD corpus has no index or persona currency check, unlike the decision corpus | 8 (Medium) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P111) |
 | 8 | P518 | `render-story-map` emits bare identifiers as link text, so every reference link announces as "P033" | 8 (Medium) | Open | S | 2026-08-24 | inbound-reported (#445) |
 | 7.5 | P544 | Briefing topic-file entries decay toward deletion because they are never loaded — Step 1.5 cannot tell "not useful" from "not delivered" | 15 (High) | Open | M | 2026-09-04 | inbound-reported (#473) |
+| 6 | P555 | Initial deficiencies are misclassified as incidents | 6 (Medium) | Open | S | 2026-10-08 | inbound-reported |
 | 6 | P436 | Issue templates declare labels ('problem', 'needs-triage') that don't exist; scaffold-intake should provision declared labels | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#170) |
 | 6 | P486 | The policy validator checks a policy's shape, never whether it contradicts itself | 12 (High) | Open | M | 2026-08-09 | inbound-reported |
 | 6 | P521 | Governance tools exit 0 over output they never validated | 12 (High) | Open | M | 2026-08-25 | inbound-reported (adopter-repo P224) |

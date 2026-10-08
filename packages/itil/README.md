@@ -17,7 +17,7 @@ Bugs recur. Incidents repeat. Without a disciplined process, you fix symptoms in
 
 **Incident management** — restore service fast with an audit trail:
 
-- **Declare incidents** when production is actively broken
+- **Declare incidents** when an existing service is interrupted or degrades from an established prior working baseline. Track missing, incomplete or initially deficient features as problems; an unknown baseline calls for problem investigation.
 - **Evidence-first discipline** — hypotheses must cite evidence before any mitigation
 - **Reversible mitigations first** — rollback, feature flag, restart, route away
 - **Automatic handoff** to problem management once service is restored

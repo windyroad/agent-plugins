@@ -9,7 +9,19 @@ deprecated-arguments: true
 
 Declare, triage, mitigate, and close an incident using an evidence-first, cool-headed workflow. This skill's primary goal is **restoring service**. Once service is restored, the skill hands off to `wr-itil:manage-problem` so the underlying cause is tracked.
 
-Incidents are time-bound events. Problems are persistent root causes. One problem can cause many incidents; one incident may (or may not) link to a problem.
+Incidents are observed interruptions or degradations of an existing service with an established prior working baseline to restore. Problems include missing, incomplete or deficient capabilities as well as persistent underlying causes. One problem can cause many incidents; one incident may (or may not) link to a problem.
+
+## Eligibility before declaration
+
+Classify the report before incident duplicate lookup, ID allocation, severity rating or mitigation. This classification is agent-owned from the available evidence; do not ask permission to use the applicable workflow.
+
+| Evidence | Route |
+|----------|-------|
+| Missing or incomplete feature, deficiency present from the outset, or performance that has always been slow | Use `wr-itil:manage-problem`. There is no prior service to restore; do not declare an incident or run restoration ceremony. |
+| Slow or deficient behavior with no established prior working baseline | Investigate through `wr-itil:manage-problem`, measuring the current behavior and seeking evidence of the baseline. Do not invent a regression or declare an incident from unmet expectations alone. |
+| Previously working service becomes unavailable, or previously fast service becomes slower, with an observed change from its baseline | Use incident management to restore that affected existing service. |
+
+Being deployed, customer-visible or called a failure does not turn a capability gap into an incident. Being part of an unfinished product does not exempt a real regression of an existing service from incident handling. If problem investigation establishes an actual interruption or degradation of existing service, switch to incident management and record the baseline and observed change. Keep unrelated incomplete features in problem management.
 
 ## Operations
 
@@ -80,7 +92,7 @@ Determine the operation from `$ARGUMENTS`:
 - If arguments match `<I###> close` → **delegate to `/wr-itil:close-incident <I###>`** via the Skill tool. See "Deprecated-argument forwarders" below.
 - If arguments match `<I###> link P<MMM>` → **delegate to `/wr-itil:link-incident <I###> P<MMM>`** via the Skill tool. See "Deprecated-argument forwarders" below.
 - If arguments start with `I<NNN>` or a bare number → this is an update
-- Otherwise → declare a new incident
+- Otherwise → apply **Eligibility before declaration**. Only an eligible report proceeds as a new incident; route initial deficiencies or an unknown baseline to `wr-itil:manage-problem` before any incident creation.
 
 #### Deprecated-argument forwarders (ADR-010 amended + P071)
 

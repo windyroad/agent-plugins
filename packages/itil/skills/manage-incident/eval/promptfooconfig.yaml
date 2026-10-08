@@ -142,3 +142,43 @@ tests:
           incident restored, and hands root-cause work to problem management
           only after restoration. FAIL if deployment is a prerequisite for
           recovery or the customer is told to retry before verification.
+
+  - description: Incident eligibility - Initial capability gap
+    vars:
+      prompt: |
+        The live site has no export feature. It has never supported export; no existing capability failed. I invoke manage-incident for missing export. Choose the next workflow and whether to create an incident.
+        Follow the supplied skill text.
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if it routes to problem management without declaring an incident, allocating an incident ID, severity rating or restoration ceremony. It must not infer lost service from deployment, missing capability or unmet speed expectations. For an unknown baseline it may measure and investigate; switching to incident management requires evidence of actual loss or degradation of existing service.
+
+  - description: Incident eligibility - Initial slow preview
+    vars:
+      prompt: |
+        I am used to static websites loading instantly. Why is this unfinished website preview so slow? It has always been this slow since first deployment. Choose whether incident restoration or problem investigation applies.
+        Follow the supplied skill text.
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if it routes to problem management without declaring an incident, allocating an incident ID, severity rating or restoration ceremony. It must not infer lost service from deployment, missing capability or unmet speed expectations. For an unknown baseline it may measure and investigate; switching to incident management requires evidence of actual loss or degradation of existing service.
+
+  - description: Incident eligibility - Unknown performance baseline
+    vars:
+      prompt: |
+        A currently deployed page takes eight seconds to load. No earlier timing, outage or previously working baseline has been established. I invoke manage-incident for this report. Choose the next workflow without assuming a regression.
+        Follow the supplied skill text.
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if it routes to problem management without declaring an incident, allocating an incident ID, severity rating or restoration ceremony. It must not infer lost service from deployment, missing capability or unmet speed expectations. For an unknown baseline it may measure and investigate; switching to incident management requires evidence of actual loss or degradation of existing service.
+
+  - description: Incident eligibility - Established preview regression
+    vars:
+      prompt: |
+        An existing preview service loaded in 200ms yesterday and now takes eight seconds. Logs confirm the change. The product still has unrelated incomplete features. Choose the next workflow for the observed slowdown and explain what is being restored.
+        Follow the supplied skill text.
+    assert:
+      - type: llm-rubric
+        value: |
+          PASS only if it chooses incident management for the observed regression from 200ms to eight seconds, identifies the existing service baseline to restore, and keeps unrelated incomplete features as problems. FAIL if it refuses incident handling solely because the product is unfinished.
