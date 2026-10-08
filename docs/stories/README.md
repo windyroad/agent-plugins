@@ -179,7 +179,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-099 | A clean reconciler result means the tier really is clean | M | P472 | RFC-100 | STORY-MAP-002 |
 | accepted | STORY-101 | Trust agent-prose CI across model updates | S | P459 | RFC-102 | STORY-MAP-002 |
 | accepted | STORY-103 | Trust stable npm release verification | M | P541 | RFC-104 | STORY-MAP-002 |
-| accepted | STORY-104 | Route initial deficiencies to problem management and service regressions to incident management | S | P555 | RFC-105 | STORY-MAP-002 |
 | draft | STORY-091 | Invoke the Wardley map converter by a name that survives every upgrade | S | P437 | RFC-095 | STORY-MAP-008 |
 | draft | STORY-093 | Every conversion tells the reporter it landed | M | P432 | RFC-097 | STORY-MAP-004 |
 
@@ -190,6 +189,7 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-104 | Route initial deficiencies to problem management and service regressions to incident management | 2026-10-08 | P555 |
 | STORY-102 | Commit implementation before preparing its release metadata | 2026-09-29 | P554 |
 | STORY-044 | See what cruise is doing — status/telemetry skill | 2026-09-19 | P160, P446 |
 | STORY-090 | Keep assistant responses in my chosen voice | 2026-09-17 | P540 |

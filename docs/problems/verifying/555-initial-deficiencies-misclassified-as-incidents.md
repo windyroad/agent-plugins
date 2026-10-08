@@ -1,11 +1,11 @@
 # Problem 555: Initial deficiencies are misclassified as incidents
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-10-08
 **Priority**: 6 (Medium) - Impact: 2 × Likelihood: 3; qualitative capture estimate from one reported instance, frequency unmeasured
 **Origin**: inbound-reported
 **Effort**: S - classification prose plus behavioral regression evaluations
-**WSJF**: 6 - (6 × 1.0) / 1
+**WSJF**: 0 - (6 × 0.0) / 1; released fix awaiting affected-chat verification
 **JTBD**: JTBD-001
 **Persona**: developer
 
@@ -25,11 +25,11 @@ The assistant classified an initially slow, unfinished website as an incident, a
 - [x] Obtain architecture and JTBD review: existing ADR-011 restoration boundary and JTBD-001 apply.
 - [x] Add eligibility routing before incident declaration and matching global guidance.
 - [x] Evaluate incomplete features, initial slowness, unknown baseline, and established service regression.
-- [ ] Release and install the corrected skill; distinguish installed artifact from active-chat adoption.
+- [x] Release and install the corrected skill; distinguish installed artifact from active-chat adoption.
 
-## Root Cause
+## Root Cause Analysis
 
-The global instruction mandated incident response for any customer-facing production failure or degradation. The canonical manage-incident skill moved directly from parsing to incident creation without establishing an existing service baseline to restore.
+The canonical manage-incident skill moved directly from parsing to incident creation without establishing an existing service baseline to restore. A global instruction also mandated incident response for any customer-facing production failure or degradation. These are confirmed contract gaps; the affected chat's exact loaded instruction path has not been established.
 
 ## Workaround
 
@@ -53,4 +53,22 @@ Decision simulations must route incomplete or initially deficient functionality 
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-104 | STORY-104: Route initial deficiencies to problem management and service regressions to incident management | accepted |
+| STORY-104 | STORY-104: Route initial deficiencies to problem management and service regressions to incident management | done |
+
+## Reproduction evidence
+
+The human screenshot records an incident declaration for initial slowness in an unfinished website, without evidence of a previous performance baseline. The four eligibility decision evaluations cover that boundary and its counterexamples. Standalone old-skill simulations chose the correct workflows; they did not reproduce a deterministic failing baseline. The observed screenshot failure and missing contract are the repair evidence.
+
+## Fix Released
+
+**Released**: 2026-10-08
+**Version**: @windyroad/itil 3.0.1
+**Implementation**: 4db9ddba
+**Release preparation**: f2ac589a
+**Release merge**: e35ab02f0131a6ff00d190142747c07e9a507251 (PR526)
+
+- Implementation CI37733511252, preparation CI37734674013, release PR CI37734776162 and final merge CI37736254156 passed Quality Gates and Agent-Prose Behavioural Evals. The new eligibility step ran and passed four cases in implementation CI.
+- Release37736254238 succeeded; npm latest is 3.0.1.
+- Supported installers updated Codex plus the existing Claude user and primary-project registrations to enabled 3.0.1. Codex canonical and generated incident skills match the published tarball; the Claude incident skill matches reviewed release source.
+- Local routing evaluations passed 4/4; the scoped incident and packaged-installation suite passed 59/59. These establish decision and artifact behavior, not affected-chat recovery.
+- Actual use of the corrected eligibility boundary in the affected running chat remains unverified. No restart or other-chat message was requested.

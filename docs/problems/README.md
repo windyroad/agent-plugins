@@ -27,7 +27,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 8 | P513 | The JTBD corpus has no index or persona currency check, unlike the decision corpus | 8 (Medium) | Known Error | M | 2026-08-21 | inbound-reported (adopter-repo P111) |
 | 8 | P518 | `render-story-map` emits bare identifiers as link text, so every reference link announces as "P033" | 8 (Medium) | Open | S | 2026-08-24 | inbound-reported (#445) |
 | 7.5 | P544 | Briefing topic-file entries decay toward deletion because they are never loaded — Step 1.5 cannot tell "not useful" from "not delivered" | 15 (High) | Open | M | 2026-09-04 | inbound-reported (#473) |
-| 6 | P555 | Initial deficiencies are misclassified as incidents | 6 (Medium) | Open | S | 2026-10-08 | inbound-reported |
 | 6 | P436 | Issue templates declare labels ('problem', 'needs-triage') that don't exist; scaffold-intake should provision declared labels | 6 (Medium) | Open | S | 2026-07-06 | inbound-reported (#170) |
 | 6 | P486 | The policy validator checks a policy's shape, never whether it contradicts itself | 12 (High) | Open | M | 2026-08-09 | inbound-reported |
 | 6 | P521 | Governance tools exit 0 over output they never validated | 12 (High) | Open | M | 2026-08-25 | inbound-reported (adopter-repo P224) |
@@ -315,6 +314,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P402 | external-comms gate — PostToolUse mark hook does not fire for background-launched (forced-async) review agents, so no marker is persisted to the live session dir despite PASS | 2026-09-12 (`@windyroad/risk-scorer@0.19.3`, `@windyroad/voice-tone@0.8.6`; version commit `8c9e4f4c`, merge `9cc26afc`, PR #477, workflow 34684064046) | no — not observed |
 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight contexts — the authorised set is now stated outright in `/wr-itil:work-problems`, with the one restrained shape (P363's held batch cadence) named beside it | pending — `@windyroad/itil` patch committed, ships next release | no — not observed |
 | P539 | Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate | 2026-10-01 (Architect 0.23.9, JTBD 0.14.11, Risk Scorer 0.19.15, Style Guide 0.6.9, Voice Tone 0.9.7; nested target resolver) | no — not observed |
+| P555 | Initial deficiencies are misclassified as incidents | 2026-10-08 (@windyroad/itil 3.0.1, PR526) | no — not observed |
 
 
 ## Inbound Upstream Reports
