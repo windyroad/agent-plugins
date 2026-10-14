@@ -1,6 +1,6 @@
 # Problem 556: Codex backlog drain halts when Goal controls are not exposed
 
-**Status**: Verification Pending
+**Status**: Closed
 **Reported**: 2026-10-14
 **Priority**: 15 (High) — Impact 3 × Likelihood 5. The affected capability-limited surface stops all backlog work before its first iteration; the unconditional projection instruction repeats on each invocation on that surface. No repository corruption was observed.
 **Origin**: internal
@@ -66,7 +66,9 @@ Goal could not be cleared instead of inventing a successful clear or a failure.
   or change to approved map activities or jobs is required.
 - [x] Complete positive and capability-limited model evaluations and release
   qualification.
-- [ ] Verify the installed correction dispatches work on an affected surface.
+- [x] Verify the installed correction's capability-limited continuation and
+  terminal behavior in a fresh session (bounded acceptance evidence below;
+  no repository iteration was executed).
 
 ## Fix Strategy
 
@@ -96,6 +98,37 @@ passed. These model simulations do not establish adoption by an already-running
 affected chat. All 4,393 local tests and the 19 focused generator/pack/condition checks passed.
 Implementation CI38635951311, preparation CI38638078521, and release PR
 CI38638209521 passed both required jobs.
+
+### Fresh installed-runtime acceptance, 2026-10-15
+
+The authorized local teammate reports PASS from fresh ephemeral Codex session
+`01a13c9d-9819-7d92-96d7-6c89617af2f3`, running Codex CLI 0.162.0 authenticated
+via ChatGPT. The session read the installed `@windyroad/itil@3.0.2` Codex
+`skills-codex/work-problems/SKILL.md`. Acceptance result SHA-256:
+`92b63fed621166e6a5c9309756e63267d0aaceed25c7ce9a464ef0db117df012`.
+
+With no callable Goal get/set/clear and one dispatchable ticket, the session
+selected continuation, a one-time missing-capability notice, and honest
+unanchored operation. It did not require permission or restart. Its terminal
+case required fresh Step 2.4 Gate (0) classification showing zero dispatchable
+tickets before `ALL_DONE`, disclosure that clear was unavailable, and no claim
+that a Goal existed or was cleared.
+
+This was a read-only acceptance exercise: no repository workflow, external
+service, task creation, or file mutation was allowed. It verifies the installed
+skill's continuation and completion decisions, not an executed repository
+iteration or hot-reload by the original cloud chat. Documentation CI38641542894
+for `22ab0a235ab21e797308ab2b521861e24e50d02d` also passed both required jobs.
+
+## Closure
+
+Closed 2026-10-15 on the cited post-release, fresh installed-runtime acceptance
+reported by the authorized local teammate. The do-not-close predicate returned
+exit 1 (not blocked). This evidence resolves the reported capability-handling
+defect without claiming that the already-running cloud chat adopted the package.
+
+Recovery: rerun `/wr-itil:transition-problem 556 known-error` to reopen if an
+affected invocation reveals incomplete continuation or completion behavior.
 
 ## Related
 

@@ -316,7 +316,6 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight contexts — the authorised set is now stated outright in `/wr-itil:work-problems`, with the one restrained shape (P363's held batch cadence) named beside it | pending — `@windyroad/itil` patch committed, ships next release | no — not observed |
 | P539 | Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate | 2026-10-01 (Architect 0.23.9, JTBD 0.14.11, Risk Scorer 0.19.15, Style Guide 0.6.9, Voice Tone 0.9.7; nested target resolver) | no — not observed |
 | P555 | Initial deficiencies are misclassified as incidents | 2026-10-08 (@windyroad/itil 3.0.1, PR526) | no — not observed |
-| P556 | Codex backlog drain halts when Goal controls are not exposed | 2026-10-15 (@windyroad/itil 3.0.2, PR527) | no — not observed |
 
 
 ## Inbound Upstream Reports
@@ -420,6 +419,7 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 
 | ID | Title | Closed via |
 |----|-------|-----------|
+| P556 | Codex backlog drain halts when Goal controls are not exposed | Closed 2026-10-15 on fresh installed ITIL 3.0.2 read-only acceptance: session `01a13c9d-9819-7d92-96d7-6c89617af2f3`, result SHA-256 `92b63fed621166e6a5c9309756e63267d0aaceed25c7ce9a464ef0db117df012`, PASS for missing-control continuation and terminal decisions. No repository iteration or original-chat hot-reload is claimed. Recovery: `/wr-itil:transition-problem 556 known-error`. |
 | P554 | Commit-time changeset enforcement forces premature release metadata | Closed 2026-09-29 on published `@windyroad/itil@2.5.1` evidence: the registry tarball omits the obsolete hook and helper, both registered runtimes permit implementation commits without changesets, npm `latest` is `2.5.1`, and release workflow 36513111022 passed. Recovery: `/wr-itil:transition-problem 554 known-error`. |
 | P450 | VQ evidence cells have no write path from subsequent sessions — drain starved | Relevance-closed 2026-09-18 by the Step 4.6 pass (ADR-079 Phase 1 + Phase 2), shapes `ADR-shipped-confirmed, named-skill-or-feature-exists, driver-child-ticket-closed`. Reversible: `git revert` the relevance-close commit, or `git mv` back to `known-error/`. |
 | P425 | Architect edit gate relitigates a same-session pass — unratified-dependency overfire | Relevance-closed 2026-09-18 by the Step 4.6 pass (ADR-079 Phase 1 + Phase 2), shapes `ADR-shipped-confirmed, named-skill-or-feature-exists, driver-child-ticket-closed`. Reversible: `git revert` the relevance-close commit, or `git mv` back to `known-error/`. |
