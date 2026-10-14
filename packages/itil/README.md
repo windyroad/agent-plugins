@@ -49,6 +49,19 @@ exact `wr-itil:hang-off-check` agent, and five consolidated lifecycle hooks.
 
 ## Usage
 
+**Plan toward a verified outcome:**
+
+```
+/wr-itil:outcome-led-planning
+```
+
+Establish a SMART outcome through one-question-at-a-time clarification, then
+confirm it before planning. Deliver with an INVEST-shaped Now increment,
+provisional Next increments and high-level Later direction. The architect,
+JTBD reviewer and risk scorer assess each executable plan revision; verified
+delivery informs the next revision. Story documents are added only when the
+project requires them.
+
 **Manage a problem ticket:**
 
 ```
@@ -85,6 +98,7 @@ See [ADR-011](../../docs/decisions/011-manage-incident-skill.proposed.md) for th
 
 | Skill | Purpose | Maturity |
 | ------- | --------- | --- |
+| `/wr-itil:outcome-led-planning` | Clarify the objective, deliver a reviewed Now increment, and replan Next and Later from verified evidence | Experimental |
 | `/wr-itil:manage-problem` | Create, update, and close problem tickets through the Open → Known Error → Verifying → Closed lifecycle | Alpha |
 | `/wr-itil:capture-problem` | Foreground-lightweight aside-invocation variant of `manage-problem` (per ADR-032 background-capture pattern + P078 capture-on-correction) — drafts a ticket scaffold without losing the operational thread when a problem signal surfaces mid-conversation | Experimental |
 | `/wr-itil:work-problem` | Pick the highest-WSJF actionable ticket and work it to completion | Experimental |

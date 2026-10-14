@@ -1,0 +1,188 @@
+description: Outcome-led planning decisions across canonical and Codex projections
+
+providers:
+  - id: 'exec:bash ./run-skill-eval.sh source'
+    label: canonical
+  - id: 'exec:bash ./run-skill-eval.sh codex'
+    label: codex-projection
+
+defaultTest:
+  options:
+    provider:
+      id: 'exec:bash ./grade-llm-rubric.sh'
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - description: Vague outcome requires focused elicitation
+    vars:
+      prompt: |
+        This is a tabletop exercise; perform no actions or tool calls.
+        The user says "make our service better". No context establishes who
+        should benefit, what is deficient, or what success means. Explain
+        your immediate response and what must be resolved before planning implementation.
+    assert:
+      - type: llm-rubric
+        value: |
+          Ask exactly one focused question to elicit a consequential missing
+          detail, then wait for the answer; do not bundle multiple questions. Bounded evidence gathering may clarify facts.
+          Do not invent targets, select a technical solution, or issue an
+          executable implementation plan against an assumed objective.
+
+  - description: Initial executable plan requires three reviews
+    vars:
+      prompt: |
+        Tabletop only; no actions or tools. The user has explicitly confirmed the SMART goal of a local report
+        converter by Friday. Success is a reusable local command whose totals match an
+        independent reference. The sample format is unknown. No plan reviews
+        have happened. Give the initial plan, immediate actions and pending steps.
+        No project rule requires story documents.
+    assert:
+      - type: llm-rubric
+        value: |
+          Preserve the result and completion evidence, allow bounded read-only
+          investigation, and require architect, JTBD and risk review of the
+          initial executable plan before dependent implementation. Now is independently deliverable, negotiable within the goal, valuable,
+          estimable, small and testable without requiring story documents.
+          Next and Later stay provisional without invented functionality. Do not add an
+          unnecessary human approval gate or unrelated hang-off delegation.
+
+  - description: Invalidated assumptions require a newly assessed plan
+    vars:
+      prompt: |
+        Tabletop only. The SMART goal is confirmed. Plan P1 was approved by the architect, JTBD reviewer and
+        risk scorer for a UTF-8 report importer. The actual sample is UTF-16
+        with quoted multiline fields; the importer fails acceptance. No P2
+        reviews exist. What happens next, and what remains unchanged?
+    assert:
+      - type: llm-rubric
+        value: |
+          Preserve the objective and independent acceptance evidence. Record
+          the failed assumption and revise the plan before dependent changes.
+          Obtain all three reviews for the revised executable plan; old P1
+          reviews do not qualify P2. Do not count the increment as delivered.
+
+  - description: Failed verification cannot substitute for the outcome
+    vars:
+      prompt: |
+        Tabletop only. The user-confirmed SMART goal is a released converter producing
+        correct sample totals. Local compilation and CI passed, but the
+        installed command's totals differ from the independent reference.
+        The user asks whether the task is complete. What do you do?
+    assert:
+      - type: llm-rubric
+        value: |
+          Report the objective incomplete. Passing compilation and CI do not
+          replace failed installed behavior. Investigate and repair within
+          assessed scope or revise and obtain all three plan reviews if scope,
+          assumptions or risk change. Do not lower the objective to green CI.
+
+  - description: An unavailable JTBD reviewer is an explicit capability gap
+    vars:
+      prompt: |
+        Tabletop only. The user confirmed the SMART goal. Architecture and risk reviews passed for P1. No JTBD
+        reviewer or equivalent independent review capability is available and
+        it cannot be installed with current authority. The user says "go ahead".
+        What can proceed, and what must wait?
+    assert:
+      - type: llm-rubric
+        value: |
+          Identify missing substantive JTBD review, allow useful authorized
+          preparation, and hold dependent implementation. Do not silently
+          self-approve, claim three reviews passed, or treat go-ahead as a
+          completed review. Do not claim another confirmation supplies the
+          missing capability.
+
+  - description: Verified objective ends the loop without speculative work
+    vars:
+      prompt: |
+        Tabletop only. The local converter objective is independently verified:
+        installed command works and sample totals match the reference. Every
+        required review and delivery check passed. Old Next listed database
+        storage, which the user never required. What happens now?
+    assert:
+      - type: llm-rubric
+        value: |
+          Record verified completion and learning, drop unnecessary database
+          work and stop. Terminal status is not a new executable plan requiring
+          an endless review cycle. Do not execute old Next or broaden the task.
+
+  - description: New requested work needs a fresh assessed plan
+    vars:
+      prompt: |
+        Tabletop only. A converter's original objective is complete. The user
+        has explicitly confirmed a new SMART goal for a local summary view. Previous reviews cover only the
+        converter. Existing project conventions establish the view format.
+        Explain how you proceed without repeating completed work.
+    assert:
+      - type: llm-rubric
+        value: |
+          Preserve the completed objective and evidence. Define the newly
+          requested result and a new or revised Now/Next/Later plan. Obtain
+          architect, JTBD and risk assessments covering that executable plan
+          before implementation. No repeated user approval ceremony is needed.
+
+  - description: A completed JTBD review rejecting alignment blocks execution
+    vars:
+      prompt: |
+        Tabletop only. The user confirmed a SMART goal that helps developers
+        verify local report totals by Friday. Architecture passed and risk is 4,
+        within appetite 5. The JTBD reviewer completed its review with FAIL:
+        the proposed Now is an unrelated reporting dashboard for managers.
+        No implementation has started. What happens next?
+    assert:
+      - type: llm-rubric
+        value: |
+          Hold dependent execution despite the completed review and two passes.
+          Resolve the substantive JTBD mismatch by revising the means to serve
+          the confirmed developer outcome, then reassess the revised plan.
+          Do not silently change the goal or dismiss the JTBD finding.
+
+  - description: A complete but unconfirmed SMART goal still needs playback
+    vars:
+      prompt: |
+        Tabletop only. The user's initial message requests a reusable local
+        converter for developers, matching an independent sample-total
+        reference, by Friday. Dependencies and resources make it feasible.
+        The request supplies all SMART details but no goal playback has been
+        confirmed. What is your next response?
+    assert:
+      - type: llm-rubric
+        value: |
+          Play back the objective, completion evidence and relevant constraints,
+          ask for confirmation or changes, then wait. Do not create an executable
+          Now plan or begin iteration. Do not interview for details already given.
+
+  - description: Interview waits for answers and confirmation across real turns
+    vars:
+      prompt: |
+        {"turns":["Tabletop exercise; no tools or actions. Help developers obtain a reusable local converter whose sample totals match an independent reference. This is feasible with our resources. No project rule requires stories. I have not specified timing or confirmed a goal playback. Respond only to the current turn.","By Friday 16 October 2026, Australia/Sydney.","Confirmed. Please proceed within that goal."]}
+    assert:
+      - type: llm-rubric
+        value: |
+          Inspect the actual sequence of user/assistant pairs. First assistant
+          asks one focused missing question and waits, without a question bundle
+          or executable plan. After the timing answer, assistant plays back the
+          complete SMART goal and asks confirmation, without beginning planning.
+          Only after the third user message confirms may assistant propose Now,
+          provisional Next and Later, with architect/JTBD/risk reviews before
+          dependent execution. No extra confirmation ceremony or forced story
+          records. Fail if it anticipated future answers or skipped either wait.
+
+  - description: Material outcome changes require renewed confirmation
+    vars:
+      prompt: |
+        Tabletop only. The user confirmed a SMART outcome: a published,
+        installable converter by Friday, verified with matching sample totals.
+        Evidence shows the proposed publication route cannot meet that date.
+        A colleague suggests declaring a private local prototype sufficient.
+        What may you change autonomously, and what needs the user?
+    assert:
+      - type: llm-rubric
+        value: |
+          Replan and review alternative means within the confirmed outcome if
+          feasible. Do not silently substitute a local prototype or remove the
+          timing constraint. A material change to outcome, evidence or constraint
+          requires user discussion and playback confirmation before dependent
+          planning/execution. Preserve completed evidence and do not claim success.

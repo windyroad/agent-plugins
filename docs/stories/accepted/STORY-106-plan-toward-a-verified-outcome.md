@@ -28,10 +28,19 @@ and high-level Later direction, reassessing the plan after each delivery.
 
 ## Acceptance criteria
 
+- [ ] Actual interview turns ask one missing question at a time and wait,
+  play back the SMART outcome and wait for explicit confirmation before
+  executable planning; substantive goal changes require reconfirmation.
+- [ ] Now uses INVEST without introducing unnecessary story documents, and a
+  substantive JTBD rejection blocks dependent work until resolved and reassessed.
+
+- [ ] When context leaves the outcome too vague, the skill elicits the desired
+  change, beneficiary and completion evidence before implementation planning.
+
 - [ ] The canonical and generated skill separate the objective and completion
   evidence from the proposed means, with one detailed Now, provisional Next and
   high-level Later.
-- [ ] Actual model scenarios for both skill projections require architect and
+- [ ] Actual model scenarios for both skill projections require architect, JTBD and
   risk assessment before dependent implementation, replan after invalidated
   assumptions or failed verification, and preserve authority when a reviewer is
   unavailable.
@@ -52,14 +61,14 @@ than treating its personal source as publication evidence.
 ## JTBD trace
 
 JTBD-008 supplies incremental delivery through the existing planning vehicle;
-JTBD-005 supplies the architecture and risk assessment checkpoints. The skill
+JTBD-005 supplies the architecture, JTBD and risk assessment checkpoints. The skill
 composes with each adopter's governing planning and delivery requirements.
 
 ## Implementation notes
 
 Reuse `packages/itil/skills/` and the Codex projector. Omit the projector's
 capture-specific delegation only for this skill. Add metadata and README
-discovery. Exercise six semantic scenarios against both projections, extend
+discovery. Exercise the semantic scenarios against both projections, extend
 packed installation checks, and qualify from outside the source checkout.
 Implementation stays STAGED without a changeset until its exact CI passes;
 then prepare the complete cumulative minor release separately.
@@ -73,5 +82,5 @@ then prepare the complete cumulative minor release separately.
 ## Related
 
 - Captured via the RFC-row and story workflows on the existing decompose activity.
-- Architecture and risk assessments of plan P4 cover the bounded source scope;
+- Architecture and risk assessments of the current confirmed-outcome plan cover the bounded source scope;
   actual changes and release preparation still require their own checks.

@@ -206,6 +206,19 @@ NODE
   done < <(find "$TMP/package" -type f \( -name '*.sh' -o -path '*/bin/wr-*' \) -print)
 
   [ -f "$TMP/package/skills/manage-problem/SKILL.md" ]
+  [ -f "$TMP/package/skills/outcome-led-planning/SKILL.md" ]
+  [ -f "$TMP/package/skills-codex/outcome-led-planning/agents/openai.yaml" ]
+  ! grep -Fq '> Spawn `wr-itil:hang-off-check`' "$TMP/package/skills-codex/outcome-led-planning/SKILL.md"
+  grep -Fq '> Spawn `wr-itil:hang-off-check`' "$TMP/package/skills-codex/capture-problem/SKILL.md"
+  node --input-type=module - "$TMP/package" <<'NODE'
+import { readFileSync } from "node:fs";
+import { parse } from "yaml";
+const root = process.argv[2];
+for (const [surface, name] of [["skills", "wr-itil:outcome-led-planning"], ["skills-codex", "outcome-led-planning"]]) {
+  const text = readFileSync(`${root}/${surface}/outcome-led-planning/SKILL.md`, "utf8");
+  if (parse(text.split("---")[1]).name !== name) throw new Error(`${surface}: incorrect invocation`);
+}
+NODE
   [ -f "$TMP/package/skills-codex/capture-problem/SKILL.md" ]
   [ -f "$TMP/package/skills-codex/manage-problem/SKILL.md" ]
   [ -f "$TMP/package/skills-codex/work-problems/SKILL.md" ]
@@ -221,6 +234,7 @@ NODE
   [ "$status" -eq 0 ]
   staged="$CODEX_HOME/.tmp/marketplaces/wr-itil-$PACKAGE_VERSION"
   [ "$(jq -r .version "$staged/.codex-plugin/plugin.json")" = "$PACKAGE_VERSION" ]
+  cmp "$TMP/package/skills-codex/outcome-led-planning/SKILL.md" "$staged/skills-codex/outcome-led-planning/SKILL.md"
   [ "$(jq '[.hooks[] | length] | add' "$staged/hooks/hooks.json")" -eq 5 ]
   [ "$(jq '[.hooks[] | length] | add' "$staged/hooks-codex/hooks.json")" -eq 5 ]
   project="$TMP/staged-project"
