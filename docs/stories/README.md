@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-10-15 **STORY-070 and STORY-105 done** — RFC-076 delivery records reconciled with published package evidence.
+> Last reviewed: 2026-10-15 **STORY-106 accepted** - Outcome-led planning is traced to a ratified map and ready for bounded implementation.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -146,6 +146,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | in-progress | STORY-083 | A canonical architect PASS unlocks the guarded edit | S | P468 | RFC-089 | STORY-MAP-002 |
 | in-progress | STORY-082 | Gate Bash writes without blocking read-only commands | L | P503 | RFC-088 | STORY-MAP-002 |
 | draft | STORY-064 | A ticket that only names a decision as background stays open | M | P463 | RFC-070 | STORY-MAP-011 |
+| accepted | STORY-106 | Keep my objective clear while I deliver, learn and replan | M | P557 | RFC-106 | STORY-MAP-002 |
 | draft | STORY-012 | Can't start coding without an RFC — the gate makes me create one first | S | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-013 | Full gate: an RFC exists → I proceed; none → I create it first | M | P251, P314 | RFC-005 | STORY-MAP-002 |
 | draft | STORY-014 | Unattended, the agent works the plan and pauses for real decisions | M | P251, P314 | RFC-005 | STORY-MAP-002 |

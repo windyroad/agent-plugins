@@ -84,7 +84,7 @@ One row per story map in `draft` / `accepted` / `in-progress` status, from files
 
 | WSJF | ID | Title | Status | Problems | RFCs |
 |------|-----|-------|--------|----------|------|
-| — | STORY-MAP-002 | Take a problem from noticed to resolved | draft | P080, P155, P170, P251, P390, P399, P401 | RFC-005, RFC-060, RFC-047, RFC-061 |
+| — | STORY-MAP-002 | Take a problem from noticed to resolved | draft | P080, P155, P170, P251, P284, P368, P390, P399, P401, P402, P415, P459, P468, P472, P477, P498, P499, P503, P508, P509, P512, P514, P519, P525, P529, P533, P537, P538, P539, P541, P555, P557 | RFC-005, RFC-060, RFC-047, RFC-061, RFC-067, RFC-068, RFC-069, RFC-071, RFC-072, RFC-073, RFC-075, RFC-077, RFC-078, RFC-081, RFC-083, RFC-085, RFC-086, RFC-087, RFC-088, RFC-089, RFC-090, RFC-091, RFC-092, RFC-093, RFC-100, RFC-102, RFC-104, RFC-105, RFC-106 |
 | — | STORY-MAP-003 | Sustain my token quota across the week and across surfaces | draft | P160, P443 | RFC-046 |
 | — | STORY-MAP-004 | Close the loop with someone who reported a problem | draft | P080, P170, P376, P431 | RFC-028, RFC-051, RFC-061 |
 | — | STORY-MAP-008 | Have a plugin behave like a guest in my repository | draft | P424 | RFC-054 |

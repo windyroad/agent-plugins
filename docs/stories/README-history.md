@@ -114,3 +114,7 @@
 ## 2026-10-15
 
 > Last reviewed: 2026-10-01 **STORY-103 accepted** — the confirmed problem-resolution map now traces P541 to bounded npm release verification.
+
+## 2026-10-15
+
+> Last reviewed: 2026-10-15 **STORY-070 and STORY-105 done** — RFC-076 delivery records reconciled with published package evidence.

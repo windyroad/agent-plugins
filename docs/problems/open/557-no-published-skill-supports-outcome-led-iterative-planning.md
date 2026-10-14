@@ -54,7 +54,7 @@ skill, which must not be introduced into the new planning contract.
 
 - [x] Identify the missing published surface and compare local and package scope.
 - [x] Confirm ITIL ownership and the existing ratified story-map journey.
-- [ ] Capture the problem-traced release row and delivery story before implementation.
+- [x] Capture the problem-traced release row and delivery story before implementation.
 - [ ] Qualify canonical and generated behavior, packing and isolated installation.
 - [ ] Verify publication and the installed skill from the exact released artifact.
 
@@ -79,3 +79,14 @@ reported as distinct evidence.
 - Captured through the ITIL problem flow. Title and path searches found no
   existing ticket covering this absent skill; general skill-testing and
   story-map-rendering tickets describe different capabilities.
+
+## RFCs
+
+- RFC-106: Plan toward a verified outcome, on [the existing developer journey](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html).
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-106 | STORY-106: Keep my objective clear while I deliver, learn and replan | accepted |

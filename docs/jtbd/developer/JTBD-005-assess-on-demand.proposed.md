@@ -30,3 +30,10 @@ When I want to know whether my work is safe to release, architecturally sound, o
 ## Current Solutions
 
 Invoke subagents manually via the Task tool with the exact subagent_type string and a self-contained prompt. Requires knowing the string and crafting the context — high friction.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-106 | STORY-106: Keep my objective clear while I deliver, learn and replan | accepted |
