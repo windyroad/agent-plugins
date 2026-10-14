@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 3.0.2
+
+### Patch Changes
+
+- 6a53a90: Continue Codex backlog work when Goal controls are unavailable while retaining completion checks and reporting anchor state honestly.
+
 ## 3.0.1
 
 ### Patch Changes
