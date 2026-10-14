@@ -12,10 +12,16 @@ Continuously work the highest-priority actionable problem until the backlog is d
 1. If `docs/problems/` is absent, direct the user to `/wr-itil:scaffold-intake` and stop.
 2. Run the installed ITIL maintenance commands required by the repository, including layout migration, README reconciliation, catch-up scanning, stale upstream-cache checks, and unresolved-response checks. Resolve them from the plugin's bundled `bin/`; do not use source-repository paths.
 3. Resolve the exact checkout with `git rev-parse --show-toplevel`. Preserve unrelated working-tree changes and record the pre-iteration status. Revert only paths proven to have been created by a failed iteration.
-4. Anchor the orchestrator with the native persisted Goal tools exposed by Codex. These are Goal tool calls, not a slash command:
+4. Check which native persisted Goal controls are callable in the **current session**. CLI protocol support, a tool name in documentation, another thread's Goal, or a stop-only control does not establish get/set capability for this orchestrator. Do not create or modify an unrelated thread to manufacture an anchor.
+
+   **When both Goal get and set controls are callable**, anchor this orchestrator using those controls. These are Goal tool calls, not a slash command:
    - Call `thread/goal/get`. Reuse the active Goal only when it carries the canonical condition below; otherwise call `thread/goal/set` with that condition and active status before entering the loop.
    - Call `thread/goal/get` again at every continue-or-stop decision. Keep the Goal active while any ticket remains dispatchable. A slow process is not a blocker.
-   - Call `thread/goal/clear` only after the final summary prints a fresh Step 2.4 Gate (0) table showing zero dispatchable tickets followed by `ALL_DONE`, or after the summary records another canonical terminal condition: a Hard-fail halt naming the gate that could not complete, or quota exhaustion.
+   - Call `thread/goal/clear`, when callable, only after the final summary prints a fresh Step 2.4 Gate (0) table showing zero dispatchable tickets followed by `ALL_DONE`, or after the summary records another canonical terminal condition: a Hard-fail halt naming the gate that could not complete, or quota exhaustion. If the completion control is unavailable, retain the actual terminal evidence and report that the Goal remains uncleared; do not claim that clearing succeeded.
+
+   **When Goal get/set controls are unavailable** (including partial or stop-only capability), report the missing capability once and continue the loop with Gate (0)-only completion checks. Do not claim that an unanchored run has a persisted Goal. A missing Goal anchor or completion control is never a reason to halt, ask permission to continue, or restart the runtime. The anchor is defense-in-depth, never a prerequisite. This capability fallback does not turn an actual error from a callable Goal control into success; diagnose such errors truthfully under the normal failure contract.
+
+   **Unconditional completion floor:** anchored and unanchored runs must rescan the open/known-error backlog and print a fresh Step 2.4 Gate (0) classification table before declaring `ALL_DONE`. Every ticket needs a concrete dispatchable or blocked classification; `ALL_DONE` requires zero dispatchable tickets. Missing or cleared Goal state never discharges this floor, and an unavailable anchor alone is not a Hard-fail gate.
 
    **Canonical Goal condition:**
 

@@ -96,3 +96,4 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | in-progress |
 | STORY-082 | STORY-082: Gate Bash writes without blocking read-only commands | in-progress |
 | STORY-098 | STORY-098: The loop I left running is still running when I get back | in-progress |
+| STORY-105 | STORY-105: Keep backlog work moving when Goal controls are unavailable | in-progress |

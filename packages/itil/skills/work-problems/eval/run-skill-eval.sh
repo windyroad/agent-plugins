@@ -28,7 +28,8 @@ SKILL_MD="${SCRIPT_DIR}/../SKILL.md"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 
 if [[ "${WR_EVAL_RUNTIME:-claude}" == "codex" ]]; then
-  SKILL_MD="${SCRIPT_DIR}/../../../scripts/codex-work-problems.md"
+  node "$REPO_ROOT/packages/itil/scripts/sync-codex-skills.mjs" --build >/dev/null
+  SKILL_MD="${SCRIPT_DIR}/../../../skills-codex/work-problems/SKILL.md"
 fi
 
 if [[ ! -f "$SKILL_MD" ]]; then

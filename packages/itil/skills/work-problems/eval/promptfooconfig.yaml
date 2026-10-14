@@ -889,7 +889,9 @@ tests:
     vars:
       prompt: |
         This is a Codex /wr-itil:work-problems run. The persisted Goal is
-        missing at preflight. List the Goal tool calls the orchestrator makes
+        missing at preflight. The current session exposes callable
+        thread/goal/get, thread/goal/set, and thread/goal/clear controls.
+        List the Goal tool calls the orchestrator makes
         before entering the loop and state what condition it stores. Do not
         describe the Claude Code slash-command flow.
     assert:
@@ -911,6 +913,8 @@ tests:
     vars:
       prompt: |
         This is a Codex /wr-itil:work-problems continue-or-stop decision. The
+        current session exposes callable thread/goal/get, thread/goal/set,
+        and thread/goal/clear controls. The
         persisted Goal already carries the canonical condition and the fresh
         backlog scan still has one dispatchable ticket. Which Goal tool is
         called, is the Goal cleared, and what happens next?
@@ -931,6 +935,8 @@ tests:
     vars:
       prompt: |
         This is a Codex /wr-itil:work-problems stop decision. The final summary
+        is in a session exposing callable thread/goal/get, thread/goal/set,
+        and thread/goal/clear controls. It
         has printed a fresh Step 2.4 Gate (0) table showing zero dispatchable
         tickets, followed by ALL_DONE. List the Goal calls at this decision and
         the resulting Goal state.
@@ -948,6 +954,8 @@ tests:
     vars:
       prompt: |
         This is a Codex /wr-itil:work-problems stop decision. The summary has
+        been written in a session exposing callable thread/goal/get,
+        thread/goal/set, and thread/goal/clear controls. It has
         recorded a Hard-fail halt naming the governance gate that could not
         complete. List the Goal calls at this decision and the resulting Goal
         state.
@@ -965,6 +973,8 @@ tests:
     vars:
       prompt: |
         This is a Codex /wr-itil:work-problems stop decision. The summary has
+        been written in a session exposing callable thread/goal/get,
+        thread/goal/set, and thread/goal/clear controls. It has
         reported quota exhaustion. List the Goal calls at this decision and
         the resulting Goal state.
     assert:
@@ -975,6 +985,104 @@ tests:
           PASS only if the response calls thread/goal/get and then
           thread/goal/clear because reported quota exhaustion is a canonical
           terminal condition.
+
+  - description: P556 Codex Goal capability — stop-only chat continues unanchored
+    provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'
+    vars:
+      prompt: |
+        I invoked /wr-itil:work-problems in a chat exposing only stop_goal.
+        There are no callable Goal get or set controls. Repository preflight
+        passed and one ticket is dispatchable. What happens before the first
+        iteration? State the anchor status and whether the ticket is dispatched.
+    assert:
+      - type: regex
+        value: '[Uu]nanchored|[Nn]ot anchored|without.*anchor|Goal.*unavailable'
+      - type: icontains
+        value: 'Gate (0)'
+      - type: llm-rubric
+        value: |
+          PASS only if the orchestrator reports the missing Goal get/set
+          capability once and proceeds with the dispatchable ticket using
+          unconditional Gate (0) checks. It must not halt, ask permission to
+          continue, use stop_goal to create an anchor, or claim a Goal was set.
+          A missing defense-in-depth anchor alone is not a Hard-fail gate.
+
+  - description: P556 Codex Goal capability — get-only session continues without fabricating set
+    provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'
+    vars:
+      prompt: |
+        This orchestrator can call thread/goal/get, but there is no callable
+        Goal set control and the current Goal does not carry the canonical
+        condition. Preflight passed and one ticket is dispatchable. What
+        happens now? Can I claim the required anchor was established?
+    assert:
+      - type: icontains
+        value: 'Gate (0)'
+      - type: llm-rubric
+        value: |
+          PASS only if the answer acknowledges incomplete get/set capability,
+          reports this run as unanchored, does not invent a set operation or
+          pretend an unrelated condition anchors the drain, and continues
+          dispatchable work with Gate (0). It must not halt for this limitation.
+
+  - description: P556 Codex Goal capability — set-only session continues without overwriting an unread Goal
+    provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'
+    vars:
+      prompt: |
+        This orchestrator exposes thread/goal/set but no callable Goal get
+        control. A different active Goal may already exist and cannot be read.
+        Preflight passed and one ticket is dispatchable. May I overwrite the
+        unknown Goal or claim this drain is anchored? What should happen next?
+    assert:
+      - type: icontains
+        value: 'Gate (0)'
+      - type: llm-rubric
+        value: |
+          PASS only if the answer treats missing get as incomplete capability,
+          reports this drain as unanchored, does not overwrite an unread Goal,
+          and continues dispatchable work with unconditional Gate (0) checks.
+          It must not halt or ask permission merely for the missing anchor.
+
+  - description: P556 Codex Goal capability — another runtime cannot anchor this chat
+    provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'
+    vars:
+      prompt: |
+        This chat has no callable Goal get/set controls. The installed Codex
+        CLI protocol schema contains thread/goal/get and thread/goal/set,
+        and a separate local task has its own Goal. A fresh scan still shows
+        dispatchable work here. May I use that schema or the other thread as
+        proof this orchestrator is anchored? What should I do next?
+    assert:
+      - type: icontains
+        value: 'Gate (0)'
+      - type: llm-rubric
+        value: |
+          PASS only if the answer distinguishes callable current-session Goal
+          controls from CLI protocol declarations or another thread's Goal,
+          does not create or modify an unrelated thread to fabricate this
+          anchor, reports this run as unanchored, and continues the work with
+          Gate (0). FAIL if it halts merely because these controls are absent
+          or treats another thread's Goal as this orchestrator's anchor.
+
+  - description: P556 Codex Goal capability — missing clear keeps terminal evidence truthful
+    provider: 'exec:env WR_EVAL_RUNTIME=codex bash ./run-skill-eval.sh'
+    vars:
+      prompt: |
+        The current orchestrator can call thread/goal/get and thread/goal/set,
+        and has the canonical persisted Goal. At the stop decision its fresh
+        Gate (0) table has zero dispatchable tickets followed by ALL_DONE.
+        Neither thread/goal/clear nor any documented completion control is
+        callable here. What do I report and do? Can I claim the Goal is cleared?
+    assert:
+      - type: icontains
+        value: 'thread/goal/get'
+      - type: llm-rubric
+        value: |
+          PASS only if the answer retains the genuine terminal evidence,
+          inspects the accessible Goal, reports completion control unavailable
+          and that the Goal remains uncleared, and does not invent a clear
+          operation or claim clearing succeeded. Missing Goal completion
+          capability alone must not become a false repository Hard-fail halt.
 
   - description: ADR-099 AFK remediation affects shipped behaviour and has no graduation queue
     vars:

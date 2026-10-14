@@ -39,6 +39,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3 | P453 | wr-jtbd edit-gate marker invalidated by the reviewer's own required doc-sync edits — PASS self-deletes, forcing an extra re-review round | 6 (Medium) | Open | M | 2026-07-15 | inbound-reported (#340) |
 | 3 | P455 | new evidence on an already-upstream-reported ticket is not routed upstream without a user prompt — no evidence-append mode exists | 6 (Medium) | Open | M | 2026-07-15 | inbound-reported (#348) |
 | | | **Tier 2 — Internal** | | | | | |
+| 30 | P556 | Codex backlog drain halts when Goal controls are not exposed | 15 (High) | Known Error | S | 2026-10-14 | internal |
 | 30 | P527 | Codex skill names render with a duplicated plugin prefix and title-case branding | 15 (High) | Known Error | S | 2026-08-29 | internal |
 | 16 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole corpus | 8 (Medium) | Known Error | S | 2026-07-04 | internal |
 | 16 | P420 | check-briefing-budgets.sh crashes with `must_split[@]: unbound variable` on empty arrays under macOS default bash 3.2 | 8 (Medium) | Known Error | S | 2026-07-05 | internal |
