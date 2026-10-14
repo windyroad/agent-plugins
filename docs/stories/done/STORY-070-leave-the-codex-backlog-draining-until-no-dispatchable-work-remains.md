@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 story-id: leave-the-codex-backlog-draining-until-no-dispatchable-work-remains
 reported: 2026-08-29
 decision-makers: [Tom Howard]
@@ -55,3 +55,13 @@ Serves JTBD-006 — progress the backlog while I am away. The persisted Goal kee
 
 - RFC-076 — *Keep the Codex backlog drain running until no dispatchable work remains*, the release row on STORY-MAP-011 activity D, *Close it out*.
 - Architecture review PASS, 2026-08-29: ADR-083, ADR-094, ADR-044, ADR-013, ADR-019, and ADR-103; no new decision required.
+
+## Delivery record reconciliation
+
+2026-10-15: all six acceptance criteria were already recorded as met.
+ITIL 2.1.2 changelog and version commit `87fa432d` cite implementation
+`98d01c0a`; ITIL 3.0.2 retains the positive native Goal lifecycle. Its five
+positive model cases passed alongside the five capability fallback cases.
+Complete this story with STORY-105 so RFC-076 derives delivered from both
+qualified stories. P528 remains Verification Pending; this status update does
+not establish active-runtime adoption.

@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-10-03 **P477 reopened** — native pipeline completion still fails to persist its score; lifecycle registration repair awaits delivery and desktop verification.
+> Last reviewed: 2026-10-15 **P556 Verification Pending** — ITIL 3.0.2 published and installed; affected-chat adoption remains unverified.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -39,7 +39,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3 | P453 | wr-jtbd edit-gate marker invalidated by the reviewer's own required doc-sync edits — PASS self-deletes, forcing an extra re-review round | 6 (Medium) | Open | M | 2026-07-15 | inbound-reported (#340) |
 | 3 | P455 | new evidence on an already-upstream-reported ticket is not routed upstream without a user prompt — no evidence-append mode exists | 6 (Medium) | Open | M | 2026-07-15 | inbound-reported (#348) |
 | | | **Tier 2 — Internal** | | | | | |
-| 30 | P556 | Codex backlog drain halts when Goal controls are not exposed | 15 (High) | Known Error | S | 2026-10-14 | internal |
 | 30 | P527 | Codex skill names render with a duplicated plugin prefix and title-case branding | 15 (High) | Known Error | S | 2026-08-29 | internal |
 | 16 | P417 | docs/stories/README.md Rankings/Done never reconciled — stale for the whole corpus | 8 (Medium) | Known Error | S | 2026-07-04 | internal |
 | 16 | P420 | check-briefing-budgets.sh crashes with `must_split[@]: unbound variable` on empty arrays under macOS default bash 3.2 | 8 (Medium) | Known Error | S | 2026-07-05 | internal |
@@ -316,6 +315,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P464 | Agent self-limits external-comms as "out of scope" in AFK / pre-flight contexts — the authorised set is now stated outright in `/wr-itil:work-problems`, with the one restrained shape (P363's held batch cadence) named beside it | pending — `@windyroad/itil` patch committed, ships next release | no — not observed |
 | P539 | Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate | 2026-10-01 (Architect 0.23.9, JTBD 0.14.11, Risk Scorer 0.19.15, Style Guide 0.6.9, Voice Tone 0.9.7; nested target resolver) | no — not observed |
 | P555 | Initial deficiencies are misclassified as incidents | 2026-10-08 (@windyroad/itil 3.0.1, PR526) | no — not observed |
+| P556 | Codex backlog drain halts when Goal controls are not exposed | 2026-10-15 (@windyroad/itil 3.0.2, PR527) | no — not observed |
 
 
 ## Inbound Upstream Reports

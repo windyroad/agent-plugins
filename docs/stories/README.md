@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-10-01 **STORY-103 accepted** — the confirmed problem-resolution map now traces P541 to bounded npm release verification.
+> Last reviewed: 2026-10-15 **STORY-070 and STORY-105 done** — RFC-076 delivery records reconciled with published package evidence.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -135,7 +135,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-067 | Publish packages without expiring secrets | S | P284 | RFC-073 | STORY-MAP-002 |
 | in-progress | STORY-069 | Drain one Codex ticket through an isolated Codex CLI | M | P529 | RFC-075 | STORY-MAP-002 |
 | in-progress | STORY-068 | Invoke a Codex skill by the name the card shows | S | P527 | RFC-074 | STORY-MAP-008 |
-| in-progress | STORY-070 | Leave the Codex backlog draining until no dispatchable work remains | S | P528 | RFC-076 | STORY-MAP-011 |
 | accepted | STORY-072 | Record oversight evidence only for the confirming session | M | P368 | RFC-078 | STORY-MAP-002 |
 | in-progress | STORY-073 | A failed reviewer blocks the guarded edit | S | P469 | RFC-079 | STORY-MAP-008 |
 | in-progress | STORY-074 | Use generated Codex skills after upgrading without repairs | S | P526 | RFC-080 | STORY-MAP-008 |
@@ -189,6 +188,8 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-070 | Leave the Codex backlog draining until no dispatchable work remains | 2026-10-15 | P528 |
+| STORY-105 | Keep backlog work moving when Goal controls are unavailable | 2026-10-15 | P556 |
 | STORY-104 | Route initial deficiencies to problem management and service regressions to incident management | 2026-10-08 | P555 |
 | STORY-102 | Commit implementation before preparing its release metadata | 2026-09-29 | P554 |
 | STORY-044 | See what cruise is doing — status/telemetry skill | 2026-09-19 | P160, P446 |

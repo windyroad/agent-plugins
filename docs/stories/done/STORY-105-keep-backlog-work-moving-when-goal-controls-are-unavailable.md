@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 story-id: keep-backlog-work-moving-when-goal-controls-are-unavailable
 reported: 2026-10-14
 decision-makers: [Tom Howard]
@@ -36,7 +36,7 @@ controls and to be told accurately whether the external anchor is active.
   the Goal remains uncleared.
 - [x] Generated-skill positive/negative model cases pass for
   complete, missing, partial, stop-only, and other-thread capabilities.
-- [ ] The published package retains all repository testing, risk, commit,
+- [x] The published package retains all repository testing, risk, commit,
   push, release, and zero-dispatchable completion requirements.
 
 ## Driving problem trace (required — I7 invariant)
@@ -68,3 +68,11 @@ claims.
 - STORY-070 supplies the existing positive persisted-Goal contract; this card
   adds the requirements-floor case on the same release row.
 - Architecture preflight PASS: ADR-083, ADR-094 Rule 6, ADR-103, ADR-104, ADR-128.
+
+## Delivery evidence
+
+2026-10-15: ITIL 3.0.2 published through PR527 and Release38640141948.
+Generated-skill model cases passed 10/10; local suite passed 4,393/4,393.
+The published package matches the reviewed build across all 284 files, and
+installed Codex skills match the publication. Affected-chat adoption remains
+unverified and is tracked by P556.

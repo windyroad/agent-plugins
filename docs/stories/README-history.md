@@ -110,3 +110,7 @@
 ## 2026-10-01
 
 > Last reviewed: 2026-09-29 **STORY-102 done** — the published ITIL plugin permits ordinary implementation commits without release metadata and keeps cumulative changesets at intentional release preparation.
+
+## 2026-10-15
+
+> Last reviewed: 2026-10-01 **STORY-103 accepted** — the confirmed problem-resolution map now traces P541 to bounded npm release verification.

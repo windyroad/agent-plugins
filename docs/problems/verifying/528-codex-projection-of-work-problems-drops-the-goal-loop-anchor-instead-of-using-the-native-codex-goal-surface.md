@@ -113,6 +113,6 @@ Release evidence: `.changeset/steady-goals-anchor.md` was consumed by version-pa
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | in-progress |
+| STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | done |
 
 **Hang-off check (Step 2b)**: not dispatched. The mechanical pre-filter on the `/wr-itil:work-problems` signal returned more than 40 candidates, over the 5-candidate cap, so the candidate-cap short-circuit fired per the SKILL contract. The nearest absorb candidates are the Codex-projection cluster P526 and P527; both are transform-level defects in the sanitizer's field handling, whereas this is a missing runtime branch in the skill body and overlay, so a sibling ticket is the honest shape. Re-evaluate the cluster at the next `/wr-itil:review-problems` pass.

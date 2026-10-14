@@ -1,6 +1,6 @@
 # Problem 556: Codex backlog drain halts when Goal controls are not exposed
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-10-14
 **Priority**: 15 (High) — Impact 3 × Likelihood 5. The affected capability-limited surface stops all backlog work before its first iteration; the unconditional projection instruction repeats on each invocation on that surface. No repository corruption was observed.
 **Origin**: internal
@@ -64,7 +64,7 @@ Goal could not be cleared instead of inventing a successful clear or a failure.
   cases; exclude structural prose assertions from the regression suite.
 - [x] Review the correction against the existing architecture; no new decision
   or change to approved map activities or jobs is required.
-- [ ] Complete positive and capability-limited model evaluations and release
+- [x] Complete positive and capability-limited model evaluations and release
   qualification.
 - [ ] Verify the installed correction dispatches work on an affected surface.
 
@@ -74,6 +74,8 @@ RFC-076, **Keep the Codex backlog drain running until no dispatchable work
 remains**, is the existing fix vehicle on STORY-MAP-011 activity `close`.
 STORY-105 implements the missing capability branch without changing the
 canonical condition, positive native Goal lifecycle, or repository gates.
+
+**Release vehicle**: .changeset/itil-goal-capability-fallback.md
 
 ## Dependencies
 
@@ -91,8 +93,9 @@ script. There were ten passes, zero assertion failures, and zero provider errors
 
 Architecture, JTBD, voice, style, accessibility, and behavioral-test reviews
 passed. These model simulations do not establish adoption by an already-running
-affected chat. Full-suite qualification and release delivery are in progress;
-the correction remains unreleased.
+affected chat. All 4,393 local tests and the 19 focused generator/pack/condition checks passed.
+Implementation CI38635951311, preparation CI38638078521, and release PR
+CI38638209521 passed both required jobs.
 
 ## Related
 
@@ -111,4 +114,23 @@ the correction remains unreleased.
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-105 | Keep backlog work moving when Goal controls are unavailable | in-progress |
+| STORY-105 | Keep backlog work moving when Goal controls are unavailable | done |
+
+## Fix Released
+
+2026-10-15: `@windyroad/itil@3.0.2` published as npm `latest` through
+Release38640141948. PR527 merged at
+`045b95986af3a40bd6b1475de029f68a1a624d5b`; source implementation is
+`462d2e58f904731acb9b71e664a16e28acdfa0f8` and release preparation is
+`6a53a90c5f9a4d07fa04b8a4f28f1bba812bfe4d`. The consumed changeset is
+`.changeset/itil-goal-capability-fallback.md`.
+
+All 284 files in the published package match a fresh pack of the reviewed
+release checkout. The supported installer registered and enabled Codex 3.0.2;
+its generated and canonical work-problems skills match the published package.
+The user-scope Claude installation is 3.0.2 and its canonical skill matches
+reviewed source. These are artifact and installation checks. Actual adoption
+and dispatch by the already-running affected cloud chat remain unverified.
+
+Recovery: rerun `/wr-itil:transition-problem 556 known-error` if affected use
+shows the fallback is incomplete.

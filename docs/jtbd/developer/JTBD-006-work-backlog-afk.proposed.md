@@ -93,7 +93,7 @@ When I step away from the keyboard, I want the agent to autonomously work throug
 | STORY-097 | STORY-097: When I come back I can see what is held, who owes it, and what would unstick it | draft |
 | STORY-062 | STORY-062: Keep problem ranking correct after a status transition | in-progress |
 | STORY-069 | STORY-069: Drain one Codex ticket through an isolated Codex CLI | in-progress |
-| STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | in-progress |
+| STORY-070 | STORY-070: Leave the Codex backlog draining until no dispatchable work remains | done |
 | STORY-082 | STORY-082: Gate Bash writes without blocking read-only commands | in-progress |
 | STORY-098 | STORY-098: The loop I left running is still running when I get back | in-progress |
-| STORY-105 | STORY-105: Keep backlog work moving when Goal controls are unavailable | in-progress |
+| STORY-105 | STORY-105: Keep backlog work moving when Goal controls are unavailable | done |
