@@ -12,22 +12,45 @@ installation-guide journeys verified on mobile and desktop.
 
 The user explicitly confirmed this playback before executable planning.
 
-## Current plan: P2
+## Current plan: P3.1
 
 ### Now
 
-One coherent buildable foundation in an independent clone. Capture P558,
-RFC-107 and STORY-107 on the existing ratified STORY-MAP-008, the proposed
-static-docs decision and necessary guide scope. Then establish a private
-website/ workspace outside packages/* with selected public sources, initial
-reading/installation pages, build and behavioral checks. Integrate tested safe
-commits with the standard exact-head CI watcher. This foundation is not public
-completion and is not an npm plugin release.
+Publish and verify the qualified documentation site through GitHub Pages.
+P2 foundation commit 01c32d870cffb25536abb075f89a775488254a26 is pushed and watched
+by exact CI 38745981110; its Documentation website job passed. Prepare and
+test at most this one isolated safe slice while its watcher runs. Provider
+configuration, commit, push and activation wait for the complete P2 pipeline
+to succeed. If it fails, stash all P3 work, including untracked files, under a
+named recoverable stash and switch to the CI repair.
 
-Expected scope is medium; uncertainty remains in provider configuration,
-canonical Markdown rendering and browser accessibility. One story carries the
-whole outcome; independently safe foundation commits need not create extra
-stories. Means remain negotiable within the confirmed objective.
+Record GitHub Pages hosting as a separate proposed/unconfirmed ADR. Add one
+CI-success deployment workflow and a tested source-identity guard. The build
+uses read-only access, checks out the exact successful same-repository main
+push, rebuilds and requalifies the artifact. The dependent deployment job has
+only Pages/OIDC write access plus contents read for its freshness check, with
+no checkout, npm command, executable artifact input or shared cache.
+
+Require the triggering CI head, workflow GITHUB_SHA and current main to agree.
+Reject failed CI, PRs, foreign repositories, other branches and stale heads.
+Check current main again immediately before deploying. Upload only website/dist
+after its tests; deploy that same run's artifact. Serialize deployments without
+cancelling an active deployment. Keep source SHA, triggering CI and deployment
+identity as separate receipts.
+
+After qualification and fresh action-risk assessment, configure workflow-based
+Pages and the main-only github-pages environment, then read back both before
+pushing the workflow. This deterministic bootstrap publishes no artifact until
+the guarded workflow runs. Inspect actual workflow permissions and outcomes,
+then verify external public reading, search, navigation, deep links and
+installation guides on mobile and desktop, including WebKit phone emulation.
+Only add the repository's public site link after that URL works. Document source
+maintenance and rollback through a source revert, green CI and verified deployment.
+
+This is one independently deliverable public reading journey. Scope is medium;
+provider bootstrap and live browser behavior remain uncertain until observed.
+Means remain negotiable and existing STORY-107 carries the outcome. No npm
+plugin release, custom domain, account or analytics is part of this increment.
 
 Required named controls:
 
@@ -43,18 +66,21 @@ Required named controls:
 - Preserve source version/maturity evidence and truthful per-runtime guidance.
 - Fresh checkout/pipeline evidence and concrete action-risk review before commit,
   push and activation. No forecast control is claimed as passed evidence.
+- website/scripts/check-deployment.mjs and website/test/deployment.test.mjs
+  exercise the actual guard CLI across successful and rejected event identities.
+- .github/workflows/website.yml isolates build and deployment, and
+  website/test/workflow.test.mjs inspects its configuration. Configuration tests
+  alone do not prove effective permissions; inspect the actual Actions run too.
 
-Delivered foundation means build/tests and exact trunk pipeline pass while
-unqualified public deployment remains disabled.
+Delivered means exact trunk CI, the guarded deployment and the actual public
+journeys pass, with accurate provenance and a working maintenance route.
 
 ### Next
 
-Provisionally complete plugin/skill references and accurate runtime guidance;
-verify actual artifact accessibility, mobile/search journeys and disclosure
-boundary. Record hosting separately, enable the least-permission Pages workflow
-only after checks/reviews and green trunk, deploy the approved artifact and
-verify live public URLs, search and mobile/desktop journeys. Replan from actual
-findings and obtain all three assessments before dependent revised work.
+Resolve any verified remaining gap, then record terminal story/problem/plan
+evidence through governed integration. Replan from live findings rather than
+inventing more functionality. No further product increment is needed if the
+confirmed completion evidence is met.
 
 ### Later
 
@@ -78,6 +104,15 @@ accessibility pass or full conformance claim exists. Browser testing remains
 required. Style review approves Starlight defaults and narrow guide extension.
 Voice review corrected the row to describe reading docs on phones, not running
 plugins on phones; site guide scope must precede site copy.
+
+P3 architecture review required explicit workflow SHA equality because
+deploy-pages identifies the build by GITHUB_SHA, and deterministic provider
+bootstrap before the workflow is pushed. Both are included above. Refined P3
+and scheduling-only P3.1 pass independent architecture and JTBD recommendation
+reviews. Risk forecasts own risk 3/25 and projected release 4/25, within appetite
+5. P3.1 permits only one local preparation slice while the P2 watcher runs,
+following AGENTS; all provider and integration effects remain gated on success.
+Concrete source and action reviews remain separate requirements.
 
 ## Evidence and learning
 
@@ -128,3 +163,13 @@ pages plus 404 from 13 selected packages and 62 skills. Local qualification:
 
 Public deployment remains disabled. This checkpoint records local qualification,
 not completion of the user outcome or permission to skip exact-head CI.
+
+### Publication preparation checkpoint
+
+P3.1 local preparation passes the build, 23 unit/artifact/configuration/guard
+tests and four browser tests. The new guard's 14 CLI scenarios are behavioral;
+parsed workflow tests retain their configuration-only limit. Applied independent
+architecture and JTBD reviews pass the actual workflow, guard, hosting proposal
+and maintenance guide. At this preparation checkpoint, provider settings and the
+public deployment are unchanged and complete P2 CI is pending. No local
+preparation result is counted as the public outcome.

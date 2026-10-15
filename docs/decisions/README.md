@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 137 (122 in-force, 15 historical)
+**Total ADRs:** 138 (123 in-force, 15 historical)
 
 ---
 
 ## In-force decisions
 
-_122 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_123 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -622,6 +622,12 @@ _122 ADRs. These are the current rules. The architect agent reads this section f
 **Status:** proposed | **Oversight:** unconfirmed
 **Chosen:** Chosen option: **Astro with Starlight in a private website/ workspace outside packages/***. Use its standard documentation interface and static output. The workspace is explicitly registered at the root and is not an npm plugin. Canonical p...
 **Confirmation:** Successful actual public use demonstrates readers can open nested pages,; Repository changes update this static documentation without changing; Explicit human ratification of the final substance supports acceptance.
+
+### ADR-140 — GitHub Pages hosts the public documentation
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** GitHub Pages hosts the public documentation at the repository's default project-site address. The static build choice remains the separate ADR-139 proposal.
+**Confirmation:** Successful public use demonstrates nested reading, navigation and browser search on mobile and desktop; a repository update reaches the site with traceable source identity; explicit human ratification supports acceptance.
+**Related:** ADR-139
 
 ---
 

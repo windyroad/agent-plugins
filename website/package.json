@@ -7,7 +7,7 @@
     "dev": "npm run generate && astro dev --host 127.0.0.1",
     "generate": "node scripts/generate-docs.mjs",
     "build": "npm run generate && astro build",
-    "test:unit": "node --test test/public-content.test.mjs test/workflow.test.mjs",
+    "test:unit": "node --test test/public-content.test.mjs test/workflow.test.mjs test/deployment.test.mjs",
     "test:built": "node --test test/site.test.mjs"
   },
   "devDependencies": {

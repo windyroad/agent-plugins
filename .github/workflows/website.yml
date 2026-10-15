@@ -1,0 +1,79 @@
+name: Documentation deployment
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: documentation-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.head_repository.full_name == github.repository &&
+          github.event.repository.full_name == github.repository &&
+          github.sha == github.event.workflow_run.head_sha }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Verify successful current source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          CI_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          export CURRENT_MAIN_SHA="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)"
+          node website/scripts/check-deployment.mjs
+          printf 'Source: %s\nCI run: %s\n' "$EXPECTED_SHA" "$CI_RUN_ID"
+      - name: Install locked documentation dependencies
+        run: npm ci --ignore-scripts
+      - name: Install browser test engines
+        run: npx playwright install --with-deps chromium webkit
+      - name: Build selected public documentation
+        run: npm run website:build
+      - name: Qualify exact public artifact
+        run: npm run website:test
+      - name: Record artifact identity
+        run: sha256sum website/dist/index.html website/dist/getting-started/index.html
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: website/dist
+          retention-days: 1
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Reject a stale deployment candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)" = "$EXPECTED_SHA"
+      - name: Deploy qualified artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
