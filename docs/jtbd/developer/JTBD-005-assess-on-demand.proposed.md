@@ -36,4 +36,4 @@ Invoke subagents manually via the Task tool with the exact subagent_type string 
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-106 | STORY-106: Keep my objective clear while I deliver, learn and replan | accepted |
+| STORY-106 | STORY-106: Keep my objective clear while I deliver, learn and replan | done |

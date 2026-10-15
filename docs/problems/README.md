@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-10-15 **P557 captured** - No published skill supports outcome-led iterative planning (lightweight aside via /wr-itil:capture-problem).
+> Last reviewed: 2026-10-15 **P557 Closed** - Outcome-led planning is published in ITIL 3.1.0 and verified through fresh native Claude Code and Codex invocations.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -97,7 +97,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 6 | P545 | The verification-close drain has no state assertion, and the do-not-close guard green-lights tickets that are already closed | 12 (High) | Open | M | 2026-09-19 | internal |
 | 6 | P547 | A per-iter constraints file carried another ticket's confirmed direction verbatim, pinning the wrong fix substance onto the dispatched ticket | 12 (High) | Open | M | 2026-09-19 | internal |
 | 5 | P406 | `github-discussions` channel in `.upstream-channels.json` returns HTTP 410 | 5 (Low) | Open | S | 2026-07-02 | internal |
-| 5 | P557 | No published skill supports outcome-led iterative planning | 10 (High) | Open | M | 2026-10-15 | internal |
 | 4.5 | P297 | ADR-047 — governance-artefact scaffolding should be a SessionStart hook (per-project, automatic), not an inline `/install-updates` step | 9 (Medium) | Open | M | 2026-05-25 | internal |
 | 4.5 | P369 | Plugin removes hook file but adopter session still invokes it via stale binding — `architect-compendium-refresh-discipline.sh` case 2026-06-17 | 9 (Medium) | Open | M | 2026-06-17 | internal |
 | 4.5 | P461 | Downstream evidence-scan flags adopter-repo sightings as live regressions without version-gating against the fix release | 9 (Medium) | Open | M | 2026-07-25 | internal |
@@ -419,6 +418,7 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 
 | ID | Title | Closed via |
 |----|-------|-----------|
+| P557 | No published skill supports outcome-led iterative planning | Closed 2026-10-15 on published `@windyroad/itil@3.1.0`, registry integrity, 22 semantic scenarios, nine targeted checks and fresh native Claude Code/Codex confirmation-gate exercise. [Evidence](closed/557-no-published-skill-supports-outcome-led-iterative-planning.md). Recovery: `/wr-itil:transition-problem 557 known-error`. |
 | P556 | Codex backlog drain halts when Goal controls are not exposed | Closed 2026-10-15 on fresh installed ITIL 3.0.2 read-only acceptance: session `01a13c9d-9819-7d92-96d7-6c89617af2f3`, result SHA-256 `92b63fed621166e6a5c9309756e63267d0aaceed25c7ce9a464ef0db117df012`, PASS for missing-control continuation and terminal decisions. No repository iteration or original-chat hot-reload is claimed. Recovery: `/wr-itil:transition-problem 556 known-error`. |
 | P554 | Commit-time changeset enforcement forces premature release metadata | Closed 2026-09-29 on published `@windyroad/itil@2.5.1` evidence: the registry tarball omits the obsolete hook and helper, both registered runtimes permit implementation commits without changesets, npm `latest` is `2.5.1`, and release workflow 36513111022 passed. Recovery: `/wr-itil:transition-problem 554 known-error`. |
 | P450 | VQ evidence cells have no write path from subsequent sessions — drain starved | Relevance-closed 2026-09-18 by the Step 4.6 pass (ADR-079 Phase 1 + Phase 2), shapes `ADR-shipped-confirmed, named-skill-or-feature-exists, driver-child-ticket-closed`. Reversible: `git revert` the relevance-close commit, or `git mv` back to `known-error/`. |

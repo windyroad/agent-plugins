@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: done
 story-id: plan-toward-a-verified-outcome
 reported: 2026-10-15
 decision-makers: [Tom Howard]
@@ -28,28 +28,28 @@ and high-level Later direction, reassessing the plan after each delivery.
 
 ## Acceptance criteria
 
-- [ ] Actual interview turns ask one missing question at a time and wait,
+- [x] Actual interview turns ask one missing question at a time and wait,
   play back the SMART outcome and wait for explicit confirmation before
   executable planning; substantive goal changes require reconfirmation.
-- [ ] Now uses INVEST without introducing unnecessary story documents, and a
+- [x] Now uses INVEST without introducing unnecessary story documents, and a
   substantive JTBD rejection blocks dependent work until resolved and reassessed.
 
-- [ ] When context leaves the outcome too vague, the skill elicits the desired
+- [x] When context leaves the outcome too vague, the skill elicits the desired
   change, beneficiary and completion evidence before implementation planning.
 
-- [ ] The canonical and generated skill separate the objective and completion
+- [x] The canonical and generated skill separate the objective and completion
   evidence from the proposed means, with one detailed Now, provisional Next and
   high-level Later.
-- [ ] Actual model scenarios for both skill projections require architect, JTBD and
+- [x] Actual model scenarios for both skill projections require architect, JTBD and
   risk assessment before dependent implementation, replan after invalidated
   assumptions or failed verification, and preserve authority when a reviewer is
   unavailable.
-- [ ] Scenarios stop when the overall objective is verified, discard unnecessary
+- [x] Scenarios stop when the overall objective is verified, discard unnecessary
   speculative work, and require fresh assessments for newly requested work.
-- [ ] Packed and isolated installed artifacts expose the new skill under the
+- [x] Packed and isolated installed artifacts expose the new skill under the
   correct runtime names without unrelated mandatory hang-off delegation;
   existing skills retain their delegation behavior.
-- [ ] The stable npm artifact and fresh installation are verified after the
+- [x] The stable npm artifact and fresh installation are verified after the
   implementation pipeline and separate cumulative release preparation pass.
 
 ## Driving problem trace
@@ -83,4 +83,31 @@ then prepare the complete cumulative minor release separately.
 
 - Captured via the RFC-row and story workflows on the existing decompose activity.
 - Architecture and risk assessments of the current confirmed-outcome plan cover the bounded source scope;
-  actual changes and release preparation still require their own checks.
+  actual changes and release preparation passed their separate checks.
+
+## Delivery evidence
+
+- Accepted on the ratified map before implementation. Implementation began
+  with `d605e6c4` on 2026-10-15; this terminal receipt reconciles its forward
+  lifecycle to done after publication and fresh installed verification.
+- Published `@windyroad/itil@3.1.0` through PR #528 at `d1f4a081`; exact
+  implementation CI, separate cumulative release preparation and publication
+  passed. No product changes are introduced by this bookkeeping transition.
+- 22 semantic scenarios passed across the canonical and Codex projections,
+  including actual sequential interviews and substantive reviewer rejection.
+  Nine targeted harness/pack/install checks passed, including preservation of
+  existing capture delegation and its omission only for the new skill.
+- Fresh native Claude Code and Codex invocations loaded the published installed
+  skill, played back the SMART goal and waited for confirmation before planning.
+  These smoke trials establish discovery and the initial confirmation gate;
+  they do not prove live reviewer dispatch or existing-chat hot-reload.
+- [P557](../../problems/closed/557-no-published-skill-supports-outcome-led-iterative-planning.md)
+  and [the terminal plan receipt](../../plans/557-outcome-led-planning.md) retain
+  publication, artifact integrity, runtime identifiers and evidence boundaries.
+
+## History
+
+- 2026-10-15 - Accepted under the existing ratified STORY-MAP-002 approval.
+- 2026-10-15 - Implementation started at `d605e6c4`; delivered in ITIL 3.1.0.
+- 2026-10-15 - Reconciled to done on verified publication and installed exercise.
+  RFC-106 status is derived from its completed story; no new approval marker.

@@ -86,7 +86,6 @@ None of these compose well with WSJF prioritisation when phases need to compete 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-065 | STORY-065: A fix proposal draws a release row, not a document | accepted |
-| STORY-106 | STORY-106: Keep my objective clear while I deliver, learn and replan | accepted |
 | STORY-001 | STORY-001: Hook exemption globs for docs/story-maps + docs/stories | done |
 | STORY-002 | STORY-002: /wr-itil:capture-story lightweight aside skill | done |
 | STORY-003 | STORY-003: /wr-itil:list-stories read-only display skill | done |
@@ -104,6 +103,7 @@ None of these compose well with WSJF prioritisation when phases need to compete 
 | STORY-025 | STORY-025: Slice the fix's stories into releases | done |
 | STORY-026 | STORY-026: Work the RFC's stories one at a time | done |
 | STORY-027 | STORY-027: Capture a problem reported through an inbound channel | done |
+| STORY-106 | STORY-106: Keep my objective clear while I deliver, learn and replan | done |
 | STORY-012 | STORY-012: Can't start coding without an RFC — the gate makes me create one first | superseded |
 | STORY-013 | STORY-013: Full gate: an RFC exists → I proceed; none → I create it first | draft |
 | STORY-014 | STORY-014: Unattended, the agent works the plan and pauses for real decisions | draft |

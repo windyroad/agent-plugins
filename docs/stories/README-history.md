@@ -118,3 +118,5 @@
 ## 2026-10-15
 
 > Last reviewed: 2026-10-15 **STORY-070 and STORY-105 done** — RFC-076 delivery records reconciled with published package evidence.
+
+> Last reviewed: 2026-10-15 **STORY-106 accepted** - Outcome-led planning is traced to a ratified map and ready for bounded implementation.
