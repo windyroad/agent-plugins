@@ -1,0 +1,22 @@
+{
+  "name": "@windyroad/website",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run generate && astro dev --host 127.0.0.1",
+    "generate": "node scripts/generate-docs.mjs",
+    "build": "npm run generate && astro build",
+    "test:unit": "node --test test/public-content.test.mjs test/workflow.test.mjs",
+    "test:built": "node --test test/site.test.mjs"
+  },
+  "devDependencies": {
+    "@astrojs/markdown-remark": "7.3.2",
+    "@astrojs/starlight": "0.42.6",
+    "astro": "7.3.8",
+    "axe-core": "4.14.0",
+    "pagefind": "1.5.2",
+    "playwright": "1.64.1",
+    "yaml": "2.9.1"
+  }
+}

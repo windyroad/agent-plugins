@@ -1,0 +1,51 @@
+---
+title: Update or remove plugins
+description: Keep installed plugins current through their supported installers.
+---
+
+Use the installer rather than changing files inside a runtime's plugin cache.
+Restart the selected runtime after an update, then verify its plugin version and
+skill list. An already-running chat may still have earlier instructions loaded.
+
+## Update the Claude Code suite
+
+```bash
+npx @windyroad/agent-plugins --update
+```
+
+## Update an individual plugin
+
+For Claude Code:
+
+```bash
+npx @windyroad/itil --update
+```
+
+For the ITIL Codex installation:
+
+```bash
+npx @windyroad/itil --runtime codex --scope user --update
+```
+
+Check the individual package's installer help for runtime and scope options.
+The source version shown on this website identifies repository reference
+material; it does not read your installed version or promise that every source
+change is already published.
+
+## Remove plugins
+
+Remove the Claude Code suite:
+
+```bash
+npx @windyroad/agent-plugins --uninstall
+```
+
+Or remove an individual ITIL installation for the selected runtime:
+
+```bash
+npx @windyroad/itil --uninstall
+npx @windyroad/itil --runtime codex --scope user --uninstall
+```
+
+Review the installer's output and restart the runtime. Uninstalling a plugin is
+different from deleting the project documents it helped you create.

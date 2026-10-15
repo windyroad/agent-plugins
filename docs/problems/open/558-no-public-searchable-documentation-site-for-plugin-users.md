@@ -37,8 +37,8 @@ site, a controlled content build or a deployment/verification workflow.
 - [x] Confirm the requested objective and deadline with the user.
 - [x] Inspect the reference site architecture and current repository boundaries.
 - [x] Review the plan against architecture, jobs and risk policy.
-- [ ] Build a private website workspace outside plugin package directories.
-- [ ] Qualify selected public content, search, runtime guidance and accessibility.
+- [x] Build a private website workspace outside plugin package directories.
+- [x] Qualify selected public content, search, runtime guidance and accessibility locally; exact trunk CI and live acceptance remain separate gates.
 - [ ] Deploy the approved artifact and verify live mobile and desktop journeys.
 
 ## Close criteria

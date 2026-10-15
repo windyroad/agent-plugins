@@ -1,7 +1,8 @@
 {
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "website"
   ],
   "type": "module",
   "license": "MIT",
@@ -57,6 +58,8 @@
     "version": "changeset version && node scripts/sync-plugin-manifests.mjs && node scripts/sync-codex-plugin-manifests.mjs && node scripts/sync-codex-agents.mjs",
     "release": "bash scripts/verify-release-dist-tags.sh --pre-publish && changeset publish",
     "release:watch": "bash scripts/release-watch.sh",
-    "push:watch": "bash scripts/push-watch.sh"
+    "push:watch": "bash scripts/push-watch.sh",
+    "website:build": "npm run build --workspace @windyroad/website",
+    "website:test": "npm run test:unit --workspace @windyroad/website && npm run test:built --workspace @windyroad/website"
   }
 }

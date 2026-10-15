@@ -256,3 +256,22 @@ jobs:
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: npx promptfoo eval -c packages/itil/skills/manage-incident/eval/promptfooconfig.yaml --filter-pattern 'Incident eligibility' --no-table
+
+  website:
+    name: Documentation website
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked documentation dependencies
+        run: npm ci --ignore-scripts
+      - name: Install browser test engines
+        run: npx playwright install --with-deps chromium webkit
+      - name: Build selected public documentation
+        run: npm run website:build
+      - name: Verify public content and reading journeys
+        run: npm run website:test

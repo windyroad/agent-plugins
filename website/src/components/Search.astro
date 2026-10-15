@@ -1,0 +1,31 @@
+---
+import DefaultSearch from '@astrojs/starlight/components/Search.astro';
+---
+
+<DefaultSearch {...Astro.props} />
+
+<script>
+  const search = document.querySelector('site-search');
+  const dialog = search?.querySelector('dialog');
+  const results = search?.querySelector('#starlight__search');
+  if (dialog && results) {
+    const status = document.createElement('span');
+    status.className = 'sr-only';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    status.setAttribute('aria-atomic', 'true');
+    dialog.append(status);
+
+    const update = () => {
+      const input = results.querySelector('input');
+      if (input && !input.hasAttribute('aria-label') && !input.hasAttribute('aria-labelledby')) {
+        const label = input.getAttribute('title');
+        if (label) input.setAttribute('aria-label', label);
+      }
+      const message = results.querySelector('.pagefind-ui__message')?.textContent ?? '';
+      if (status.textContent !== message) status.textContent = message;
+    };
+    new MutationObserver(update).observe(results, { childList: true, subtree: true, characterData: true });
+    update();
+  }
+</script>

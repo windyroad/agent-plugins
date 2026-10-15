@@ -47,3 +47,10 @@ docs/retros/*-iter.md
 docs/retros/*-iter-ask-hygiene.md
 docs/retros/*-iter[0-9].md
 docs/retros/*-iter[0-9]-ask-hygiene.md
+
+# Private documentation build output
+website/dist/
+website/.astro/
+website/src/content/docs/plugins/
+website/src/content/docs/skills/
+website/artifacts/

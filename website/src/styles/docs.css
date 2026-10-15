@@ -1,0 +1,8 @@
+:root {
+  --sl-font: system-ui, sans-serif;
+  --sl-font-system: system-ui, sans-serif;
+}
+
+.sl-markdown-content a:not(.sl-link-button) {
+  text-decoration: underline;
+}

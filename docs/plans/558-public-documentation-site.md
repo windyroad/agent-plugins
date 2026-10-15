@@ -92,3 +92,39 @@ plugins on phones; site guide scope must precede site copy.
 - Root README contains superseded prose; it will not be copied wholesale.
 - ADR-139 remains proposed/unconfirmed. Production use and explicit final human
   ratification are required before acceptance; this plan writes no oversight marker.
+
+### Foundation qualification checkpoint
+
+Governance commit 57461f56118de2631057dc20e267e87a3e72c742 passed exact CI
+38739098720 and Release 38739098386. The private foundation now builds 80 docs
+pages plus 404 from 13 selected packages and 62 skills. Local qualification:
+
+- Eight source/artifact/configuration tests and four browser journey tests pass.
+  All routes, base-path links and assets resolve. Key pages pass reflow checks at
+  320, 390 and 1280 pixels in both themes; search, keyboard, no-JavaScript reading
+  and WebKit iPhone 13 emulation pass. Physical iPhone and screen-reader speech
+  have not been tested.
+- The Node 20 root suite passes all 4,396 cases. Node 20 npm ci exits zero with
+  lifecycle allow-scripts warnings; this does not prove native lifecycle scripts
+  ran. Existing better-sqlite3 version is unchanged. Exact new-head CI remains
+  required after push.
+- Independent artifact review found no private source text, audit content or
+  canaries, including decompressed search assets. Positive and negative browser
+  search prove the generated index works and excludes the synthetic canary.
+- Actual mobile failures drove built-in command wrapping and a narrow default
+  Search wrapper for polite result-status announcements. Cached Markdown needed
+  a forced Astro rebuild to apply wrapping. One desktop axe shortcut warning is
+  independently classified as a symbolic-key-hint false positive, with an exact
+  target exception and runtime label/shortcut assertions, not a global rule skip.
+- Applied JTBD review corrected missing per-skill maturity and misleading internal
+  helper invocation guidance. Recognized bands come from selected README tables;
+  helpers now link to their public workflows.
+- The installed architecture role injected a superseded ratification blocker.
+  Source and installed role files both contain current rules permitting proposed
+  implementation; an independent architecture substitute reviewed under those
+  actual rules. The original role's conflicting verdict is not recorded as PASS.
+  The accessibility lead's pinned model cannot execute; independent browser
+  review substitutes for that capability, without claiming full conformance.
+
+Public deployment remains disabled. This checkpoint records local qualification,
+not completion of the user outcome or permission to skip exact-head CI.

@@ -1,0 +1,194 @@
+{
+  "pages": [
+    "index.md",
+    "getting-started.md",
+    "runtimes.md",
+    "updating.md",
+    "outcome-led-planning.md"
+  ],
+  "packages": [
+    {
+      "slug": "agent-plugins",
+      "package": "packages/agent-plugins/package.json",
+      "readme": "packages/agent-plugins/README.md",
+      "skills": []
+    },
+    {
+      "slug": "architect",
+      "package": "packages/architect/package.json",
+      "readme": "packages/architect/README.md",
+      "skills": [
+        "packages/architect/skills/capture-adr/SKILL.md",
+        "packages/architect/skills/create-adr/SKILL.md",
+        "packages/architect/skills/review-decisions/SKILL.md",
+        "packages/architect/skills/review-design/SKILL.md"
+      ]
+    },
+    {
+      "slug": "c4",
+      "package": "packages/c4/package.json",
+      "readme": "packages/c4/README.md",
+      "skills": [
+        "packages/c4/skills/check/SKILL.md",
+        "packages/c4/skills/generate/SKILL.md"
+      ]
+    },
+    {
+      "slug": "connect",
+      "package": "packages/connect/package.json",
+      "readme": "packages/connect/README.md",
+      "skills": [
+        "packages/connect/skills/send/SKILL.md",
+        "packages/connect/skills/setup/SKILL.md"
+      ]
+    },
+    {
+      "slug": "cruise",
+      "package": "packages/cruise/package.json",
+      "readme": "packages/cruise/README.md",
+      "skills": [
+        "packages/cruise/skills/status/SKILL.md"
+      ]
+    },
+    {
+      "slug": "itil",
+      "package": "packages/itil/package.json",
+      "readme": "packages/itil/README.md",
+      "skills": [
+        "packages/itil/skills/capture-problem/SKILL.md",
+        "packages/itil/skills/capture-rfc/SKILL.md",
+        "packages/itil/skills/capture-story/SKILL.md",
+        "packages/itil/skills/capture-story-map/SKILL.md",
+        "packages/itil/skills/check-upstream-responses/SKILL.md",
+        "packages/itil/skills/close-incident/SKILL.md",
+        "packages/itil/skills/link-incident/SKILL.md",
+        "packages/itil/skills/list-incidents/SKILL.md",
+        "packages/itil/skills/list-problems/SKILL.md",
+        "packages/itil/skills/list-stories/SKILL.md",
+        "packages/itil/skills/list-story-maps/SKILL.md",
+        "packages/itil/skills/manage-incident/SKILL.md",
+        "packages/itil/skills/manage-problem/SKILL.md",
+        "packages/itil/skills/manage-rfc/SKILL.md",
+        "packages/itil/skills/manage-story/SKILL.md",
+        "packages/itil/skills/manage-story-map/SKILL.md",
+        "packages/itil/skills/migrate-story-map/SKILL.md",
+        "packages/itil/skills/mitigate-incident/SKILL.md",
+        "packages/itil/skills/outcome-led-planning/SKILL.md",
+        "packages/itil/skills/reconcile-readme/SKILL.md",
+        "packages/itil/skills/reconcile-stories/SKILL.md",
+        "packages/itil/skills/reconcile-story-maps/SKILL.md",
+        "packages/itil/skills/report-upstream/SKILL.md",
+        "packages/itil/skills/restore-incident/SKILL.md",
+        "packages/itil/skills/review-problems/SKILL.md",
+        "packages/itil/skills/scaffold-intake/SKILL.md",
+        "packages/itil/skills/transition-problem/SKILL.md",
+        "packages/itil/skills/transition-problems/SKILL.md",
+        "packages/itil/skills/update-upstream/SKILL.md",
+        "packages/itil/skills/work-problem/SKILL.md",
+        "packages/itil/skills/work-problems/SKILL.md"
+      ],
+      "description": "Service management workflows for Claude Code and Codex."
+    },
+    {
+      "slug": "jtbd",
+      "package": "packages/jtbd/package.json",
+      "readme": "packages/jtbd/README.md",
+      "skills": [
+        "packages/jtbd/skills/confirm-jobs-and-personas/SKILL.md",
+        "packages/jtbd/skills/review-jobs/SKILL.md",
+        "packages/jtbd/skills/update-guide/SKILL.md"
+      ]
+    },
+    {
+      "slug": "retrospective",
+      "package": "packages/retrospective/package.json",
+      "readme": "packages/retrospective/README.md",
+      "skills": [
+        "packages/retrospective/skills/analyze-context/SKILL.md",
+        "packages/retrospective/skills/migrate-briefing/SKILL.md",
+        "packages/retrospective/skills/run-retro/SKILL.md"
+      ]
+    },
+    {
+      "slug": "risk-scorer",
+      "package": "packages/risk-scorer/package.json",
+      "readme": "packages/risk-scorer/README.md",
+      "skills": [
+        "packages/risk-scorer/skills/assess-external-comms/SKILL.md",
+        "packages/risk-scorer/skills/assess-inbound-report/SKILL.md",
+        "packages/risk-scorer/skills/assess-release/SKILL.md",
+        "packages/risk-scorer/skills/assess-wip/SKILL.md",
+        "packages/risk-scorer/skills/bootstrap-catalog/SKILL.md",
+        "packages/risk-scorer/skills/create-risk/SKILL.md",
+        "packages/risk-scorer/skills/external-comms/SKILL.md",
+        "packages/risk-scorer/skills/pipeline/SKILL.md",
+        "packages/risk-scorer/skills/update-policy/SKILL.md",
+        "packages/risk-scorer/skills/wip/SKILL.md"
+      ]
+    },
+    {
+      "slug": "style-guide",
+      "package": "packages/style-guide/package.json",
+      "readme": "packages/style-guide/README.md",
+      "skills": [
+        "packages/style-guide/skills/update-guide/SKILL.md"
+      ]
+    },
+    {
+      "slug": "tdd",
+      "package": "packages/tdd/package.json",
+      "readme": "packages/tdd/README.md",
+      "skills": [
+        "packages/tdd/skills/setup-tests/SKILL.md"
+      ]
+    },
+    {
+      "slug": "voice-tone",
+      "package": "packages/voice-tone/package.json",
+      "readme": "packages/voice-tone/README.md",
+      "skills": [
+        "packages/voice-tone/skills/assess-external-comms/SKILL.md",
+        "packages/voice-tone/skills/update-assistant-guide/SKILL.md",
+        "packages/voice-tone/skills/update-guide/SKILL.md"
+      ]
+    },
+    {
+      "slug": "wardley",
+      "package": "packages/wardley/package.json",
+      "readme": "packages/wardley/README.md",
+      "skills": [
+        "packages/wardley/skills/generate/SKILL.md"
+      ]
+    }
+  ],
+  "publicWorkflows": {
+    "packages/risk-scorer/skills/pipeline/SKILL.md": "assess-release",
+    "packages/risk-scorer/skills/external-comms/SKILL.md": "assess-external-comms",
+    "packages/risk-scorer/skills/wip/SKILL.md": "assess-wip"
+  },
+  "summaries": {
+    "packages/itil/skills/capture-problem/SKILL.md": "Record a problem during ongoing work, with its impact, job trace and index entry.",
+    "packages/itil/skills/capture-story/SKILL.md": "Record a delivery story with problem, job and story-map traces.",
+    "packages/itil/skills/capture-story-map/SKILL.md": "Draft a story map connecting a problem and desired outcomes to coordinated delivery.",
+    "packages/itil/skills/manage-rfc/SKILL.md": "Manage a problem-traced release row and its delivery stories.",
+    "packages/itil/skills/manage-story/SKILL.md": "Create, refine and advance a delivery story through its lifecycle.",
+    "packages/itil/skills/manage-story-map/SKILL.md": "Create, refine and manage a story map for coordinated delivery.",
+    "packages/itil/skills/restore-incident/SKILL.md": "Record observed service restoration and hand the underlying cause to problem management.",
+    "packages/risk-scorer/skills/pipeline/SKILL.md": "Internal pipeline-risk helper; use assess-release for the public review workflow.",
+    "packages/risk-scorer/skills/external-comms/SKILL.md": "Internal outbound-prose review helper; use assess-external-comms for the public review workflow.",
+    "packages/risk-scorer/skills/wip/SKILL.md": "Internal review helper for work in progress; use assess-wip for the public review workflow.",
+    "packages/itil/skills/list-problems/SKILL.md": "List open and known-error problems ordered by weighted priority.",
+    "packages/itil/skills/reconcile-readme/SKILL.md": "Detect and correct drift between the problem index and its on-disk inventory.",
+    "packages/itil/skills/review-problems/SKILL.md": "Reassess open and known-error problems, their risks, effort and priority.",
+    "packages/itil/skills/close-incident/SKILL.md": "Close a restored incident after checking the linked problem’s status or a documented justification for having no linked problem.",
+    "packages/itil/skills/link-incident/SKILL.md": "Link an incident to an existing problem and record that problem’s current status.",
+    "packages/architect/skills/capture-adr/SKILL.md": "Record an architecture decision from the current conversation during ongoing work.",
+    "packages/architect/skills/create-adr/SKILL.md": "Create an architecture decision record describing the problem, options and chosen approach.",
+    "packages/itil/skills/capture-rfc/SKILL.md": "Add an RFC release row to a story map, connecting a problem to stories delivered together.",
+    "packages/itil/skills/list-stories/SKILL.md": "List delivery stories and their status as a Markdown table.",
+    "packages/itil/skills/manage-problem/SKILL.md": "Create, update and prioritise problems using their impact, likelihood and estimated effort.",
+    "packages/itil/skills/migrate-story-map/SKILL.md": "Replace an eligible legacy story map using a complete mapping approved by the adopter.",
+    "packages/itil/skills/work-problem/SKILL.md": "Investigate and repair the highest-priority eligible problem, then follow the project’s delivery workflow.",
+    "packages/retrospective/skills/migrate-briefing/SKILL.md": "Split an existing project briefing into topic files for subsequent sessions."
+  }
+}
