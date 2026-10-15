@@ -1,11 +1,11 @@
 # Problem 437: wr-wardley exposes no version-stable invocation path for its owm-to-svg converter (consumers pin the cache version and break on bump)
 
-**Status**: Known Error
+**Status**: Verification Pending
 **Reported**: 2026-07-06
 **Priority**: 9 (Medium) — Impact: 3 × Likelihood: 3
 **Origin**: inbound-reported (#325)
 **Effort**: S. WSJF = (9 × 2.0) / 1 = 18.0.
-**WSJF**: 18 — (9 × 2.0) / 1 (Known Error multiplier applied 2026-09-19; Effort held at S — one generated entry point, one packaging field, one skill dispatch line)
+**WSJF**: 0 — Verification Pending is excluded from development ranking; prior Known Error score was 18.
 **JTBD**: JTBD-101
 **Persona**: plugin-developer
 
@@ -58,6 +58,30 @@ Give wr-wardley the same entry-point shape every sibling plugin already has, so 
 **Release vehicle**: `.changeset/wardley-version-stable-converter-entry-point.md`
 
 The fix is proposed as the RFC-095 release row on STORY-MAP-008 ("Have a plugin behave like a guest in my repository"), activity E ("Get a fix on upgrade"), carrying STORY-091. Reproduction and regression coverage is the behavioural bats at `packages/wardley/scripts/test/owm-to-svg-shim.bats`, which packs the workspace and asserts the command and its target both ship and dispatch from a simulated two-version cache — it fails against the pre-fix package.
+
+## Fix Released
+
+Verified on 2026-10-15: npm `latest` is `@windyroad/wardley@0.3.0`.
+Registry publication timestamp: `2026-09-19T06:34:49.618Z`.
+Its changelog cites implementation `d387c93564670b47dcf4f1221dca0c7d248e0dab`.
+The published package contains the stable command, dispatch script, and converter.
+The root-cause package observations above describe the pre-fix surface.
+
+## Verification Notes
+
+At repository base `81c15f7f546962e6ea26aacc572e1655c7680dab`, all three
+`packages/wardley/scripts/test/owm-to-svg-shim.bats` tests passed, including
+unrelated-directory conversion and highest-installed-version dispatch.
+A separate registry-tarball smoke check verified SHA-512 registry integrity,
+executable entry point, and byte equality of the three runtime files with
+reviewed source. Calling the published command from an unrelated directory
+returned exit 0 and produced nonempty SVG containing the input title.
+PNG generation was not asserted.
+
+This commit records only Known Error → Verification Pending. Authenticated
+acceptance evidence will be recorded in a separate Verifying → Closed commit
+after this transition's exact pipeline passes. No downstream consumer migration,
+native marketplace installation, or closure is claimed by this transition.
 
 ## Dependencies
 
