@@ -4,6 +4,11 @@
 
 Built by [Windy Road Technology](https://windyroad.com.au).
 
+[Read the documentation](https://windyroad.github.io/agent-plugins/) to choose
+plugins, find skills and follow installation guidance for your runtime. Start
+with [outcome-led planning](https://windyroad.github.io/agent-plugins/outcome-led-planning/)
+to confirm an objective and deliver through Now, Next and Later.
+
 ## The Problem
 
 AI coding agents are fast. Sometimes too fast. They skip architecture reviews, introduce risk without assessment, ignore your design system, and write implementation before tests. The same governance that keeps human teams shipping safely gets bypassed when an agent writes code.

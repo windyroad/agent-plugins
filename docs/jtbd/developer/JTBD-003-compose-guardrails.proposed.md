@@ -40,4 +40,4 @@ Install everything and ignore irrelevant hooks, or don't install at all
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-107 | STORY-107: Find the plugin and instructions I need on my phone | accepted |
+| STORY-107 | STORY-107: Find the plugin and instructions I need on my phone | done |

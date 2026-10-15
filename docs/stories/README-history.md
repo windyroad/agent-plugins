@@ -122,3 +122,7 @@
 > Last reviewed: 2026-10-15 **STORY-106 accepted** - Outcome-led planning is traced to a ratified map and ready for bounded implementation.
 
 > Last reviewed: 2026-10-15 **STORY-106 done** - Published planning skill qualified on both projections and verified in fresh native installations.
+
+## 2026-10-16
+
+> Last reviewed: 2026-10-15 **STORY-107 accepted** - Public documentation is traced to the existing plugin-selection journey.

@@ -12,7 +12,81 @@ installation-guide journeys verified on mobile and desktop.
 
 The user explicitly confirmed this playback before executable planning.
 
-## Current plan: P3.1
+## Terminal status: objective achieved on 2026-10-16
+
+Public site: <https://windyroad.github.io/agent-plugins/>.
+Planning guide: <https://windyroad.github.io/agent-plugins/outcome-led-planning/>.
+The confirmed public reading, discovery, search, installation-guide and maintained
+delivery outcome is verified before the Sunday deadline.
+
+### Now
+
+Complete. The public site covers 13 packages and 62 skills across 80 documentation
+pages. The terminal tracker updates record evidence already observed; they add
+no website input or plugin behavior and still pass the normal integration workflow.
+
+### Next
+
+None required for the confirmed objective.
+
+### Later
+
+None committed. Further improvements require evidence and a new requested scope.
+
+### Delivery receipts
+
+- Foundation `01c32d870cffb25536abb075f89a775488254a26`: exact CI
+  [38745981110](https://github.com/windyroad/agent-plugins/actions/runs/38745981110)
+  and Release 38745981277 succeeded. This discharged the P3 integration prerequisite.
+- Publication `29f566b63b74496fb68bfc3dca5a24e9e2d56c62`: exact CI
+  [38748545880](https://github.com/windyroad/agent-plugins/actions/runs/38748545880)
+  and Release 38748545871 succeeded. No npm package release or changeset was needed.
+- [Pages workflow 38750360372](https://github.com/windyroad/agent-plugins/actions/runs/38750360372)
+  rebuilt that exact source, passed 23 unit/artifact/configuration/guard tests and
+  four browser tests, and deployed its own qualified artifact. Environment
+  deployment `7095198494` reports success for the same SHA and public URL.
+- Provider readbacks confirm workflow-based Pages, enforced HTTPS, no custom
+  domain and exactly one main-branch environment policy. Pages created the
+  correct environment automatically, so no additional settings writes were needed.
+  Actual logs confirm read-only build repository permission and Pages write only
+  in the artifact deployment job; its declared OIDC permission is confined there.
+- Live verification from 2026-10-15T14:23:38Z to 14:24:34Z returned HTTP 200 for
+  all 80 routes. Eight browser contexts covered Chromium 320/390/1280 in both
+  themes and WebKit iPhone 13 emulation in both themes. Five key pages passed
+  reading/reflow and asset checks; search, no results, private canary exclusion,
+  current status text, focus return, keyboard result activation, navigation and
+  installation command payloads passed. No-JavaScript reading and native mobile
+  navigation passed too.
+- Independent live phone checks repeated the core journeys in both engines.
+  Root inspected public mobile and desktop screenshots. Physical devices,
+  spoken screen-reader output and operating-system clipboard writes remain
+  untested; no full accessibility-conformance claim is made.
+- The fetched live home SHA-256 matches the actual CI artifact:
+  `6f0141297ebcf025017bb56d22943c4a947e3b34165b0b46fdcb1db8d08f54a7`.
+  Local home bytes differ, so local output is not serving-revision proof.
+  Independent review of the downloaded deployment tar read all 188 files,
+  including 81 HTML pages and 85 decompressed search assets, and passed privacy,
+  reference metadata, maturity, helper-workflow links and internal-link checks.
+  Visible main content matches the reviewed local pages.
+- Maintenance and source-revert recovery are recorded in website/README.md.
+  STORY-107 is done. The ordered batch `558 verifying 558 close` performed both
+  actual filesystem transitions with per-pair re-staging and closed P558 on its
+  observed criteria. Recovery remains `/wr-itil:transition-problem 558 known-error`.
+  ADR-139 and ADR-140 remain proposed/unconfirmed; this delivery does not invent
+  final human ratification or architectural acceptance.
+
+### Material learning
+
+Reuse supplied the interface, while public source selection and runtime truth
+needed explicit checks. Actual browser findings justified command wrapping and
+the small search-status enhancement. JTBD review caught missing skill maturity
+and conflicting helper instructions. Exact-source CI, provider readback,
+deployment identity and live artifact/journey evidence established different
+stages; none substituted for the next. The reviewed P3.1 scheduling amendment
+allowed one safe local slice during the earlier watcher without integrating or
+activating it until trunk was green. No further product increment is necessary.
+
+## Last assessed plan: P3.1 (completed)
 
 ### Now
 

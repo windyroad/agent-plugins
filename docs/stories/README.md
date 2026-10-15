@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-10-15 **STORY-107 accepted** - Public documentation is traced to the existing plugin-selection journey.
+> Last reviewed: 2026-10-16 **STORY-107 done** - Public documentation, search and phone/desktop journeys verified.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -113,7 +113,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 
 | Status | ID | Title | Effort | Problems | RFCs | Story Map |
 |--------|-----|-------|--------|----------|------|-----------|
-| accepted | STORY-107 | Find the plugin and instructions I need on my phone | M | P558 | RFC-107 | STORY-MAP-008 |
 | draft | STORY-045 | Outbound lifecycle comments generated from real issue context | M | P376 | RFC-028 | STORY-MAP-004 |
 | accepted | STORY-047 | Gate the correction nudge on prompt authorship | S | P430 | RFC-050 | STORY-MAP-005 |
 | draft | STORY-048 | Gate the inbound-discovery pre-flight on the channel list | S | P431 | RFC-051 | STORY-MAP-006 |
@@ -189,6 +188,7 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-107 | Find the plugin and instructions I need on my phone | 2026-10-16 | P558 |
 | STORY-106 | Keep my objective clear while I deliver, learn and replan | 2026-10-15 | P557 |
 | STORY-070 | Leave the Codex backlog draining until no dispatchable work remains | 2026-10-15 | P528 |
 | STORY-105 | Keep backlog work moving when Goal controls are unavailable | 2026-10-15 | P556 |

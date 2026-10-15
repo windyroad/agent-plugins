@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-10-15 **P558 captured** - Public searchable mobile documentation is absent; confirmed delivery by 18 October.
+> Last reviewed: 2026-10-16 **batch transition** - P558 verifying, P558 close; public documentation verified.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -112,7 +112,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4 | P483 | Amendment sections are not a legitimate mechanism — a ratified decision is immutable | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
 | 4 | P485 | Every step in the process adds and none removes, so cruft accumulates without limit | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
 | 4 | P494 | Plugin tests and project-conformance tests are the same suite, so neither can be right | 16 (High) | Open | L | 2026-08-09 | corrective-feedback (user, 2026-08-09) |
-| 4 | P558 | No public searchable documentation site for plugin users | 8 (Medium) | Open | M | 2026-10-15 | internal |
 | 3.75 | P443 | Quota-pacing (P160 / RFC-046 / ADR-093) shipped without a grounded JTBD → persona → USM → RFC → story lineage — governance artefacts are wrong, orphaned, or missing | 15 (High) | Open | L | 2026-07-07 | internal |
 | 3.75 | P445 | Agent offers unsolicited off-ramps, hedges, projects onto the user, and narrates its own conduct — "acknowledges-but-recurs" — and needs a PLUGIN-shipped behavioural rule (portable across every project), not a project-local fix | 15 (High) | Open | L | 2026-07-08 | internal |
 | 3 | P248 | Use time and token cost (not t-shirt sizing) for WSJF effort, with retro-driven estimation refinement | 6 (Medium) | Open | M | 2026-05-17 | internal |
@@ -418,6 +417,7 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 
 | ID | Title | Closed via |
 |----|-------|-----------|
+| P558 | No public searchable documentation site for plugin users | Closed 2026-10-16 on source 29f566b6, successful Pages workflow 38750360372, exact artifact review and live 80-route/mobile/desktop/search verification. [Evidence](closed/558-no-public-searchable-documentation-site-for-plugin-users.md). Recovery: `/wr-itil:transition-problem 558 known-error`. |
 | P557 | No published skill supports outcome-led iterative planning | Closed 2026-10-15 on published `@windyroad/itil@3.1.0`, registry integrity, 22 semantic scenarios, nine targeted checks and fresh native Claude Code/Codex confirmation-gate exercise. [Evidence](closed/557-no-published-skill-supports-outcome-led-iterative-planning.md). Recovery: `/wr-itil:transition-problem 557 known-error`. |
 | P477 | Codex collaboration completion bypasses the risk-marker bridge | Closed 2026-10-15 on local Codex 0.162.0 installed-runtime evidence: fresh typed pipeline result consumed by the guarded command without an unavailable-evidence advisory, plus Architecture/JTBD/Style Guide/Voice Tone typed PASS followed by installed edit-hook PASS. Cloud-runtime recovery is unclaimed. Recovery: `/wr-itil:transition-problem 477 known-error`. |
 | P556 | Codex backlog drain halts when Goal controls are not exposed | Closed 2026-10-15 on fresh installed ITIL 3.0.2 read-only acceptance: session `01a13c9d-9819-7d92-96d7-6c89617af2f3`, result SHA-256 `92b63fed621166e6a5c9309756e63267d0aaceed25c7ce9a464ef0db117df012`, PASS for missing-control continuation and terminal decisions. No repository iteration or original-chat hot-reload is claimed. Recovery: `/wr-itil:transition-problem 556 known-error`. |
