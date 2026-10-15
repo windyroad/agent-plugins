@@ -1,6 +1,6 @@
 # Problem 477: Codex collaboration completion bypasses the risk-marker bridge
 
-**Status**: Open (reopened 2026-10-03 after a genuine completed native pipeline review was followed by a missing-score commit denial; current desktop recovery remains unverified)
+**Status**: Closed (2026-10-15; installed local typed-review handoffs verified; this cloud runtime remains unverified)
 **Reported**: 2026-08-12
 **Priority**: 20 (Very High) — Impact: 4 × Likelihood: 5
 **Origin**: internal
@@ -67,7 +67,91 @@ The [Codex hook contract](https://developers.openai.com/codex/hooks) documents p
 
 Fresh-context capture arbitration returned `HANG_OFF: P477`: the missing native spawn-registration boundary is already owned here. P539 continues to own shared decoding and nested-name transport. The monitor's separate error-wrapper parsing gap is not treated as this repair's root cause.
 
-No currently verified desktop workaround exists. Source and packed-artifact tests do not establish runtime restoration. Closure requires a fresh installed native typed review followed by a successful guarded command with the exact assessed checkout and unchanged state.
+At the time of that recurrence no verified desktop workaround existed. Source
+and packed-artifact tests do not establish runtime restoration. Closure requires
+a fresh installed native typed review followed by a successful guarded command
+with the exact assessed checkout and unchanged state. The later local pipeline
+acceptance below satisfies that check for the pipeline role. The subsequent
+installed edit-gate acceptance covers the four edit-reviewer roles above.
+
+### Local pipeline acceptance, 2026-10-15
+
+The authorized local teammate reconstructed the exact 7,010-byte P556 closure
+patch at base `22ab0a235ab21e797308ab2b521861e24e50d02d`, verifying staged diff
+SHA-256 `1034188ef3ae8d329f7b633269846fd9d19951d1c20c624efc0dd3bacc866ca6`.
+The registered `wr-risk-scorer:pipeline` reviewer returned `Verdict: PASS`,
+`RISK_SCORES: commit=3 push=0 release=0`, and the matching single `RISK_CWD`
+for the isolated checkout. The following guarded commit succeeded as
+`5e3e164f989fb3f515117ee91792d072a5824af4` without a manually manufactured marker.
+
+After upstream main advanced, the teammate rebased, preserved the newer P557
+index header, reran the reconciler and close guard, and obtained a fresh typed
+PASS bound to the same checkout with `commit=2 push=2 release=0`. The standard
+`npm run push:watch` pushed final commit
+`e13957f045b81132b59e0e6715a8fea8c10aae6d`; local HEAD and origin/main matched,
+and the checkout was clean. The teammate reports that typed collaboration
+completion authorized both the initial guarded commit and post-rebase push;
+no marker was manually manufactured.
+
+Exact Release run 38653582210 succeeded. Exact CI38653582299 initially failed
+because the configured Claude evaluator reached its external session limit;
+the failed-job rerun passed on attempt 2, including Quality Gates and
+Agent-Prose Behavioural Evals. No code or control changed for the rerun.
+
+This is reported live local pipeline-review evidence, not a cloud rerun or
+proof that this existing cloud chat gained the registered agent selector.
+That initial evidence did not cover the four edit-reviewer roles or distinguish
+normal review consumption from an unavailable-evidence advisory. The subsequent
+bounded acceptance below supplies those missing observations.
+
+### Installed edit-gate and pipeline acceptance, 2026-10-15
+
+The authorized local teammate reports these installed versions with Codex CLI
+0.162.0: Architect 1.1.0, JTBD 0.15.0, Style Guide 0.7.0, Voice Tone 0.10.1,
+and Risk Scorer 0.20.1. In the live local parent session, four fresh registered
+typed reviewers assessed isolated policy/target fixtures. Each returned PASS;
+the corresponding installed guarded-edit hook, invoked with the parent session
+and exact target, then passed:
+
+| Registered role | Review | Installed guarded-edit hook |
+|-----------------|--------|-----------------------------|
+| `wr-architect:agent` | Architecture Review: PASS | PASS |
+| `wr-jtbd:agent` | JTBD Review: PASS | PASS |
+| `wr-style-guide:agent` | Style Guide Review: PASS | PASS |
+| `wr-voice-tone:agent` | Voice & Tone Review: PASS | PASS |
+
+The teammate checked only existence of the session-bound marker/hash and empty
+successful gate output. No marker was fabricated or altered; no transcripts or
+marker contents were read. These are live native reviewer-completion followed
+by installed hook checks. They are not claimed as four completed native file
+edits or proof of this cloud chat's transport.
+
+A separate fresh registered `wr-risk-scorer:pipeline` review assessed the clean
+local checkout at `e13957f045b81132b59e0e6715a8fea8c10aae6d` and returned
+`RISK_SCORES: commit=0 push=0 release=0` with the exact matching `RISK_CWD`.
+The governed read-only command was:
+
+```sh
+cd '/tmp/emseepea-p556-risk.0adivj/repo' && git commit --dry-run
+```
+
+The gate admitted the command without an unavailable-evidence advisory. Git
+returned exit 1 solely because there was nothing to commit and the working tree
+was clean. This is evidence of fresh typed-result consumption, not a successful
+new commit or reliance on unavailable-evidence handling.
+
+## Closure
+
+Closed 2026-10-15 on the authorized teammate's cited installed-runtime evidence:
+fresh typed pipeline review followed by an admitted guarded command in the
+exact assessed unchanged checkout, plus all four fresh edit-reviewer handoffs
+followed by successful installed guarded-edit hook checks. The do-not-close
+predicate returned exit 1 (not blocked). Earlier dated failure observations
+remain historical evidence; this closure does not assert universal recovery or
+verification of the already-running cloud runtime.
+
+Recovery: rerun `/wr-itil:transition-problem 477 known-error` to reopen on a
+reproduced affected-runtime failure.
 
 ### Recurrence on 2026-09-13
 
