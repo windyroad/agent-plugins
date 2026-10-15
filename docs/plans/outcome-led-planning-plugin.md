@@ -11,74 +11,83 @@ skill usable throughout. The user confirmed this complete playback.
 Completion requires registry publication, fresh runtime evidence and deployed
 documentation. Source, packed artifacts and CI establish their own stages only.
 
-## Current plan: revision 3
+## Current plan: revision 5
 
-Revision 2 package, installer and website checks passed, but the full model
-qualification returned 20/22. One response bundled beneficiary and deficiency
-into one purported question; another invented future features and queried an
-ambiguous relative Friday. Revision 3 clarifies the existing single-fact
-interview and evidence-led horizon rules, and pins that confirmed-date fixture
-without weakening its rubric. It does not add a capability or change the goal.
+Keep the confirmed objective unchanged. Publish the independently installable
+package before activating website guidance that recommends its npm command.
+Architecture, JTBD recommendation and pre-edit reviews passed this exact split;
+plan and projected release residual risk passed at 5/25, within appetite 5.
+These assessments do not replace concrete provider, commit, push or release reviews.
 
-Architecture and JTBD passed the revised plan and expanded source scope. Plan
-and projected release risk passed at 4/25. Update the personal skill first by
-atomic replacement, retaining a recoverable copy, bare name, permissions and
-picker metadata; then apply the equivalent canonical and compatibility bodies.
-Rerun all 22 behavioral cases and native vague-outcome scenarios before claiming
-the repair verified. All branch-only and publication constraints below remain.
+## Now: qualify the package foundation
 
-## Now: branch implementation and qualification
+Deliver the complete tested package and compatibility foundation through draft
+PR 529 on `codex/planning-plugin`, with exact-head PR CI. ADR-002, ADR-017 and
+ADR-083's independently installable package model applies; no new ADR is needed.
 
-Deliver a complete, tested implementation on `codex/planning-plugin` and a draft
-PR with PR CI. The existing independently installable package model applies
-(ADR-002, ADR-017, ADR-083). No new architectural decision is needed.
+- Retain skill-only `@windyroad/planning`, plugin `wr-planning`, shared installer,
+  marketplace and meta-installer selection. No automatic dependencies, hooks or
+  reviewer agents are bundled.
+- Own the canonical workflow in planning. Keep the complete ITIL command as an
+  independently usable generated compatibility entrypoint, checked for drift.
+- Preserve the personal `$outcome-led-planning` skill and its picker metadata.
+- Restore the seven website files to current green main. The existing ITIL guide
+  remains valid. Package README body prose is not copied into generated pages;
+  the old website allowlist does not include planning.
+- Preserve the qualified website changes in the original implementation commit
+  and a checked seven-file patch under ignored audit storage. Verify the patch
+  applies to the restored baseline; activate it only after stable publication.
+- Rebuild and test the retained website journeys, reconfirm packed installation
+  and compatibility, obtain fresh concrete commit/push reviews, then qualify the
+  exact new PR head in CI. Revise the PR around the package foundation and its
+  explicit remaining delivery hold.
 
-- Add skill-only `@windyroad/planning`, plugin `wr-planning`, using the shared
-  installer with no automatic plugin dependencies, hooks or agents.
-- Own the generic skill body in the planning package. Generate the
-  existing full-body ITIL skill from it, preserving its command and independent
-  operation, with a checked synchronization boundary.
-- Update marketplace selection, package inventories and public installation and
-  runtime guidance. Preserve the public guide and old ITIL skill URL.
-- Preserve the personal skill's identity, availability, permissions and picker
-  metadata during the local-first clarification. Compare bodies and record the
-  authorized content change separately from packaging continuity checks.
-- Verify extracted tarballs, isolated installer boundaries, correct Codex skill
-  names, absence of ITIL runtime assets, compatibility drift, existing behavioral
-  scenarios, and built-site navigation/search/accessibility checks.
+This is a coherent independently reviewable foundation increment, valuable for
+selective installation and compatibility. Its bounded scope is estimable with
+uncertainty disclosed and testable; means remain negotiable. No manufactured
+numerical estimate or extra story is needed to satisfy INVEST.
 
-This is one coherent, independently reviewable migration increment. Its means
-remain negotiable, its user value is selective installation, and its bounded
-package/compatibility/docs surface is testable. No numerical estimate or extra
-story is manufactured to satisfy INVEST.
-
-**Release hold:** npm CLI and browser are signed out. Do not merge or push the
-new public package to main, merge a release PR or publish until first-package
-bootstrap and the existing `release.yml` trusted publisher are established.
-Both stable and preview paths would otherwise attempt unauthorized publication.
-Do not add a token, second workflow or speculative flag to bypass this boundary.
+**Release hold:** npm CLI and browser are signed out. Do not integrate the new
+package into main, merge a release PR or publish before first-package bootstrap
+and the existing `release.yml` trusted publisher are established. Main's stable
+and preview paths would otherwise attempt unauthorized publication. Do not add
+a token, second workflow or speculative flag.
 
 ## Next (provisional)
 
-Once the complete artifact is reviewable, resolve the precise owner-only npm
-action. Obtain fresh concrete risk reviews, integrate the safe slice into green
-trunk, and use the existing release workflow. Qualify fresh registry installs
-and native planning behaviour in both runtimes outside this repository, then
-verify the deployed public docs and retained URLs. Replan from that evidence.
+After exact-head CI passes, complete owner npm web sign-in and verify identity
+and organization authority. Under separate fresh concrete provider reviews,
+stage only the exact qualified planning 0.0.0 tarball with a bootstrap tag;
+verify stage identity and integrity. Do not approve or publicly publish that
+bootstrap version. Configure and read back only the existing
+`windyroad/agent-plugins` / `release.yml` direct-publish trust, with owner 2FA.
+Staging is documented to create a nonpublic package, but whether that package
+can receive trust configuration remains unproven. If it cannot, investigate;
+do not substitute manual public publication or a second workflow.
+
+Only once publisher readiness is established, integrate the package foundation
+into fresh green trunk using concrete reviews and the existing OIDC release
+workflow. Verify stable registry availability, fresh installation, discovery
+and core behavior in both runtimes, including coexistence with the personal
+skill. Then restore the preserved website changes through fresh source reviews,
+checks and governed integration, and verify deployed old/new URLs. Reject the
+unused bootstrap stage only after successful normal publication and exact
+owner/state verification. Replan from the actual evidence at each checkpoint.
 
 ## Later (provisional)
 
-No additional capability is required. Retire compatibility only if separately
-justified; preserving existing invocations is the default for this move.
+No additional capability is required. Compatibility retirement needs separate
+justification; preserving existing invocations is the default for this move.
 
-## Assessment
+## Assessment history
 
-Revision 1 was rejected by risk review because a written release hold would not
-prevent the main-only workflow from attempting publication. Revision 2 confines
-Now to a branch and draft PR. Architecture and JTBD passed revision 2 and the
-concrete source scope. Plan and projected release residual risk passed at 4/25,
-within appetite 5. These assessments do not replace commit, push or publication
-reviews. Artifact, runtime and website controls above remain forecast until run.
+Revision 1 failed risk review because a written release hold would not prevent
+main-only publication attempts. Revision 2 confined delivery to a branch and
+draft PR. Revision 3 clarified two behavior failures, updating the local skill
+first, and passed architecture, JTBD and risk review at 4/25. Revision 4's
+conditional unpublished bootstrap and restricted publisher setup passed all
+three reviews at 5/25 but remains unexecuted. Revision 5 makes the reviewed
+package-before-docs ordering concrete without flags or history rewriting.
 
 JTBD alignment: JTBD-003 (select only needed guardrails), JTBD-005 (invoke
 assessments), JTBD-007 (keep plugins current), JTBD-101 (extend the suite without
@@ -124,9 +133,16 @@ behaviour, not registry publication, reviewer dispatch or existing-chat reload.
 Changesets derives planning 0.1.0, ITIL 3.1.1 and meta-installer 0.3.0 for the
 eventual release. These are planned versions, not publication receipts.
 
-Main is unchanged and its existing CI, Release and documentation deployment are
-green at the baseline. PR CI, publication, fresh registry runtime qualification
-and live documentation evidence remain pending.
+Native coexistence checks also installed the extracted plugin alongside a copy
+of the personal skill: both bare and qualified invocations loaded their own
+expected source and waited for objective confirmation. This proves coexistence
+in an isolated runtime home, not installation of the new plugin in the user's
+current desktop session.
+
+The initial PR CI passed model and website jobs but failed the metadata lint
+as described below. The repaired head's CI is running; the new split requires
+its own exact-head CI. Main remains unchanged and green. Publication, fresh
+registry runtime qualification and live standalone documentation remain pending.
 
 ## CI metadata compatibility repair
 

@@ -12,28 +12,28 @@ other, or that a manifest proves equivalent behavior.
 Run the selected package's installer, then restart Claude Code:
 
 ```bash
-npx @windyroad/planning
+npx @windyroad/itil
 ```
 
 Invoke a skill by its slash command:
 
 ```text
-/wr-planning:outcome-led-planning
+/wr-itil:outcome-led-planning
 ```
 
 ## Codex
 
-The planning package supports an explicit Codex installation:
+The ITIL package supports an explicit Codex installation:
 
 ```bash
-npx @windyroad/planning --runtime codex --scope user
+npx @windyroad/itil --runtime codex --scope user
 ```
 
 Restart Codex and check its installed plugin and skill lists. Select the skill
 name exposed by that installation. The outcome-led planning invocation is:
 
 ```text
-$wr-planning:outcome-led-planning
+$wr-itil:outcome-led-planning
 ```
 
 For a package that documents both-runtime installation, `--runtime both` selects
@@ -42,17 +42,16 @@ does not offer that runtime selection.
 
 ## Install required reviewers
 
-Outcome-led planning requires architecture, JTBD and risk assessment. Planning bundles no reviewers or hooks and does not require ITIL. Use available
-independent reviewers, or install the relevant plugins
+Outcome-led planning requires architecture, JTBD and risk assessment. Installing
+ITIL alone does not supply all three review roles. Install the relevant plugins
 for the runtime you will use, following each package's documentation:
 
 - [Architecture review](../plugins/architect/).
 - [JTBD review](../plugins/jtbd/).
 - [Risk assessment](../plugins/risk-scorer/).
 
-Verify that all three substantive reviews are available before starting
-dependent work. The skill reports a missing review capability and holds
-implementation if it cannot obtain a review.
+The ITIL installer also declares a risk-scorer dependency. Check installer
+warnings and verify the required reviewers are available before starting work.
 
 ## Understand evidence limits
 

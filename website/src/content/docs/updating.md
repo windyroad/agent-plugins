@@ -18,13 +18,13 @@ npx @windyroad/agent-plugins --update
 For Claude Code:
 
 ```bash
-npx @windyroad/planning --update
+npx @windyroad/itil --update
 ```
 
-For the planning Codex installation:
+For the ITIL Codex installation:
 
 ```bash
-npx @windyroad/planning --runtime codex --scope user --update
+npx @windyroad/itil --runtime codex --scope user --update
 ```
 
 Check the individual package's installer help for runtime and scope options.
@@ -40,11 +40,11 @@ Remove the Claude Code suite:
 npx @windyroad/agent-plugins --uninstall
 ```
 
-Or remove an individual planning installation for the selected runtime:
+Or remove an individual ITIL installation for the selected runtime:
 
 ```bash
-npx @windyroad/planning --uninstall
-npx @windyroad/planning --runtime codex --scope user --uninstall
+npx @windyroad/itil --uninstall
+npx @windyroad/itil --runtime codex --scope user --uninstall
 ```
 
 Review the installer's output and restart the runtime. Uninstalling a plugin is

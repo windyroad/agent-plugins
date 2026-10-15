@@ -8,18 +8,14 @@ the plan changes through delivery and learning. The outcome is the objective.
 
 ## Start the workflow
 
-[Install planning and arrange the required reviews](../runtimes/), then invoke:
+[Install ITIL and the required review plugins](../runtimes/), then invoke:
 
 ```text
-/wr-planning:outcome-led-planning
+/wr-itil:outcome-led-planning
 ```
 
-For an installed Codex plugin, use `$wr-planning:outcome-led-planning`.
+For an installed Codex plugin, use `$wr-itil:outcome-led-planning`.
 Describe the result you want and any constraints you already know.
-
-Planning installs independently of ITIL and has no hooks or bundled reviewer
-agents. Existing ITIL planning commands and personal `$outcome-led-planning`
-skills remain usable; you do not need to remove them to install this plugin.
 
 ## Establish and confirm the objective
 
@@ -60,4 +56,4 @@ The agent stops when the objective's evidence is satisfied, or reports the exact
 remaining blocker after exhausting useful authorized work. A commit, green CI or
 publication establishes only its own stage.
 
-[Read the skill reference and full source](../skills/planning/outcome-led-planning/).
+[Read the skill reference and full source](../skills/itil/outcome-led-planning/).

@@ -50,7 +50,7 @@ after(async () => {
   await new Promise((resolve) => server?.close(resolve));
 });
 
-const keyRoutes = [base, base + 'getting-started/', base + 'outcome-led-planning/', base + 'plugins/planning/', base + 'skills/planning/outcome-led-planning/', base + 'plugins/itil/', base + 'skills/itil/outcome-led-planning/'];
+const keyRoutes = [base, base + 'getting-started/', base + 'outcome-led-planning/', base + 'plugins/itil/', base + 'skills/itil/outcome-led-planning/'];
 
 async function checkAxe(page) {
   await page.addScriptTag({ content: axe.source });
