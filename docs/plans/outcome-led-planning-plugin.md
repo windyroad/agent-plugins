@@ -11,13 +11,39 @@ skill usable throughout. The user confirmed this complete playback.
 Completion requires registry publication, fresh runtime evidence and deployed
 documentation. Source, packed artifacts and CI establish their own stages only.
 
-## Current plan: revision 5
+## Current plan: revision 6
 
 Keep the confirmed objective unchanged. Publish the independently installable
 package before activating website guidance that recommends its npm command.
 Architecture, JTBD recommendation and pre-edit reviews passed this exact split;
 plan and projected release residual risk passed at 5/25, within appetite 5.
 These assessments do not replace concrete provider, commit, push or release reviews.
+
+The user subsequently requested an "Improvise, overcome, adapt" mentality.
+Revision 6 clarifies the existing requirement to exhaust useful authorized work:
+diagnose recoverable failures, use available equivalents, repair within scope,
+and continue independent work without handing routine choices back to the user.
+Preserve the confirmed result, evidence, constraints, authority and reviews;
+retain precise handoff for genuine gaps and ambiguous remote effects. This is
+an explicitly requested behavioral clarification, not a different delivery goal.
+Architecture and JTBD recommendation/pre-edit reviews passed. Plan risk passed
+at 4/25 and projected release risk at 5/25.
+
+The local skill was updated first by atomic replacement, preserving identity,
+mode and picker metadata; its current body equals the canonical skill at
+SHA-256 `b2cc720581088027037b30389d18dee693ca1f5733042c93718464ff339d0a4e`.
+A recoverable pre-change snapshot is retained. The ITIL compatibility body and
+Codex projection carry the same clarification. All prior model scenarios remain,
+with two new paired scenarios for recoverable tool failure and genuine authority
+gaps. All 26 scenarios passed with zero failures or errors. Both actual native CLI
+checks executed Python verification after finding the preferred helper absent,
+matched totals of 15 and 7 against the independent reference, and completed
+without asking the user to resolve the missing tool. Claude also recovered
+from an unnecessarily prefixed command denied by its tool permissions, using
+a fixture-local permitted invocation. No files were changed or software installed;
+temporary authentication references and fixture homes were removed. These
+prove the bounded fallback behavior, not registry publication. The held
+website activation patch now also explains this behavior, without activating it.
 
 ## Now: qualify the package foundation
 
@@ -123,7 +149,7 @@ runtimes request one missing fact and wait. Final website build and all 23 unit
 plus four browser checks passed, including the expanded planning routes.
 
 The personal skill was updated first atomically, with a recoverable snapshot.
-Its final file equals the canonical skill at SHA-256
+Its interview/horizon clarification-stage file equaled the canonical skill at SHA-256
 `20c5f6f35fa707ba542dfaa4b38a21ca7462619cb8d564dee3256b9f0997a43f`;
 its picker metadata retains its baseline hash. No installation or removal gap
 was introduced. Temporary native authentication references and runtime homes

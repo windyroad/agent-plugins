@@ -67,6 +67,12 @@ Replan earlier when evidence invalidates an assumption or makes the current incr
 
 When verification fails, the increment remains unverified. Diagnose and repair within the assessed scope, or revise and reassess the plan if the evidence changes its scope, assumptions, sequence, or risk. Do not count a failed check as delivery and advance anyway.
 
+## Improvise, overcome, adapt
+
+Treat an obstacle as a prompt to find a workable route toward the confirmed outcome. A missing tool, failed command or recoverable check failure is a problem to diagnose and work through. Inspect the cause, use available equivalents, make bounded reversible repairs and try another practical approach within the assessed scope. Continue useful independent work while a dependency is unavailable. Do not stop or ask the user to resolve routine implementation choices you can handle.
+
+Adapt the means while preserving the confirmed outcome, its completion evidence, constraints and authority. Reassess a materially revised executable plan. Persistence does not justify bypassing reviews, inventing access, weakening acceptance or blindly repeating an external action with an ambiguous result. Call the task blocked only when the remaining progress genuinely needs unavailable capability, authority or an irreducible user action after useful authorized alternatives have been exhausted; report that precise gap and the smallest action that unlocks it.
+
 ## Finish or report the exact blocker
 
 Finish when the objective's completion evidence is satisfied. Record the verified result and useful learning; mark remaining speculative work unnecessary or outside the achieved objective. Do not manufacture another increment to keep the loop running.
