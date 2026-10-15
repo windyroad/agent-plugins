@@ -93,6 +93,18 @@
       "source": { "source": "local", "path": "./packages/voice-tone" },
       "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
       "category": "Developer Tools"
+    },
+    {
+      "name": "wr-planning",
+      "source": {
+        "source": "local",
+        "path": "./packages/planning"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
     }
   ]
 }

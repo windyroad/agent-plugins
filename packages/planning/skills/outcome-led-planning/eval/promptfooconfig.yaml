@@ -34,7 +34,7 @@ tests:
     vars:
       prompt: |
         Tabletop only; no actions or tools. The user has explicitly confirmed the SMART goal of a local report
-        converter by Friday. Success is a reusable local command whose totals match an
+        converter by Friday 16 October 2026, Australia/Sydney. Success is a reusable local command whose totals match an
         independent reference. The sample format is unknown. No plan reviews
         have happened. Give the initial plan, immediate actions and pending steps.
         No project rule requires story documents.
@@ -157,7 +157,7 @@ tests:
   - description: Interview waits for answers and confirmation across real turns
     vars:
       prompt: |
-        {"turns":["Tabletop exercise; no tools or actions. Help developers obtain a reusable local converter whose sample totals match an independent reference. This is feasible with our resources. No project rule requires stories. I have not specified timing or confirmed a goal playback. Respond only to the current turn.","By Friday 16 October 2026, Australia/Sydney.","Confirmed. Please proceed within that goal."]}
+        {"turns":["Tabletop exercise; no tools or actions. Help developers obtain a reusable local CSV-to-JSON converter whose every sample total exactly equals its independent reference. The sample and reference are available, with source and target schemas and all total definitions established. This is feasible with our resources. No project rule requires stories. I have not specified timing or confirmed a goal playback. Respond only to the current turn.","By Friday 16 October 2026, Australia/Sydney.","Confirmed. Please proceed within that goal."]}
     assert:
       - type: llm-rubric
         value: |

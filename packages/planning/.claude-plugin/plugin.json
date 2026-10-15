@@ -1,0 +1,15 @@
+{
+  "name": "wr-planning",
+  "version": "0.0.0",
+  "description": "Confirm SMART outcomes and deliver through reviewed Now, Next and Later increments.",
+  "maturity": {
+    "band": "Experimental",
+    "skills": {
+      "outcome-led-planning": {
+        "band": "Experimental",
+        "schema_version": "2.0"
+      }
+    },
+    "schema_version": "2.0"
+  }
+}

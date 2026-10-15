@@ -54,3 +54,7 @@ website/.astro/
 website/src/content/docs/plugins/
 website/src/content/docs/skills/
 website/artifacts/
+
+# Generated standalone planning runtime surfaces
+packages/planning/skills-codex/
+packages/planning/.pack-codex-source/

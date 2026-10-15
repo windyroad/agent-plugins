@@ -16,11 +16,11 @@ process.stdout.write('{"pass":true,"score":1,"reason":"fake subprocess boundary"
 NODE
   chmod +x "$TMP/bin/claude"
   export PATH="$TMP/bin:$PATH"
-  node "$PACKAGE/scripts/sync-codex-skills.mjs" --build >/dev/null
+  node "$PACKAGE/../../scripts/sync-codex-plugin-surfaces.mjs" planning --build >/dev/null
 }
 
 teardown() {
-  node "$PACKAGE/scripts/sync-codex-skills.mjs" --clean >/dev/null
+  node "$PACKAGE/../../scripts/sync-codex-plugin-surfaces.mjs" planning --clean >/dev/null
   rm -rf "$TMP"
 }
 
@@ -55,6 +55,10 @@ const [first, second] = require('node:fs').readFileSync(process.argv[2], 'utf8')
 assert.equal(first.at(-1), 'FIRST_USER_TURN');
 assert.equal(second.at(-1), 'SECOND_USER_TURN');
 assert.equal(first.some(arg => arg.includes('SECOND_USER_TURN')), false);
+assert.ok(first.includes('--session-id'));
+assert.ok(second.includes('--resume'));
+assert.ok(first[first.indexOf('--session-id') + 1]);
+assert.ok(second[second.indexOf('--resume') + 1]);
 assert.equal(first[first.indexOf('--session-id') + 1], second[second.indexOf('--resume') + 1]);
 assert.equal(second.includes('--append-system-prompt'), false);
 assert.equal([...first, ...second].some(arg => arg.includes('DO_NOT_FORWARD')), false);

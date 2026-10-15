@@ -159,6 +159,14 @@
       "skills": [
         "packages/wardley/skills/generate/SKILL.md"
       ]
+    },
+    {
+      "slug": "planning",
+      "package": "packages/planning/package.json",
+      "readme": "packages/planning/README.md",
+      "skills": [
+        "packages/planning/skills/outcome-led-planning/SKILL.md"
+      ]
     }
   ],
   "publicWorkflows": {
@@ -180,15 +188,16 @@
     "packages/itil/skills/list-problems/SKILL.md": "List open and known-error problems ordered by weighted priority.",
     "packages/itil/skills/reconcile-readme/SKILL.md": "Detect and correct drift between the problem index and its on-disk inventory.",
     "packages/itil/skills/review-problems/SKILL.md": "Reassess open and known-error problems, their risks, effort and priority.",
-    "packages/itil/skills/close-incident/SKILL.md": "Close a restored incident after checking the linked problem’s status or a documented justification for having no linked problem.",
-    "packages/itil/skills/link-incident/SKILL.md": "Link an incident to an existing problem and record that problem’s current status.",
+    "packages/itil/skills/close-incident/SKILL.md": "Close a restored incident after checking the linked problem\u2019s status or a documented justification for having no linked problem.",
+    "packages/itil/skills/link-incident/SKILL.md": "Link an incident to an existing problem and record that problem\u2019s current status.",
     "packages/architect/skills/capture-adr/SKILL.md": "Record an architecture decision from the current conversation during ongoing work.",
     "packages/architect/skills/create-adr/SKILL.md": "Create an architecture decision record describing the problem, options and chosen approach.",
     "packages/itil/skills/capture-rfc/SKILL.md": "Add an RFC release row to a story map, connecting a problem to stories delivered together.",
     "packages/itil/skills/list-stories/SKILL.md": "List delivery stories and their status as a Markdown table.",
     "packages/itil/skills/manage-problem/SKILL.md": "Create, update and prioritise problems using their impact, likelihood and estimated effort.",
     "packages/itil/skills/migrate-story-map/SKILL.md": "Replace an eligible legacy story map using a complete mapping approved by the adopter.",
-    "packages/itil/skills/work-problem/SKILL.md": "Investigate and repair the highest-priority eligible problem, then follow the project’s delivery workflow.",
-    "packages/retrospective/skills/migrate-briefing/SKILL.md": "Split an existing project briefing into topic files for subsequent sessions."
+    "packages/itil/skills/work-problem/SKILL.md": "Investigate and repair the highest-priority eligible problem, then follow the project\u2019s delivery workflow.",
+    "packages/retrospective/skills/migrate-briefing/SKILL.md": "Split an existing project briefing into topic files for subsequent sessions.",
+    "packages/itil/skills/outcome-led-planning/SKILL.md": "Compatibility entrypoint for the standalone planning workflow. Existing ITIL installations remain usable."
   }
 }

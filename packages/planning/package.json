@@ -1,0 +1,38 @@
+{
+  "name": "@windyroad/planning",
+  "version": "0.0.0",
+  "description": "Outcome-led planning with SMART objectives and iterative Now, Next, Later delivery",
+  "type": "module",
+  "bin": {
+    "windyroad-planning": "./bin/install.mjs"
+  },
+  "scripts": {
+    "prepack": "node ../../scripts/sync-codex-plugin-surfaces.mjs planning --pack",
+    "postpack": "node ../../scripts/sync-codex-plugin-surfaces.mjs planning --restore-pack"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/windyroad/agent-plugins.git",
+    "directory": "packages/planning"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "codex",
+    "planning",
+    "smart",
+    "ai-agent"
+  ],
+  "files": [
+    "bin/",
+    "lib/",
+    "skills/",
+    "skills-codex/",
+    ".claude-plugin/",
+    ".codex-plugin/",
+    ".agents/",
+    "!skills/*/eval/",
+    "!skills/*/test/"
+  ]
+}

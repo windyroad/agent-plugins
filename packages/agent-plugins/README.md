@@ -33,6 +33,7 @@ Restart Claude Code after installing. Type `/wr-` to see all available skills.
 | `style-guide` | Style guide review for CSS and UI components |
 | `jtbd` | Jobs-to-be-done review for UI changes |
 | `itil` | ITIL-aligned problem and incident management |
+| `planning` | SMART outcomes and iterative Now, Next, Later planning |
 | `retrospective` | Session retrospectives |
 | `connect` | Cross-repo agent collaboration via Discord (experimental) |
 | `c4` | C4 architecture diagram generation |

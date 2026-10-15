@@ -43,7 +43,7 @@ After installing, type `/wr-` in Claude Code to see all available skills.
 
 ## How It Works
 
-Each plugin uses Claude Code's hook system to intercept actions at the right moment:
+Governance plugins use Claude Code's hook system to intercept actions at the right moment:
 
 1. **Detect** -- A `UserPromptSubmit` hook scans for relevant project files (e.g., `docs/decisions/` for architect, `RISK-POLICY.md` for risk-scorer)
 2. **Gate** -- A `PreToolUse` hook blocks edits to relevant files until the review agent has been consulted
@@ -71,6 +71,7 @@ These plugins enforce review workflows. They block edits to relevant files until
 
 | Package | What it does |
 |---------|-------------|
+| [`@windyroad/planning`](packages/planning/) | Confirm SMART outcomes and deliver through reviewed Now, Next and Later increments; installs one skill without hooks |
 | [`@windyroad/itil`](packages/itil/) | ITIL-aligned IT service management — problem management (WSJF-prioritised) and evidence-first incident management with automatic handoff |
 | [`@windyroad/retrospective`](packages/retrospective/) | Session retrospectives that update briefings and create problem tickets |
 | [`@windyroad/connect`](packages/connect/) | Cross-repo agent collaboration via Discord channels (experimental — see plugin README) |
