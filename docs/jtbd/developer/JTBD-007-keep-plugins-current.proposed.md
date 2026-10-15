@@ -47,4 +47,5 @@ When I ship a new version of a plugin I depend on, I want every active project t
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-103 | STORY-103: Trust stable npm release verification | accepted |
+| STORY-107 | STORY-107: Find the plugin and instructions I need on my phone | accepted |
 | STORY-034 | STORY-034: Warn once per new version when a session runs stale plugin code | draft |

@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-10-15 **STORY-106 done** - Published planning skill qualified on both projections and verified in fresh native installations.
+> Last reviewed: 2026-10-15 **STORY-107 accepted** - Public documentation is traced to the existing plugin-selection journey.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -113,6 +113,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 
 | Status | ID | Title | Effort | Problems | RFCs | Story Map |
 |--------|-----|-------|--------|----------|------|-----------|
+| accepted | STORY-107 | Find the plugin and instructions I need on my phone | M | P558 | RFC-107 | STORY-MAP-008 |
 | draft | STORY-045 | Outbound lifecycle comments generated from real issue context | M | P376 | RFC-028 | STORY-MAP-004 |
 | accepted | STORY-047 | Gate the correction nudge on prompt authorship | S | P430 | RFC-050 | STORY-MAP-005 |
 | draft | STORY-048 | Gate the inbound-discovery pre-flight on the channel list | S | P431 | RFC-051 | STORY-MAP-006 |

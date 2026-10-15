@@ -136,3 +136,19 @@ It does NOT apply to:
 - **`docs/VOICE-AND-TONE.md`** — sibling policy for prose content.
 - **`docs/story-maps/README.md`** — story-map directory scaffold + per-state subdir convention.
 - **JTBD-302** — Trust That the README Describes the Plugin I Just Installed; style guidance supports that trust by keeping HTML simple, semantic, and grep-able.
+
+
+## Public documentation website
+
+The website/ workspace retains Starlight's default documentation layout,
+light/dark colors, navigation, search and mobile controls. Branding is the text
+"Windy Road Agent Plugins"; do not copy Em See Pea assets or add a custom palette,
+decorative hero or animation. Limit one theme stylesheet to documented font
+properties using system-ui, sans-serif and prose-link underlines where needed.
+
+Prose links remain underlined at rest. Keyboard focus must be visible and clear
+of sticky elements. Verify rendered contrast in both themes: normal text 4.5:1,
+large text 3:1, and UI boundaries/focus indicators 3:1 against adjacent colors.
+Prevent page-wide horizontal overflow at mobile widths; code blocks and genuinely
+two-dimensional content may scroll locally and must remain keyboard operable.
+Story-map selectors, dimensions and generated-map rules remain scoped to maps.

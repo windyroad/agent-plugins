@@ -1564,3 +1564,5 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 > Last reviewed: 2026-10-15 **P556 Verification Pending** — ITIL 3.0.2 published and installed; affected-chat adoption remains unverified.
 
 > Last reviewed: 2026-10-15 **P557 captured** - No published skill supports outcome-led iterative planning (lightweight aside via /wr-itil:capture-problem).
+
+> Last reviewed: 2026-10-15 **P557 Closed** - Outcome-led planning is published in ITIL 3.1.0 and verified through fresh native Claude Code and Codex invocations.

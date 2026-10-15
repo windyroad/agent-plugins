@@ -83,3 +83,20 @@ It does NOT apply to:
 - **CLAUDE.md** — project guidance; voice rules echo the MANDATORY rules there (e.g. "act on obvious, AskUserQuestion for ambiguous, NEVER prose-ask").
 - **JTBD-302** — Trust That the README Describes the Plugin I Just Installed; voice rules support that trust by keeping prose honest about deferral and explicit about contracts.
 - **JTBD-101** — Plugin developer extends the suite; voice rules favour the plain-language + plain-imperative shape that helps adopters extend confidently.
+
+
+## Public documentation website
+
+The public website/ documentation serves developers choosing, installing and
+using plugins, including readers away from a repository or using a phone. This
+section extends the guide's internal audience and scope to website Markdown,
+components, navigation, search messages and runtime installation guidance.
+
+Use plain, descriptive headings and link labels. Explain what the reader can do
+and how to verify it. Distinguish reading documentation on a phone from executing
+plugins in a supported coding-agent runtime. Keep install and invocation examples
+accurate for the selected package and runtime. Claude Code remains the default;
+qualify Codex support per package and actual evidence. Do not infer full parity
+from a manifest or advertise enforcement guarantees beyond the shipped contract.
+Preserve maturity limits where available. Framework vocabulary is explained when
+needed; internal ticket identifiers are not reader instructions.

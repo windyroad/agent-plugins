@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-10-15 **P557 Closed** - Outcome-led planning is published in ITIL 3.1.0 and verified through fresh native Claude Code and Codex invocations.
+> Last reviewed: 2026-10-15 **P558 captured** - Public searchable mobile documentation is absent; confirmed delivery by 18 October.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -112,6 +112,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 4 | P483 | Amendment sections are not a legitimate mechanism — a ratified decision is immutable | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
 | 4 | P485 | Every step in the process adds and none removes, so cruft accumulates without limit | 16 (High) | Open | L | 2026-08-08 | corrective-feedback |
 | 4 | P494 | Plugin tests and project-conformance tests are the same suite, so neither can be right | 16 (High) | Open | L | 2026-08-09 | corrective-feedback (user, 2026-08-09) |
+| 4 | P558 | No public searchable documentation site for plugin users | 8 (Medium) | Open | M | 2026-10-15 | internal |
 | 3.75 | P443 | Quota-pacing (P160 / RFC-046 / ADR-093) shipped without a grounded JTBD → persona → USM → RFC → story lineage — governance artefacts are wrong, orphaned, or missing | 15 (High) | Open | L | 2026-07-07 | internal |
 | 3.75 | P445 | Agent offers unsolicited off-ramps, hedges, projects onto the user, and narrates its own conduct — "acknowledges-but-recurs" — and needs a PLUGIN-shipped behavioural rule (portable across every project), not a project-local fix | 15 (High) | Open | L | 2026-07-08 | internal |
 | 3 | P248 | Use time and token cost (not t-shirt sizing) for WSJF effort, with retro-driven estimation refinement | 6 (Medium) | Open | M | 2026-05-17 | internal |
