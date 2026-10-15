@@ -127,3 +127,21 @@ eventual release. These are planned versions, not publication receipts.
 Main is unchanged and its existing CI, Release and documentation deployment are
 green at the baseline. PR CI, publication, fresh registry runtime qualification
 and live documentation evidence remain pending.
+
+## CI metadata compatibility repair
+
+The initial PR head passed model evaluation and website CI, but the maturity
+doc lint rejected the new skill's incomplete rich record. The existing
+population tool generated the planning record from current transcript and git
+measurement streams in an isolated workspace; only its maturity subtree was
+copied back. Planning has zero measured age and closed tickets, no breaking
+marker, and the measurement tool's zero-invocation fallback. That fallback does
+not contradict the separately captured native runtime invocations. The full
+suite evidence determines that bootstrapping is inactive.
+
+This retains compatibility with the shipped F2 population/render/lint tooling.
+ADR-063's later F1 simplification remains an incomplete migration tracked by
+Problem 300; this repair does not implement F1 or close that problem. Architecture
+and JTBD approved this bounded generated-metadata repair without changing the
+confirmed outcome, skill body, lint or shared toolchain. Revised-head CI must
+pass before dependent provider actions.

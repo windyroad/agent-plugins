@@ -4,12 +4,21 @@
   "description": "Confirm SMART outcomes and deliver through reviewed Now, Next and Later increments.",
   "maturity": {
     "band": "Experimental",
+    "bootstrapping": false,
+    "rollup_invocations_30d": 0,
+    "schema_version": "2.0",
     "skills": {
       "outcome-led-planning": {
         "band": "Experimental",
+        "computed_at": "2026-10-15T22:17:10Z",
+        "evidence": {
+          "breaking_change_age_days": null,
+          "closed_tickets_window": 0,
+          "days_shipped": 0,
+          "invocations_30d": 0
+        },
         "schema_version": "2.0"
       }
-    },
-    "schema_version": "2.0"
+    }
   }
 }
