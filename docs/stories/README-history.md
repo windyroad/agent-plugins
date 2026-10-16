@@ -126,3 +126,7 @@
 ## 2026-10-16
 
 > Last reviewed: 2026-10-15 **STORY-107 accepted** - Public documentation is traced to the existing plugin-selection journey.
+
+## 2026-10-16
+
+> Last reviewed: 2026-10-16 **STORY-107 done** - Public documentation, search and phone/desktop journeys verified.

@@ -50,3 +50,13 @@ The original published workflow defines iterative planning but leaves the shared
 - Capture duplicate check used title keywords outcome, GitHub and coordination. No matching open capability ticket was found.
 - Fresh-context hang-off review returned PROCEED_NEW: P070, P207, P220 and P413 share JTBD-004 but concern upstream reporting, labels or polling rather than outcome planning.
 - Plan G2: optional GitHub reference, local skill first, standalone/compatibility synchronization, substantive behavior and package checks, stable release, then public documentation activation. Architecture, JTBD and plan risk PASS; forecast residual 4/25. Concrete pipeline assessments remain required.
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-108 | STORY-108: Coordinate shared outcomes with optional GitHub Issues | accepted |
+
+## RFCs
+
+- RFC-108: Coordinate shared outcomes with optional GitHub Issues, release row on [the developer journey](../../story-maps/draft/STORY-MAP-002-take-a-problem-from-noticed-to-resolved.html), with STORY-108.

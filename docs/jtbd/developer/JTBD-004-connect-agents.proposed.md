@@ -26,3 +26,10 @@ When I have multiple AI sessions working on related repos, I want them to commun
 ## Current Solutions
 
 Copy-paste between terminals, manually restarting sessions with new instructions
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-108 | STORY-108: Coordinate shared outcomes with optional GitHub Issues | accepted |
