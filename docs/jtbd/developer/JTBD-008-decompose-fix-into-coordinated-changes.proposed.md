@@ -86,7 +86,6 @@ None of these compose well with WSJF prioritisation when phases need to compete 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-065 | STORY-065: A fix proposal draws a release row, not a document | accepted |
-| STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | accepted |
 | STORY-001 | STORY-001: Hook exemption globs for docs/story-maps + docs/stories | done |
 | STORY-002 | STORY-002: /wr-itil:capture-story lightweight aside skill | done |
 | STORY-003 | STORY-003: /wr-itil:list-stories read-only display skill | done |
@@ -120,3 +119,4 @@ None of these compose well with WSJF prioritisation when phases need to compete 
 | STORY-075 | STORY-075: My story map starts from the journey I walk | in-progress |
 | STORY-082 | STORY-082: Gate Bash writes without blocking read-only commands | in-progress |
 | STORY-108 | STORY-108: Coordinate shared outcomes with optional GitHub Issues | in-progress |
+| STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | in-progress |

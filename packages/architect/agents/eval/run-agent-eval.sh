@@ -9,11 +9,9 @@
 # Promptfoo invokes this as: bash run-agent-eval.sh "$PROMPT"
 # (per `providers: - id: 'exec:bash ./run-agent-eval.sh'`).
 #
-# cwd at invocation is the config dir (promptfoo basePath). The architect agent
-# reads live docs/decisions/ to check ADR ratification (human-oversight marker),
-# so cd to the repo root first. ADR-049: this driver is dev-only (tarball-
-# excluded via `!agents/eval/`), so the repo-relative root resolution only ever
-# runs in the source monorepo.
+# Run from the existing fixture repository so hypothetical schema proposals
+# cannot inherit unrelated source-repository architecture. Fixture ADRs retain
+# both ratified and unratified states for the actual agent to inspect.
 #
 # Subscription auth via the developer's logged-in claude session — no
 # ANTHROPIC_API_KEY, no CLAUDE_CODE_OAUTH_TOKEN (CI/release-only per
@@ -28,18 +26,23 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 AGENT_MD="${SCRIPT_DIR}/../agent.md"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 
 if [[ ! -f "$AGENT_MD" ]]; then
   echo "run-agent-eval.sh: agent.md not found at $AGENT_MD" >&2
   exit 2
 fi
 
-# Run from repo root so docs/decisions/ resolves for ratification checks.
-cd "$REPO_ROOT"
+FIXTURE_ROOT="$(mktemp -d)"
+trap 'rm -rf "$FIXTURE_ROOT"' EXIT
+cp -R "$SCRIPT_DIR/fixtures/repo/." "$FIXTURE_ROOT/"
+cd "$FIXTURE_ROOT"
 
 set +e
-agent_out="$(claude -p --model "${AGENT_EVAL_MODEL:-claude-sonnet-5}" --system-prompt "$(cat "$AGENT_MD")" "$@")"
+agent_out="$(claude -p --model "${AGENT_EVAL_MODEL:-claude-sonnet-5}" \
+  --permission-mode dontAsk --tools 'Read,Glob,Grep' --allowedTools 'Read,Glob,Grep' \
+  --setting-sources '' --settings '{"disableAllHooks":true}' --no-session-persistence \
+  --strict-mcp-config --mcp-config '{"mcpServers":{}}' \
+  --system-prompt "$(cat "$AGENT_MD")" -- "${1:?prompt argument is required}" </dev/null)"
 claude_status=$?
 set -e
 

@@ -138,3 +138,7 @@
 ## 2026-10-16
 
 > Last reviewed: 2026-10-16 **STORY-108 in progress** - Optional GitHub coordination implementation and qualification.
+
+## 2026-10-16
+
+> Last reviewed: 2026-10-16 **STORY-109 accepted** - Isolate CI fixtures and retain complete failure results.

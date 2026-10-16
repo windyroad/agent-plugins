@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: trust-ci-failures-with-isolated-fixtures-and-complete-results
 reported: 2026-10-16
 decision-makers: [Tom Howard]

@@ -223,6 +223,10 @@ jobs:
           sudo apt-get install --no-install-recommends -y bubblewrap socat
           npm i -g @anthropic-ai/claude-code@2.1.280
 
+      - name: Prepare evaluation results
+        if: steps.scope.outputs.run == 'true' && steps.token.outputs.present == 'true'
+        run: mkdir -p docs/audits/agent-evals-workspace
+
       - name: Run agent-prose behavioural evals
         id: agent-evals
         if: steps.scope.outputs.run == 'true' && steps.token.outputs.present == 'true'
@@ -235,27 +239,36 @@ jobs:
         if: steps.scope.outputs.skills == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: npx promptfoo eval -c packages/itil/skills/work-problems/eval/risk-appetite.promptfooconfig.yaml --no-table
+        run: npx promptfoo eval -c packages/itil/skills/work-problems/eval/risk-appetite.promptfooconfig.yaml --no-table --output docs/audits/agent-evals-workspace/work-problems-appetite.json
 
       - name: Verify update-upstream gate verdict behavior
         if: steps.scope.outputs.skills == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: npx promptfoo eval -c packages/itil/skills/update-upstream/eval/promptfooconfig.yaml --filter-pattern 'AFK below-appetite|AFK external-comms FAIL|Gate composition is mandatory' --no-table
+        run: npx promptfoo eval -c packages/itil/skills/update-upstream/eval/promptfooconfig.yaml --filter-pattern 'AFK below-appetite|AFK external-comms FAIL|Gate composition is mandatory' --no-table --output docs/audits/agent-evals-workspace/update-upstream.json
 
       - name: Verify authorized draft remediation behavior
         if: steps.scope.outputs.remediation == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
-          npx promptfoo eval -c packages/voice-tone/skills/assess-external-comms/eval/promptfooconfig.yaml --filter-pattern 'Routine failed release|Material unresolved' --no-table
-          npx promptfoo eval -c packages/risk-scorer/skills/assess-external-comms/eval/promptfooconfig.yaml --no-table
+          npx promptfoo eval -c packages/voice-tone/skills/assess-external-comms/eval/promptfooconfig.yaml --filter-pattern 'Routine failed release|Material unresolved' --no-table --output docs/audits/agent-evals-workspace/voice-remediation.json
+          npx promptfoo eval -c packages/risk-scorer/skills/assess-external-comms/eval/promptfooconfig.yaml --no-table --output docs/audits/agent-evals-workspace/risk-remediation.json
 
       - name: Verify incident eligibility behavior
         if: steps.scope.outputs.skills == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: npx promptfoo eval -c packages/itil/skills/manage-incident/eval/promptfooconfig.yaml --filter-pattern 'Incident eligibility' --no-table
+        run: npx promptfoo eval -c packages/itil/skills/manage-incident/eval/promptfooconfig.yaml --filter-pattern 'Incident eligibility' --no-table --output docs/audits/agent-evals-workspace/incident-eligibility.json
+
+      - name: Retain complete evaluation results
+        if: always() && steps.token.outputs.present == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-evaluation-results
+          path: docs/audits/agent-evals-workspace/*.json
+          if-no-files-found: ignore
+          retention-days: 7
 
   website:
     name: Documentation website

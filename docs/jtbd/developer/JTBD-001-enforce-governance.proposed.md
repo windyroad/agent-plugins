@@ -55,7 +55,6 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-080 | STORY-080: Record a completed native review without manual marker recovery | accepted |
 | STORY-081 | STORY-081: Trust plan reviews when no risk policy is present | accepted |
 | STORY-103 | STORY-103: Trust stable npm release verification | accepted |
-| STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | accepted |
 | STORY-002 | STORY-002: /wr-itil:capture-story lightweight aside skill | done |
 | STORY-005 | STORY-005: Working-the-problem traversal rewrite (manage-problem + work-problem) | done |
 | STORY-006 | STORY-006: /wr-itil:reconcile-stories trio (skill + script + bin shim) | done |
@@ -80,3 +79,4 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-083 | STORY-083: A canonical architect PASS unlocks the guarded edit | in-progress |
 | STORY-086 | STORY-086: Complete an external-comms review without repeating it | in-progress |
 | STORY-087 | STORY-087: Inspect a package without triggering publication review | in-progress |
+| STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | in-progress |

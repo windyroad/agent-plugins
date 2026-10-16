@@ -222,10 +222,11 @@ One assessed diagnostic rerun at the identical source failed earlier: attempt 2,
 
 Plan G6a / RFC-109 / STORY-109 isolate the existing Claude fixture context and retain complete designated evaluation-result JSON without changing model roles, assertions, retries, provider-error handling or production behavior. No further unchanged-revision retry is included. Required failed CI continues to block publication; the historical workaround above does not authorize this release. The documentation slice is preserved while this repair is delivered. A later pass establishes that execution only, without explaining the unavailable first response.
 
+
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-081 | STORY-081: Trust plan reviews when no risk policy is present | accepted |
 | STORY-101 | STORY-101: Trust agent-prose CI across model updates | accepted |
-| STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | accepted |
+| STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | in-progress |
