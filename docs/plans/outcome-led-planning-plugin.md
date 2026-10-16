@@ -11,7 +11,7 @@ skill usable throughout. The user confirmed this complete playback.
 Completion requires registry publication, fresh runtime evidence and deployed
 documentation. Source, packed artifacts and CI establish their own stages only.
 
-## Current plan: revision 6
+## Current plan: revision 10
 
 Keep the confirmed objective unchanged. Publish the independently installable
 package before activating website guidance that recommends its npm command.
@@ -45,60 +45,87 @@ temporary authentication references and fixture homes were removed. These
 prove the bounded fallback behavior, not registry publication. The held
 website activation patch now also explains this behavior, without activating it.
 
-## Now: qualify the package foundation
+## Verified increment: publisher readiness
 
-Deliver the complete tested package and compatibility foundation through draft
-PR 529 on `codex/planning-plugin`, with exact-head PR CI. ADR-002, ADR-017 and
-ADR-083's independently installable package model applies; no new ADR is needed.
+The package foundation is qualified on draft PR 529 at
+`102238e5d1c3597ca6785501b5b1684d04122f2b`. Exact-head CI 38818202574 passed
+all three required jobs. Main remains green and unchanged at the baseline.
+The existing website guidance remains operational; its seven-file activation
+patch is preserved separately until stable registry availability is verified.
 
-- Retain skill-only `@windyroad/planning`, plugin `wr-planning`, shared installer,
-  marketplace and meta-installer selection. No automatic dependencies, hooks or
-  reviewer agents are bundled.
-- Own the canonical workflow in planning. Keep the complete ITIL command as an
-  independently usable generated compatibility entrypoint, checked for drift.
-- Preserve the personal `$outcome-led-planning` skill and its picker metadata.
-- Restore the seven website files to current green main. The existing ITIL guide
-  remains valid. Package README body prose is not copied into generated pages;
-  the old website allowlist does not include planning.
-- Preserve the qualified website changes in the original implementation commit
-  and a checked seven-file patch under ignored audit storage. Verify the patch
-  applies to the restored baseline; activate it only after stable publication.
-- Rebuild and test the retained website journeys, reconfirm packed installation
-  and compatibility, obtain fresh concrete commit/push reviews, then qualify the
-  exact new PR head in CI. Revise the PR around the package foundation and its
-  explicit remaining delivery hold.
+Authentication succeeded using the 1Password desktop app, including its
+one-time code, through npm's normal web flow. The authenticated identity has
+verified owner authority for the intended npm organization. No 1Password CLI,
+publish token in CI or credential change was introduced.
 
-This is a coherent independently reviewable foundation increment, valuable for
-selective installation and compatibility. Its bounded scope is estimable with
-uncertainty disclosed and testable; means remain negotiable. No manufactured
-numerical estimate or extra story is needed to satisfy INVEST.
+A fresh concrete staging assessment passed at 4/25. The exact qualified
+11-file planning 0.0.0 tarball was submitted once with tag `bootstrap`; stage
+`0473c71c-cb32-48d2-a2d7-c3f906c5aa2c` is now `staged`. Its package, version,
+actor, tag and SHA-1 match the qualified archive; the submission response also
+matches its SHA-512 integrity. The archive's SHA-256 is
+`2d9239fd444a27e24c78bd89ac621595be58ce8211d5de81744efb01251c95c7`.
+Do not approve this bootstrap payload.
 
-**Release hold:** npm CLI and browser are signed out. Do not integrate the new
-package into main, merge a release PR or publish before first-package bootstrap
-and the existing `release.yml` trusted publisher are established. Main's stable
-and preview paths would otherwise attempt unauthorized publication. Do not add
-a token, second workflow or speculative flag.
+Corrected assumption: staging a new package creates a **public 0.0.0-stage
+placeholder**, while the qualified 0.0.0 payload remains unpublished pending
+approval. [npm documents this distinction](https://docs.npmjs.com/staged-publishing/).
+Public registry readback confirms only 0.0.0-stage is available; this does not
+establish installation or publication of the skill. The downloaded remote staged
+archive matches the qualified SHA-256 byte-for-byte.
+
+A concrete provider assessment passed at 5/25 before one trusted-publisher
+creation. Owner-authenticated independent readback confirms exactly one GitHub
+publisher, ID `06d074e5-a99f-4b6b-a875-ec2b443c5c0c`, bound to
+`windyroad/agent-plugins` and `release.yml`, with no environment restriction.
+Permissions are direct publishing and staging; no dist-tag permission is granted.
+
+Corrected assumption: [npm requires staging permission on every newly created
+trusted publisher](https://docs.npmjs.com/trusted-publishers/). It cannot be
+removed. Direct publishing is separately enabled for the existing release
+workflow. This is the provider's minimum supported configuration for that path;
+no revoke/recreate attempt is warranted. OIDC cannot approve staged payloads.
+Revision 9 architecture, JTBD and plan/projected release reviews passed this
+correction within appetite at 5/25. Configuration establishes readiness for the
+normal OIDC attempt; it does not prove successful publication.
+
+## Now: publish and qualify the standalone plugin
+
+Revision 10 architecture, JTBD recommendation/pre-edit and plan/projected release
+reviews passed this increment within appetite at 5/25. The prior readiness hold
+is satisfied. No executable package source changed after exact-head qualification.
+
+- Record the provider evidence and this revised plan through fresh concrete
+  commit/push review, then require revised-head branch CI.
+- Reconcile with fresh green main and obtain concrete integration/release review
+  before making PR 529 ready and merging its package foundation.
+- Watch the exact main CI and existing OIDC release workflow. Preview publication
+  and the automated version PR are intermediate stages.
+- Inspect the actual version PR, generated versions/manifests and release scope;
+  merge only after its checks and concrete release review pass. Use the existing
+  normal OIDC workflow for stable publication.
+- Verify exact stable registry availability and provenance, fresh installation,
+  discovery and core behavior in both native runtimes, including coexistence
+  with the personal skill. Preserve its body and picker metadata.
+- Inspect exact state before retrying any ambiguous external action. Exhaust
+  useful authorized alternatives when a prerequisite fails.
+
+This coherent increment delivers an independently usable published plugin.
+Its means remain negotiable, dependencies and uncertainty are explicit, and
+registry/runtime evidence makes completion testable. A story or invented
+estimate is unnecessary. Public website activation remains a separate increment.
+
+Do not approve the bootstrap payload, substitute a manual public plugin release,
+add a reusable CI token, create another publishing workflow or weaken security
+controls. Package source, green CI and configured trust establish their own
+stages; the published-plugin increment remains unfinished until qualified.
 
 ## Next (provisional)
 
-After exact-head CI passes, complete owner npm web sign-in and verify identity
-and organization authority. Under separate fresh concrete provider reviews,
-stage only the exact qualified planning 0.0.0 tarball with a bootstrap tag;
-verify stage identity and integrity. Do not approve or publicly publish that
-bootstrap version. Configure and read back only the existing
-`windyroad/agent-plugins` / `release.yml` direct-publish trust, with owner 2FA.
-Staging is documented to create a nonpublic package, but whether that package
-can receive trust configuration remains unproven. If it cannot, investigate;
-do not substitute manual public publication or a second workflow.
-
-Only once publisher readiness is established, integrate the package foundation
-into fresh green trunk using concrete reviews and the existing OIDC release
-workflow. Verify stable registry availability, fresh installation, discovery
-and core behavior in both runtimes, including coexistence with the personal
-skill. Then restore the preserved website changes through fresh source reviews,
-checks and governed integration, and verify deployed old/new URLs. Reject the
-unused bootstrap stage only after successful normal publication and exact
-owner/state verification. Replan from the actual evidence at each checkpoint.
+After stable registry/runtime qualification, restore the preserved website
+changes through fresh plan and source reviews, checks and governed integration.
+Verify deployed old/new URLs and advertised installation commands against the
+stable package. Reject the unused bootstrap stage only after successful normal
+publication and exact owner/state verification, through concrete provider review.
 
 ## Later (provisional)
 
@@ -112,8 +139,19 @@ main-only publication attempts. Revision 2 confined delivery to a branch and
 draft PR. Revision 3 clarified two behavior failures, updating the local skill
 first, and passed architecture, JTBD and risk review at 4/25. Revision 4's
 conditional unpublished bootstrap and restricted publisher setup passed all
-three reviews at 5/25 but remains unexecuted. Revision 5 makes the reviewed
+three reviews at 5/25. Revision 5 made the reviewed
 package-before-docs ordering concrete without flags or history rewriting.
+Revision 6 added the explicitly requested persistence clarification and passed
+all 26 model scenarios and native fallback checks. Revision 7 reassessed the
+publisher-readiness increment after foundation qualification. Revision 8 corrects
+the public-placeholder assumption and records actual authentication and staging;
+architecture, JTBD recommendation/pre-edit and plan/projected release risk
+reviews passed, with the latter within appetite at 5/25. Revision 9 records
+verified publisher readiness and replaces the unsupported direct-only permission
+assumption with npm's mandatory staging baseline. Revision 10 makes normal OIDC
+publication and fresh registry/runtime qualification Now; all three substantive
+reviews passed at 5/25 before dependent execution. Website activation remains
+Next, conditional on stable package qualification.
 
 JTBD alignment: JTBD-003 (select only needed guardrails), JTBD-005 (invoke
 assessments), JTBD-007 (keep plugins current), JTBD-101 (extend the suite without
@@ -166,8 +204,8 @@ in an isolated runtime home, not installation of the new plugin in the user's
 current desktop session.
 
 The initial PR CI passed model and website jobs but failed the metadata lint
-as described below. The repaired head's CI is running; the new split requires
-its own exact-head CI. Main remains unchanged and green. Publication, fresh
+as described below. Exact-head CI now passes for the package foundation and persistence clarification.
+Main remains unchanged and green. Publication, fresh
 registry runtime qualification and live standalone documentation remain pending.
 
 ## CI metadata compatibility repair
@@ -185,5 +223,4 @@ This retains compatibility with the shipped F2 population/render/lint tooling.
 ADR-063's later F1 simplification remains an incomplete migration tracked by
 Problem 300; this repair does not implement F1 or close that problem. Architecture
 and JTBD approved this bounded generated-metadata repair without changing the
-confirmed outcome, skill body, lint or shared toolchain. Revised-head CI must
-pass before dependent provider actions.
+confirmed outcome, skill body, lint or shared toolchain. Revised-head CI passed before dependent provider actions.
