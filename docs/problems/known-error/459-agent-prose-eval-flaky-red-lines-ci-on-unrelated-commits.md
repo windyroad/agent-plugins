@@ -223,6 +223,12 @@ One assessed diagnostic rerun at the identical source failed earlier: attempt 2,
 Plan G6a / RFC-109 / STORY-109 isolate the existing Claude fixture context and retain complete designated evaluation-result JSON without changing model roles, assertions, retries, provider-error handling or production behavior. No further unchanged-revision retry is included. Required failed CI continues to block publication; the historical workaround above does not authorize this release. The documentation slice is preserved while this repair is delivered. A later pass establishes that execution only, without explaining the unavailable first response.
 
 
+## Release merge grading-process diagnostic gap, 2026-10-17
+
+After successful source and version-PR CI, the stable release merge `ba1e9de4a0b7a720edbf00efa6cf89d77bbc46aa` published planning 0.2.0 and ITIL 3.2.0. [CI run 38909557295](https://github.com/windyroad/agent-plugins/actions/runs/38909557295) passed Quality Gates and the documentation build but failed work-problems appetite verification. Its retained artifact records zero passing cases, zero assertion failures and two provider errors; both grading results are null. The captured grader command errors contain subject output but no grading verdict. Only an unused-stdin warning survives from the failed child process. The provider failure's cause remains unknown.
+
+The grader wrapper captures Claude stdout in a command substitution under `set -e`; a nonzero child exit discards that captured output. G9 extends the existing RFC-109 / STORY-109 diagnostic repair: preserve failed stdout on stderr and the exact nonzero status, close unused stdin, and retain the successful JSON path. Behavioral subprocess checks reproduce the lost diagnostic before correction. This is not evidence that the failed grading passed, nor permission to retry unchanged source or integrate unrelated work on red trunk. Documentation remains recoverably stashed until required CI succeeds. No broad P459 closure is claimed.
+
 ## Stories
 
 | ID | Title | Status |

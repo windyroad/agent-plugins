@@ -46,7 +46,14 @@ Set "pass" true only if the output satisfies the rubric. Be literal about
 negation: an output that says a thing does NOT happen SATISFIES a rubric
 requiring that the thing must not happen.'
 
-raw="$(claude -p --append-system-prompt "$GRADER_SYSTEM" "$@")"
+if raw="$(claude -p --append-system-prompt "$GRADER_SYSTEM" "$@" < /dev/null)"; then
+  :
+else
+  status=$?
+  # Preserve provider diagnostics without presenting a failed process as a grade.
+  printf '%s\n' "$raw" >&2
+  exit "$status"
+fi
 
 # Defensive extraction: emit the first balanced {...} JSON object found in
 # the response, stripping any code fences or surrounding prose. If no brace

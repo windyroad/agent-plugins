@@ -46,6 +46,10 @@ JTBD-001 requires trustworthy governance evidence. JTBD-008 keeps this repair se
 
 Plan G6a passed independent architecture, JTBD and plan-risk review. Preserve STORY-101's model-pinning scope. Use existing fixture data and read-only tools, retain all current oracles and nonzero outcomes, and upload only designated result JSON. No unchanged-revision retry is included.
 
+The G6a repair passed exact source CI at `27093d4936a330a7e9e7d8117b43b9245a5dce5b`, retaining all 45 passing model cases. Subsequent planning source `5864aca8e1c69820dc70bda62668b37d5c5a0f61` also passed required CI. The release merge's CI run `38909557295` retained a further diagnostic gap: both work-problems appetite cases errored inside the grading process, with no grading verdict. Its wrapper discarded captured stdout when Claude exited nonzero, leaving the provider cause unknown.
+
+Plan G9 preserves that failed evidence and adds a bounded diagnostic transport repair: failed grader stdout goes to stderr, the original nonzero exit survives, unused stdin closes, and successful JSON extraction remains unchanged. Owning subprocess tests cover valid and malformed failed payloads, exact exit status, separate output streams and unchanged successful grading. This changes tarball-excluded evaluation infrastructure only. No model, rubric, threshold or retry policy changes; exact new CI remains required before unrelated documentation integration. P459 remains Known Error.
+
 ## Dependencies
 
 - **Blocked by**: none.
