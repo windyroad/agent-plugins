@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-10-16 **STORY-108 in progress** - Optional GitHub coordination implementation and qualification.
+> Last reviewed: 2026-10-16 **STORY-109 accepted** - Isolate CI fixtures and retain complete failure results.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -181,6 +181,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | draft | STORY-091 | Invoke the Wardley map converter by a name that survives every upgrade | S | P437 | RFC-095 | STORY-MAP-008 |
 | draft | STORY-093 | Every conversion tells the reporter it landed | M | P432 | RFC-097 | STORY-MAP-004 |
 | in-progress | STORY-108 | Coordinate shared outcomes with optional GitHub Issues | M | P559 | RFC-108 | STORY-MAP-002 |
+| accepted | STORY-109 | Trust CI failures with isolated fixtures and complete results | S | P459 | RFC-109 | STORY-MAP-002 |
 
 
 ## Done

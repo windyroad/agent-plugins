@@ -175,15 +175,6 @@ This correction addresses the documented default-appetite source gap and the nam
 - [Merge CI 33354699544](https://github.com/windyroad/agent-plugins/actions/runs/33354699544) subsequently passed on that exact release revision: 4,260 hook checks passed, two skipped, none failed; all 27 actual-agent cases passed, including the 12 risk-agent cases.
 
 The failed first run's full response remains unavailable. The broader flake class is not closed by this successful delivery. A direct check of the existing absent-root negative assertion found that its parsed double-escaped whitespace pattern does not match an actual emitted `RISK_SCORES: commit=4 push=4 release=4` line. That assertion receives no control credit; its correction remains part of the existing Phase 2 work. No installed plugin or disabled hook setting was changed.
-
-
-## Stories
-
-| ID | Title | Status |
-|----|-------|--------|
-| STORY-081 | STORY-081: Trust plan reviews when no risk policy is present | accepted |
-| STORY-101 | STORY-101: Trust agent-prose CI across model updates | accepted |
-
 ## Phase 3 — stable Claude model roles in agent-prose CI (2026-09-23)
 
 The CI harness invokes `claude -p` without `--model` for both the agent under test and the semantic rubric grader. Claude Code's default can change independently of this repository, so identical prompts and source are not bound to a reproducible model pair. RFC-102 / STORY-101 pins Sonnet 5 for evaluated agents and Opus 5.5 for semantic grading while preserving the existing sandbox, output, and retry behaviour.
@@ -213,7 +204,6 @@ The correction preserves ADR-075's fail-closed pass semantics rather than adding
 
 Both configs validate. Fresh local calls passed the architect case twice and the risk-scorer case once before the Claude session quota became unavailable; the quota failure remained a provider error rather than being converted to passing evidence. [Exact-revision CI run 35924119017](https://github.com/windyroad/agent-plugins/actions/runs/35924119017) passed on its first attempt at commit `12e3defd6`: architect 6/6, risk-scorer 12/12, all 31 agent cases, and all 4,365 hook checks were green. The paired release workflow also passed; no package was published because the change is tarball-excluded eval infrastructure. P459 remains Known Error pending a longer recurrence-free cohort.
 
-
 ### Shared delivery fixture recurrence — 2026-10-01
 
 At exact main revision `0aafc0dc`, CI run `36827600002` passed all hook checks but failed the shared delivery instruction fixture on two attempts. The first model response refused the hypothetical output request; the unchanged retry reported writing a native Plan Mode plan despite the fixture forbidding tools and file changes. Other completed agent suites passed before this case. These are observed responses, not a claim that every refusal has the same cause.
@@ -223,3 +213,19 @@ The shared text-only wrapper incorrectly enabled native Plan Mode and ambient se
 A first tool-free local pair returned the correct full delivery sequence but added `verify` to the push-only case. The fixture had not defined whether outcome checking counted as a delivery stage. Both runtime fixtures now define the same stage vocabulary and keep outcome checking inside its stage. Both original regex assertions remain unchanged.
 
 The subprocess boundary regression failed against the prior wrapper, then passed after the correction; all six model-pinning and agent-instruction Bats checks pass. A fresh uncached native Claude promptfoo run passed both shared delivery fixtures (2/2). This is evidence for this scoped fixture repair only. P459 remains Known Error pending broader recurrence evidence.
+
+## Fixture context and incomplete diagnostics recurrence, 2026-10-16
+
+At source `a7e0f6b61df2c9284caf903cb6f80ea21877637e`, CI run `38888510966` attempt 1 passed the agent suites but failed incident eligibility at 3/4 with zero errors. No full failing response or assertion result was retained, so the cause remains unknown.
+
+One assessed diagnostic rerun at the identical source failed earlier: attempt 2, job `116939027983`, passed six of seven architect cases. The unique-primary-key case returned `ISSUES FOUND` with an undocumented-decision finding grounded in this plugin repository rather than the hypothetical schema. The Claude driver runs in the live monorepo with ambient configuration; the Codex driver already uses isolated fixture data. Independent architecture review identifies this as a fixture-context defect; the shipped first-match rule already exempts primary-key and unique-index lookups.
+
+Plan G6a / RFC-109 / STORY-109 isolate the existing Claude fixture context and retain complete designated evaluation-result JSON without changing model roles, assertions, retries, provider-error handling or production behavior. No further unchanged-revision retry is included. Required failed CI continues to block publication; the historical workaround above does not authorize this release. The documentation slice is preserved while this repair is delivered. A later pass establishes that execution only, without explaining the unavailable first response.
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-081 | STORY-081: Trust plan reviews when no risk policy is present | accepted |
+| STORY-101 | STORY-101: Trust agent-prose CI across model updates | accepted |
+| STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | accepted |

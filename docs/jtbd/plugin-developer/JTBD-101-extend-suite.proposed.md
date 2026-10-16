@@ -65,6 +65,7 @@ Copy an existing plugin and modify it, read ADRs and BRIEFING.md
 
 | ID | Title | Status |
 |----|-------|--------|
+| STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | accepted |
 | STORY-004 | STORY-004: RFC frontmatter stories: extension + capture-rfc / manage-rfc updates | done |
 | STORY-049 | STORY-049: Ask for a URL in a shape I can paste into | draft |
 | STORY-050 | STORY-050: Have my reviewer read the version I actually have | draft |
