@@ -1,0 +1,32 @@
+{
+  "name": "wr-planning",
+  "version": "0.0.0",
+  "description": "Confirm SMART outcomes and deliver through reviewed Now, Next and Later increments.",
+  "author": {
+    "name": "Windy Road Technology",
+    "url": "https://windyroad.com.au"
+  },
+  "homepage": "https://windyroad.github.io/agent-plugins/outcome-led-planning/",
+  "repository": "https://github.com/windyroad/agent-plugins",
+  "license": "MIT",
+  "skills": "./skills-codex/",
+  "interface": {
+    "displayName": "Windy Road Planning",
+    "shortDescription": "Plan toward verified outcomes",
+    "longDescription": "Confirm a SMART objective, then deliver, verify and replan through Now, Next and Later.",
+    "developerName": "Windy Road Technology",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://windyroad.com.au",
+    "privacyPolicyURL": "https://windyroad.com.au/privacy",
+    "termsOfServiceURL": "https://windyroad.com.au/terms",
+    "defaultPrompt": [
+      "Plan toward a verified outcome"
+    ],
+    "screenshots": []
+  }
+}

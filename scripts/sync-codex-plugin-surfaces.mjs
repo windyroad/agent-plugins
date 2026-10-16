@@ -10,7 +10,7 @@ const root = join(repoRoot, "packages", packageName || "");
 const skillsOutput = join(root, "skills-codex");
 const hooksOutput = join(root, "hooks-codex");
 const backup = join(root, ".pack-codex-source");
-const supported = new Set(["c4", "connect", "jtbd", "retrospective", "style-guide", "tdd", "voice-tone"]);
+const supported = new Set(["planning", "c4", "connect", "jtbd", "retrospective", "style-guide", "tdd", "voice-tone"]);
 const reviewerCompletions = {
   jtbd: [
     { role: "wr-jtbd:agent", writer: "jtbd-mark-reviewed.sh", policy: "docs/jtbd", passPattern: "^[ \\t]*>?[ \\t]*\\*\\*JTBD Review: PASS\\*\\*[ \\t]*$", firstLineOnly: true, verdictFile: "/tmp/jtbd-verdict" },

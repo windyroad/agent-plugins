@@ -96,9 +96,13 @@ See [ADR-011](../../docs/decisions/011-manage-incident-skill.proposed.md) for th
 
 ## Skills
 
+Outcome-led planning now has its own [planning package](../planning/). The
+existing ITIL command remains a complete compatibility entrypoint and does not
+require the new package. New users can install planning without ITIL.
+
 | Skill | Purpose | Maturity |
 | ------- | --------- | --- |
-| `/wr-itil:outcome-led-planning` | Clarify the objective, deliver a reviewed Now increment, and replan Next and Later from verified evidence | Experimental |
+| `/wr-itil:outcome-led-planning` | Compatibility entrypoint for the standalone planning workflow; remains usable without installing planning | Experimental |
 | `/wr-itil:manage-problem` | Create, update, and close problem tickets through the Open → Known Error → Verifying → Closed lifecycle | Alpha |
 | `/wr-itil:capture-problem` | Foreground-lightweight aside-invocation variant of `manage-problem` (per ADR-032 background-capture pattern + P078 capture-on-correction) — drafts a ticket scaffold without losing the operational thread when a problem signal surfaces mid-conversation | Experimental |
 | `/wr-itil:work-problem` | Pick the highest-WSJF actionable ticket and work it to completion | Experimental |

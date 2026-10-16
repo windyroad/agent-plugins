@@ -60,6 +60,8 @@
     "release:watch": "bash scripts/release-watch.sh",
     "push:watch": "bash scripts/push-watch.sh",
     "website:build": "npm run build --workspace @windyroad/website",
-    "website:test": "npm run test:unit --workspace @windyroad/website && npm run test:built --workspace @windyroad/website"
+    "website:test": "npm run test:unit --workspace @windyroad/website && npm run test:built --workspace @windyroad/website",
+    "sync:planning-skill": "node scripts/sync-planning-skill.mjs",
+    "check:planning-skill": "node scripts/sync-planning-skill.mjs --check"
   }
 }

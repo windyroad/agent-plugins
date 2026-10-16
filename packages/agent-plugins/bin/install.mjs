@@ -15,6 +15,7 @@ const PLUGINS = [
   "wr-tdd",
   "wr-retrospective",
   "wr-itil",
+  "wr-planning",
   "wr-c4",
   "wr-wardley",
   "wr-connect",
@@ -40,7 +41,7 @@ Options:
 
 Available plugins:
   architect, risk-scorer, voice-tone, style-guide, jtbd,
-  tdd, itil, retrospective, c4, wardley, connect, cruise
+  tdd, itil, retrospective, c4, wardley, connect, cruise, planning
 
 Examples:
   npx @windyroad/agent-plugins

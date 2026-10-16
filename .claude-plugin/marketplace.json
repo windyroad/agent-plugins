@@ -65,6 +65,11 @@
       "name": "wr-cruise",
       "description": "Token-quota pacing — self-calibrating burn throttle that glides you to each rate-limit window reset",
       "source": "./packages/cruise"
+    },
+    {
+      "name": "wr-planning",
+      "source": "./packages/planning",
+      "description": "Outcome-led planning with SMART objectives and iterative Now, Next, Later delivery"
     }
   ]
 }
