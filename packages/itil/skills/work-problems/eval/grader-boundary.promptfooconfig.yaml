@@ -13,8 +13,9 @@ prompts:
 defaultTest:
   assert:
     - type: javascript
-      value: const grade = JSON.parse(output); return grade.pass === context.vars.expected && typeof
-        grade.reason === "string" && grade.reason.length > 0;
+      value: |
+        const grade = JSON.parse(output);
+        return grade.pass === context.vars.expected && typeof grade.reason === "string" && grade.reason.length > 0;
 tests:
   - description: Saved unknown-baseline response passes its unchanged eligibility rubric
     vars:

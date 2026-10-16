@@ -6,6 +6,11 @@ setup() {
   cat > "$FIXTURE/claude" <<'PY'
 #!/usr/bin/env python3
 import json,os,pathlib,sys
+if os.environ.get('FIXTURE_BOUNDARY'):
+    positive='This is a problem, not an incident.' in sys.argv[-1]
+    grade=positive and os.environ['FIXTURE_BOUNDARY']!='invert'
+    print(json.dumps({'pass':grade,'score':int(grade),'reason':'controlled assertion transport'}))
+    sys.exit(0)
 if os.environ.get('FIXTURE_TRACE'):
     pathlib.Path(os.environ['FIXTURE_TRACE']).write_text(json.dumps({'cwd':os.getcwd(),'args':sys.argv[1:]}))
 if os.environ.get('FIXTURE_REQUIRE_EOF') == '1' and sys.stdin.read():
@@ -16,6 +21,28 @@ sys.stderr.write(os.environ.get('FIXTURE_STDERR',''))
 sys.exit(int(os.environ.get('FIXTURE_STATUS','0')))
 PY
   chmod +x "$FIXTURE/claude"
+}
+
+@test "actual boundary config accepts matching grades and rejects an inverted grade with complete results" {
+  local root
+  root="$(cd "$BATS_TEST_DIRNAME/../../../../.." && pwd)"
+  python3 - "$root" "$GRADER" "$FIXTURE" <<'PY'
+import json,os,pathlib,subprocess,sys
+root,grader,fixture=map(pathlib.Path,sys.argv[1:])
+config=grader.parent/'grader-boundary.promptfooconfig.yaml'
+for mode in ['match','invert']:
+    result=fixture/(mode+'.json')
+    env={**os.environ,'PATH':str(fixture)+os.pathsep+os.environ['PATH'],'WR_EVAL_RUNTIME':'claude','FIXTURE_BOUNDARY':mode,'PROMPTFOO_CONFIG_DIR':str(fixture/'promptfoo'),'PROMPTFOO_DISABLE_TELEMETRY':'1'}
+    r=subprocess.run(['npx','promptfoo','eval','-c',str(config),'--no-cache','--no-table','--output',str(result)],cwd=root,env=env,text=True,capture_output=True,timeout=90)
+    assert r.returncode==(0 if mode=='match' else 100),(r.returncode,r.stdout,r.stderr)
+    data=json.loads(result.read_text())['results'];rows=data['results'];stats=data['stats']
+    assert len(rows)==4 and stats['errors']==0,stats
+    assert stats['successes']==(4 if mode=='match' else 3) and stats['failures']==(0 if mode=='match' else 1),stats
+    for row in rows:
+        grade=json.loads(row['response']['output']);expected=row['testCase']['vars']['expected']
+        assert row['success']==(grade['pass']==expected),(row['response'],row['gradingResult'])
+        assert row['gradingResult']['reason']
+PY
 }
 
 teardown() {

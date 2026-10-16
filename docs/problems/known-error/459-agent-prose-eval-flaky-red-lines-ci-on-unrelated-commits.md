@@ -46,6 +46,10 @@ An LLM-rubric assertion on the `risk-scorer:plan` agent's prose is graded too st
 - [ ] Investigate the `MetadataLookupWarning: All promises were rejected` runner errors (eval-env network/metadata degradation)
 - [ ] Create a reproduction (run the single `plan` case N times, measure flip rate)
 
+## Boundary assertion parser repair, 2026-10-17
+
+Plan G14 preserves the retained G11 native grades: all four match the expected true/false/false/false results, but the single-line JavaScript assertion is expression-wrapped by Promptfoo and throws `Unexpected token return`. The controls therefore failed assertion execution and the original incident group was skipped. G14 changes only the scalar representation to a multiline function body, preserving its predicate, all candidates, rubrics and expectations. An owning actual-Promptfoo subprocess test requires four matching grades to pass, then one deliberately inverted grade to fail with complete retained results. New exact-source CI remains required; G13 qualification and public documentation remain recoverably stashed. P459 remains Known Error.
+
 ## Dependencies
 
 - **Blocks**: (none — publishing is not gated on this eval)
