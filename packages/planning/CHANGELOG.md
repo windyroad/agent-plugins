@@ -1,5 +1,14 @@
 # @windyroad/planning
 
+## 0.2.0
+
+### Minor Changes
+
+- a7e0f6b: Offer optional GitHub Issues tracking for confirmed outcomes, reviewed increments
+  and agent contribution tasks. Load a bundled coordination protocol for ownership,
+  shared increment discussions, dependency handoffs and outcome-owner replanning,
+  while preserving conversation/local planning and the ITIL compatibility command.
+
 ## 0.1.0
 
 ### Minor Changes
