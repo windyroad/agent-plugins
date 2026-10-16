@@ -8,14 +8,18 @@ the plan changes through delivery and learning. The outcome is the objective.
 
 ## Start the workflow
 
-[Install ITIL and the required review plugins](../runtimes/), then invoke:
+[Install planning and arrange the required reviews](../runtimes/), then invoke:
 
 ```text
-/wr-itil:outcome-led-planning
+/wr-planning:outcome-led-planning
 ```
 
-For an installed Codex plugin, use `$wr-itil:outcome-led-planning`.
+For an installed Codex plugin, use `$wr-planning:outcome-led-planning`.
 Describe the result you want and any constraints you already know.
+
+Planning installs independently of ITIL and has no hooks or bundled reviewer
+agents. Existing ITIL planning commands and personal `$outcome-led-planning`
+skills remain usable; you do not need to remove them to install this plugin.
 
 ## Establish and confirm the objective
 
@@ -45,6 +49,17 @@ INVEST does not require story documents unless your project already requires
 them. Architecture, JTBD and risk reviewers assess every executable plan
 revision. Substantive failures are resolved before dependent work.
 
+## Work through obstacles
+
+The agent treats a recoverable failure as a problem to solve: diagnose it,
+use an available equivalent or make a bounded reversible repair, and continue
+useful independent work. It adapts the means while preserving the confirmed
+outcome and required evidence.
+
+Routine choices do not need another approval. Real gaps in authority or
+capability still need a precise handoff after useful authorized alternatives
+have been exhausted. Required reviews still apply to materially revised plans.
+
 ## Verify, learn and replan
 
 After each delivered increment, compare actual evidence with both that increment
@@ -56,4 +71,4 @@ The agent stops when the objective's evidence is satisfied, or reports the exact
 remaining blocker after exhausting useful authorized work. A commit, green CI or
 publication establishes only its own stage.
 
-[Read the skill reference and full source](../skills/itil/outcome-led-planning/).
+[Read the skill reference and full source](../skills/planning/outcome-led-planning/).
