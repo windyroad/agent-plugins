@@ -19,7 +19,8 @@ before installing for Codex.
 - [Risk assessment](./plugins/risk-scorer/): assess changes and pipeline actions.
 - [Testing discipline](./plugins/tdd/): work through a test-first development cycle.
 - [Jobs to be done](./plugins/jtbd/): check changes against the people and outcomes they serve.
-- [Service and delivery workflows](./plugins/itil/): manage problems, incidents and iterative delivery.
+- [Outcome-led planning](./plugins/planning/): confirm the outcome and iteratively deliver through Now, Next and Later.
+- [Service management](./plugins/itil/): manage problems and incidents.
 - [Retrospectives](./plugins/retrospective/): retain learning from coding sessions.
 - [Voice and tone](./plugins/voice-tone/) and [style guidance](./plugins/style-guide/): follow project conventions.
 - [Cruise](./plugins/cruise/): pace coding-agent usage across rate-limit windows.

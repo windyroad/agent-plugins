@@ -159,6 +159,14 @@
       "skills": [
         "packages/wardley/skills/generate/SKILL.md"
       ]
+    },
+    {
+      "slug": "planning",
+      "package": "packages/planning/package.json",
+      "readme": "packages/planning/README.md",
+      "skills": [
+        "packages/planning/skills/outcome-led-planning/SKILL.md"
+      ]
     }
   ],
   "publicWorkflows": {
@@ -189,6 +197,7 @@
     "packages/itil/skills/manage-problem/SKILL.md": "Create, update and prioritise problems using their impact, likelihood and estimated effort.",
     "packages/itil/skills/migrate-story-map/SKILL.md": "Replace an eligible legacy story map using a complete mapping approved by the adopter.",
     "packages/itil/skills/work-problem/SKILL.md": "Investigate and repair the highest-priority eligible problem, then follow the project’s delivery workflow.",
-    "packages/retrospective/skills/migrate-briefing/SKILL.md": "Split an existing project briefing into topic files for subsequent sessions."
+    "packages/retrospective/skills/migrate-briefing/SKILL.md": "Split an existing project briefing into topic files for subsequent sessions.",
+    "packages/itil/skills/outcome-led-planning/SKILL.md": "Compatibility entrypoint for the standalone planning workflow. Existing ITIL installations remain usable."
   }
 }
