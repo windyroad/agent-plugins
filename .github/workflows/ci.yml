@@ -259,7 +259,9 @@ jobs:
         if: steps.scope.outputs.skills == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: npx promptfoo eval -c packages/itil/skills/manage-incident/eval/promptfooconfig.yaml --filter-pattern 'Incident eligibility' --no-table --output docs/audits/agent-evals-workspace/incident-eligibility.json
+        run: |
+          npx promptfoo eval -c packages/itil/skills/work-problems/eval/grader-boundary.promptfooconfig.yaml --no-table --output docs/audits/agent-evals-workspace/grader-boundary.json
+          npx promptfoo eval -c packages/itil/skills/manage-incident/eval/promptfooconfig.yaml --filter-pattern 'Incident eligibility' --no-table --output docs/audits/agent-evals-workspace/incident-eligibility.json
 
       - name: Retain complete evaluation results
         if: always() && steps.token.outputs.present == 'true'

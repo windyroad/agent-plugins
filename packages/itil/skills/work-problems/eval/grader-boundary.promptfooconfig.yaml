@@ -1,0 +1,71 @@
+description: Rubric-only grading across eligibility and explicit process criteria
+providers:
+  - id: exec:bash ./grade-llm-rubric.sh
+prompts:
+  - |-
+    Grade the Output against the Rubric.
+    <Output>
+    {{candidate}}
+    </Output>
+    <Rubric>
+    {{rubric}}
+    </Rubric>
+defaultTest:
+  assert:
+    - type: javascript
+      value: const grade = JSON.parse(output); return grade.pass === context.vars.expected && typeof
+        grade.reason === "string" && grade.reason.length > 0;
+tests:
+  - description: Saved unknown-baseline response passes its unchanged eligibility rubric
+    vars:
+      candidate: >-
+        This is a problem, not an incident. Per the Eligibility table: slow/deficient behavior with
+        no established prior working baseline routes to `wr-itil:manage-problem`, not incident
+        declaration — there's no observed change from a known-good state, just an unverified claim
+        that 8s is "slow."
+
+
+        I'm not creating an incident file. Instead I'll invoke `wr-itil:manage-problem` to
+        investigate: measure the current 8s load time, and look for evidence of whether a faster
+        baseline ever existed (deploy history, prior perf data, etc.). If that investigation later
+        turns up proof of a regression (e.g., "this page loaded in 1s last week per metric X, now
+        it's 8s"), that's the trigger to switch into incident management at that point — not before.
+
+
+        Want me to proceed with `/wr-itil:manage-problem` for this page's load time?
+      rubric: >
+        PASS only if it routes to problem management without declaring an incident, allocating an
+        incident ID, severity rating or restoration ceremony. It must not infer lost service from
+        deployment, missing capability or unmet speed expectations. For an unknown baseline it may
+        measure and investigate; switching to incident management requires evidence of actual loss
+        or degradation of existing service.
+      expected: true
+  - description: Incident declaration without a baseline fails eligibility
+    vars:
+      candidate: The page is deployed and eight seconds is unacceptable, so declare incident I001 at High
+        severity and start restoring service immediately. No previous baseline is needed.
+      rubric: >
+        PASS only if it routes to problem management without declaring an incident, allocating an
+        incident ID, severity rating or restoration ceremony. It must not infer lost service from
+        deployment, missing capability or unmet speed expectations. For an unknown baseline it may
+        measure and investigate; switching to incident management requires evidence of actual loss
+        or degradation of existing service.
+      expected: false
+  - description: A current timing measurement alone does not establish a regression
+    vars:
+      candidate: Start with problem management and measure the current load time. Once the measurement
+        confirms eight seconds, immediately switch to incident restoration, even if no prior working
+        baseline is found.
+      rubric: >
+        PASS only if it routes to problem management without declaring an incident, allocating an
+        incident ID, severity rating or restoration ceremony. It must not infer lost service from
+        deployment, missing capability or unmet speed expectations. For an unknown baseline it may
+        measure and investigate; switching to incident management requires evidence of actual loss
+        or degradation of existing service.
+      expected: false
+  - description: An explicitly supplied prohibition still rejects the same consent question
+    vars:
+      candidate: Want me to proceed with `/wr-itil:manage-problem` for this page's load time?
+      rubric: PASS only if the response contains no prose question asking whether to proceed. FAIL if it
+        ends by asking the user for consent to continue.
+      expected: false

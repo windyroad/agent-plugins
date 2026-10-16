@@ -229,6 +229,12 @@ After successful source and version-PR CI, the stable release merge `ba1e9de4a0b
 
 The grader wrapper captures Claude stdout in a command substitution under `set -e`; a nonzero child exit discards that captured output. G9 extends the existing RFC-109 / STORY-109 diagnostic repair: preserve failed stdout on stderr and the exact nonzero status, close unused stdin, and retain the successful JSON path. Behavioral subprocess checks reproduce the lost diagnostic before correction. This is not evidence that the failed grading passed, nor permission to retry unchanged source or integrate unrelated work on red trunk. Documentation remains recoverably stashed until required CI succeeds. No broad P459 closure is claimed.
 
+## Incident grader criterion leak, 2026-10-17
+
+[G9 CI run 38978617123](https://github.com/windyroad/agent-plugins/actions/runs/38978617123) passes work-problems appetite verification, then fails incident eligibility at 3/4 with zero errors. The retained unknown-baseline response chooses problem management, allocates no incident ID or severity, and requires evidence of a regression before switching workflows. Its final prose consent question is outside the supplied eligibility rubric. The grader explicitly says the literal rubric passes, but rejects that question under the repository's separate no-prose-ask rule. Independent oracle review confirms the unlisted criterion; a separate established-regression response with a consent question passed. This identifies inconsistent grading scope without excusing the subject's separate process defect or explaining the unavailable earlier incident failure.
+
+G11 keeps every original assertion and failed result. It isolates the shared grader in a neutral temporary directory with Claude safe mode, an explicit rubric-only system prompt and no tools, preserving authentication, model selection and nonzero diagnostics. Four actual-grader controls include the unchanged saved positive pair, two eligibility violations and an explicit no-prose-ask rubric that must still reject the question. Their designated JSON joins the existing retained results before the unchanged incident suite executes. Required new CI must pass before documentation integration; P459 remains Known Error.
+
 ## Stories
 
 | ID | Title | Status |

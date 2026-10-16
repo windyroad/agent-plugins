@@ -50,6 +50,10 @@ The G6a repair passed exact source CI at `27093d4936a330a7e9e7d8117b43b9245a5dce
 
 Plan G9 preserves that failed evidence and adds a bounded diagnostic transport repair: failed grader stdout goes to stderr, the original nonzero exit survives, unused stdin closes, and successful JSON extraction remains unchanged. Owning subprocess tests cover valid and malformed failed payloads, exact exit status, separate output streams and unchanged successful grading. This changes tarball-excluded evaluation infrastructure only. No model, rubric, threshold or retry policy changes; exact new CI remains required before unrelated documentation integration. P459 remains Known Error.
 
+G9 CI run `38978617123` passes the work-problems appetite checks, then fails incident eligibility at 3/4 with zero provider errors. Its complete retained unknown-baseline row exposes an oracle-scope defect: the grader explicitly acknowledges that the response satisfies the eligibility rubric, then rejects a separate prose consent question using an unrelated project rule. The original failed result is preserved; the subject's separate process defect is not excused.
+
+Plan G11 isolates the grader in a temporary neutral directory and Claude safe mode, with a rubric-only system prompt and no tools, preserving authentication, model selection and failure transport. Owning subprocess checks cover contaminated callers and cleanup. Four direct semantic controls test the unchanged retained positive pair, invalid incident declaration, unsupported regression inference and a separately explicit prohibition of consent questions. CI retains their results before running the unchanged original incident cases. New semantic qualification and required CI remain pending.
+
 ## Dependencies
 
 - **Blocked by**: none.
