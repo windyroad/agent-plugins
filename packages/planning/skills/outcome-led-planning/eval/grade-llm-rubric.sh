@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ "${PLANNING_EVAL_RUNTIME:-claude}" = codex ]; then
+  exec python3 "$(dirname "${BASH_SOURCE[0]}")/codex-eval.py" grade "${1:?expected grading prompt}"
+fi
+[ "${PLANNING_EVAL_RUNTIME:-claude}" = claude ] || { echo 'Expected explicit claude or codex runtime.' >&2; exit 2; }
+
 GRADER_SYSTEM='You are a strict grading assistant for an automated test
 harness. You will be given a rubric and a model output to grade against it.
 Respond with ONLY a single minified JSON object and nothing else — no

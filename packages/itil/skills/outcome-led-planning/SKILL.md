@@ -24,6 +24,12 @@ Once confident the outcome is captured correctly, **play back the complete objec
 
 Keep the confirmed objective as the reference point throughout delivery. Ordinary replanning changes the means and does not repeat goal confirmation. A substantive change to the desired result, completion evidence or constraints requires renewed user confirmation before dependent planning or execution.
 
+## Choose the tracking vehicle
+
+After the SMART outcome is confirmed, honor any existing user, session or repository choice of planning vehicle. If none is established and shared tracking is relevant, offer **GitHub Issues or conversation/local tracking** in one focused question, then wait for the answer. Do not require a GitHub account, access setup or Project for local planning. Record the choice with the plan; do not ask again merely because an agent joins or the session resumes. For ordinary local work where shared tracking adds no value, retain the existing conversation/local route.
+
+**When GitHub tracking is selected, read [the GitHub coordination protocol](references/github-coordination.md) before building its executable plan, claiming work or making planning-related issue/Project mutations.** Follow its outcome → increment → task hierarchy, contribution ownership and shared handoff rules. Load this reference only for that mode. An optional Project mirrors the same issues; it does not create another authoritative plan. Selecting a tracker does not independently grant permission to message people, broaden access or create persistent automation.
+
 ## Build the current plan
 
 Keep one authoritative plan in the conversation or an agreed artifact. Use an existing planning vehicle when the project requires one. If continuity needs a saved plan, use the project's permitted document location, outside runtime configuration directories. Keep updates proportional to the work.
@@ -40,9 +46,13 @@ Do not fill Next or Later with invented features. If evidence does not yet justi
 
 Use INVEST as a quality check for **Now**: independently deliverable, negotiable means within the confirmed goal, valuable, estimable with uncertainty disclosed, small, and testable. Internal dependencies are acceptable when the whole increment remains coherently and safely deliverable. Do not manufacture precise estimates. Do not introduce story documents just to use INVEST; retain any story and approval requirements the project already imposes. Next and Later stay provisional and need less detail.
 
+If material uncertainty prevents a small, estimable implementation increment, make Now a bounded discovery or qualification increment instead of labeling unbounded implementation INVEST-shaped. State its concrete value, limited investigation scope, observable artifact or decision evidence, stopping condition and verification. Keep implementation provisional until that evidence supports a bounded increment. Bound and qualitatively estimate the discovery work itself from its limited inspection scope; keep uncertainty about the subsequent implementation estimate separate. Use available authorized read-only evidence before asking the user for facts you can establish. Do not manufacture an estimate, make discovery mandatory when evidence is sufficient, or substitute discovery for the final outcome.
+
 Define delivery according to the requested outcome and established workflow: for example, a locally installed artifact or a qualified production release. Complete its required stages. A commit, green CI, or publication proves only its own stage.
 
 ## Assess before executing
+
+Authorized bounded context and sample inspection may inform a proposed plan before these reviews; do not make simple read-only evidence gathering wait on a plan-review ceremony. Stay within existing access and project rules. Executing a formal discovery increment or implementing its findings still requires the reviews below.
 
 Have **the architect, JTBD reviewer and risk scorer assess the initial plan and every revised executable plan before dependent execution**. Give each reviewer the objective, exact plan revision, relevant evidence, scope, assumptions, and applicable project rules.
 

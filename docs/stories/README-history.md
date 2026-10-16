@@ -130,3 +130,7 @@
 ## 2026-10-16
 
 > Last reviewed: 2026-10-16 **STORY-107 done** - Public documentation, search and phone/desktop journeys verified.
+
+## 2026-10-16
+
+> Last reviewed: 2026-10-16 **STORY-108 accepted** - Optional GitHub coordination on the ratified developer journey.

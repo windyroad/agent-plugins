@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: in-progress
 story-id: coordinate-shared-outcomes-with-optional-github-issues
 reported: 2026-10-16
 decision-makers: [Tom Howard]
@@ -38,7 +38,7 @@ This coherent capability is independently releasable without new hooks, dependen
 
 ## Implementation notes
 
-Authoritative inline Plan G2 passed architecture, JTBD and plan-risk review before edits. Governance trace precedes implementation. Personal-first atomic update, then canonical/ITIL synchronization and behavior/package qualification. Skill release precedes public guide activation. Tests distinguish fixture, runtime, registry and live website evidence; they do not claim real cross-account effects or automatic agent wakeup from issue comments.
+Authoritative inline Plan G3 passed architecture, JTBD and plan-risk review before edits. Governance trace precedes implementation. Personal-first atomic update, then canonical/ITIL synchronization and behavior/package qualification. Skill release precedes public guide activation. An explicit Codex subject/grader route retains the unavailable Claude campaign without relabeling its evidence. Tests distinguish fixture, runtime, registry and live website evidence; they do not claim real cross-account effects or automatic agent wakeup from issue comments.
 
 ## Dependencies
 

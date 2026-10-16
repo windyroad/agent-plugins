@@ -9,8 +9,21 @@ case "$surface" in
   codex) skill="$HERE/../../../skills-codex/outcome-led-planning/SKILL.md" ;;
   *) echo 'Expected source or codex skill surface.' >&2; exit 2 ;;
 esac
+if [ "${PLANNING_EVAL_RUNTIME:-claude}" = codex ]; then
+  exec python3 "$HERE/codex-eval.py" subject "${1:?expected scenario}" "$skill"
+fi
+[ "${PLANNING_EVAL_RUNTIME:-claude}" = claude ] || { echo 'Expected explicit claude or codex runtime.' >&2; exit 2; }
 contract="$(cat "$skill")"
 scenario="${1:?expected scenario}"
+# Only an explicit selected-mode envelope loads the conditional reference.
+# Provider metadata/rubrics and future turns never select or reach the subject.
+if jq -e 'type == "object" and .tracking == "github"' <<< "$scenario" >/dev/null 2>&1; then
+  contract+=$'\n\n'
+  contract+="$(cat "$(dirname "$skill")/references/github-coordination.md")"
+fi
+if jq -e 'type == "object" and (.prompt | type == "string")' <<< "$scenario" >/dev/null 2>&1; then
+  scenario="$(jq -r .prompt <<< "$scenario")"
+fi
 scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
 cd "$scratch"
@@ -23,14 +36,14 @@ if jq -e 'type == "object" and (.turns | type == "array") and (.turns | length >
   while IFS= read -r encoded; do
     turn="$(jq -r . <<< "$encoded")"
     if $first; then
-      response="$(claude -p "${common[@]}" --session-id "$session" --append-system-prompt "$contract" "$turn" </dev/null)"
+      response="$(claude -p "${common[@]}" --session-id "$session" --append-system-prompt "$contract" -- "$turn" </dev/null)"
       first=false
     else
-      response="$(claude -p "${common[@]}" --resume "$session" "$turn" </dev/null)"
+      response="$(claude -p "${common[@]}" --resume "$session" -- "$turn" </dev/null)"
     fi
     jq -cn --arg user "$turn" --arg assistant "$response" '{user:$user,assistant:$assistant}' >> "$scratch/transcript.jsonl"
   done < <(jq -c '.turns[]' <<< "$scenario")
   jq -s . "$scratch/transcript.jsonl"
 else
-  claude -p "${common[@]}" --append-system-prompt "$contract" "$scenario"
+  claude -p "${common[@]}" --append-system-prompt "$contract" -- "$scenario"
 fi

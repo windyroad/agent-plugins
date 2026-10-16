@@ -52,6 +52,19 @@ and waits for your confirmation before planning. It makes one Now increment
 INVEST-shaped without requiring story documents unless your project needs them.
 After delivery it verifies the result, learns and reassesses the revised plan.
 
+For shared work, choose optional **GitHub Issues tracking** after confirming the
+outcome. The agent loads a bundled coordination protocol and uses outcome →
+increment → task issues. Increments have Now, Next or Later horizons; execution
+status is separate. Contributors check existing claims, identify their account
+and agent/session, and coordinate dependencies and evidence in the increment
+thread. The outcome owner verifies delivery and replans. A GitHub Project can
+mirror those issues when available; it is optional. Conversation and local
+planning remain available.
+
+Each contributor uses their own access. Tracker selection does not authorize
+new messaging, broader permissions or persistent automation. Issue comments
+do not guarantee an idle agent will wake up.
+
 | Skill | Purpose | Maturity |
 | --- | --- | --- |
 | `/wr-planning:outcome-led-planning` | Confirm a SMART outcome and iteratively deliver through reviewed Now, Next and Later increments | Experimental |
@@ -79,5 +92,6 @@ Include the same runtime and scope flags used for installation.
 
 The canonical workflow lives in `skills/outcome-led-planning/SKILL.md`. In the
 monorepo, run `npm run sync:planning-skill` after changing it; the checked sync
-keeps the ITIL compatibility body equivalent while preserving its old name.
+keeps the ITIL compatibility body and supporting reference equivalent while
+preserving its old name.
 The personal skill is user-managed and is not a synchronization target.
