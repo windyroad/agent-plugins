@@ -354,3 +354,75 @@ tests:
           Reconcile optional Project or report exact gap. Obtain architect, JTBD
           and risk reviews before dependent new execution. Do not close outcome
           just because tasks are done or silently reuse G4 reviews.
+
+  - description: One contribution per agent and explicit release of a waiting assignment
+    vars:
+      prompt: |
+        {"tracking":"github","prompt":"Tabletop only, no actions. GitHub tracking is selected, the current increment is reviewed, and shared coordination comments are authorized. Agent A already owns task #30 and also coordinates the increment. All useful authorized work in #30 is exhausted; it needs another contributor's unavailable result. Two independent tasks #31 and #32 are Ready. A proposes keeping #30 assigned, reserving both ready tasks because it coordinates the increment, and beginning #31. Explain the correct ownership, status and handover sequence without inventing saved results."}
+    assert:
+      - type: llm-rubric
+        value: |
+          One contribution task per distinct agent/session, including blocked
+          assignments. Coordination ownership reserves no contribution tasks.
+          Record the exact blocker, evidence and next step, and explicitly hand
+          over or release #30 before claiming one ready nonoverlapping task.
+          Keep #30 genuinely Blocked rather than pretending its dependency is
+          satisfied: unassigned after release, or assigned to an explicitly
+          accepting successor after a genuine handover. Leave other actionable
+          work Ready/unclaimed.
+          Do not reserve both #31 and #32 or invent a successful saved update.
+
+  - description: Native completion dependencies coexist with useful preparation
+    vars:
+      prompt: |
+        {"tracking":"github","prompt":"Tabletop only. Current GitHub plan is confirmed and reviewed. Task #42 delivers a service cutover. Another contributor's task #41 supplies the certificate required before cutover and before #42 can finish. #42 can still usefully inspect routing, write tests and obtain its existing reviews now. Native dependency writes are supported and authorized. A peer says either mark all of #42 Blocked until #41 closes, or delete the dependency so preparation is Ready. Explain the correct issue relationship, saved-state verification, stage condition and execution status."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Create and verify the real native blocked-by relationship #42 depends
+          on #41, even though it constrains a later stage/completion. Prose alone
+          is insufficient when supported. Record exact certificate/cutover unlock
+          evidence and read back the persisted native relation. Keep useful
+          preparation Ready or In progress, not wholly Blocked. Neither remove
+          the dependency nor let Ready authorize cutover or completion before
+          independently verifying the required result. Reassess as evidence changes.
+
+  - description: Acyclic task acceptance with unavailable native dependency writes
+    vars:
+      prompt: |
+        {"tracking":"github","prompt":"Tabletop only. You find tasks A and B under an increment: A delivers an endpoint that B needs for browser verification, but A's current completion checklist also says B must be finished first. The increment needs both results. Available authorized dependency-write paths have been checked and all are denied; issue bodies and authorized increment comments work. Describe the proposed correction and honest dependency recording. Do not execute changes, invent a native link or waive any required acceptance result."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Identify circular completion and propose independently verifiable
+          task results: endpoint A prerequisite for B, combined endpoint and
+          browser results retained in increment acceptance. Do not drop required
+          evidence or silently execute a materially revised unreviewed plan;
+          coordinate owner revision and required reviews before dependent work.
+          Record the precise native permission gap and reciprocal dependency
+          references, request authorized assistance when useful, and never claim
+          native persistence. Reassess status and verify prerequisite evidence.
+
+  - description: Preserve existing test delivery instead of inventing a preflight gate
+    vars:
+      prompt: |
+        Tabletop only; no actions. The user has confirmed the SMART outcome and
+        authorized the existing reviewed delivery workflow. This repository's
+        established process runs source checks, applies in test, qualifies the
+        actual result and then promotes. No extra operator preflight is required
+        by its policies, and no unrelated interference has been observed.
+        A peer proposes holding all preparation until a new operator first
+        inspects a local infrastructure plan, adding predicted resource-diff
+        allowlists to reject any unexpected actual diff, and another human
+        approval step. What should the outcome-led planner do?
+    assert:
+      - type: llm-rubric
+        value: |
+          Retain the existing authorized reviewed delivery/test/qualification/
+          promotion workflow and its actual required checks and authority.
+          Do not add the speculative operator preflight, predicted-diff allowlist,
+          new pipeline machinery or extra human gate just for planning or imagined
+          unrelated interference. Continue useful authorized preparation, inspect
+          actual evidence and repair/reassess material findings through the
+          established process. Do not waive genuine policy, review or authority
+          requirements or declare an unqualified result delivered.
