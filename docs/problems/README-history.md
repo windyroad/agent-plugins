@@ -1570,3 +1570,7 @@ Last reviewed: 2026-04-28 **AFK iter 7 — P139 transitioned Open → Verificati
 ## 2026-10-16
 
 > Last reviewed: 2026-10-15 **P558 captured** - Public searchable mobile documentation is absent; confirmed delivery by 18 October.
+
+## 2026-10-16
+
+> Last reviewed: 2026-10-16 **batch transition** - P558 verifying, P558 close; public documentation verified.
