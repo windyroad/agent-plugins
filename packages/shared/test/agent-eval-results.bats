@@ -52,7 +52,7 @@ p.write_text(json.dumps({'response':{'output':'complete '+('evidence '*150)+' EN
 counter=pathlib.Path('invocations');n=int(counter.read_text())+1 if counter.exists() else 1;counter.write_text(str(n))
 sys.exit(17 if n==int(os.environ['FIXTURE_FAIL_AT']) else 0)
 ''');stub.chmod(0o755)
-runs=json.loads((fixture/'runs.json').read_text());assert len(runs)==4
+runs=json.loads((fixture/'runs.json').read_text());assert len(runs)==5
 for i,command in enumerate(runs):
  count=command.count('npx promptfoo eval')
  for failure in range(count+1):

@@ -164,8 +164,23 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
           HEAD_SHA: ${{ github.sha }}
         run: |
+          range_base="$BASE_SHA"
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            range_base="$BEFORE_SHA"
+          fi
+          planning=false
+          scope_unknown=false
+          if [ -z "$range_base" ] || [[ "$range_base" =~ ^0+$ ]] || ! changed=$(git diff --name-only "$range_base" "$HEAD_SHA"); then
+            planning=true
+            scope_unknown=true
+            changed=''
+          elif printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|packages/planning/.*|packages/itil/skills/outcome-led-planning/.*|packages/shared/test/(planning-eval-scope|agent-eval-results)\.bats|scripts/sync-(planning-skill|codex-plugin-surfaces)\.mjs|package(-lock)?\.json)$'; then
+            planning=true
+          fi
+          echo "planning=$planning" >> "$GITHUB_OUTPUT"
           if [ "$EVENT_NAME" != "pull_request" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
             echo "agents=true" >> "$GITHUB_OUTPUT"
@@ -174,17 +189,16 @@ jobs:
             exit 0
           fi
 
-          changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
-          run=false
-          if printf '%s\n' "$changed" | grep -Eq '^(scripts/run-agent-evals-ci\.sh|packages/shared/test/agent-eval-quota-gate\.bats|packages/[^/]+/agents/.*|package(-lock)?\.json)$'; then
+          run="$planning"
+          if [ "$scope_unknown" = true ] || printf '%s\n' "$changed" | grep -Eq '^(scripts/run-agent-evals-ci\.sh|packages/shared/test/agent-eval-quota-gate\.bats|packages/[^/]+/agents/.*|package(-lock)?\.json)$'; then
             echo "agents=true" >> "$GITHUB_OUTPUT"
             run=true
           fi
-          if printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|packages/itil/skills/(work-problems|update-upstream|manage-incident)/(SKILL\.md|eval/.*)|package(-lock)?\.json)$'; then
+          if [ "$scope_unknown" = true ] || printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|packages/itil/skills/(work-problems|update-upstream|manage-incident)/(SKILL\.md|eval/.*)|package(-lock)?\.json)$'; then
             echo "skills=true" >> "$GITHUB_OUTPUT"
             run=true
           fi
-          if printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|packages/(voice-tone|risk-scorer)/skills/assess-external-comms/(SKILL\.md|eval/.*)|package(-lock)?\.json)$'; then
+          if [ "$scope_unknown" = true ] || printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|packages/(voice-tone|risk-scorer)/skills/assess-external-comms/(SKILL\.md|eval/.*)|package(-lock)?\.json)$'; then
             echo "remediation=true" >> "$GITHUB_OUTPUT"
             run=true
           fi
@@ -262,6 +276,17 @@ jobs:
         run: |
           npx promptfoo eval -c packages/itil/skills/work-problems/eval/grader-boundary.promptfooconfig.yaml --no-table --output docs/audits/agent-evals-workspace/grader-boundary.json
           npx promptfoo eval -c packages/itil/skills/manage-incident/eval/promptfooconfig.yaml --filter-pattern 'Incident eligibility' --no-table --output docs/audits/agent-evals-workspace/incident-eligibility.json
+
+      - name: Build planning Codex projection for qualification
+        if: steps.scope.outputs.planning == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
+        run: node scripts/sync-codex-plugin-surfaces.mjs planning --build
+
+      - name: Verify planning behavior with Claude on both skill surfaces
+        if: steps.scope.outputs.planning == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          PLANNING_EVAL_RUNTIME: claude
+        run: npx promptfoo eval -c packages/planning/skills/outcome-led-planning/eval/promptfooconfig.yaml --max-concurrency 2 --no-table --output docs/audits/agent-evals-workspace/planning-claude.json
 
       - name: Retain complete evaluation results
         if: always() && steps.token.outputs.present == 'true'

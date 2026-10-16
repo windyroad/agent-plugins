@@ -56,6 +56,8 @@ Plan G11 isolates the grader in a temporary neutral directory and Claude safe mo
 
 Plan G14 preserves the retained G11 native grades: all four match the expected true/false/false/false results, but the single-line JavaScript assertion is expression-wrapped by Promptfoo and throws `Unexpected token return`. The controls therefore failed assertion execution and the original incident group was skipped. G14 changes only the scalar representation to a multiline function body, preserving its predicate, all candidates, rubrics and expectations. An owning actual-Promptfoo subprocess test requires four matching grades to pass, then one deliberately inverted grade to fail with complete retained results. New exact-source CI remains required; G13 qualification and public documentation remain recoverably stashed. P459 remains Known Error.
 
+Plan G13 applies the existing neutral rubric-grader boundary and diagnostic retention to planning's separate evaluation driver. Its owning tests preserve first-argument forwarding, independent subject/grader data and interview sessions, and observe isolated cwd, cleanup, EOF and exact nonzero diagnostics. CI gains a conditional planning campaign and retained result JSON, with behavioral range and command-transport checks. G14 exact CI and the new native campaign remain prerequisites for subsequent integration and qualification respectively.
+
 ## Dependencies
 
 - **Blocked by**: none.
