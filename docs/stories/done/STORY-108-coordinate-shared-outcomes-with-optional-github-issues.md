@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 story-id: coordinate-shared-outcomes-with-optional-github-issues
 reported: 2026-10-16
 decision-makers: [Tom Howard]
@@ -29,8 +29,8 @@ In order to contribute safely toward the same outcome across agent sessions, as 
 - [x] Tracking choice is optional and remembered; selected GitHub tracking loads the bundled protocol before planning or issue mutations, while local mode remains usable.
 - [x] Outcome → increment → task guidance distinguishes increment Horizon from execution Status, checks overlap and plan revision, identifies account and agent, respects authority, records shared handoffs and preserves outcome-owner replanning.
 - [x] Actual behavioral scenarios cover selected and declined tracking, contribution ownership, denied access, ambiguous mutations, dependencies and reassessed replanning; packaging and synchronization checks cover supporting references in both runtimes.
-- [ ] Stable planning and compatibility packages are published through the normal pipeline, with registry integrity/provenance, fresh installs and accurately scoped runtime qualification.
-- [ ] Public documentation matches the qualified stable release and its live deployed artifact is verified.
+- [x] Stable planning and compatibility packages are published through the normal pipeline, with registry integrity/provenance, fresh installs and accurately scoped runtime qualification.
+- [x] Public documentation matches the qualified stable release and its live deployed artifact is verified.
 
 ## INVEST assessment
 
@@ -67,3 +67,14 @@ G16d qualification retained 52 passes, two failures and zero errors. Independent
 Reviewed G19a/G16e supersedes the historical separate Claude48-before-integration condition. Final 54-case qualification retains the original scenarios and is required in each runtime before stable release. Source integration follows whole green G19a CI and fresh complete Codex54, enabling CI-authenticated Claude qualification; quota skips earn no behavioral credit.
 
 G16e qualification retained 53 passes, one failure and zero errors (exit 100). Independent TDD review finds that the handoff response leaves bounded checking unspecified while cadence agreement is pending; the grader overstates this as explicit suspension. G16f clarifies that pending agreement does not suspend already-authorized active-work checks or existing action checkpoints. The source correction preserves every scenario, rubric, model and provider. The failed result remains unchanged and complete fresh qualification remains required.
+
+
+## Verified completion - 2026-10-17
+
+All 58 source-evaluation cases pass in each runtime, across the canonical and projected planning surfaces. The final inputs are bound by `g30e-input-binding.json`; earlier failed campaigns remain retained and were not rescored. The 18 independent grader controls and owning package checks pass.
+
+[Release workflow 39017618182](https://github.com/windyroad/agent-plugins/actions/runs/39017618182) published `@windyroad/planning@0.3.0` and `@windyroad/itil@3.3.0` from `2e53b447baa227c1a25ca7555da37e2e080f04b5`. Fresh registry acquisition verifies signatures, attestations, integrity and both runtime payloads for both packages against the qualified source. Standalone planning additionally passes fresh installation, discovery and complete native reference reading in Claude Code and Codex. These checks do not establish native ITIL behavior, full runtime parity or live cross-account GitHub coordination. The personal skill and reference match the qualified release, with mode and picker metadata preserved.
+
+[Documentation CI 39018647304](https://github.com/windyroad/agent-plugins/actions/runs/39018647304) and [deployment 39019494258](https://github.com/windyroad/agent-plugins/actions/runs/39019494258) succeed for documentation source `7c6000227998e78519660e30d32fdcd3483a881e`. Seven live routes match the downloaded deployment artifact byte for byte. Actual public keyboard search, focus return, mobile navigation, source links and WebKit phone emulation pass. The repository About homepage points to the published site. Phone checks use browser emulation, not a physical device.
+
+Retained audit receipts: `docs/audits/planning-plugin-workspace/github-planning/final-integrity-20261017T083329020092Z-52915/summary.json`, `final-source-binding-20261017T083401665270Z-54954/summary.json`, `final-registry-20261017T083421254964Z-56451/summary.json`, `g36-live-artifact.json` and `g36-live-browser.json` under the same audit directory. The [public coordination guide](https://windyroad.github.io/agent-plugins/outcome-led-planning/) describes the released behavior and minimum versions.

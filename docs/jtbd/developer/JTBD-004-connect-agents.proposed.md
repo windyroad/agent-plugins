@@ -32,4 +32,4 @@ Copy-paste between terminals, manually restarting sessions with new instructions
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-108 | STORY-108: Coordinate shared outcomes with optional GitHub Issues | in-progress |
+| STORY-108 | STORY-108: Coordinate shared outcomes with optional GitHub Issues | done |

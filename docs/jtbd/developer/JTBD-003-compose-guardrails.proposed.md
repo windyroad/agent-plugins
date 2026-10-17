@@ -41,4 +41,4 @@ Install everything and ignore irrelevant hooks, or don't install at all
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-107 | STORY-107: Find the plugin and instructions I need on my phone | done |
-| STORY-108 | STORY-108: Coordinate shared outcomes with optional GitHub Issues | in-progress |
+| STORY-108 | STORY-108: Coordinate shared outcomes with optional GitHub Issues | done |

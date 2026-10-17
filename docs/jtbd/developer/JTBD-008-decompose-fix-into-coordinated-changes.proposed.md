@@ -104,6 +104,7 @@ None of these compose well with WSJF prioritisation when phases need to compete 
 | STORY-026 | STORY-026: Work the RFC's stories one at a time | done |
 | STORY-027 | STORY-027: Capture a problem reported through an inbound channel | done |
 | STORY-106 | STORY-106: Keep my objective clear while I deliver, learn and replan | done |
+| STORY-108 | STORY-108: Coordinate shared outcomes with optional GitHub Issues | done |
 | STORY-012 | STORY-012: Can't start coding without an RFC — the gate makes me create one first | superseded |
 | STORY-013 | STORY-013: Full gate: an RFC exists → I proceed; none → I create it first | draft |
 | STORY-014 | STORY-014: Unattended, the agent works the plan and pauses for real decisions | draft |
@@ -118,5 +119,4 @@ None of these compose well with WSJF prioritisation when phases need to compete 
 | STORY-035 | STORY-035: Home RFC decisions in ADRs and make the RFC-first trace unconditional | draft |
 | STORY-075 | STORY-075: My story map starts from the journey I walk | in-progress |
 | STORY-082 | STORY-082: Gate Bash writes without blocking read-only commands | in-progress |
-| STORY-108 | STORY-108: Coordinate shared outcomes with optional GitHub Issues | in-progress |
 | STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | in-progress |

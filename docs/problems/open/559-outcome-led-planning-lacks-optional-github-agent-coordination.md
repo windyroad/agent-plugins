@@ -70,7 +70,9 @@ Plan G16c incorporates the later pinned active-work cadence refinement: read rel
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-108 | STORY-108: Coordinate shared outcomes with optional GitHub Issues | in-progress |
+| STORY-108 | STORY-108: Coordinate shared outcomes with optional GitHub Issues | done |
+
+## Qualification history
 
 G16c qualification retained 52 passes, two failures and zero errors across 54 Codex cases. Independent TDD review identified a preflight oracle-context error: the response preserved source-required reviews only for a materially revised plan, while rejecting the invented gates. The handoff case exposed ambiguity between stored Blocked status and a current assessment of useful work. G16d clarifies reassessment before assignment release and adds the missing conditional-review context to the preflight rubric. Scenario inputs and negative assertions remain unchanged; the earlier result is not rescored. Fresh complete 54-case qualification in both runtimes remains required.
 
