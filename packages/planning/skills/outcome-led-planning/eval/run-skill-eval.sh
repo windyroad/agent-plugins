@@ -13,7 +13,9 @@ if [ "${PLANNING_EVAL_RUNTIME:-claude}" = codex ]; then
   exec python3 "$HERE/codex-eval.py" subject "${1:?expected scenario}" "$skill"
 fi
 [ "${PLANNING_EVAL_RUNTIME:-claude}" = claude ] || { echo 'Expected explicit claude or codex runtime.' >&2; exit 2; }
-contract="$(cat "$skill")"
+contract="$(cat "$HERE/fixture-context.txt")"
+contract+=$'\n\n'
+contract+="$(cat "$skill")"
 scenario="${1:?expected scenario}"
 # Only an explicit selected-mode envelope loads the conditional reference.
 # Provider metadata/rubrics and future turns never select or reach the subject.

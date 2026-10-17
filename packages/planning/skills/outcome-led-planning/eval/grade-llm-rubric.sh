@@ -17,6 +17,8 @@ markdown, no code fences, no commentary. The JSON schema is exactly:
 Set "pass" true only if the output satisfies the rubric. Be literal about
 negation: an output that says a thing does NOT happen SATISFIES a rubric
 requiring that the thing must not happen.'
+GRADER_SYSTEM+=$'\n\n'
+GRADER_SYSTEM+="$(cat "$(dirname "${BASH_SOURCE[0]}")/fixture-context.txt")"
 
 # Keep caller customizations out of the literal rubric judgment.
 GRADER_WORKSPACE="$(mktemp -d)"

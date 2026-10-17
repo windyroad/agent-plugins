@@ -46,6 +46,9 @@ assert.ok(fs.readFileSync(path.join(root, manifest.skills, reference), 'utf8').l
 assert.deepEqual(fs.readFileSync(path.join(root, manifest.skills, reference)), fs.readFileSync(path.join(root, 'skills', reference)));
 for (const absent of ['hooks', 'hooks-codex', 'agents', 'templates']) assert.equal(fs.existsSync(path.join(root, absent)), false, absent);
 assert.equal(manifest.hooks, undefined);
+for (const surface of ['skills', 'skills-codex']) {
+  assert.equal(fs.existsSync(path.join(root, surface, 'outcome-led-planning/eval')), false, 'evaluation-only context must not ship');
+}
 NODE
   [ "$status" -eq 0 ]
   [ "$(grep -c '^plugin add wr-planning@windyroad-planning-local$' "$CODEX_HOME/calls")" -eq 2 ]

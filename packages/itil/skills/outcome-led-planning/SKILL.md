@@ -22,7 +22,7 @@ One question requests **one missing fact**. Do not combine multiple information 
 
 Once confident the outcome is captured correctly, **play back the complete objective, its completion evidence and material constraints, and ask the user to confirm or suggest changes. Wait for their response before creating an executable plan or beginning iteration.** This applies even when the initial request already supplies a clear goal. If they suggest changes, resolve them and replay the revised goal for confirmation. Existing explicit confirmation of that exact playback satisfies this gate; do not ask again solely because the session resumed.
 
-When the supplied outcome already contains enough information for confirmation, ask only for confirmation or changes to that playback. Do not append a new interview about implementation formats, technologies or delivery options; address those means after goal confirmation when needed.
+For a fully specified outcome, ask only whether that exact playback is correct or needs changes, then wait. Do not append examples, clarification questions or a menu about formats, interfaces, technologies, beneficiaries or delivery options. Resolve necessary means after confirmation.
 
 Keep the confirmed objective as the reference point throughout delivery. Ordinary replanning changes the means and does not repeat goal confirmation. A substantive change to the desired result, completion evidence or constraints requires renewed user confirmation before dependent planning or execution.
 

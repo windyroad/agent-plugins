@@ -46,6 +46,7 @@ const assert = require('node:assert/strict');
 const [first, second] = fs.readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JSON.parse);
 const reference = fs.readFileSync(process.argv[4] + '/references/github-coordination.md', 'utf8');
 assert.ok(first.at(-1).includes(reference));
+assert.ok(first.at(-1).includes(fs.readFileSync(process.argv[4] + '/eval/fixture-context.txt', 'utf8')));
 assert.ok(first.at(-1).endsWith('FIRST_TURN'));
 assert.equal(first.at(-1).includes('FUTURE_REPLY'), false);
 assert.equal([...first, ...second].some(arg => arg.includes('HIDDEN_RUBRIC')), false);
@@ -72,6 +73,9 @@ assert.equal(subject.at(-1).includes(fs.readFileSync(process.argv[3] + '/referen
 assert.ok(subject.at(-1).endsWith('LOCAL_ONLY'));
 assert.equal([...subject, ...grader].some(arg => /HIDDEN_RUBRIC|HIDDEN_CONTEXT/.test(arg)), false);
 assert.ok(grader.includes('--output-schema'));
+const fixture = fs.readFileSync(process.argv[3] + '/eval/fixture-context.txt', 'utf8');
+assert.ok(subject.at(-1).includes(fixture));
+assert.ok(grader.at(-1).includes(fixture));
 assert.ok(grader.at(-1).endsWith('GRADER_ONLY'));
 assert.equal(grader.at(-1).includes('LOCAL_ONLY'), false);
 NODE
@@ -88,11 +92,13 @@ teardown() {
     run bash "$SKILL/eval/run-skill-eval.sh" "$surface" 'SUBJECT_SCENARIO' '{"assertions":"DO_NOT_FORWARD"}'
     [ "$status" -eq 0 ]
   done
-  run node - "$EVAL_ARGV" <<'NODE'
+  run node - "$EVAL_ARGV" "$SKILL" <<'NODE'
 const assert = require('node:assert/strict');
 const lines = require('node:fs').readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JSON.parse);
 assert.equal(lines.length, 2);
 for (const args of lines) {
+  const fixture = require('node:fs').readFileSync(process.argv[3] + '/eval/fixture-context.txt', 'utf8').trimEnd();
+  assert.ok(args[args.indexOf('--append-system-prompt') + 1].includes(fixture));
   assert.equal(args.at(-1), 'SUBJECT_SCENARIO');
   assert.equal(args.some(arg => arg.includes('DO_NOT_FORWARD')), false);
   assert.equal(args[args.indexOf('--tools') + 1], '');
@@ -131,11 +137,13 @@ NODE
   run bash "$SKILL/eval/run-skill-eval.sh" source '{"turns":["FIRST_USER_TURN","SECOND_USER_TURN"]}' '{"assertions":"DO_NOT_FORWARD"}'
   [ "$status" -eq 0 ]
   [ "$(printf '%s' "$output" | jq length)" -eq 2 ]
-  run node - "$EVAL_ARGV" "$EVAL_STDIN" <<'NODE'
+  run node - "$EVAL_ARGV" "$EVAL_STDIN" "$SKILL" <<'NODE'
 const assert = require('node:assert/strict');
 const stdin = require('node:fs').readFileSync(process.argv[3], 'utf8').trim().split('\n').map(JSON.parse);
 assert.deepEqual(stdin, ['', '']);
 const [first, second] = require('node:fs').readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JSON.parse);
+const fixture = require('node:fs').readFileSync(process.argv[4] + '/eval/fixture-context.txt', 'utf8').trimEnd();
+assert.ok(first[first.indexOf('--append-system-prompt') + 1].includes(fixture));
 assert.equal(first.at(-1), 'FIRST_USER_TURN');
 assert.equal(second.at(-1), 'SECOND_USER_TURN');
 assert.equal(first.some(arg => arg.includes('SECOND_USER_TURN')), false);
@@ -154,9 +162,11 @@ NODE
   run bash "$SKILL/eval/grade-llm-rubric.sh" 'GRADING_PROMPT' '{"context":"DO_NOT_FORWARD"}'
   [ "$status" -eq 0 ]
   [ "$(printf '%s' "$output" | jq -r .pass)" = true ]
-  run node - "$EVAL_ARGV" <<'NODE'
+  run node - "$EVAL_ARGV" "$SKILL" <<'NODE'
 const assert = require('node:assert/strict');
 const [args] = require('node:fs').readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JSON.parse);
+const fixture = require('node:fs').readFileSync(process.argv[3] + '/eval/fixture-context.txt', 'utf8').trimEnd();
+assert.ok(args[args.indexOf('--system-prompt') + 1].includes(fixture));
 assert.equal(args.at(-1), 'GRADING_PROMPT');
 assert.equal(args.some(arg => arg.includes('DO_NOT_FORWARD')), false);
 NODE
