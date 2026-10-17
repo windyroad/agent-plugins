@@ -1,5 +1,15 @@
 # @windyroad/problem
 
+## 3.3.0
+
+### Minor Changes
+
+- cedf163: Keep optional GitHub coordination current during active work, verify actual Project fields, and retire obsolete tasks without losing acceptance evidence.
+
+### Patch Changes
+
+- a27e1a7: Clarify goal playback, local tracking, required reviews and bounded discovery. Choose the smallest independently useful Now increment while preserving essential safeguards and the complete outcome.
+
 ## 3.2.0
 
 ### Minor Changes
