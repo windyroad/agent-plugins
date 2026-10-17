@@ -1,10 +1,11 @@
 # Problem 559: Outcome-led planning lacks optional GitHub agent coordination
 
-**Status**: Open
+**Status**: Verification Pending
 **Reported**: 2026-10-16
 **Priority**: 6 (Medium) - Impact: 2 × Likelihood: 3
 **Origin**: internal
 **Effort**: M
+**WSJF**: 0.0 - (6 × 0.0) / 2 for Verification Pending; the composed Known Error preflight score is documented below.
 **JTBD**: JTBD-008, JTBD-004, JTBD-003
 **Persona**: developer
 
@@ -35,8 +36,8 @@ The original published workflow defines iterative planning but leaves the shared
 
 - [x] Confirm the user-requested hierarchy, ownership and cross-agent handoff requirements from prior conversation evidence.
 - [x] Verify existing package synchronization and runtime projection can carry a conditional reference.
-- [ ] Qualify optional tracking, scoped contributions and replanning through actual behavioral runs.
-- [ ] Verify stable registry artifacts, fresh runtime installations and public documentation.
+- [x] Qualify optional tracking, scoped contributions and replanning through actual behavioral runs.
+- [x] Verify stable registry artifacts, fresh runtime installations and public documentation.
 
 Plan G18 repairs existing planning boundaries exposed by the first actual Claude campaign. Exact G13 CI `38982728285` at `2935c7e1d0642c5f2e7f55f5cb447428bb2ed65f` retains 44 passes, four failures and zero errors. Both missing-JTBD responses improperly proceed on generic go-ahead. A goal playback adds implementation questions and invents an inconsistent date. Independent oracle review finds the fourth row's immediate-planning rationale stronger than its “only after confirmation may” rubric; its unnecessary local tracking question still exposes an existing-default ambiguity. Preserve all failed results and original 48 scenarios/rubrics without rescoring or waiver.
 
@@ -81,3 +82,24 @@ G16d qualification retained 52 passes, two failures and zero errors. Independent
 Reviewed G19a/G16e supersedes the historical separate Claude48-before-integration condition. Final 54-case qualification retains the original scenarios and is required in each runtime before stable release. Source integration follows whole green G19a CI and fresh complete Codex54, enabling CI-authenticated Claude qualification; quota skips earn no behavioral credit.
 
 G16e qualification retained 53 passes, one failure and zero errors (exit 100). Independent TDD review finds that the handoff response leaves bounded checking unspecified while cadence agreement is pending; the grader overstates this as explicit suspension. G16f clarifies that pending agreement does not suspend already-authorized active-work checks or existing action checkpoints. The source correction preserves every scenario, rubric, model and provider. The failed result remains unchanged and complete fresh qualification remains required.
+
+
+## Fix Strategy
+
+Provide optional GitHub tracking through the existing conditional reference boundary, preserve local planning, synchronize standalone and compatibility surfaces, qualify the actual behavior, then publish through the existing package and documentation workflows. Release vehicle: `.changeset/current-shared-planning.md`, combined with `.changeset/clear-planning-boundaries.md` in the normal version release.
+
+The medium effort rating remains appropriate to the bounded guidance, packaging, behavioral qualification and documentation scope. Impact 2 and Likelihood 3 remain unchanged. The composed Known Error preflight uses multiplier 2.0 and effort weight 2, giving WSJF 6.0 before removing this delivered fix from the development ranking.
+
+## Reproduction and verification
+
+The original published skill omitted the selected GitHub tracking and contribution protocol. The retained behavioral scenarios in `packages/planning/skills/outcome-led-planning/eval/promptfooconfig.yaml` reproduce and verify the capability boundaries. The complete final campaign passes all 58 cases in each runtime across canonical and projected surfaces, bound to the published source. Earlier failures remain retained without rescoring. The existing manual-coordination workaround remains available.
+
+## Fix Released
+
+`@windyroad/planning@0.3.0` and compatibility `@windyroad/itil@3.3.0` were published on 2026-10-17 from `2e53b447baa227c1a25ca7555da37e2e080f04b5` by [release run 39017618182](https://github.com/windyroad/agent-plugins/actions/runs/39017618182/attempts/1). Both registry artifacts pass signatures, attestations, integrity and qualified-source payload comparisons. Fresh standalone planning installation, discovery and complete native reference reading pass in Claude Code and Codex; native ITIL behavior, full runtime parity and live cross-account GitHub effects remain unclaimed.
+
+The personal skill was updated first and remains usable with its original picker and modes. [Documentation source CI 39018647304](https://github.com/windyroad/agent-plugins/actions/runs/39018647304) and [deployment 39019494258](https://github.com/windyroad/agent-plugins/actions/runs/39019494258) succeed at `7c6000227998e78519660e30d32fdcd3483a881e`. Seven served routes match the downloaded workflow artifact. Actual public mobile navigation, keyboard search, focus return, source links and WebKit phone emulation pass; the repository About homepage is correct. The [released coordination guide](https://windyroad.github.io/agent-plugins/outcome-led-planning/) states the qualified behavior and minimum versions.
+
+The release-vehicle helper resolves `.changeset/current-shared-planning.md` to version commit `696e5d3e72d766acdacf0d1f7b4e3420ef170041`, [PR #533](https://github.com/windyroad/agent-plugins/pull/533), merge `2e53b447baa227c1a25ca7555da37e2e080f04b5`, released 2026-10-17. Both composed transition legs have passed; no conditional deferral or upstream-report surface is present.
+
+Awaiting the separate final close verification; existing qualification evidence is recorded above. The evidence-authorized close requires the normal close-block check and does not require another user confirmation.

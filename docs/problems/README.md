@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-10-16 **P559 captured** - Optional shared GitHub outcome planning and agent coordination.
+> Last reviewed: 2026-10-17 **P559 verification pending** - Planning 0.3.0 and compatibility 3.3.0 published; behavior, registry, standalone runtime loading and live docs qualified.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -128,7 +128,6 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3 | P473 | Story maps are authored as per-fix 1-card stubs, not user journeys — below the STORY-MAP-003 quality bar | 12 (High) | Open | L | 2026-07-27 | corrective-feedback (user, 2026-07-27) |
 | 3 | P489 | The shipped ratification surfaces do not meet the rule they are governed by | 12 (High) | Open | L | 2026-08-09 | internal |
 | 3 | P505 | Seven SKILL.md files breach the 50 KB budget, and nothing converts the measurement into work | 12 (High) | Open | L | 2026-08-20 | internal |
-| 3 | P559 | Outcome-led planning lacks optional GitHub agent coordination | 6 (Medium) | Open | M | 2026-10-16 | internal |
 | 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 (Medium) | Open | L | 2026-04-27 | internal |
 | 2.25 | P290 | Harden ADR-052 to behavioural-only — remove the structural-test escape hatch entirely | 9 (Medium) | Open | L | 2026-05-25 | internal |
 | 2.25 | P324 | Agent-prose verdicts have no behavioural test harness — forcing the ADR-052 structural-test escape hatch + above-appetite release workarounds, perpetuating the structural tests the user has rejected | 9 (Medium) | Open | L | 2026-05-27 | internal |
@@ -315,6 +314,7 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P437 | Wardley converter lacks a version-stable invocation path | 2026-09-19 (@windyroad/wardley 0.3.0; registry/package checks 2026-10-15) | no — not observed |
 | P539 | Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate | 2026-10-01 (Architect 0.23.9, JTBD 0.14.11, Risk Scorer 0.19.15, Style Guide 0.6.9, Voice Tone 0.9.7; nested target resolver) | no — not observed |
 | P555 | Initial deficiencies are misclassified as incidents | 2026-10-08 (@windyroad/itil 3.0.1, PR526) | no — not observed |
+| P559 | Outcome-led planning lacks optional GitHub agent coordination | 2026-10-17 (`@windyroad/planning@0.3.0`, `@windyroad/itil@3.3.0`; PR #533) | no — not observed |
 
 
 ## Inbound Upstream Reports
