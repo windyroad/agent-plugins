@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 138 (123 in-force, 15 historical)
+**Total ADRs:** 139 (124 in-force, 15 historical)
 
 ---
 
 ## In-force decisions
 
-_123 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_124 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -625,9 +625,13 @@ _123 ADRs. These are the current rules. The architect agent reads this section f
 
 ### ADR-140 — GitHub Pages hosts the public documentation
 **Status:** proposed | **Oversight:** unconfirmed
-**Chosen:** GitHub Pages hosts the public documentation at the repository's default project-site address. The static build choice remains the separate ADR-139 proposal.
-**Confirmation:** Successful public use demonstrates nested reading, navigation and browser search on mobile and desktop; a repository update reaches the site with traceable source identity; explicit human ratification supports acceptance.
-**Related:** ADR-139
+**Chosen:** Chosen option: **GitHub Pages hosts the public documentation** at the repository's default project-site address. The static build choice remains the separate ADR-139 proposal. Delivery configuration and operational receipts belong to the de...
+**Confirmation:** Successful public use demonstrates nested reading, navigation and browser; A repository update reaches the public site with traceable source identity.; Explicit human ratification of the final hosting decision supports acceptance.
+
+### ADR-141 — Claude quota exhaustion leaves evaluations unavailable
+**Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** [ADR-075]
+**Chosen:** Chosen option: **recognized pure Claude quota exhaustion leaves evaluations unavailable regardless of when it occurs in the job**. Stop further Claude calls for that job, retain partial results and report the unavailable coverage through an...
+**Confirmation:** Production CI demonstrates that pure late quota exhaustion stops further; Actual qualification demonstrates that mixed, assertion, authentication,; A subsequent available job runs its normally selected evaluations.; Human review ratifies the final decision after reviewing actual evidence.
 
 ---
 
