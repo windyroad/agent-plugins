@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 story-id: trust-ci-failures-with-isolated-fixtures-and-complete-results
 reported: 2026-10-16
 decision-makers: [Tom Howard]
@@ -25,11 +25,11 @@ In order to diagnose CI failures without confusing hypothetical proposals with t
 
 ## Acceptance criteria
 
-- [ ] The Claude architect evaluation uses the existing isolated fixture repository, exact agent prompt and model, and read-only fixture inspection without ambient settings, hooks or MCP configuration.
-- [ ] Existing agent suites and CI skill checks retain complete structured responses and grading results in designated audit JSON artifacts, excluding credentials, environment dumps and runtime configuration.
-- [ ] Behavioral checks exercise subprocess isolation, result transport and serialization, and preserve nonzero provider and evaluation failures except recognized pure subscription exhaustion under proposed ADR-141; existing scenarios, assertions, model roles and retry policies remain unchanged.
-- [ ] Pure quota exhaustion at the probe or during any selected campaign stops further Claude calls, warns and retains partial JSON without model-test pass credit. Mixed, semantic and unclassified failures remain blocking; a later available job runs normally.
-- [ ] A meaningful new source revision passes the exact required CI with the original incident eligibility cases retained. Selected Claude campaigns provide actual results or an explicit pure-quota unavailable warning under proposed ADR-141; unavailable cases receive no pass credit. A passing execution does not explain the unavailable first failing response.
+- [x] The Claude architect evaluation uses the existing isolated fixture repository, exact agent prompt and model, and read-only fixture inspection without ambient settings, hooks or MCP configuration.
+- [x] Existing agent suites and CI skill checks retain complete structured responses and grading results in designated audit JSON artifacts, excluding credentials, environment dumps and runtime configuration.
+- [x] Behavioral checks exercise subprocess isolation, result transport and serialization, and preserve nonzero provider and evaluation failures except recognized pure subscription exhaustion under proposed ADR-141; existing scenarios, assertions, model roles and retry policies remain unchanged.
+- [x] Pure quota exhaustion at the probe or during any selected campaign stops further Claude calls, warns and retains partial JSON without model-test pass credit. Mixed, semantic and unclassified failures remain blocking; a later available job runs normally.
+- [x] A meaningful new source revision passes the exact required CI with the original incident eligibility cases retained. Selected Claude campaigns provide actual results or an explicit pure-quota unavailable warning under proposed ADR-141; unavailable cases receive no pass credit. A passing execution does not explain the unavailable first failing response.
 
 ## INVEST assessment
 
@@ -87,3 +87,16 @@ must establish this repair before claiming it delivered.
 
 - **Blocked by**: none.
 - **Blocks**: final planning capability publication while required trunk CI is failed.
+
+
+## Verified completion - 2026-10-17
+
+The isolated architect fixture and complete result transport were integrated at `27093d4936a330a7e9e7d8117b43b9245a5dce5b`; exact source CI retained 45 passing cases. Subsequent diagnostic, neutral-grader and assertion-body corrections are documented above, with original failures retained. The unchanged original incident eligibility cases remain in the selected campaign. This completion does not explain a failed response whose complete payload was unavailable.
+
+The final quota repair at `74f4cfdac4ad5b59358c018110386a0a1d57729b` passes all 22 owning behavioral checks with stable input hashes (`g33q-final-checks.json` and `.log` in the planning audit directory). These checks exercise each selected campaign, exhaustion after a successful probe, concurrent calls, complete outer-provider diagnostics, partial-result validation, mixed and ordinary failures, forwarding and later-job recovery, including actual Promptfoo execution. The earlier unsafe inner-proof experiment remains retained; only the reviewed complete-provider proof implementation is integrated.
+
+[Exact source CI 39016506787](https://github.com/windyroad/agent-plugins/actions/runs/39016506787), [release-merge CI 39017618147](https://github.com/windyroad/agent-plugins/actions/runs/39017618147) and [documentation CI 39018647304](https://github.com/windyroad/agent-plugins/actions/runs/39018647304) succeed. Their explicit Claude quota warnings establish unavailable coverage and receive zero additional model-test pass credit. Pure quota exhaustion stops later calls; semantic, mixed, malformed, transport and unknown failures remain blocking. New available jobs run the selected evaluations normally. No model, rubric, authentication or consumer payload was changed by this repair.
+
+The quota exception follows user direction and proposed ADR-141, which remains unconfirmed. P459 remains Known Error because its broader evaluation-flake work is not complete. Standalone planning publication and its separately qualified 58 cases per runtime do not substitute for unavailable CI model coverage.
+
+After the observed reset, [CI 39019901484](https://github.com/windyroad/agent-plugins/actions/runs/39019901484) at `9a3f28e9605859b916aa616ad7b17661efa24eed` executes all 49 selected Claude checks successfully, with zero failures or provider errors. Its downloaded `agent-evaluation-results` artifact contains all 13 complete result files, including the original four incident eligibility cases. This directly verifies that a later available job resumes execution. The earlier quota warnings still receive no model-test pass credit.

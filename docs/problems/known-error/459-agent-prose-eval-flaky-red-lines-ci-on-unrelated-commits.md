@@ -268,10 +268,16 @@ This supersedes the earlier quota-specific demand to obtain unavailable CI calls
 before delivery; actual local runtime qualification remains separate evidence.
 Exact implementation verification remains pending. P459 remains Known Error.
 
+## STORY-109 scoped verification completed, 2026-10-17
+
+The final quota implementation `74f4cfdac4ad5b59358c018110386a0a1d57729b` passes all 22 owning behavioral checks and [exact source CI 39016506787](https://github.com/windyroad/agent-plugins/actions/runs/39016506787). Pure quota warnings mean unavailable model coverage and add no model-test passes. Ordinary and mixed failures remain blocking. STORY-109's fixture isolation, complete result transport and quota scope is done; earlier failed executions remain retained. This does not establish that the broader flake class is resolved, and P459 remains Known Error.
+
+After the observed reset, [CI 39019901484](https://github.com/windyroad/agent-plugins/actions/runs/39019901484) at `9a3f28e9605859b916aa616ad7b17661efa24eed` executes all 49 selected Claude checks successfully, with zero failures or provider errors. Its downloaded `agent-evaluation-results` artifact contains all 13 complete result files, including the original four incident eligibility cases. This directly verifies that a later available job resumes execution. The earlier quota warnings still receive no model-test pass credit.
+
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-081 | STORY-081: Trust plan reviews when no risk policy is present | accepted |
 | STORY-101 | STORY-101: Trust agent-prose CI across model updates | accepted |
-| STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | in-progress |
+| STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | done |

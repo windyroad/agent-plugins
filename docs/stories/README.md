@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-10-17 **STORY-108 done** - Shared planning released and qualified in both runtimes; live documentation verified.
+> Last reviewed: 2026-10-17 **STORY-109 done** - CI isolation, complete diagnostics and quota-unavailable handling verified; broader P459 remains Known Error.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -180,7 +180,6 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 | accepted | STORY-103 | Trust stable npm release verification | M | P541 | RFC-104 | STORY-MAP-002 |
 | draft | STORY-091 | Invoke the Wardley map converter by a name that survives every upgrade | S | P437 | RFC-095 | STORY-MAP-008 |
 | draft | STORY-093 | Every conversion tells the reporter it landed | M | P432 | RFC-097 | STORY-MAP-004 |
-| in-progress | STORY-109 | Trust CI failures with isolated fixtures and complete results | S | P459 | RFC-109 | STORY-MAP-002 |
 
 
 ## Done
@@ -189,6 +188,7 @@ Terminal stories, from filesystem truth (`docs/stories/done/`). `Done` is the da
 
 | ID | Title | Done | Driving problems |
 |----|-------|------|------------------|
+| STORY-109 | Trust CI failures with isolated fixtures and complete results | 2026-10-17 | P459 |
 | STORY-108 | Coordinate shared outcomes with optional GitHub Issues | 2026-10-17 | P559 |
 | STORY-107 | Find the plugin and instructions I need on my phone | 2026-10-16 | P558 |
 | STORY-106 | Keep my objective clear while I deliver, learn and replan | 2026-10-15 | P557 |

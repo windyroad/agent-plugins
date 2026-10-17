@@ -66,6 +66,7 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-089 | STORY-089: I can continue after a reviewer passes, without plugin-specific recovery | done |
 | STORY-102 | STORY-102: Commit implementation before preparing its release metadata | done |
 | STORY-104 | STORY-104: Route initial deficiencies to problem management and service regressions to incident management | done |
+| STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | done |
 | STORY-013 | STORY-013: Full gate: an RFC exists → I proceed; none → I create it first | draft |
 | STORY-033 | STORY-033: Loud cold-path diagnostic for oversight-marker shims | draft |
 | STORY-037 | STORY-037: Commit gate honours the RISK-POLICY stated review cadence for staleness | draft |
@@ -79,4 +80,3 @@ Manual code review, PR review checklists, hoping the agent follows CLAUDE.md ins
 | STORY-083 | STORY-083: A canonical architect PASS unlocks the guarded edit | in-progress |
 | STORY-086 | STORY-086: Complete an external-comms review without repeating it | in-progress |
 | STORY-087 | STORY-087: Inspect a package without triggering publication review | in-progress |
-| STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | in-progress |
