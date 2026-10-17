@@ -28,6 +28,11 @@ npx @windyroad/planning --runtime codex --scope user --update
 ```
 
 Check the individual package's installer help for runtime and scope options.
+The full GitHub coordination requirements use planning **0.3.0
+or later**, or ITIL **3.3.0 or later** through its compatibility command. Follow
+[GitHub planning and agent coordination](../outcome-led-planning/#choose-where-to-track-the-plan)
+after updating.
+
 The source version shown on this website identifies repository reference
 material; it does not read your installed version or promise that every source
 change is already published.

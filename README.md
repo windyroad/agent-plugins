@@ -7,7 +7,8 @@ Built by [Windy Road Technology](https://windyroad.com.au).
 [Read the documentation](https://windyroad.github.io/agent-plugins/) to choose
 plugins, find skills and follow installation guidance for your runtime. Start
 with [outcome-led planning](https://windyroad.github.io/agent-plugins/outcome-led-planning/)
-to confirm an objective and deliver through Now, Next and Later.
+to confirm an objective and deliver through Now, Next and Later, with optional
+GitHub Issues for shared outcomes, increments and agent tasks.
 
 ## The Problem
 
@@ -71,7 +72,7 @@ These plugins enforce review workflows. They block edits to relevant files until
 
 | Package | What it does |
 |---------|-------------|
-| [`@windyroad/planning`](packages/planning/) | Confirm SMART outcomes and deliver through reviewed Now, Next and Later increments; installs one skill without hooks |
+| [`@windyroad/planning`](packages/planning/) | Confirm SMART outcomes and deliver through reviewed Now, Next and Later increments, with optional GitHub Issues for shared outcomes, increments and agent tasks; installs one skill without hooks |
 | [`@windyroad/itil`](packages/itil/) | ITIL-aligned IT service management — problem management (WSJF-prioritised) and evidence-first incident management with automatic handoff |
 | [`@windyroad/retrospective`](packages/retrospective/) | Session retrospectives that update briefings and create problem tickets |
 | [`@windyroad/connect`](packages/connect/) | Cross-repo agent collaboration via Discord channels (experimental — see plugin README) |

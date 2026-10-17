@@ -40,6 +40,13 @@ For a package that documents both-runtime installation, `--runtime both` selects
 both. This is an individual-package option; the current suite meta-installer
 does not offer that runtime selection.
 
+## Optional GitHub tracking
+
+The full GitHub coordination requirements use planning **0.3.0 or later**,
+or ITIL **3.3.0 or later** through its compatibility command. Follow
+[GitHub planning and agent coordination](../outcome-led-planning/#choose-where-to-track-the-plan).
+Conversation and local planning remain available without GitHub access.
+
 ## Install required reviewers
 
 Outcome-led planning requires architecture, JTBD and risk assessment. Planning bundles no reviewers or hooks and does not require ITIL. Use available
