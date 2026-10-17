@@ -150,7 +150,8 @@ jobs:
   # llm-rubric) via `claude -p` subscription OAuth. Secrets are not readable
   # in job-level `if:` conditions, so guard steps first scope the eval to
   # relevant PR changes, then probe the token. Unrelated and fork PRs skip
-  # GREEN while pushes to main retain the full compatibility check.
+  # GREEN while pushes to main retain the full existing compatibility check.
+  # Planning runs separately when its behavioral inputs change.
   eval-agents:
     name: Agent-Prose Behavioural Evals
     runs-on: ubuntu-latest
@@ -177,7 +178,7 @@ jobs:
             planning=true
             scope_unknown=true
             changed=''
-          elif printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|packages/planning/.*|packages/itil/skills/outcome-led-planning/.*|packages/shared/test/(planning-eval-scope|agent-eval-results)\.bats|scripts/sync-(planning-skill|codex-plugin-surfaces)\.mjs|package(-lock)?\.json)$'; then
+          elif printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|packages/planning/(skills/.*|scripts/test/.*)|packages/itil/skills/outcome-led-planning/.*|packages/shared/test/(planning-eval-scope|agent-eval-results|agent-eval-quota-gate)\.bats|scripts/(sync-(planning-skill|codex-plugin-surfaces)\.mjs|run-agent-evals-ci\.sh)|package(-lock)?\.json)$'; then
             planning=true
           fi
           echo "planning=$planning" >> "$GITHUB_OUTPUT"

@@ -58,6 +58,8 @@ Plan G14 preserves the retained G11 native grades: all four match the expected t
 
 Plan G13 applies the existing neutral rubric-grader boundary and diagnostic retention to planning's separate evaluation driver. Its owning tests preserve first-argument forwarding, independent subject/grader data and interview sessions, and observe isolated cwd, cleanup, EOF and exact nonzero diagnostics. CI gains a conditional planning campaign and retained result JSON, with behavioral range and command-transport checks. G14 exact CI and the new native campaign remain prerequisites for subsequent integration and qualification respectively.
 
+CI run `38986500635` retained 16 passing planning cases and 32 provider errors after Claude session quota expired. Two retained diagnostics identify the session limit; remaining errors do not preserve that exact line. The campaign provides no complete qualification. G19a narrows only the already-conditional planning campaign to behavioral source, projection and evaluation inputs, avoiding duplicate planning calls on version-only changes. Existing full-main governance campaigns, unconditional checks, conservative unknown-range behavior and provider failure handling remain unchanged. Final qualification requires a complete fresh 54-case campaign for each runtime; the original 49 governance cases remain required. One bounded attempt after observed provider recovery is permitted; previous failures remain evidence.
+
 ## Dependencies
 
 - **Blocked by**: none.

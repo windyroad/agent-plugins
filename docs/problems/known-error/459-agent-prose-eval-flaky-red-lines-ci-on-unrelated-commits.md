@@ -239,6 +239,10 @@ The grader wrapper captures Claude stdout in a command substitution under `set -
 
 G11 keeps every original assertion and failed result. It isolates the shared grader in a neutral temporary directory with Claude safe mode, an explicit rubric-only system prompt and no tools, preserving authentication, model selection and nonzero diagnostics. Four actual-grader controls include the unchanged saved positive pair, two eligibility violations and an explicit no-prose-ask rubric that must still reject the question. Their designated JSON joins the existing retained results before the unchanged incident suite executes. Required new CI must pass before documentation integration; P459 remains Known Error.
 
+## Planning quota exhaustion, 2026-10-17
+
+CI run `38986500635` retained 16 passing planning cases and 32 provider errors after Claude session quota expired. Two retained diagnostics identify the session limit; remaining errors do not preserve that exact line. The campaign provides no complete qualification. G19a narrows only the already-conditional planning campaign to behavioral source, projection and evaluation inputs, avoiding duplicate planning calls on version-only changes. Existing full-main governance campaigns, unconditional checks, conservative unknown-range behavior and provider failure handling remain unchanged. Final qualification requires a complete fresh 54-case campaign for each runtime; the original 49 governance cases remain required. One bounded attempt after observed provider recovery is permitted; previous failures remain evidence.
+
 ## Stories
 
 | ID | Title | Status |
