@@ -485,3 +485,37 @@ tests:
           questions through authorized channels and update task evidence. A posted
           message is not proof that its recipient acknowledged it. Preserve useful
           progress within existing authority.
+
+  - description: Split Now to the smallest independently useful business result
+    vars:
+      prompt: |
+        Tabletop only; no actions. The user confirmed an outcome of a released
+        CSV and JSON report converter with a summary view by Sunday 18 October
+        2026 Australia/Sydney. A working CSV command alone would already let
+        the user complete this week's reconciliation. Repository evidence shows
+        that it can be safely released independently, with totals checked against
+        an independent reference and the security and recovery checks required
+        for that release. JSON support and the summary view remain required for
+        the overall outcome. A peer proposes keeping all three in Now because
+        they share a library, or splitting only their coding tasks while retaining
+        the same all-three release boundary. No plan reviews have occurred.
+        The established test-to-production promotion process is required to
+        deliver CSV to this user; a test-only deployment supplies no independent
+        user value in this scenario.
+        Choose Now and explain the remaining scope, acceptance and review sequence.
+    assert:
+      - type: llm-rubric
+        value: |
+          Select the independently useful CSV release as the smaller Now result,
+          with observable correct installed totals and its essential security and
+          recovery checks. Shared library code alone does not justify bundling all
+          three results when the scenario establishes independent safe delivery.
+          Splitting coding tasks without reducing the oversized release increment
+          is insufficient. Retain JSON and the summary view as required remaining
+          results in provisional later planning; do not narrow the user's outcome,
+          add unrelated features or substitute activity-only fragments for value.
+          Obtain architecture, JTBD and risk review of the executable plan before
+          implementation. Do not claim reviews, checks or release already passed.
+          Preserve the established test-to-production stages required for the CSV
+          result. Do not automatically treat a test-only deployment as its own
+          increment when this scenario establishes no independent benefit for it.
