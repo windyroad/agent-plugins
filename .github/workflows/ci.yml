@@ -178,7 +178,7 @@ jobs:
             planning=true
             scope_unknown=true
             changed=''
-          elif printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|packages/planning/(skills/.*|scripts/test/.*)|packages/itil/skills/outcome-led-planning/.*|packages/shared/test/(planning-eval-scope|agent-eval-results|agent-eval-quota-gate)\.bats|scripts/(sync-(planning-skill|codex-plugin-surfaces)\.mjs|run-agent-evals-ci\.sh)|package(-lock)?\.json)$'; then
+          elif printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|packages/planning/(skills/.*|scripts/test/.*)|packages/itil/skills/outcome-led-planning/.*|packages/shared/test/(planning-eval-scope|agent-eval-results|agent-eval-quota-gate|agent-eval-late-quota)\.bats|packages/shared/test/agent-eval-quota-fixture\.py|scripts/(sync-(planning-skill|codex-plugin-surfaces)\.mjs|run-agent-evals-ci\.sh|agent-eval-quota\.py)|package(-lock)?\.json)$'; then
             planning=true
           fi
           echo "planning=$planning" >> "$GITHUB_OUTPUT"
@@ -191,15 +191,15 @@ jobs:
           fi
 
           run="$planning"
-          if [ "$scope_unknown" = true ] || printf '%s\n' "$changed" | grep -Eq '^(scripts/run-agent-evals-ci\.sh|packages/shared/test/agent-eval-quota-gate\.bats|packages/[^/]+/agents/.*|package(-lock)?\.json)$'; then
+          if [ "$scope_unknown" = true ] || printf '%s\n' "$changed" | grep -Eq '^(scripts/(run-agent-evals-ci\.sh|agent-eval-quota\.py)|packages/shared/test/agent-eval-(quota-gate\.bats|late-quota\.bats|quota-fixture\.py)|packages/[^/]+/agents/.*|package(-lock)?\.json)$'; then
             echo "agents=true" >> "$GITHUB_OUTPUT"
             run=true
           fi
-          if [ "$scope_unknown" = true ] || printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|packages/itil/skills/(work-problems|update-upstream|manage-incident)/(SKILL\.md|eval/.*)|package(-lock)?\.json)$'; then
+          if [ "$scope_unknown" = true ] || printf '%s\n' "$changed" | grep -Eq '^(scripts/(run-agent-evals-ci\.sh|agent-eval-quota\.py)|packages/shared/test/agent-eval-(quota-gate\.bats|late-quota\.bats|quota-fixture\.py)|\.github/workflows/ci\.yml|packages/itil/skills/(work-problems|update-upstream|manage-incident)/(SKILL\.md|eval/.*)|package(-lock)?\.json)$'; then
             echo "skills=true" >> "$GITHUB_OUTPUT"
             run=true
           fi
-          if [ "$scope_unknown" = true ] || printf '%s\n' "$changed" | grep -Eq '^(\.github/workflows/ci\.yml|packages/(voice-tone|risk-scorer)/skills/assess-external-comms/(SKILL\.md|eval/.*)|package(-lock)?\.json)$'; then
+          if [ "$scope_unknown" = true ] || printf '%s\n' "$changed" | grep -Eq '^(scripts/(run-agent-evals-ci\.sh|agent-eval-quota\.py)|packages/shared/test/agent-eval-(quota-gate\.bats|late-quota\.bats|quota-fixture\.py)|\.github/workflows/ci\.yml|packages/(voice-tone|risk-scorer)/skills/assess-external-comms/(SKILL\.md|eval/.*)|package(-lock)?\.json)$'; then
             echo "remediation=true" >> "$GITHUB_OUTPUT"
             run=true
           fi
@@ -248,46 +248,10 @@ jobs:
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           AGENT_EVAL_RUN_AGENTS: ${{ steps.scope.outputs.agents }}
+          AGENT_EVAL_RUN_SKILLS: ${{ steps.scope.outputs.skills }}
+          AGENT_EVAL_RUN_REMEDIATION: ${{ steps.scope.outputs.remediation }}
+          AGENT_EVAL_RUN_PLANNING: ${{ steps.scope.outputs.planning }}
         run: scripts/run-agent-evals-ci.sh
-
-      - name: Verify work-problems appetite behavior
-        if: steps.scope.outputs.skills == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
-        env:
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: npx promptfoo eval -c packages/itil/skills/work-problems/eval/risk-appetite.promptfooconfig.yaml --no-table --output docs/audits/agent-evals-workspace/work-problems-appetite.json
-
-      - name: Verify update-upstream gate verdict behavior
-        if: steps.scope.outputs.skills == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
-        env:
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: npx promptfoo eval -c packages/itil/skills/update-upstream/eval/promptfooconfig.yaml --filter-pattern 'AFK below-appetite|AFK external-comms FAIL|Gate composition is mandatory' --no-table --output docs/audits/agent-evals-workspace/update-upstream.json
-
-      - name: Verify authorized draft remediation behavior
-        if: steps.scope.outputs.remediation == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
-        env:
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: |
-          npx promptfoo eval -c packages/voice-tone/skills/assess-external-comms/eval/promptfooconfig.yaml --filter-pattern 'Routine failed release|Material unresolved' --no-table --output docs/audits/agent-evals-workspace/voice-remediation.json
-          npx promptfoo eval -c packages/risk-scorer/skills/assess-external-comms/eval/promptfooconfig.yaml --no-table --output docs/audits/agent-evals-workspace/risk-remediation.json
-
-      - name: Verify incident eligibility behavior
-        if: steps.scope.outputs.skills == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
-        env:
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: |
-          npx promptfoo eval -c packages/itil/skills/work-problems/eval/grader-boundary.promptfooconfig.yaml --no-table --output docs/audits/agent-evals-workspace/grader-boundary.json
-          npx promptfoo eval -c packages/itil/skills/manage-incident/eval/promptfooconfig.yaml --filter-pattern 'Incident eligibility' --no-table --output docs/audits/agent-evals-workspace/incident-eligibility.json
-
-      - name: Build planning Codex projection for qualification
-        if: steps.scope.outputs.planning == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
-        run: node scripts/sync-codex-plugin-surfaces.mjs planning --build
-
-      - name: Verify planning behavior with Claude on both skill surfaces
-        if: steps.scope.outputs.planning == 'true' && steps.token.outputs.present == 'true' && steps.agent-evals.outputs.quota-exhausted != 'true'
-        env:
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          PLANNING_EVAL_RUNTIME: claude
-        run: npx promptfoo eval -c packages/planning/skills/outcome-led-planning/eval/promptfooconfig.yaml --max-concurrency 2 --no-table --output docs/audits/agent-evals-workspace/planning-claude.json
 
       - name: Retain complete evaluation results
         if: always() && steps.token.outputs.present == 'true'

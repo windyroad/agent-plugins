@@ -16,6 +16,12 @@ const [root,fixture]=process.argv.slice(2);
 const workflow=YAML.parse(fs.readFileSync(root+'/.github/workflows/ci.yml','utf8'));
 const scope=workflow.jobs['eval-agents'].steps.find(s=>s.id==='scope');
 fs.writeFileSync(fixture+'/scope.sh',scope.run);
+const runner=workflow.jobs['eval-agents'].steps.find(s=>s.id==='agent-evals');
+if(runner.run !== 'scripts/run-agent-evals-ci.sh') throw Error('workflow bypasses quota-aware runner');
+for (const [flag,scope] of Object.entries({AGENTS:'agents',SKILLS:'skills',REMEDIATION:'remediation',PLANNING:'planning'})) {
+ if(runner.env['AGENT_EVAL_RUN_'+flag] !== '${{ steps.scope.outputs.'+scope+' }}') throw Error('lost runner selection '+flag);
+}
+if(workflow.jobs['eval-agents'].steps.some(s=>s.run?.includes('npx promptfoo eval'))) throw Error('campaign escaped quota boundary');
 if (scope.env.BEFORE_SHA !== '${{ github.event.before }}') throw Error('push base must come from event.before');
 JS
   python3 - "$FIXTURE" <<'PY'
@@ -40,7 +46,7 @@ def evaluate(event,changed,expected,**extra):
  return calls.read_text()
 for event in ['pull_request','push']:
  evaluate(event,'website/src/content/docs/outcome-led-planning.md',{'planning':'false','run':'false' if event=='pull_request' else 'true'})
- for path in ['packages/planning/skills/outcome-led-planning/SKILL.md','packages/planning/skills/outcome-led-planning/references/github-coordination.md','packages/planning/skills/outcome-led-planning/eval/run-skill-eval.sh','packages/planning/skills/outcome-led-planning/test/eval-runner.bats','packages/itil/skills/outcome-led-planning/SKILL.md','scripts/sync-planning-skill.mjs','scripts/sync-codex-plugin-surfaces.mjs','scripts/run-agent-evals-ci.sh','packages/shared/test/agent-eval-quota-gate.bats','packages/planning/scripts/test/planning-package.bats','packages/shared/test/planning-eval-scope.bats','.github/workflows/ci.yml','package-lock.json']:
+ for path in ['packages/planning/skills/outcome-led-planning/SKILL.md','packages/planning/skills/outcome-led-planning/references/github-coordination.md','packages/planning/skills/outcome-led-planning/eval/run-skill-eval.sh','packages/planning/skills/outcome-led-planning/test/eval-runner.bats','packages/itil/skills/outcome-led-planning/SKILL.md','scripts/sync-planning-skill.mjs','scripts/sync-codex-plugin-surfaces.mjs','scripts/run-agent-evals-ci.sh','scripts/agent-eval-quota.py','packages/shared/test/agent-eval-quota-fixture.py','packages/shared/test/agent-eval-late-quota.bats','packages/shared/test/agent-eval-quota-gate.bats','packages/planning/scripts/test/planning-package.bats','packages/shared/test/planning-eval-scope.bats','.github/workflows/ci.yml','package-lock.json']:
   evaluate(event,path,{'planning':'true','run':'true'})
  for path in ['packages/planning/package.json','packages/planning/CHANGELOG.md','packages/planning/.claude-plugin/plugin.json','packages/planning/.codex-plugin/plugin.json','packages/planning/README.md']:
   evaluate(event,path,{'planning':'false','run':'false' if event=='pull_request' else 'true','agents':'false' if event=='pull_request' else 'true','skills':'false' if event=='pull_request' else 'true','remediation':'false' if event=='pull_request' else 'true'})
@@ -48,6 +54,8 @@ for event in ['pull_request','push']:
  evaluate(event,'docs/other.md',{'planning':'true','agents':'true','skills':'true','remediation':'true','run':'true'},**({'BASE_SHA':''} if event=='pull_request' else {'BEFORE_SHA':'0000000000000000000000000000000000000000'}))
 # The earlier planning change in a multicommit push must be in before..head.
 assert evaluate('push','packages/planning/skills/outcome-led-planning/SKILL.md\nREADME.md',{'planning':'true','agents':'true','skills':'true','remediation':'true'}).count('push-before')==1
+for path in ['scripts/run-agent-evals-ci.sh','scripts/agent-eval-quota.py','packages/shared/test/agent-eval-quota-fixture.py','packages/shared/test/agent-eval-late-quota.bats']:
+ evaluate('pull_request',path,{'agents':'true','skills':'true','remediation':'true','planning':'true','run':'true'})
 evaluate('pull_request','packages/planning/skills/outcome-led-planning/SKILL.md',{'agents':'false','skills':'false','remediation':'false','planning':'true','run':'true'})
 evaluate('pull_request','packages/architect/agents/architect.md',{'agents':'true','skills':'false','remediation':'false','planning':'false','run':'true'})
 evaluate('pull_request','packages/itil/skills/manage-incident/SKILL.md',{'agents':'false','skills':'true','remediation':'false','planning':'false','run':'true'})

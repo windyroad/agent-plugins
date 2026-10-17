@@ -243,6 +243,31 @@ G11 keeps every original assertion and failed result. It isolates the shared gra
 
 CI run `38986500635` retained 16 passing planning cases and 32 provider errors after Claude session quota expired. Two retained diagnostics identify the session limit; remaining errors do not preserve that exact line. The campaign provides no complete qualification. G19a narrows only the already-conditional planning campaign to behavioral source, projection and evaluation inputs, avoiding duplicate planning calls on version-only changes. Existing full-main governance campaigns, unconditional checks, conservative unknown-range behavior and provider failure handling remain unchanged. Final qualification requires a complete fresh 54-case campaign for each runtime; the original 49 governance cases remain required. One bounded attempt after observed provider recovery is permitted; previous failures remain evidence.
 
+
+## Late subscription quota handling, 2026-10-17
+
+CI run `39008611611` attempt 1 retained 32 successful governance cases, zero
+assertion failures and two provider errors, then stopped before planning.
+Attempt 2 passed by detecting quota exhaustion at the initial probe and warning;
+it supplied no additional model-test evidence. The account owner and the cause
+of its continued exhaustion after the expected reset remain unverified.
+
+The user requested that Claude tests be disabled when quota is exceeded.
+G33Q / STORY-109 implements proposed ADR-141's narrow unavailable-coverage
+exception for pure quota exhaustion at any campaign boundary. The existing
+runner retains campaign selection, commands and partial JSON. Its temporary
+forwarding shim sees actual Claude diagnostics rather than serialized prompts;
+only a pure unsuccessful quota response latches unavailability. The complete
+known bash evaluation script must independently produce only quota diagnostics
+before a distinct outer provider proof is granted. Fresh structured results
+must contain only proven quota provider errors among failed rows and no
+assertion or ordinary subprocess failures. Missing, malformed, stale, mixed,
+authentication, transport and unrecognized failures remain blocking. No skipped
+case receives model-test pass credit, and a later available job runs normally.
+This supersedes the earlier quota-specific demand to obtain unavailable CI calls
+before delivery; actual local runtime qualification remains separate evidence.
+Exact implementation verification remains pending. P459 remains Known Error.
+
 ## Stories
 
 | ID | Title | Status |

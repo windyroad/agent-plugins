@@ -27,8 +27,9 @@ In order to diagnose CI failures without confusing hypothetical proposals with t
 
 - [ ] The Claude architect evaluation uses the existing isolated fixture repository, exact agent prompt and model, and read-only fixture inspection without ambient settings, hooks or MCP configuration.
 - [ ] Existing agent suites and CI skill checks retain complete structured responses and grading results in designated audit JSON artifacts, excluding credentials, environment dumps and runtime configuration.
-- [ ] Behavioral checks exercise subprocess isolation, result transport and serialization, and preserve nonzero provider and evaluation failures; existing scenarios, assertions, model roles and retry policies remain unchanged.
-- [ ] A meaningful new source revision passes the exact required CI, including the original incident eligibility group; a passing execution does not explain the unavailable first failing response.
+- [ ] Behavioral checks exercise subprocess isolation, result transport and serialization, and preserve nonzero provider and evaluation failures except recognized pure subscription exhaustion under proposed ADR-141; existing scenarios, assertions, model roles and retry policies remain unchanged.
+- [ ] Pure quota exhaustion at the probe or during any selected campaign stops further Claude calls, warns and retains partial JSON without model-test pass credit. Mixed, semantic and unclassified failures remain blocking; a later available job runs normally.
+- [ ] A meaningful new source revision passes the exact required CI with the original incident eligibility cases retained. Selected Claude campaigns provide actual results or an explicit pure-quota unavailable warning under proposed ADR-141; unavailable cases receive no pass credit. A passing execution does not explain the unavailable first failing response.
 
 ## INVEST assessment
 
@@ -59,6 +60,28 @@ Plan G14 preserves the retained G11 native grades: all four match the expected t
 Plan G13 applies the existing neutral rubric-grader boundary and diagnostic retention to planning's separate evaluation driver. Its owning tests preserve first-argument forwarding, independent subject/grader data and interview sessions, and observe isolated cwd, cleanup, EOF and exact nonzero diagnostics. CI gains a conditional planning campaign and retained result JSON, with behavioral range and command-transport checks. G14 exact CI and the new native campaign remain prerequisites for subsequent integration and qualification respectively.
 
 CI run `38986500635` retained 16 passing planning cases and 32 provider errors after Claude session quota expired. Two retained diagnostics identify the session limit; remaining errors do not preserve that exact line. The campaign provides no complete qualification. G19a narrows only the already-conditional planning campaign to behavioral source, projection and evaluation inputs, avoiding duplicate planning calls on version-only changes. Existing full-main governance campaigns, unconditional checks, conservative unknown-range behavior and provider failure handling remain unchanged. Final qualification requires a complete fresh 54-case campaign for each runtime; the original 49 governance cases remain required. One bounded attempt after observed provider recovery is permitted; previous failures remain evidence.
+
+
+## Quota handling requested during qualification
+
+Source CI run `39008611611` initially retained 32 successful governance cases
+and two provider errors, then stopped before planning. Its second attempt passed
+the CI job by warning and skipping at the initial quota probe; it supplied no
+additional model-test evidence. The user explicitly requested disabling Claude
+tests when quota is exceeded, including exhaustion after a successful probe.
+
+G33Q follows proposed, unconfirmed ADR-141. The existing CI runner owns all
+selected campaigns and their original commands. A temporary Claude forwarding
+shim recognizes only actual unsuccessful pure quota diagnostics and stops
+further calls. A second forwarding boundary captures each known evaluation
+script completely and grants a distinct provider proof only when no other
+diagnostic accompanies the quota error. A command may warn and stop subsequent
+campaigns only when fresh structured results contain quota provider errors and
+no assertion or unrelated failure. Existing designated partial JSON is retained.
+Ordinary failures keep their nonzero status. State is temporary to the job;
+future available jobs run normally. No model, rubric, authentication or published
+plugin payload changes are included. Owning behavioral checks and exact new CI
+must establish this repair before claiming it delivered.
 
 ## Dependencies
 
