@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-10-17 **P559 verification pending** - Planning 0.3.0 and compatibility 3.3.0 published; behavior, registry, standalone runtime loading and live docs qualified.
+> Last reviewed: 2026-10-17 **P559 closed on evidence** - Published optional GitHub coordination, standalone native loading and live documentation verified; recovery command retained.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -314,7 +314,6 @@ Fix released, awaiting user verification (driven off the dual-tolerant glob `doc
 | P437 | Wardley converter lacks a version-stable invocation path | 2026-09-19 (@windyroad/wardley 0.3.0; registry/package checks 2026-10-15) | no — not observed |
 | P539 | Governance reviewer plugins lack one canonical Codex completion transport, so marker fixes do not propagate | 2026-10-01 (Architect 0.23.9, JTBD 0.14.11, Risk Scorer 0.19.15, Style Guide 0.6.9, Voice Tone 0.9.7; nested target resolver) | no — not observed |
 | P555 | Initial deficiencies are misclassified as incidents | 2026-10-08 (@windyroad/itil 3.0.1, PR526) | no — not observed |
-| P559 | Outcome-led planning lacks optional GitHub agent coordination | 2026-10-17 (`@windyroad/planning@0.3.0`, `@windyroad/itil@3.3.0`; PR #533) | no — not observed |
 
 
 ## Inbound Upstream Reports
@@ -418,6 +417,7 @@ Recently closed this session (2026-04-19/20, against direct in-session evidence)
 
 | ID | Title | Closed via |
 |----|-------|-----------|
+| P559 | Outcome-led planning lacks optional GitHub agent coordination | Closed 2026-10-17 on planning 0.3.0 and compatibility 3.3.0, 58 passing source cases per runtime, qualified registry payloads, standalone native loading and live artifact/journey verification. [Evidence](closed/559-outcome-led-planning-lacks-optional-github-agent-coordination.md). Recovery: `/wr-itil:transition-problem 559 known-error`. |
 | P558 | No public searchable documentation site for plugin users | Closed 2026-10-16 on source 29f566b6, successful Pages workflow 38750360372, exact artifact review and live 80-route/mobile/desktop/search verification. [Evidence](closed/558-no-public-searchable-documentation-site-for-plugin-users.md). Recovery: `/wr-itil:transition-problem 558 known-error`. |
 | P557 | No published skill supports outcome-led iterative planning | Closed 2026-10-15 on published `@windyroad/itil@3.1.0`, registry integrity, 22 semantic scenarios, nine targeted checks and fresh native Claude Code/Codex confirmation-gate exercise. [Evidence](closed/557-no-published-skill-supports-outcome-led-iterative-planning.md). Recovery: `/wr-itil:transition-problem 557 known-error`. |
 | P477 | Codex collaboration completion bypasses the risk-marker bridge | Closed 2026-10-15 on local Codex 0.162.0 installed-runtime evidence: fresh typed pipeline result consumed by the guarded command without an unavailable-evidence advisory, plus Architecture/JTBD/Style Guide/Voice Tone typed PASS followed by installed edit-hook PASS. Cloud-runtime recovery is unclaimed. Recovery: `/wr-itil:transition-problem 477 known-error`. |

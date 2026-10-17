@@ -1,6 +1,6 @@
 # Problem 559: Outcome-led planning lacks optional GitHub agent coordination
 
-**Status**: Verification Pending
+**Status**: Closed (closed-on-evidence 2026-10-17 - final verification below cites 58 passing cases per runtime, qualified registry artifacts, standalone native reference loading and live documentation. Recovery: rerun /wr-itil:transition-problem 559 known-error to reopen)
 **Reported**: 2026-10-16
 **Priority**: 6 (Medium) - Impact: 2 × Likelihood: 3
 **Origin**: internal
@@ -102,4 +102,13 @@ The personal skill was updated first and remains usable with its original picker
 
 The release-vehicle helper resolves `.changeset/current-shared-planning.md` to version commit `696e5d3e72d766acdacf0d1f7b4e3420ef170041`, [PR #533](https://github.com/windyroad/agent-plugins/pull/533), merge `2e53b447baa227c1a25ca7555da37e2e080f04b5`, released 2026-10-17. Both composed transition legs have passed; no conditional deferral or upstream-report surface is present.
 
-Awaiting the separate final close verification; existing qualification evidence is recorded above. The evidence-authorized close requires the normal close-block check and does not require another user confirmation.
+At the Verification Pending stage, the separate final close verification was awaited. That check is completed below; no additional user confirmation is required for this evidence-authorized close.
+
+
+## Final verification and evidence-authorized closure
+
+Final close verification on 2026-10-17 returns PASS (`docs/audits/planning-plugin-workspace/github-planning/g40-p559-final-verification.json`). The normal close-block predicate exits 1, meaning clear. All nine qualified behavioral inputs remain unchanged. The installed personal skill and reference still match the qualified canonical files, with modes preserved. Seven current public routes still match the exact qualified Pages artifact byte for byte.
+
+The retained complete campaigns pass 58 source-evaluation cases in each runtime. The actual stable release, both-package signature/provenance/integrity and payload bindings, fresh standalone planning installation/discovery/native complete reference reads, and deployed public journeys are recorded above and in STORY-108's completion evidence. [Release workflow 39017618182](https://github.com/windyroad/agent-plugins/actions/runs/39017618182), [documentation deployment 39019494258](https://github.com/windyroad/agent-plugins/actions/runs/39019494258) and the [live coordination guide](https://windyroad.github.io/agent-plugins/outcome-led-planning/) identify the shipped result. Native ITIL behavior, full parity, physical-device testing and live cross-account GitHub effects remain outside the verified claims.
+
+This closes P559 on its own capability evidence. It does not close broader P459 or ratify proposed ADR-141. Earlier failed campaigns and the manual coordination workaround remain recorded. Recovery: rerun `/wr-itil:transition-problem 559 known-error` to reopen.
