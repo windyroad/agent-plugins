@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 139 (124 in-force, 15 historical)
+**Total ADRs:** 140 (125 in-force, 15 historical)
 
 ---
 
 ## In-force decisions
 
-_124 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_125 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -632,6 +632,10 @@ _124 ADRs. These are the current rules. The architect agent reads this section f
 **Status:** proposed | **Oversight:** unconfirmed | **Supersedes:** [ADR-075]
 **Chosen:** Chosen option: **recognized pure Claude quota exhaustion leaves evaluations unavailable regardless of when it occurs in the job**. Stop further Claude calls for that job, retain partial results and report the unavailable coverage through an...
 **Confirmation:** Production CI demonstrates that pure late quota exhaustion stops further; Actual qualification demonstrates that mixed, assertion, authentication,; A subsequent available job runs its normally selected evaluations.; Human review ratifies the final decision after reviewing actual evidence.
+
+### ADR-142 — Shared project planning configuration
+**Status:** proposed | **Oversight:** unconfirmed
+**Chosen:** Chosen option: **shared declarative project configuration**. Both skills read the project-declared configuration location, defaulting to `.agents/planning.json`. The version 1 object records `version: 1` and `backend: github` or `backend: l...
 
 ---
 
