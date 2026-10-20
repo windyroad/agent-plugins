@@ -1,6 +1,6 @@
 # Problem Backlog
 
-> Last reviewed: 2026-10-17 **P559 closed on evidence** - Published optional GitHub coordination, standalone native loading and live documentation verified; recovery command retained.
+> Last reviewed: 2026-10-21 **P560 captured** - Persist project planning choices and share useful contribution work without speculative risk tasks.
 > Run `/wr-itil:review-problems` to refresh WSJF rankings.
 
 ## WSJF Rankings
@@ -128,6 +128,7 @@ Dev-work queue only. Verification Pending (`.verifying.md`, WSJF multiplier 0) a
 | 3 | P473 | Story maps are authored as per-fix 1-card stubs, not user journeys — below the STORY-MAP-003 quality bar | 12 (High) | Open | L | 2026-07-27 | corrective-feedback (user, 2026-07-27) |
 | 3 | P489 | The shipped ratification surfaces do not meet the rule they are governed by | 12 (High) | Open | L | 2026-08-09 | internal |
 | 3 | P505 | Seven SKILL.md files breach the 50 KB budget, and nothing converts the measurement into work | 12 (High) | Open | L | 2026-08-20 | internal |
+| 3 | P560 | Planning preferences and contributions lack project continuity | 6 (Medium) | Open | M | 2026-10-21 | internal |
 | 2.25 | P136 | ADR-044 alignment audit — sweep all unaudited skills/hooks/agents/ADRs/JTBDs/READMEs against the framework-resolution boundary (master ticket) | 9 (Medium) | Open | L | 2026-04-27 | internal |
 | 2.25 | P290 | Harden ADR-052 to behavioural-only — remove the structural-test escape hatch entirely | 9 (Medium) | Open | L | 2026-05-25 | internal |
 | 2.25 | P324 | Agent-prose verdicts have no behavioural test harness — forcing the ADR-052 structural-test escape hatch + above-appetite release workarounds, perpetuating the structural tests the user has rejected | 9 (Medium) | Open | L | 2026-05-27 | internal |
