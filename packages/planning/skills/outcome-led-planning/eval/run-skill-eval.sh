@@ -58,7 +58,7 @@ if jq -e 'type == "object" and (.turns | type == "array") and (.turns | length >
   while IFS= read -r encoded; do
     turn="$(jq -r . <<< "$encoded")"
     if $first; then
-      response="$(claude -p "${common[@]}" --session-id "$session" --append-system-prompt "$contract" -- "$turn" </dev/null)"
+      response="$(claude -p "${common[@]}" --session-id "$session" --system-prompt "$contract" -- "$turn" </dev/null)"
       first=false
     else
       response="$(claude -p "${common[@]}" --resume "$session" -- "$turn" </dev/null)"
@@ -67,5 +67,5 @@ if jq -e 'type == "object" and (.turns | type == "array") and (.turns | length >
   done < <(jq -c '.turns[]' <<< "$scenario")
   jq -s . "$scratch/transcript.jsonl"
 else
-  claude -p "${common[@]}" --append-system-prompt "$contract" -- "$scenario"
+  claude -p "${common[@]}" --system-prompt "$contract" -- "$scenario"
 fi

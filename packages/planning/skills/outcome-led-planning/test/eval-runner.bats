@@ -123,6 +123,10 @@ for (const [args, model] of [[first, process.argv[3]], [resumed, process.argv[3]
   assert.equal(args[args.indexOf('--tools') + 1], '');
   assert.equal(args.some(arg => arg.includes('HIDDEN_PROVIDER_METADATA')), false);
 }
+assert.equal(first.filter(arg => arg === '--system-prompt').length, 1);
+assert.equal(first.includes('--append-system-prompt'), false);
+assert.equal(resumed.includes('--system-prompt'), false);
+assert.equal(resumed.includes('--append-system-prompt'), false);
 assert.equal(first.at(-1), 'FIRST_TURN');
 assert.equal(first.some(arg => arg.includes('FUTURE_REPLY') || arg.includes('GRADING_ONLY')), false);
 assert.equal(resumed.at(-1), 'FUTURE_REPLY');
@@ -177,7 +181,11 @@ const calls = fs.readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JS
 assert.equal(calls.length, 8);
 calls.forEach((args, index) => {
   const root = path.join(process.argv[4], Math.floor(index / 2) % 2 ? 'skills-codex' : 'skills');
-  const contract = index < 4 ? args[args.indexOf('--append-system-prompt') + 1] : args.at(-1);
+  if (index < 4) {
+    assert.equal(args.filter(arg => arg === '--system-prompt').length, 1);
+    assert.equal(args.includes('--append-system-prompt'), false);
+  }
+  const contract = index < 4 ? args[args.indexOf('--system-prompt') + 1] : args.at(-1);
   assert.ok(contract.includes(fs.readFileSync(path.join(root, 'contribute/SKILL.md'), 'utf8').trimEnd()));
   assert.ok(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/references/project-tracking.md'), 'utf8').trimEnd()));
   assert.equal(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/references/github-coordination.md'), 'utf8').trimEnd()), index % 2 === 1);
@@ -212,7 +220,7 @@ const assert = require('node:assert/strict');
 const calls = fs.readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JSON.parse);
 assert.equal(calls.length, 12);
 calls.forEach((args, index) => {
-  const contract = args.includes('--append-system-prompt') ? args[args.indexOf('--append-system-prompt') + 1] : args.at(-1);
+  const contract = args.includes('--system-prompt') ? args[args.indexOf('--system-prompt') + 1] : args.at(-1);
   const backend = ['github', 'local', 'unset'][index % 3];
   assert.equal(contract.includes('Scenario tracking backend: '), backend !== 'unset');
   if (backend !== 'unset') assert.ok(contract.includes(`Scenario tracking backend: ${backend}.`));
@@ -234,7 +242,7 @@ const lines = require('node:fs').readFileSync(process.argv[2], 'utf8').trim().sp
 assert.equal(lines.length, 2);
 for (const args of lines) {
   const fixture = require('node:fs').readFileSync(process.argv[3] + '/eval/fixture-context.txt', 'utf8').trimEnd();
-  assert.ok(args[args.indexOf('--append-system-prompt') + 1].includes(fixture));
+  assert.ok(args[args.indexOf('--system-prompt') + 1].includes(fixture));
   assert.equal(args.at(-1), 'SUBJECT_SCENARIO');
   assert.equal(args.some(arg => arg.includes('DO_NOT_FORWARD')), false);
   assert.equal(args[args.indexOf('--tools') + 1], '');
@@ -260,7 +268,7 @@ const calls = fs.readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JS
 const refs = [process.argv[3], path.join(process.argv[4], 'skills-codex/outcome-led-planning')].map(root => fs.readFileSync(path.join(root, 'references/github-coordination.md'), 'utf8').trimEnd());
 assert.equal(calls.length, 4);
 calls.forEach((args, index) => {
-  const contract = args[args.indexOf('--append-system-prompt') + 1];
+  const contract = args[args.indexOf('--system-prompt') + 1];
   assert.equal(contract.includes(refs[Math.floor(index / 2)]), index % 2 === 0);
   assert.equal(args.at(-1), index % 2 === 0 ? 'GITHUB_SCENARIO' : 'LOCAL_SCENARIO');
   assert.equal(args.some(value => value.includes('DO_NOT_FORWARD')), false);
@@ -279,7 +287,7 @@ const stdin = require('node:fs').readFileSync(process.argv[3], 'utf8').trim().sp
 assert.deepEqual(stdin, ['', '']);
 const [first, second] = require('node:fs').readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JSON.parse);
 const fixture = require('node:fs').readFileSync(process.argv[4] + '/eval/fixture-context.txt', 'utf8').trimEnd();
-assert.ok(first[first.indexOf('--append-system-prompt') + 1].includes(fixture));
+assert.ok(first[first.indexOf('--system-prompt') + 1].includes(fixture));
 assert.equal(first.at(-1), 'FIRST_USER_TURN');
 assert.equal(second.at(-1), 'SECOND_USER_TURN');
 assert.equal(first.some(arg => arg.includes('SECOND_USER_TURN')), false);
@@ -288,7 +296,7 @@ assert.ok(second.includes('--resume'));
 assert.ok(first[first.indexOf('--session-id') + 1]);
 assert.ok(second[second.indexOf('--resume') + 1]);
 assert.equal(first[first.indexOf('--session-id') + 1], second[second.indexOf('--resume') + 1]);
-assert.equal(second.includes('--append-system-prompt'), false);
+assert.equal(second.includes('--system-prompt'), false);
 assert.equal([...first, ...second].some(arg => arg.includes('DO_NOT_FORWARD')), false);
 NODE
   [ "$status" -eq 0 ]
