@@ -55,8 +55,19 @@ Tracking choice is presently scoped to a plan/session rather than declarative pr
 - **Blocks**: reusable project-persistent planning and contributions.
 - **Composes with**: independently available architecture, JTBD and risk reviewers.
 
+## RFCs
+
+- RFC-110: Remember project tracking choices and share increment work (STORY-110 on STORY-MAP-002).
+
 ## Related
 
 - P559 delivered original optional GitHub coordination; preserve its completed scope.
 - Fresh-context hang-off review returned PROCEED_NEW because the completed original planning tickets contain no deferred project-persistence or separate contribution entrypoint scope.
 - Confirmed user deadline: by lunchtime on 2026-10-21, Australia/Sydney. This record makes no publication or runtime-verification claim before those stages complete.
+
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| STORY-110 | STORY-110: Remember project tracking choices and share increment work | draft |

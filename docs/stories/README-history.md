@@ -147,3 +147,7 @@
 
 > Last reviewed: 2026-10-16 **STORY-109 in progress** - CI fixture isolation and complete result transport implemented; qualification pending.
 > Last reviewed: 2026-10-17 **STORY-108 done** - Shared planning released and qualified in both runtimes; live documentation verified.
+
+## 2026-10-21
+
+> Last reviewed: 2026-10-17 **STORY-109 done** - CI isolation, complete diagnostics and quota-unavailable handling verified; broader P459 remains Known Error.
