@@ -51,7 +51,7 @@ trap 'rm -rf "$scratch"' EXIT
 cd "$scratch"
 # Additional exec-provider arguments contain test metadata, including rubrics.
 # Only the scenario may reach the subject; future interview replies stay separate.
-common=(--tools "" --disable-slash-commands --setting-sources "" --strict-mcp-config --mcp-config '{"mcpServers":{}}')
+common=(--model "${AGENT_EVAL_MODEL:-claude-sonnet-5}" --tools "" --disable-slash-commands --setting-sources "" --strict-mcp-config --mcp-config '{"mcpServers":{}}')
 if jq -e 'type == "object" and (.turns | type == "array") and (.turns | length > 0) and all(.turns[]; type == "string")' <<< "$scenario" >/dev/null 2>&1; then
   session="$(node -p 'require("node:crypto").randomUUID()')"
   first=true

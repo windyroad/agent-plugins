@@ -24,7 +24,7 @@ GRADER_SYSTEM+="$(cat "$(dirname "${BASH_SOURCE[0]}")/fixture-context.txt")"
 GRADER_WORKSPACE="$(mktemp -d)"
 trap 'rm -rf "$GRADER_WORKSPACE"' EXIT
 
-if raw="$(cd "$GRADER_WORKSPACE" && claude -p --safe-mode \
+if raw="$(cd "$GRADER_WORKSPACE" && claude -p --model "${AGENT_EVAL_GRADER_MODEL:-claude-opus-5-5}" --safe-mode \
   --system-prompt "$GRADER_SYSTEM" --tools '' --permission-mode dontAsk \
   --no-session-persistence "${1:?expected grading prompt}" < /dev/null)"; then
   :

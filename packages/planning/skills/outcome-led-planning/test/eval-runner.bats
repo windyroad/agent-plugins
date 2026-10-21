@@ -92,6 +92,54 @@ teardown() {
   rm -rf "$TMP"
 }
 
+@test "Claude subjects and graders transport distinct declared model roles on both surfaces" {
+  for surface in source codex; do
+    for profile in default override; do
+      : > "$EVAL_ARGV"
+      if [ "$profile" = default ]; then
+        roles=(-u AGENT_EVAL_MODEL -u AGENT_EVAL_GRADER_MODEL)
+        subject_model=claude-sonnet-5
+        grader_model=claude-opus-5-5
+      else
+        roles=(AGENT_EVAL_MODEL=fixture-subject AGENT_EVAL_GRADER_MODEL=fixture-grader)
+        subject_model=fixture-subject
+        grader_model=fixture-grader
+      fi
+      run env "${roles[@]}" PLANNING_EVAL_RUNTIME=claude bash "$SKILL/eval/run-skill-eval.sh" "$surface" \
+        '{"turns":["FIRST_TURN","FUTURE_REPLY"]}' HIDDEN_PROVIDER_METADATA
+      [ "$status" -eq 0 ]
+      run env "${roles[@]}" PLANNING_EVAL_RUNTIME=claude bash "$SKILL/eval/grade-llm-rubric.sh" \
+        GRADING_ONLY HIDDEN_PROVIDER_METADATA
+      [ "$status" -eq 0 ]
+      run node - "$EVAL_ARGV" "$subject_model" "$grader_model" <<'NODE'
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const calls = fs.readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JSON.parse);
+assert.equal(calls.length, 3);
+const [first, resumed, grader] = calls;
+for (const [args, model] of [[first, process.argv[3]], [resumed, process.argv[3]], [grader, process.argv[4]]]) {
+  assert.equal(args.filter(arg => arg === '--model').length, 1);
+  assert.equal(args[args.indexOf('--model') + 1], model);
+  assert.equal(args[args.indexOf('--tools') + 1], '');
+  assert.equal(args.some(arg => arg.includes('HIDDEN_PROVIDER_METADATA')), false);
+}
+assert.equal(first.at(-1), 'FIRST_TURN');
+assert.equal(first.some(arg => arg.includes('FUTURE_REPLY') || arg.includes('GRADING_ONLY')), false);
+assert.equal(resumed.at(-1), 'FUTURE_REPLY');
+assert.equal(resumed[resumed.indexOf('--resume') + 1], first[first.indexOf('--session-id') + 1]);
+assert.equal(first[first.indexOf('--setting-sources') + 1], '');
+assert.equal(resumed[resumed.indexOf('--setting-sources') + 1], '');
+assert.equal(grader.at(-1), 'GRADING_ONLY');
+assert.equal(grader.some(arg => arg.includes('FIRST_TURN') || arg.includes('FUTURE_REPLY')), false);
+assert.ok(grader.includes('--safe-mode'));
+assert.ok(grader.includes('--no-session-persistence'));
+assert.equal(grader[grader.indexOf('--permission-mode') + 1], 'dontAsk');
+NODE
+      [ "$status" -eq 0 ]
+    done
+  done
+}
+
 @test "Codex subject and grader retain failed provider diagnostics and clean their workspace" {
   run env EVAL_FAIL=1 PLANNING_EVAL_RUNTIME=codex bash "$SKILL/eval/run-skill-eval.sh" source CURRENT_SCENARIO
   [ "$status" -ne 0 ]
