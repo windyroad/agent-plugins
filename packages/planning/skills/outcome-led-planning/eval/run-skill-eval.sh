@@ -9,19 +9,35 @@ case "$surface" in
   codex) skill="$HERE/../../../skills-codex/outcome-led-planning/SKILL.md" ;;
   *) echo 'Expected source or codex skill surface.' >&2; exit 2 ;;
 esac
+scenario="${1:?expected scenario}"
+entry=outcome-led-planning
+if jq -e 'type == "object" and has("skill")' <<< "$scenario" >/dev/null 2>&1; then
+  entry="$(jq -r .skill <<< "$scenario")"
+fi
+case "$entry" in
+  outcome-led-planning|contribute) ;;
+  *) echo 'Expected outcome-led-planning or contribute skill envelope.' >&2; exit 2 ;;
+esac
 if [ "${PLANNING_EVAL_RUNTIME:-claude}" = codex ]; then
   exec python3 "$HERE/codex-eval.py" subject "${1:?expected scenario}" "$skill"
 fi
 [ "${PLANNING_EVAL_RUNTIME:-claude}" = claude ] || { echo 'Expected explicit claude or codex runtime.' >&2; exit 2; }
 contract="$(cat "$HERE/fixture-context.txt")"
+references="$(dirname "$skill")/references"
+[ "$entry" != contribute ] || skill="$(dirname "$skill")/../contribute/SKILL.md"
 contract+=$'\n\n'
 contract+="$(cat "$skill")"
-scenario="${1:?expected scenario}"
+contract+=$'\n\n'
+contract+="$(cat "$references/project-tracking.md")"
+if [ "$entry" = outcome-led-planning ]; then
+  contract+=$'\n\n'
+  contract+="$(cat "$references/planning-details.md")"
+fi
 # Only an explicit selected-mode envelope loads the conditional reference.
 # Provider metadata/rubrics and future turns never select or reach the subject.
 if jq -e 'type == "object" and .tracking == "github"' <<< "$scenario" >/dev/null 2>&1; then
   contract+=$'\n\n'
-  contract+="$(cat "$(dirname "$skill")/references/github-coordination.md")"
+  contract+="$(cat "$references/github-coordination.md")"
 fi
 if jq -e 'type == "object" and (.prompt | type == "string")' <<< "$scenario" >/dev/null 2>&1; then
   scenario="$(jq -r .prompt <<< "$scenario")"

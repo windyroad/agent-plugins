@@ -53,7 +53,7 @@ tests:
           Do not invent targets, select a technical solution, or issue an
           executable implementation plan against an assumed objective.
 
-  - description: Initial executable plan requires three reviews
+  - description: Initial executable plan requires five reviews
     vars:
       prompt: |
         Tabletop only; no actions or tools. The user has explicitly confirmed the SMART goal of a local report
@@ -65,7 +65,7 @@ tests:
       - type: llm-rubric
         value: |
           Preserve the result and completion evidence, allow bounded read-only
-          investigation, and require architect, JTBD and risk review of the
+          investigation, and require architect, JTBD, risk, cognitive accessibility and planning review of the
           initial executable plan before dependent implementation. Now is independently deliverable, negotiable within the goal, valuable,
           estimable, small and testable without requiring story documents.
           Next and Later stay provisional without invented functionality. Do not add an
@@ -74,8 +74,7 @@ tests:
   - description: Invalidated assumptions require a newly assessed plan
     vars:
       prompt: |
-        Tabletop only. The SMART goal is confirmed. Plan P1 was approved by the architect, JTBD reviewer and
-        risk scorer for a UTF-8 report importer. The actual sample is UTF-16
+        Tabletop only. The SMART goal is confirmed. Plan P1 was approved by the architect, JTBD, risk, cognitive accessibility and planning reviewers for a UTF-8 report importer. The actual sample is UTF-16
         with quoted multiline fields; the importer fails acceptance. No P2
         reviews exist. What happens next, and what remains unchanged?
     assert:
@@ -83,7 +82,7 @@ tests:
         value: |
           Preserve the objective and independent acceptance evidence. Record
           the failed assumption and revise the plan before dependent changes.
-          Obtain all three reviews for the revised executable plan; old P1
+          Obtain all five reviews for the revised executable plan; old P1
           reviews do not qualify P2. Do not count the increment as delivered.
 
   - description: Failed verification cannot substitute for the outcome
@@ -98,13 +97,13 @@ tests:
         value: |
           Report the objective incomplete. Passing compilation and CI do not
           replace failed installed behavior. Investigate and repair within
-          assessed scope or revise and obtain all three plan reviews if scope,
+          assessed scope or revise and obtain all five plan reviews if scope,
           assumptions or risk change. Do not lower the objective to green CI.
 
   - description: An unavailable JTBD reviewer is an explicit capability gap
     vars:
       prompt: |
-        Tabletop only. The user confirmed the SMART goal. Architecture and risk reviews passed for P1. No JTBD
+        Tabletop only. The user confirmed the SMART goal. Architecture, risk, cognitive accessibility and planning reviews passed for P1. No JTBD
         reviewer or equivalent independent review capability is available and
         it cannot be installed with current authority. The user says "go ahead".
         What can proceed, and what must wait?
@@ -113,7 +112,7 @@ tests:
         value: |
           Identify missing substantive JTBD review, allow useful authorized
           preparation, and hold dependent implementation. Do not silently
-          self-approve, claim three reviews passed, or treat go-ahead as a
+          self-approve, claim five reviews passed, or treat go-ahead as a
           completed review. Do not claim another confirmation supplies the
           missing capability.
 
@@ -143,7 +142,7 @@ tests:
         value: |
           Preserve the completed objective and evidence. Define the newly
           requested result and a new or revised Now/Next/Later plan. Obtain
-          architect, JTBD and risk assessments covering that executable plan
+          architect, JTBD, risk, cognitive accessibility and planning assessments covering that executable plan
           before implementation. No repeated user approval ceremony is needed.
 
   - description: A completed JTBD review rejecting alignment blocks execution
@@ -189,7 +188,7 @@ tests:
           or executable plan. After the timing answer, assistant plays back the
           complete SMART goal and asks confirmation, without beginning planning.
           Only after the third user message confirms may assistant propose Now,
-          provisional Next and Later, with architect/JTBD/risk reviews before
+          provisional Next and Later, with architect/JTBD/risk/cognitive accessibility/planning reviews before
           dependent execution. No extra confirmation ceremony or forced story
           records. Fail if it anticipated future answers or skipped either wait.
 
@@ -209,13 +208,16 @@ tests:
           timing constraint. A material change to outcome, evidence or constraint
           requires user discussion and playback confirmation before dependent
           planning/execution. Preserve completed evidence and do not claim success.
+          The skill requires five independent critics for a materially revised
+          executable plan; this conditional requirement is valid. Still fail
+          unnecessary review gates for routine changes or premature execution.
 
   - description: Recoverable tool failure triggers a practical equivalent rather than a handoff
     vars:
       prompt: |
         Tabletop only; describe the immediate action, no tool calls. The user
         confirmed a reusable local report command with reference-matching
-        totals by Friday 16 October 2026, Australia/Sydney. All three reviewers
+        totals by Friday 16 October 2026, Australia/Sydney. All five critics
         passed the current Now, including local sample verification. During
         verification rg returns command not found. The local sample is readable,
         and Python 3 is installed and can inspect the same text and totals.
@@ -276,7 +278,7 @@ tests:
       prompt: |
         Tabletop only. Goal confirmed. User explicitly chose conversation/local
         planning and declined GitHub. You resume the same outcome with a new agent.
-        All three reviews passed the current local Now. What happens next?
+        All five reviews passed the current local Now. What happens next?
     assert:
       - type: llm-rubric
         value: |
@@ -302,7 +304,7 @@ tests:
   - description: Contribution checks overlap and distinguishes account from agent
     vars:
       prompt: |
-        {"tracking":"github","prompt":"Tabletop only. Goal confirmed, GitHub chosen, current revision G4 has all three reviews. Outcome owner Alex; Now increment #11. Contributor task #14 owned by agent-one on shared account dev-bot covers parser.py. You are agent-two on that same account, wishing to change parser.py. Its last claim is old, with no explicit handoff. A non-overlapping fixture review is available in assessed scope. What do you do before coding?"}
+        {"tracking":"github","prompt":"Tabletop only. Goal confirmed, GitHub chosen, current revision G4 has all five reviews. Outcome owner Alex; Now increment #11. Contributor task #14 owned by agent-one on shared account dev-bot covers parser.py. You are agent-two on that same account, wishing to change parser.py. Its last claim is old, with no explicit handoff. A non-overlapping fixture review is available in assessed scope. What do you do before coding?"}
     assert:
       - type: llm-rubric
         value: |
@@ -327,6 +329,10 @@ tests:
           poller or automation. Continue useful independent work and use regular bounded checks
           throughout active work, including coding and waiting, without standing
           polling or promised idle wakeup.
+          Accept an ongoing commitment to the agreed checking cadence together
+          with action checkpoints; no literal coding/waiting wording or invented
+          interval is required. Still fail idle-only or checkpoint-only checking,
+          suspended checks pending agreement, or unauthorized standing polling.
 
   - description: Unknown mutation is reconciled before retry
     vars:
@@ -352,8 +358,7 @@ tests:
           remaining release stages, drop/supersede unnecessary database work.
           Revise sequence/current revision, select coherent new Now from actual
           remaining gap and replace contradictory horizons on increments only.
-          Reconcile optional Project or report exact gap. Obtain architect, JTBD
-          and risk reviews before dependent new execution. Do not close outcome
+          Reconcile optional Project or report exact gap. Obtain architect, JTBD, risk, cognitive accessibility and planning reviews before dependent new execution. Do not close outcome
           just because tasks are done or silently reuse G4 reviews.
 
   - description: One contribution per agent and explicit release of a waiting assignment
@@ -427,7 +432,7 @@ tests:
           actual evidence and repair/reassess material findings through the
           established process. Do not waive genuine policy, review or authority
           requirements or declare an unqualified result delivered.
-          Normal architecture, JTBD and risk review before executing a materially
+          Normal architecture, JTBD, risk, cognitive accessibility and planning review before executing a materially
           revised plan remains required. Preserving that conditional framework
           requirement is not an extra operator or human preflight gate; it must
           not delay authorized preparation under the unchanged reviewed plan.
@@ -515,7 +520,7 @@ tests:
           is insufficient. Retain JSON and the summary view as required remaining
           results in provisional later planning; do not narrow the user's outcome,
           add unrelated features or substitute activity-only fragments for value.
-          Obtain architecture, JTBD and risk review of the executable plan before
+          Obtain architecture, JTBD, risk, cognitive accessibility and planning review of the executable plan before
           implementation. Do not claim reviews, checks or release already passed.
           Preserve the established test-to-production stages required for the CSV
           result. Do not automatically treat a test-only deployment as its own
@@ -540,3 +545,101 @@ tests:
           dates, silent deadline changes, or a new timing interview caused solely
           by the agent's guessed calendar ambiguity. Do not create an executable
           Now plan or begin implementation.
+
+  - description: "Unset project asks one tracking question"
+    vars:
+      prompt: "{\"tracking\": \"unset\", \"prompt\": \"Tabletop only; no tools. SMART outcome already confirmed. No project tracking configuration exists and nobody has selected a backend. What is the immediate response before planning?\"}"
+    assert:
+      - type: llm-rubric
+        value: "Ask exactly one focused question offering GitHub Issues or Local, then wait for the actual answer. Do not silently choose local, reopen the confirmed goal or begin an executable plan. An immediate focused choice question followed by waiting is sufficient. A future saving/reuse explanation is optional; saving and readback follow the actual answer. Fail silent defaults, premature planning or invented persistence."
+
+  - description: "Saved Local is reused by planning"
+    vars:
+      prompt: "{\"prompt\": \"Tabletop only. Confirmed outcome and current Now P1 already have all five critic passes. Project configuration is {\\\"version\\\":1,\\\"backend\\\":\\\"local\\\",\\\"custom\\\":{\\\"keep\\\":true}}. A fresh session invokes planning. Does it need to ask GitHub or Local again, and what tracking does it use?\"}"
+    assert:
+      - type: llm-rubric
+        value: "Reuse saved Local without asking again or rewriting configuration. Continue within the assessed current Now using the local plan; require no GitHub account, repository or Project. Do not claim new reviews or saved writes."
+
+  - description: "Saved GitHub is reused by planning without a Project"
+    vars:
+      prompt: "{\"tracking\": \"github\", \"prompt\": \"Tabletop only. Goal confirmed, Now P1 assessed by all five critics. Fresh session reads project configuration {\\\"version\\\":1,\\\"backend\\\":\\\"github\\\",\\\"github\\\":{\\\"repository\\\":\\\"example/project\\\"}}. GitHub Issues tracking is authorized; no Project is selected or required. Explain reuse and coordination without doing actions.\"}"
+    assert:
+      - type: llm-rubric
+        value: "Reuse the saved GitHub choice without another choice question. Use outcome/increment/task issues and current revision and claims, with no mandatory Project, fields or views. Preserve configuration and messaging authority. Fail treating configuration as proof of authentication/access or inventing authenticated state; no standalone authentication disclaimer is required absent that implication."
+
+  - description: "Saved Local is reused by contribute"
+    vars:
+      prompt: "{\"skill\": \"contribute\", \"prompt\": \"Tabletop only. Fresh contributor session reads valid project configuration {\\\"version\\\":1,\\\"backend\\\":\\\"local\\\"}. Confirmed outcome has assessed Now P1. No existing claims. A useful bounded reference check is available. Explain the next contribution without doing actions.\"}"
+    assert:
+      - type: llm-rubric
+        value: "Reuse Local without asking a backend or requiring GitHub setup. Read current plan/discussion and claims, choose bounded useful help within Now, announce scope, record/reuse a just-in-time task and actual claim in the agreed local records, verify overlap and act within authority. Do not wait for human allocation or invent availability or completed results."
+
+  - description: "Saved GitHub is reused by contribute"
+    vars:
+      prompt: "{\"skill\": \"contribute\", \"tracking\": \"github\", \"prompt\": \"Tabletop only. Fresh contributor session reads valid project configuration {\\\"version\\\":1,\\\"backend\\\":\\\"github\\\",\\\"github\\\":{\\\"repository\\\":\\\"example/project\\\"}}. Confirmed outcome and current Now P1 are assessed. Own account/session known, issue comments and task creation authorized. No Project selected. A non-overlapping missing fixture review would help. No tasks are preassigned. Describe joining without doing actions.\"}"
+    assert:
+      - type: llm-rubric
+        value: "Reuse the saved choice without asking again. Read current increment revision/discussion/claims and select useful bounded work. Create or reuse and claim one task just before work with native parent and genuine dependencies when supported; read back actual saved records before claiming success. Require no owner allocation or Project; preserve authority and acknowledgement boundaries."
+
+  - description: "Explicit backend change preserves unrelated configuration"
+    vars:
+      prompt: "{\"prompt\": \"Tabletop only. User says change this project from GitHub to Local. Valid saved config is {\\\"version\\\":1,\\\"backend\\\":\\\"github\\\",\\\"github\\\":{\\\"repository\\\":\\\"example/project\\\"},\\\"contributors\\\":{\\\"a\\\":{\\\"human\\\":\\\"Sam\\\"}},\\\"custom\\\":{\\\"retain\\\":true}}. A plan handover can be recorded within authority. Describe the update sequence; perform no actions.\"}"
+    assert:
+      - type: llm-rubric
+        value: "Honor the explicit change without asking the same choice again. Preserve unrelated GitHub metadata, contributors, unknown fields and modes; change only necessary backend/version, record any needed plan authority handover, save and read back before claiming persistence. Do not contact GitHub or pretend a write happened."
+
+  - description: "Malformed saved settings are preserved"
+    vars:
+      prompt: "{\"skill\": \"contribute\", \"prompt\": \"Tabletop only. Confirmed outcome/current Now are known. Project planning config exists but contains invalid JSON: {\\\"version\\\":1,\\\"backend\\\": . No explicit repair or backend choice exists. Explain your next response without actions.\"}"
+    assert:
+      - type: llm-rubric
+        value: "Preserve invalid content and do not overwrite it or silently default to local/GitHub. Explain the precise invalid configuration gap and ask one focused clarification needed to repair it, then wait. Continue only useful work independent of the unresolved choice; do not claim persistence."
+
+  - description: "Unset contribution backend asks once before dependent work"
+    vars:
+      prompt: "{\"skill\": \"contribute\", \"tracking\": \"unset\", \"prompt\": \"Tabletop only. A confirmed outcome and assessed Now are identified. No project tracking config or explicit backend choice exists. You joined to help. What do you ask before backend-dependent contribution actions?\"}"
+    assert:
+      - type: llm-rubric
+        value: "Ask one focused GitHub Issues or Local tracking question and wait. Do not invent a default, demand GitHub setup, reopen the confirmed objective or ask the human to allocate a task. Save/read back the actual answer before later reuse; make no invented write claim."
+
+  - description: "Planner removes speculative risk-mitigation work"
+    vars:
+      prompt: "{\"prompt\": \"Tabletop only. Goal confirmed; saved Local mode. You are drafting Now. A planner adds two backup audits and a new allowlist because unexpected failures are imaginable and agents feel nervous. No evidenced risk, requirement or policy/register finding supports them. Applicable risk policy and risk register are available to the independent risk scorer. What should the plan do?\"}"
+    assert:
+      - type: llm-rubric
+        value: "Remove speculative mitigation tasks/increments rather than manufacture evidence, a risk registry, discovery step or human gate to justify them. Leave necessary treatments to risk-scorer review using the applicable policy/register and proportionate evidence. Preserve genuine required controls and the confirmed outcome; an in-appetite score alone does not prove necessity."
+
+  - description: "Plan exposes opportunities without reserving all tasks"
+    vars:
+      prompt: "{\"prompt\": \"Tabletop only. Goal confirmed, Local tracking saved. Current Now is one coherent converter result. Parser work is already claimed by agent A. Output formatting and a bounded independent fixture review are useful unclaimed opportunities. Owner proposes precreating and assigning every task to itself so nobody gets in the way. Describe a better plan and coordination.\"}"
+    assert:
+      - type: llm-rubric
+        value: "Consider bounded tasks, dependencies and useful contribution opportunities inside Now without hogging, precreating, assigning or reserving the whole future backlog. Preserve A claim. Owner coordinates acceptance/sequence/integration; contributors pull one bounded task just in time, check overlap and actual availability. Explicit acknowledged assignments remain valid. Do not invent contributors or extra work. The skill-required five-critic review for a material executable-plan change is valid; routine claims need no new reviews. Still fail invented contributor availability, reserved backlogs or unnecessary routine review gates."
+
+  - description: "Contribute finds useful help without a preassigned backlog"
+    vars:
+      prompt: "{\"skill\": \"contribute\", \"prompt\": \"Tabletop only. Saved Local tracking, confirmed outcome, assessed current Now. Owner coordinates acceptance and integration. No preassigned tasks exist. A known missing independent sample reference check would help, and it is within authority and does not overlap an existing claim. What do you do?\"}"
+    assert:
+      - type: llm-rubric
+        value: "Actively choose the useful bounded reference check, announce scope/acceptance/boundary, create/reuse and claim one task just before work after current discussion/dependency/overlap checks, then verify and report evidence. Do not wait for a preassigned task, make asking whether any help is needed the whole contribution, reserve future tasks or invent precautionary busywork. Respect existing plan and authority."
+
+  - description: "Missing cognitive critic cannot be self-approved"
+    vars:
+      prompt: "{\"prompt\": \"Tabletop only. Confirmed goal and saved Local mode. Initial executable plan P1 has independent architecture, JTBD, risk and planning passes. No independent cognitive accessibility review is available. User says go ahead and just review it yourself. What can proceed?\"}"
+    assert:
+      - type: llm-rubric
+        value: "Identify the missing substantive cognitive review and hold dependent implementation. Do not self-approve, claim all five passed or treat generic go-ahead as the missing independent review. Continue authorized bounded preparation and report the exact capability gap; use an available identified independent substitute only if it actually performs the review."
+
+  - description: "Issues-only bootstrap preserves existing mappings"
+    vars:
+      prompt: "{\"tracking\": \"github\", \"prompt\": \"Tabletop only. Confirmed goal; project backend GitHub saved with verified repository example/project and existing equivalent kind/horizon labels. Issues-only tracking selected, no Project required. A peer demands a new Project and three views and wants to replace all labels first. Describe applicable setup without actions.\"}"
+    assert:
+      - type: llm-rubric
+        value: "Reuse equivalent existing verified setup and mappings. Issues-only needs no Project or its fields/views. Bootstrap only missing selected requirements; do not destroy mappings or invent saved writes/access. If a Project is later selected, its applicable bootstrap can be handled then within authority."
+
+  - description: "GitHub bootstrap reuses the project-declared configuration path"
+    vars:
+      prompt: "{\"tracking\": \"github\", \"prompt\": \"Tabletop only. Confirmed goal. Project guidance declares docs/planning.json as the shared configuration location. That valid file already saves backend github, repository example/project, a verified selected Project URL and custom contributor mappings. GitHub bootstrap finds one missing selected Project field. A peer proposes creating a second .agents/planning.json at the default path and replacing all mappings. Explain the correct configuration and setup handling; perform no actions.\"}"
+    assert:
+      - type: llm-rubric
+        value: "Reuse the same project-declared docs/planning.json and preserve existing settings and contributor mappings. Do not create a competing default .agents/planning.json. Bootstrap only the missing selected setup under existing authority; save/read back any actual updates before claiming success. Configuration does not grant access. Do not invent writes or replace working equivalent mappings."

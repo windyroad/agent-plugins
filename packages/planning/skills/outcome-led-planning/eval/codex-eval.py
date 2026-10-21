@@ -50,13 +50,21 @@ def main():
         if mode != 'subject':
             raise ValueError('Expected subject or grade')
         skill = Path(sys.argv[3]).resolve()
-        contract = fixture + '\n\n' + skill.read_text()
         try:
             scenario = json.loads(payload)
         except json.JSONDecodeError:
             scenario = {}
+        entry = scenario.get('skill', 'outcome-led-planning') if isinstance(scenario, dict) else 'outcome-led-planning'
+        if entry not in ('outcome-led-planning', 'contribute'):
+            raise ValueError('Expected outcome-led-planning or contribute skill envelope')
+        references = skill.parent / 'references'
+        if entry == 'contribute':
+            skill = skill.parent.parent / 'contribute/SKILL.md'
+        contract = fixture + '\n\n' + skill.read_text() + '\n\n' + (references / 'project-tracking.md').read_text()
+        if entry == 'outcome-led-planning':
+            contract += '\n\n' + (references / 'planning-details.md').read_text()
         if isinstance(scenario, dict) and scenario.get('tracking') == 'github':
-            contract += '\n\n' + (skill.parent / 'references/github-coordination.md').read_text()
+            contract += '\n\n' + (references / 'github-coordination.md').read_text()
         turns = scenario.get('turns') if isinstance(scenario, dict) else None
         if not isinstance(turns, list) or not turns or not all(isinstance(t, str) for t in turns):
             turns = [scenario.get('prompt', payload) if isinstance(scenario, dict) else payload]

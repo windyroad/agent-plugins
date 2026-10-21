@@ -87,6 +87,42 @@ teardown() {
   rm -rf "$TMP"
 }
 
+@test "both runtimes route contribute explicitly with common guidance and isolate conditional GitHub guidance" {
+  for runtime in claude codex; do
+    for surface in source codex; do
+      run env PLANNING_EVAL_RUNTIME="$runtime" bash "$SKILL/eval/run-skill-eval.sh" "$surface" '{"skill":"contribute","prompt":"LOCAL_CONTRIBUTION"}' '{"skill":"outcome-led-planning","tracking":"github","rubric":"HIDDEN_RUBRIC"}'
+      [ "$status" -eq 0 ]
+      run env PLANNING_EVAL_RUNTIME="$runtime" bash "$SKILL/eval/run-skill-eval.sh" "$surface" '{"skill":"contribute","tracking":"github","prompt":"GITHUB_CONTRIBUTION"}'
+      [ "$status" -eq 0 ]
+    done
+  done
+  run node - "$EVAL_ARGV" "$SKILL" "$PACKAGE" <<'NODE'
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const calls = fs.readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JSON.parse);
+assert.equal(calls.length, 8);
+calls.forEach((args, index) => {
+  const root = path.join(process.argv[4], Math.floor(index / 2) % 2 ? 'skills-codex' : 'skills');
+  const contract = index < 4 ? args[args.indexOf('--append-system-prompt') + 1] : args.at(-1);
+  assert.ok(contract.includes(fs.readFileSync(path.join(root, 'contribute/SKILL.md'), 'utf8').trimEnd()));
+  assert.ok(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/references/project-tracking.md'), 'utf8').trimEnd()));
+  assert.equal(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/references/github-coordination.md'), 'utf8').trimEnd()), index % 2 === 1);
+  assert.equal(args.some(arg => arg.includes('HIDDEN_RUBRIC')), false);
+});
+NODE
+  [ "$status" -eq 0 ]
+}
+
+@test "unknown skill envelopes fail before invoking either runtime" {
+  for runtime in claude codex; do
+    run env PLANNING_EVAL_RUNTIME="$runtime" bash "$SKILL/eval/run-skill-eval.sh" source '{"skill":"../../private","prompt":"NO_CALL"}'
+    [ "$status" -ne 0 ]
+    [[ "$output" == *'Expected outcome-led-planning or contribute'* ]]
+  done
+  [ ! -s "$EVAL_ARGV" ]
+}
+
 @test "subject receives only its scenario on both skill surfaces" {
   for surface in source codex; do
     run bash "$SKILL/eval/run-skill-eval.sh" "$surface" 'SUBJECT_SCENARIO' '{"assertions":"DO_NOT_FORWARD"}'

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Contribute to an Outcome"
+  short_description: "Find useful work in the current Now increment"
+  default_prompt: "Use $contribute to find and carry out a useful bounded contribution within the current assessed outcome and Now increment."
