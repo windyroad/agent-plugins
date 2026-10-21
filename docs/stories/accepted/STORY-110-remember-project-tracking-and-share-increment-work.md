@@ -1,5 +1,5 @@
 ---
-status: draft
+status: accepted
 story-id: remember-project-tracking-and-share-increment-work
 reported: 2026-10-21
 decision-makers: [Tom Howard]

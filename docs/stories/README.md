@@ -1,6 +1,6 @@
 # Story Backlog
 
-> Last reviewed: 2026-10-21 **STORY-110 draft** - Shared project tracking and contribution release captured on the existing ratified map.
+> Last reviewed: 2026-10-21 **STORY-110 accepted** - Existing map approval and INVEST criteria qualify the shared tracking release.
 >
 > Run `/wr-itil:manage-story review` to re-rank, or `/wr-itil:reconcile-stories` to repair index drift against filesystem truth.
 
@@ -113,7 +113,7 @@ Active (non-done) stories, from filesystem truth. Terminal stories are listed un
 
 | Status | ID | Title | Effort | Problems | RFCs | Story Map |
 |--------|-----|-------|--------|----------|------|-----------|
-| draft | STORY-110 | Remember project tracking choices and share increment work | M | P560 | RFC-110 | STORY-MAP-002 |
+| accepted | STORY-110 | Remember project tracking choices and share increment work | M | P560 | RFC-110 | STORY-MAP-002 |
 | draft | STORY-045 | Outbound lifecycle comments generated from real issue context | M | P376 | RFC-028 | STORY-MAP-004 |
 | accepted | STORY-047 | Gate the correction nudge on prompt authorship | S | P430 | RFC-050 | STORY-MAP-005 |
 | draft | STORY-048 | Gate the inbound-discovery pre-flight on the channel list | S | P431 | RFC-051 | STORY-MAP-006 |

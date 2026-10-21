@@ -151,3 +151,7 @@
 ## 2026-10-21
 
 > Last reviewed: 2026-10-17 **STORY-109 done** - CI isolation, complete diagnostics and quota-unavailable handling verified; broader P459 remains Known Error.
+
+## 2026-10-21
+
+> Last reviewed: 2026-10-21 **STORY-110 draft** - Shared project tracking and contribution release captured on the existing ratified map.

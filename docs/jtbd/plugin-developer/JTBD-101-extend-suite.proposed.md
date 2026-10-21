@@ -65,6 +65,7 @@ Copy an existing plugin and modify it, read ADRs and BRIEFING.md
 
 | ID | Title | Status |
 |----|-------|--------|
+| STORY-110 | STORY-110: Remember project tracking choices and share increment work | accepted |
 | STORY-004 | STORY-004: RFC frontmatter stories: extension + capture-rfc / manage-rfc updates | done |
 | STORY-109 | STORY-109: Trust CI failures with isolated fixtures and complete results | done |
 | STORY-049 | STORY-049: Ask for a URL in a shape I can paste into | draft |
@@ -75,6 +76,5 @@ Copy an existing plugin and modify it, read ADRs and BRIEFING.md
 | STORY-058 | STORY-058: Read a README that describes the version I installed | draft |
 | STORY-091 | STORY-091: Invoke the Wardley map converter by a name that survives every upgrade | draft |
 | STORY-092 | STORY-092: Provision the labels the intake templates declare | draft |
-| STORY-110 | STORY-110: Remember project tracking choices and share increment work | draft |
 | STORY-073 | STORY-073: A failed reviewer blocks the guarded edit | in-progress |
 | STORY-074 | STORY-074: Use generated Codex skills after upgrading without repairs | in-progress |
