@@ -70,4 +70,4 @@ Tracking choice is presently scoped to a plan/session rather than declarative pr
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-110 | STORY-110: Remember project tracking choices and share increment work | accepted |
+| STORY-110 | STORY-110: Remember project tracking choices and share increment work | in-progress |

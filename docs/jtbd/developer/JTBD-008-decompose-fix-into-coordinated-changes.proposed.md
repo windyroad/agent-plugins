@@ -86,7 +86,6 @@ None of these compose well with WSJF prioritisation when phases need to compete 
 | ID | Title | Status |
 |----|-------|--------|
 | STORY-065 | STORY-065: A fix proposal draws a release row, not a document | accepted |
-| STORY-110 | STORY-110: Remember project tracking choices and share increment work | accepted |
 | STORY-001 | STORY-001: Hook exemption globs for docs/story-maps + docs/stories | done |
 | STORY-002 | STORY-002: /wr-itil:capture-story lightweight aside skill | done |
 | STORY-003 | STORY-003: /wr-itil:list-stories read-only display skill | done |
@@ -121,3 +120,4 @@ None of these compose well with WSJF prioritisation when phases need to compete 
 | STORY-035 | STORY-035: Home RFC decisions in ADRs and make the RFC-first trace unconditional | draft |
 | STORY-075 | STORY-075: My story map starts from the journey I walk | in-progress |
 | STORY-082 | STORY-082: Gate Bash writes without blocking read-only commands | in-progress |
+| STORY-110 | STORY-110: Remember project tracking choices and share increment work | in-progress |

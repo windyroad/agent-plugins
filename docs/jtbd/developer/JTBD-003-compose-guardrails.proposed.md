@@ -40,6 +40,6 @@ Install everything and ignore irrelevant hooks, or don't install at all
 
 | ID | Title | Status |
 |----|-------|--------|
-| STORY-110 | STORY-110: Remember project tracking choices and share increment work | accepted |
 | STORY-107 | STORY-107: Find the plugin and instructions I need on my phone | done |
 | STORY-108 | STORY-108: Coordinate shared outcomes with optional GitHub Issues | done |
+| STORY-110 | STORY-110: Remember project tracking choices and share increment work | in-progress |
