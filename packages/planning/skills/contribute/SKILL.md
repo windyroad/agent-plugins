@@ -72,7 +72,9 @@ For each separately owned contribution:
    genuine dependencies. Add it to a Project only when selected or required.
    Claim with the actual agent/session, read back saved records and recheck overlap.
 4. Execute within the assessed plan and authority, keeping evidence and status
-   current. Small routine steps stay in the task.
+   current. Small routine steps stay in the task. In GitHub mode, follow the
+   [work checkpoints](../outcome-led-planning/references/github-coordination.md#reconcile-tracking-at-work-checkpoints)
+   and read back issue and selected Project changes.
 5. Record the verified result and finish, or release with a handover stating
    evidence, blocker and next step when no useful authorized work remains.
 6. Choose and document the next useful contribution from current evidence, then

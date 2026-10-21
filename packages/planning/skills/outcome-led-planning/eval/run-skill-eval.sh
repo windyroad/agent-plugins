@@ -39,6 +39,10 @@ if jq -e 'type == "object" and .tracking == "github"' <<< "$scenario" >/dev/null
   contract+=$'\n\n'
   contract+="$(cat "$references/github-coordination.md")"
 fi
+if jq -e 'type == "object" and (.tracking == "github" or .tracking == "local")' <<< "$scenario" >/dev/null 2>&1; then
+  contract+=$'\n\nScenario tracking backend: '
+  contract+="$(jq -r .tracking <<< "$scenario")."
+fi
 if jq -e 'type == "object" and (.prompt | type == "string")' <<< "$scenario" >/dev/null 2>&1; then
   scenario="$(jq -r .prompt <<< "$scenario")"
 fi

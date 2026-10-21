@@ -6,7 +6,11 @@ Read this reference from planning and contribute before choosing a backend or co
 
 Read the project-declared configuration location, defaulting to `.agents/planning.json` at the project root. Parse JSON as data, never executable code. A supported version 1 object contains `version: 1` and `backend: "github"` or `backend: "local"`.
 
-Reuse a saved backend across sessions and through either skill without asking again. If an explicit user or project choice already exists and the file is absent or lacks that setting, record that choice without asking again. Otherwise planning first confirms the SMART outcome, then asks one focused question: “Use GitHub Issues or Local tracking for this project?” Contribute follows its already confirmed outcome and asks only if no backend is established. Wait for the actual answer; do not silently default to either backend.
+Choose the applicable branch:
+
+- **Saved backend:** reuse it across sessions and through either skill without asking again.
+- **Explicit choice already established:** if the file is absent or lacks that setting, record the user or project choice without asking again.
+- **No backend established:** planning first confirms the SMART outcome; contribute follows its already confirmed outcome. Ask only: “Use GitHub Issues or Local tracking for this project?” Wait for the actual answer. Do not append a repository or Project request, even conditionally, before that reply. Resolve a genuinely missing target later, only when needed for an authorized action. Do not silently default to either backend.
 
 Save the answer by creating the minimal object or merging only the backend and necessary version into valid existing configuration. Preserve unrelated fields, contributor mappings and file modes. Read the saved result back before claiming persistence. An explicit change request updates that setting while preserving unrelated data; resolve genuine conflicts with project policy and record any plan handover before changing its authority. Read-only reuse does not rewrite configuration.
 

@@ -28,6 +28,11 @@ const fs = require('node:fs');
 const args = process.argv.slice(2);
 fs.appendFileSync(process.env.EVAL_STDIN, JSON.stringify(fs.readFileSync(0, 'utf8')) + '\n');
 fs.appendFileSync(process.env.EVAL_ARGV, JSON.stringify(args) + '\n');
+if (process.env.EVAL_FAIL) {
+  process.stdout.write('FULL_PROVIDER_FAILURE');
+  process.stderr.write('provider stderr\n');
+  process.exit(17);
+}
 fs.writeFileSync(args[args.indexOf('-o') + 1], args.includes('--output-schema') ? '{"pass":true,"score":1,"reason":"fake grader"}' : 'subject response');
 process.stdout.write('{"type":"thread.started","thread_id":"fixture-session"}\n');
 NODE
@@ -87,6 +92,26 @@ teardown() {
   rm -rf "$TMP"
 }
 
+@test "Codex subject and grader retain failed provider diagnostics and clean their workspace" {
+  run env EVAL_FAIL=1 PLANNING_EVAL_RUNTIME=codex bash "$SKILL/eval/run-skill-eval.sh" source CURRENT_SCENARIO
+  [ "$status" -ne 0 ]
+  [[ "$output" == *FULL_PROVIDER_FAILURE* ]]
+  [[ "$output" == *'provider stderr'* ]]
+  run env EVAL_FAIL=1 PLANNING_EVAL_RUNTIME=codex bash "$SKILL/eval/grade-llm-rubric.sh" GRADING_PROMPT
+  [ "$status" -ne 0 ]
+  [[ "$output" == *FULL_PROVIDER_FAILURE* ]]
+  [[ "$output" == *'provider stderr'* ]]
+  run node - "$EVAL_ARGV" <<'NODE'
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const calls = fs.readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JSON.parse);
+assert.equal(calls.length, 2);
+for (const args of calls) assert.equal(fs.existsSync(path.dirname(args[args.indexOf('-o') + 1])), false);
+NODE
+  [ "$status" -eq 0 ]
+}
+
 @test "both runtimes route contribute explicitly with common guidance and isolate conditional GitHub guidance" {
   for runtime in claude codex; do
     for surface in source codex; do
@@ -121,6 +146,33 @@ NODE
     [[ "$output" == *'Expected outcome-led-planning or contribute'* ]]
   done
   [ ! -s "$EVAL_ARGV" ]
+}
+
+@test "scenario backend choice reaches both subjects without provider metadata" {
+  for runtime in claude codex; do
+    for surface in source codex; do
+      for backend in github local unset; do
+        scenario="$(jq -cn --arg backend "$backend" '{tracking:$backend,prompt:"CURRENT_SCENARIO"}')"
+        run env PLANNING_EVAL_RUNTIME="$runtime" bash "$SKILL/eval/run-skill-eval.sh" "$surface" "$scenario" '{"tracking":"github","rubric":"DO_NOT_FORWARD"}'
+        [ "$status" -eq 0 ]
+      done
+    done
+  done
+  run node - "$EVAL_ARGV" <<'NODE'
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const calls = fs.readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JSON.parse);
+assert.equal(calls.length, 12);
+calls.forEach((args, index) => {
+  const contract = args.includes('--append-system-prompt') ? args[args.indexOf('--append-system-prompt') + 1] : args.at(-1);
+  const backend = ['github', 'local', 'unset'][index % 3];
+  assert.equal(contract.includes('Scenario tracking backend: '), backend !== 'unset');
+  if (backend !== 'unset') assert.ok(contract.includes(`Scenario tracking backend: ${backend}.`));
+  assert.equal(args.some(arg => arg.includes('DO_NOT_FORWARD')), false);
+  assert.ok(args.at(-1).endsWith('CURRENT_SCENARIO'));
+});
+NODE
+  [ "$status" -eq 0 ]
 }
 
 @test "subject receives only its scenario on both skill surfaces" {

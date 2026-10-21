@@ -294,7 +294,21 @@ tests:
       - type: llm-rubric
         value: |
           Use outcome/increment/task hierarchy with explicit owners, current
-          revision and acceptance evidence. Horizon belongs only to increments
+          revision and acceptance evidence. Account for each record's own known
+          or unresolved owner, revision and acceptance, including provisional #12
+          and completed #13; do not replace a completed task's recorded revision.
+          An unequivocal shared rule preserving each record's known values and
+          marking its required missing fields unresolved is acceptable; do not
+          demand repetition in individual bullets. An explicit shared rule to
+          preserve existing owners includes #11; do not assume an owner is missing
+          merely because the scenario omits its name. Unknown Project selection
+          must remain conditional; do not invent either selection or absence.
+          Provisional #12 needs neither a fully assessed executable plan nor
+          invented completion evidence. Establish selected/required Project use
+          before treating setup as pending, and base missing-setting claims on
+          inspected saved state; defaults alone do not establish missing views,
+          fields or membership. Conditional inspection plans are acceptable.
+          Horizon belongs only to increments
           and is separate from execution Status. Blocked Now remains Now unless
           replanned, task done does not finish parent. Optional Project absence
           does not block all progress. Use reciprocal links and disclose native
@@ -314,6 +328,8 @@ tests:
           may claim separate authorized non-overlap task after checking. Identify
           actual account and distinct session, parent/revision/scope/dependencies
           and verify claim. Assignment grants no extra authority.
+          Project selection is not established; keep Project operations conditional on selected or required use. GitHub tracking alone does not select a Project.
+
 
   - description: Handoffs require evidence and do not wake idle agents
     vars:
@@ -329,15 +345,22 @@ tests:
           poller or automation. Continue useful independent work and use regular bounded checks
           throughout active work, including coding and waiting, without standing
           polling or promised idle wakeup.
-          Accept an ongoing commitment to the agreed checking cadence together
-          with action checkpoints; no literal coding/waiting wording or invented
-          interval is required. Still fail idle-only or checkpoint-only checking,
+          Require BOTH an ongoing commitment to regular active-work reads and
+          additional action/event checkpoints. Accept semantic equivalents anywhere
+          in the response; no literal coding/waiting wording or invented interval
+          is required. Fail regular-only, idle-only or checkpoint-only checking,
           suspended checks pending agreement, or unauthorized standing polling.
+          Agreement governs the cadence, not whether regular active-work reads
+          happen; do not infer suspension without a stated condition or omission
+          of regular reads. When no useful authorized in-task work remains and
+          required input is unavailable, release the assignment unassigned with
+          an explicit handover; responsibility alone does not permit retaining
+          an exhausted claim.
 
   - description: Unknown mutation is reconciled before retry
     vars:
       prompt: |
-        {"tracking":"github","prompt":"Tabletop only. Authorized task creation under Now increment timed out after submit. Account and session marker are known, issue read/search still works. Project permission is denied. User already authorized task records and shared increment comments. What do you do before creating again or reporting blocked?"}
+        {"tracking":"github","prompt":"Tabletop only. Authorized task creation under Now increment timed out after submit. Account and session marker are known, issue read/search still works. A selected Project requires a pending update. Your Project permission is denied and current authorized routes cannot complete that update, but the recorded authorized Project owner can assist. User already authorized task records and shared increment comments, including requesting that assistance. What do you do before creating again or reporting blocked?"}
     assert:
       - type: llm-rubric
         value: |
@@ -392,6 +415,14 @@ tests:
           preparation Ready or In progress, not wholly Blocked. Neither remove
           the dependency nor let Ready authorize cutover or completion before
           independently verifying the required result. Reassess as evidence changes.
+          For this tabletop, naming the certificate evidence and cutover/completion
+          gate in the concrete native-write plan satisfies the stage-condition
+          requirement; do not demand an additional issue-body write not specified
+          by the scenario. Do not add #41 closure as another cutover or completion
+          gate; the scenario requires delivery of independently verified certificate
+          evidence.
+          If discussing later verified exhaustion with a required input unavailable, require releasing that assignment unassigned with a handover; do not permit retaining an exhausted claim. Do not demand this future branch while useful preparation remains.
+
 
   - description: Acyclic task acceptance with unavailable native dependency writes
     vars:
@@ -408,6 +439,8 @@ tests:
           Record the precise native permission gap and reciprocal dependency
           references, request authorized assistance when useful, and never claim
           native persistence. Reassess status and verify prerequisite evidence.
+          Denied writes do not establish historical or current absence of native relationships. Do not infer that no native link ever existed; keep unreadable native state unknown and preserve known links.
+
 
   - description: Preserve existing test delivery instead of inventing a preflight gate
     vars:
@@ -586,7 +619,7 @@ tests:
       prompt: "{\"prompt\": \"Tabletop only. User says change this project from GitHub to Local. Valid saved config is {\\\"version\\\":1,\\\"backend\\\":\\\"github\\\",\\\"github\\\":{\\\"repository\\\":\\\"example/project\\\"},\\\"contributors\\\":{\\\"a\\\":{\\\"human\\\":\\\"Sam\\\"}},\\\"custom\\\":{\\\"retain\\\":true}}. A plan handover can be recorded within authority. Describe the update sequence; perform no actions.\"}"
     assert:
       - type: llm-rubric
-        value: "Honor the explicit change without asking the same choice again. Preserve unrelated GitHub metadata, contributors, unknown fields and modes; change only necessary backend/version, record any needed plan authority handover, save and read back before claiming persistence. Do not contact GitHub or pretend a write happened."
+        value: "Honor the explicit change without asking the same choice again. Preserve unrelated GitHub metadata, contributors, unknown fields and modes; change only necessary backend/version, record any needed plan authority handover, save and read back before claiming persistence. Describing the necessary plan handover in both places within the scenario's stated authority is permitted. Fail actual tabletop tool actions, invented writes or persistence, unrelated tracker changes, or authority expansion; do not excuse an unauthorized hypothetical sequence merely because it is tabletop."
 
   - description: "Malformed saved settings are preserved"
     vars:
@@ -600,7 +633,7 @@ tests:
       prompt: "{\"skill\": \"contribute\", \"tracking\": \"unset\", \"prompt\": \"Tabletop only. A confirmed outcome and assessed Now are identified. No project tracking config or explicit backend choice exists. You joined to help. What do you ask before backend-dependent contribution actions?\"}"
     assert:
       - type: llm-rubric
-        value: "Ask one focused GitHub Issues or Local tracking question and wait. Do not invent a default, demand GitHub setup, reopen the confirmed objective or ask the human to allocate a task. Save/read back the actual answer before later reuse; make no invented write claim."
+        value: "Ask one focused GitHub Issues or Local tracking question and wait. Do not invent a default, demand GitHub setup, reopen the confirmed objective or ask the human to allocate a task. Save/read back the actual answer before later reuse; make no invented write claim. Fail requesting an additional repository or Project fact before the backend answer, including a conditional request in the same proposed message. Accept explanations of genuinely needed later steps when their questions are explicitly deferred until after the choice."
 
   - description: "Planner removes speculative risk-mitigation work"
     vars:
@@ -643,3 +676,38 @@ tests:
     assert:
       - type: llm-rubric
         value: "Reuse the same project-declared docs/planning.json and preserve existing settings and contributor mappings. Do not create a competing default .agents/planning.json. Bootstrap only the missing selected setup under existing authority; save/read back any actual updates before claiming success. Configuration does not grant access. Do not invent writes or replace working equivalent mappings."
+
+  - description: "Selected Project setup is completed before treating tracking as ready"
+    vars:
+      prompt: "{\"tracking\": \"github\", \"prompt\": \"Tabletop only; no tools or actual changes. SMART outcome and Now P2 are confirmed and assessed by all five critics. Saved GitHub settings name the repository and selected Project. The user authorized its setup. It has only an unfiltered default View 1 with mixed outcome, increment and task issues. Existing Status and Horizon options are equivalent; authorized browser editing works even though the CLI cannot edit views. You are about to start implementation. Explain the immediate work sequence and the evidence required before reporting setup complete.\"}"
+    assert:
+      - type: llm-rubric
+        value: "Treat the selected Project setup as an existing delivery obligation and complete its missing applicable setup at this work checkpoint using the authorized browser, rather than skip it as optional or demand new credentials. Describe distinct kind-filtered Outcomes and Increments tables and Tasks Status board, increment Horizon grouping, real issue kind plus explicit membership and native fields, preserving equivalent options/custom settings. Save changed view settings and reopen/read persisted state plus actual real issue visibility before claiming setup complete. Do not claim any actions occurred in this tabletop. Do not require dummy issues, new automation or reset equivalent mappings. Keep Status derived from actual work and Agent from each item's own verified owner/session; an owner identity is not a Status value."
+
+  - description: "Resume reconciles stale task and increment states before implementation"
+    vars:
+      prompt: "{\"skill\": \"contribute\", \"tracking\": \"github\", \"prompt\": \"Tabletop only; do not act. A fresh session resumes its sole claimed task in assessed Now P2 under the saved GitHub backend and selected Project. The actual work is mid-implementation. Both the task and increment Project Status still show Todo, Agent is blank, and the task brief still says next action: start. The task belongs to Casey/session C and the increment belongs to Quinn/session Q; both identities are verified. The issue assignment is correct; a local note says work is In progress. Authorized issue and Project edits are available. What must happen before further implementation, and what establishes that it happened?\"}"
+    assert:
+      - type: llm-rubric
+        value: "Read shared current revision/discussion/claims, reconcile the owned task and increment to actual work before further implementation, updating stale brief/next action and actual native Status to In progress plus distinct Agent/session. Keep Horizon increment-only and aligned to Now, preserving unrelated settings and others ownership. Read back persisted issue and Project fields; the local note, assignment, labels or successful command alone do not prove synchronization. Reconcile and read back BOTH affected Agent fields: task Casey/session C and increment Quinn/session Q. Fail omitting the increment Agent or copying the task contributor identity upward. No fresh goal interview, owner allocation, five-review cycle for this routine correction, or invented writes. If the plan changes only the supplied stale fields and does not alter Horizon or other settings, accept preservation without an explicit no-change recital. Still fail assigning Horizon to tasks, moving the increment away from Now, or changing unrelated settings or owners."
+
+  - description: "Material failure and handoff update shared records without waiting for a reminder"
+    vars:
+      prompt: "{\"skill\": \"contribute\", \"tracking\": \"github\", \"prompt\": \"Tabletop only. GitHub Issues and its selected Project are authorized. Current Now P2 and your sole task are already assessed and correctly claimed. CI now fails a concrete test. Useful repair is possible within the assessed scope; after the repair passes you must hand over to the next contributor for an independent release check. Your recorded task acceptance is the repaired test passing; the separate release check belongs to the increment acceptance, not your repair task. No issue or Project capability is missing. Describe when records change, what is written and read back, and whether the initial failed check makes the task Blocked.\"}"
+    assert:
+      - type: llm-rubric
+        value: "At the material failed verification checkpoint, record actual failure/evidence and next repair action on existing task, and cross-task consequences on increment as applicable before dependent action. Keep In progress while useful repair remains; do not mark Blocked simply because CI failed. Record repair result/evidence and remaining independent check, update task and increment status/next action and selected native fields as applicable at milestone/handoff, and verify saved records. Do not wait for user status request, defer all updates until final completion, claim whole increment delivered on task tests alone, invent recipient acknowledgement or start unauthorized messaging/pollers. Preserve the supplied repair-task acceptance: do not invent the separate release check as its completion requirement. State a coherent claim transition, not contradictory retained and released claims."
+
+  - description: "A pending Project update is revisited rather than silently abandoned"
+    vars:
+      prompt: "{\"tracking\": \"github\", \"prompt\": \"Tabletop only. The selected Project Status/Agent update failed during the prior work window because its old browser binding disappeared; issue-side progress and the exact pending operation are recorded. You now resume the same assessed Now with useful issue work available. The pending item is the increment, whose recorded owner is Quinn/session Q, distinct from your task ownership. A fresh authorized browser binding can edit that same Project; CLI still lacks read:project. A peer says Projects are optional, so leave the old pending note forever and report coordination complete. What do you do at this checkpoint and what if the new write has an ambiguous result?\"}"
+    assert:
+      - type: llm-rubric
+        value: "Revisit the recorded pending operation at this checkpoint using the fresh authorized capability, verify correct repository/Project/account and reconcile actual fields; do not treat optional Project selection as permission to abandon a selected Project. Read actual persisted field state before reporting synchronization. An ambiguous mutation requires remote readback before retry, not blind repetition or duplicate creates. Preserve current issue truth, custom settings and authority; no automatic scope expansion or credentials request while authorized browser works. The increment Agent must remain its verified owner Quinn/session Q, not the task contributor; fail identity propagation. If the operation actually remains unavailable, keep exact pending gap and next recovery action visible and continue useful authorized issue work without claiming synchronization complete."
+
+  - description: "Outcome owns the current cross-increment plan after Now replacement"
+    vars:
+      prompt: "{\"tracking\": \"github\", \"prompt\": \"Tabletop only; no actions or tools. Confirmed SMART outcome #10 and its owner-approved replacement plan r8 have all five independent PASS reviews. You are the recorded owner of outcome #10 and increment #12, authorized to reconcile their records. The outcome current heading still says r7 Now #11. Increment #11 is verified complete and CLOSED, with no active Horizon; preserve its owner, revision, acceptance and history. Increment #12 already has exactly one Now label and native Horizon. Its body contains a copied current cross-increment plan: Now #12 verified converter result; provisional Next independent consumer sample; Later TBD from verified gaps. It also contains its own bounded execution tasks, r8 revision and acceptance, all still valid. The selected Project already has verified equivalent Outcomes/Increments/Tasks views. A limited CLI returns projectItems:[]; an authorized browser confirms the actual membership and correct native Status/Agent/Horizon. Explain the record reconciliation and any setup needed without claiming actions occurred.\"}"
+    assert:
+      - type: llm-rubric
+        value: "Reconcile and read back BOTH the outcome #10 authoritative current r8 Now/Next/Later plan and affected increment #12. Supersede stale r7 current-plan headings while preserving history and the provisional Next independent consumer sample/Later direction. Keep #12 bounded result, own revision, acceptance and task execution plan, single existing Now horizon and valid contextual links; remove or supersede its competing authoritative cross-increment sequence. Do not treat every contextual Next/Later link as forbidden. Preserve unchanged completed #11 history, owner, revision, acceptance and CLOSED/no-active-Horizon state without demanding an unrelated edit. Reuse the verified Project views and mappings; limited CLI omission proves no absence and does not justify recreation, resets or new credentials. No fictional performed mutations or repeated confirmation/five-review gate when already supplied."

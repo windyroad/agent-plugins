@@ -14,7 +14,7 @@ Iterate each **initial or materially revised executable plan with five independe
 - **JTBD:** checks intended beneficiaries and their desired outcomes.
 - **Risk:** checks action risk and whether proposed mitigation work is justified.
 - **Cognitive accessibility:** checks whether beneficiaries and contributors can understand the result, choices and next action without unnecessary cognitive work, jargon or human handoffs.
-- **Planning:** tests INVEST for Now, especially whether a smaller still-valuable increment exists, and outcome-directed dependencies and sequencing across Now/Next/Later. Future horizons remain provisional, without full Now detail.
+- **Planning:** tests INVEST for Now, especially whether a smaller still-valuable increment exists, and outcome-directed dependencies and sequencing across Now/Next/Later. Future horizons remain provisional, without full Now detail. For initial or material plan reviews, inspect the authoritative plan in the chosen vehicle and actual affected tracking records, where used, against the assessed revision, including relevant task and selected Project setup evidence. Return concrete discrepancies; have repairs reflected in that same vehicle and rechecked before dependent work. Do not create a new artifact or tracking vehicle just for review. This is the existing planning review, not another five-critic cycle for routine updates.
 
 ## Independent reviewer capability
 

@@ -5,7 +5,7 @@ description: Establish and confirm a SMART outcome, then deliver through INVEST-
 
 # Outcome-led planning
 
-Keep the objective as the reference point while the plan evolves through delivery and learning. Treat the plan as the current hypothesis about how to achieve the result.
+Keep the confirmed outcome as the reference point; replan the means from evidence.
 
 ## Establish and confirm the SMART objective
 
@@ -33,7 +33,7 @@ Local mode needs no GitHub account or Project. When GitHub is selected, read [th
 
 ## Build the current plan
 
-Keep one authoritative plan in the conversation or an agreed artifact. Use an existing planning vehicle when the project requires one. If continuity needs a saved plan, use the project's permitted document location, outside runtime configuration directories. Keep updates proportional to the work.
+Keep one authoritative plan in the conversation or an agreed artifact. Honor any required project vehicle. Save continuity in a permitted document location outside runtime configuration directories. Keep updates proportional.
 
 Include:
 
@@ -55,7 +55,7 @@ If uncertainty prevents a bounded, estimable implementation increment, use a sma
 
 Use the project's existing delivery and environment-promotion process. Do not turn a planning convention or hypothetical unrelated interference into extra operator preflights, predicted resource or diff allowlists, approval gates, scripts or pipelines. Preserve required project checks and authority boundaries. When the existing workflow qualifies changes in a test environment before promotion, inspect the actual result, repair through that workflow and promote when qualified. Investigate observed interference and reassess material risk; do not invent an extra prerequisite without evidence or an applicable project rule.
 
-Define delivery according to the requested outcome and established workflow: for example, a locally installed artifact or a qualified production release. Complete its required stages. A commit, green CI, or publication proves only its own stage.
+Complete every delivery stage required by the confirmed outcome and project workflow. A commit, green CI, or publication proves only its own stage.
 
 ## Assess before executing
 
@@ -76,6 +76,8 @@ Reviews are part of execution, not an extra request for human approval at every 
 ## Deliver, verify, learn, replan
 
 Execute the assessed **Now** increment through the applicable delivery workflow. Integrate independently safe changes promptly and preserve other owners' work. Keep unfinished functionality safely dormant where necessary.
+
+For GitHub delivery, follow the [work checkpoints](references/github-coordination.md#reconcile-tracking-at-work-checkpoints), with regular discussion reads AND event checks. Reconcile each affected record and selected Project from saved state; read back changes.
 
 After every delivered increment:
 

@@ -41,6 +41,8 @@ def main():
                                     '--output-schema', str(schema), prompt],
                                     cwd=project, env=env, capture_output=True, text=True,
                                     stdin=subprocess.DEVNULL, timeout=240)
+            if result.returncode:
+                print(result.stdout, result.stderr, sep='\n', file=sys.stderr)
             result.check_returncode()
             grade = json.loads(response_file.read_text())
             if not isinstance(grade.get('pass'), bool):
@@ -63,8 +65,11 @@ def main():
         contract = fixture + '\n\n' + skill.read_text() + '\n\n' + (references / 'project-tracking.md').read_text()
         if entry == 'outcome-led-planning':
             contract += '\n\n' + (references / 'planning-details.md').read_text()
-        if isinstance(scenario, dict) and scenario.get('tracking') == 'github':
+        tracking = scenario.get('tracking') if isinstance(scenario, dict) else None
+        if tracking == 'github':
             contract += '\n\n' + (references / 'github-coordination.md').read_text()
+        if tracking in ('github', 'local'):
+            contract += f'\n\nScenario tracking backend: {tracking}.'
         turns = scenario.get('turns') if isinstance(scenario, dict) else None
         if not isinstance(turns, list) or not turns or not all(isinstance(t, str) for t in turns):
             turns = [scenario.get('prompt', payload) if isinstance(scenario, dict) else payload]
@@ -82,6 +87,8 @@ def main():
                         '-c', 'approval_policy="never"', '-o', str(response_file), session, turn]
             result = subprocess.run(args, cwd=project, env=env, capture_output=True,
                                     text=True, stdin=subprocess.DEVNULL, timeout=240)
+            if result.returncode:
+                print(result.stdout, result.stderr, sep='\n', file=sys.stderr)
             result.check_returncode()
             for line in result.stdout.splitlines():
                 event = json.loads(line)
