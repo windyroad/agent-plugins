@@ -121,6 +121,7 @@ for (const [args, model] of [[first, process.argv[3]], [resumed, process.argv[3]
   assert.equal(args.filter(arg => arg === '--model').length, 1);
   assert.equal(args[args.indexOf('--model') + 1], model);
   assert.equal(args[args.indexOf('--tools') + 1], '');
+  assert.ok(args.includes('--safe-mode'));
   assert.equal(args.some(arg => arg.includes('HIDDEN_PROVIDER_METADATA')), false);
 }
 assert.equal(first.filter(arg => arg === '--system-prompt').length, 1);
@@ -253,21 +254,27 @@ NODE
   [ "$status" -eq 0 ]
 }
 
-@test "subject receives only its scenario on both skill surfaces" {
+@test "Claude subjects request isolation and transport only their scenario from clean and customized callers" {
+  mkdir -p "$TMP/customized"
+  printf '%s\n' 'Caller policy must not replace the supplied tabletop contract.' > "$TMP/customized/CLAUDE.md"
   for surface in source codex; do
-    run bash "$SKILL/eval/run-skill-eval.sh" "$surface" 'SUBJECT_SCENARIO' '{"assertions":"DO_NOT_FORWARD"}'
-    [ "$status" -eq 0 ]
+    for caller in "$TMP" "$TMP/customized"; do
+      cd "$caller"
+      run bash "$SKILL/eval/run-skill-eval.sh" "$surface" 'SUBJECT_SCENARIO' '{"assertions":"DO_NOT_FORWARD"}'
+      [ "$status" -eq 0 ]
+    done
   done
   run node - "$EVAL_ARGV" "$SKILL" <<'NODE'
 const assert = require('node:assert/strict');
 const lines = require('node:fs').readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JSON.parse);
-assert.equal(lines.length, 2);
+assert.equal(lines.length, 4);
 for (const args of lines) {
   const fixture = require('node:fs').readFileSync(process.argv[3] + '/eval/fixture-context.txt', 'utf8').trimEnd();
   assert.ok(args[args.indexOf('--system-prompt') + 1].includes(fixture));
   assert.equal(args.at(-1), 'SUBJECT_SCENARIO');
   assert.equal(args.some(arg => arg.includes('DO_NOT_FORWARD')), false);
   assert.equal(args[args.indexOf('--tools') + 1], '');
+  assert.ok(args.includes('--safe-mode'));
   assert.ok(args.includes('--strict-mcp-config'));
   assert.equal(args.at(-2), '--');
 }
