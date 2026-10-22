@@ -71,7 +71,7 @@ The planner MUST NOT add speculative risk-mitigation tasks. The risk scorer iden
 
 Resolve substantive findings from all five critics and reduce above-appetite risk under the applicable policy. Reassess affected critics after material changes until the exact plan revision is coherent and within appetite. Record the reviewer identities, assessed revision, verdicts and evidence in the existing issue or plan artifact; no new report or template is required. A completed review with unresolved substantive findings is not a pass. Distinguish forecast controls from controls already verified. Plan assessment does not replace concrete code, commit, push, release, or operational reviews required by the project.
 
-Reviews are part of execution, not an extra request for human approval at every cycle. Continue within existing user authorization and policy. Replanning does not grant permission for new external effects, wider scope, persistent goals, or automations.
+Perform reviews within existing authorization and policy. Replanning grants no wider scope, new external effects, persistent goals or automation authority.
 
 ## Deliver, verify, learn, replan
 
@@ -79,9 +79,9 @@ Execute the assessed **Now** increment through the applicable delivery workflow.
 
 For GitHub delivery, follow the [work checkpoints](references/github-coordination.md#reconcile-tracking-at-work-checkpoints), with regular discussion reads AND event checks. Reconcile each affected record and selected Project from saved state; read back changes.
 
-After every delivered increment:
+At each increment boundary:
 
-1. **Verify:** inspect the actual completion evidence and state exactly what it establishes. Compare the result with both the increment's acceptance criteria and the overall objective.
+1. **Verify:** compare actual results with the increment's acceptance criteria and overall objective. Before declaring completion, obtain the [independent acceptance check](references/planning-details.md#independent-increment-acceptance), then repair and recheck discrepancies.
 2. **Learn:** record the material facts that changed understanding: invalidated assumptions, unexpected coupling, failures, useful measurements, and remaining uncertainty. Keep this brief and evidence-based.
 3. **Replan:** rewrite Now from the remaining gap to the objective; revise, reorder, split, replace, or drop Next and Later items as evidence warrants. Do not mechanically promote the old Next item or retain work merely because it was planned.
 4. **Reassess:** iterate the revised executable plan with the five independent critics above before its dependent work begins.

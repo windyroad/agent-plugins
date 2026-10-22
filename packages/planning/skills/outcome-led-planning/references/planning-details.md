@@ -20,3 +20,13 @@ Iterate each **initial or materially revised executable plan with five independe
 
 Use the installed review roles or available independent agents assigned those responsibilities. The JTBD reviewer checks the objective and plan against the relevant persona and desired outcomes. Follow its recommendation-review contract, including a `RECOMMENDATION REVIEW` prompt prefix where required; recommendation review does not authorize file edits. Identify any substitution and its limits. If a substantive review cannot be obtained, report the exact missing capability and hold dependent implementation. Continue useful authorized preparation within existing authority. An ordinary go-ahead does not provide the missing review or itself waive this gate; do not infer informed risk acceptance or substitute another confirmation for that capability. Do not claim the plan passed or silently substitute self-approval.
 
+
+## Independent increment acceptance
+
+Before declaring an increment complete, its owner obtains one bounded independent acceptance check through the existing planning critic. Reuse an independent check that already covers these criteria. The owner retains the final acceptance decision; a critic verdict does not automatically complete the increment.
+
+Give the critic the acceptance criteria, current revision, actual execution results and access to the affected authoritative plan and saved records. The critic inspects those results directly and compares the completion claim with the affected outcome, increment and task records, including selected Project state where applicable. Reviewing only the executor's summary or a PASS label is insufficient. Use the existing Local plan/conversation or GitHub records.
+
+The critic identifies concrete discrepancies or missing results. Withhold Done, repair within existing authority and obtain a recheck of the repaired results and saved state. If the independent reviewer or required results are unavailable, report the precise gap and withhold the completion claim. This review grants no wider access or operation authority.
+
+This is an increment-acceptance boundary. Completing an individual task or making a routine update does not trigger it or another five-critic cycle. Earlier review, coordination and prerequisite obligations still apply.

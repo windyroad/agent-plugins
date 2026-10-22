@@ -111,7 +111,10 @@ useful opportunities and resolves overlap and dependencies. A starting battle
 plan is provisional work and dependency guidance, not a reserved backlog. Agents
 create/reuse and claim tasks just in time; the owner need not allocate every
 contribution. Explicit assignments still require verified availability and
-acknowledgement. Preserve current claims. If no useful action is available,
+acknowledgement. Before declaring the increment complete, its owner obtains the
+[independent acceptance check](../outcome-led-planning/references/planning-details.md#independent-increment-acceptance)
+through the existing planning critic, including repair and recheck. Individual
+task completion alone does not trigger that increment-level check. Preserve current claims. If no useful action is available,
 state the concrete limit instead of inventing busywork or asking the human to
 manage routine allocation.
 

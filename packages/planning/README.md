@@ -37,6 +37,12 @@ Arrange the cognitive accessibility and planning critics through available
 independent reviewers too. Routine task claims and status updates within an
 assessed plan do not restart all five reviews.
 
+Before an increment is declared complete, its owner obtains an independent
+acceptance check through the planning critic. The critic inspects actual results
+and affected saved records; discrepancies are repaired and rechecked. An existing
+independent review covering these criteria is reused. Individual task completion
+does not trigger this increment-level check.
+
 ## Use
 
 In Claude Code:
