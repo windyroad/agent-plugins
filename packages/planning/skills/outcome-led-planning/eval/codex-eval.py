@@ -65,6 +65,12 @@ def main():
         contract = fixture + '\n\n' + skill.read_text() + '\n\n' + (references / 'project-tracking.md').read_text()
         if entry == 'outcome-led-planning':
             contract += '\n\n' + (references / 'planning-details.md').read_text()
+        else:
+            heading = '## Independent increment acceptance\n'
+            _, found, acceptance = ('\n' + (references / 'planning-details.md').read_text()).partition('\n' + heading)
+            if not found:
+                raise ValueError('Missing independent increment acceptance section')
+            contract += '\n\n' + heading + acceptance.split('\n## ', 1)[0]
         tracking = scenario.get('tracking') if isinstance(scenario, dict) else None
         if tracking == 'github':
             contract += '\n\n' + (references / 'github-coordination.md').read_text()

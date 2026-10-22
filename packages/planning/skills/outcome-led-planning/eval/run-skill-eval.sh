@@ -32,6 +32,13 @@ contract+="$(cat "$references/project-tracking.md")"
 if [ "$entry" = outcome-led-planning ]; then
   contract+=$'\n\n'
   contract+="$(cat "$references/planning-details.md")"
+else
+  contract+=$'\n\n'
+  contract+="$(awk '
+    /^## / { selected = ($0 == "## Independent increment acceptance"); if (selected) found = 1 }
+    selected { print }
+    END { if (!found) { print "Missing independent increment acceptance section" > "/dev/stderr"; exit 2 } }
+  ' "$references/planning-details.md")"
 fi
 # Only an explicit selected-mode envelope loads the conditional reference.
 # Provider metadata/rubrics and future turns never select or reach the subject.

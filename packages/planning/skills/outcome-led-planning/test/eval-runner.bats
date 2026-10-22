@@ -188,11 +188,33 @@ calls.forEach((args, index) => {
   const contract = index < 4 ? args[args.indexOf('--system-prompt') + 1] : args.at(-1);
   assert.ok(contract.includes(fs.readFileSync(path.join(root, 'contribute/SKILL.md'), 'utf8').trimEnd()));
   assert.ok(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/references/project-tracking.md'), 'utf8').trimEnd()));
+  const details = fs.readFileSync(path.join(root, 'outcome-led-planning/references/planning-details.md'), 'utf8');
+  const acceptance = details.split('\n## Independent increment acceptance\n')[1].split('\n## ')[0].trimEnd();
+  assert.ok(contract.includes('## Independent increment acceptance\n' + acceptance));
+  assert.equal(contract.includes('## Bounded discovery'), false);
+  assert.equal(contract.includes('## Critic responsibilities'), false);
   assert.equal(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/references/github-coordination.md'), 'utf8').trimEnd()), index % 2 === 1);
   assert.equal(args.some(arg => arg.includes('HIDDEN_RUBRIC')), false);
 });
 NODE
   [ "$status" -eq 0 ]
+}
+
+@test "contribute rejects a missing acceptance reference before either runtime on both surfaces" {
+  local fixture="$TMP/fixture"
+  mkdir -p "$fixture"
+  cp -R "$PACKAGE/skills" "$PACKAGE/skills-codex" "$fixture/"
+  for surface in skills skills-codex; do
+    printf '%s\n' '# Details' '## Other guidance' 'Unrelated fixture section.' > "$fixture/$surface/outcome-led-planning/references/planning-details.md"
+  done
+  for runtime in claude codex; do
+    for surface in source codex; do
+      run env PLANNING_EVAL_RUNTIME="$runtime" bash "$fixture/skills/outcome-led-planning/eval/run-skill-eval.sh" "$surface" '{"skill":"contribute","prompt":"NO_PROVIDER_CALL"}'
+      [ "$status" -ne 0 ]
+      [[ "$output" == *'Missing independent increment acceptance section'* ]]
+    done
+  done
+  [ ! -s "$EVAL_ARGV" ]
 }
 
 @test "unknown skill envelopes fail before invoking either runtime" {
