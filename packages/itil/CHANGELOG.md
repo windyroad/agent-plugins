@@ -1,5 +1,15 @@
 # @windyroad/problem
 
+## 3.4.0
+
+### Minor Changes
+
+- 479079c: Remember each project's GitHub Issues or Local tracking choice across sessions and both skills. Add contribute to the standalone planning plugin. Assess initial and materially revised plans with five independent critics, and claim bounded contributions just in time. Keep Projects optional and leave necessary risk treatments to the risk scorer.
+
+### Patch Changes
+
+- 99c4b26: Fixed selected GitHub Project setup and ticket updates at delivery checkpoints, with verified saved fields, preserved ownership, and handoffs that retain recorded acceptance criteria.
+
 ## 3.3.0
 
 ### Minor Changes
