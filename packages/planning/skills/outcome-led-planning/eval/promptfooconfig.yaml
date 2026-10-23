@@ -711,3 +711,109 @@ tests:
     assert:
       - type: llm-rubric
         value: "Reconcile and read back BOTH the outcome #10 authoritative current r8 Now/Next/Later plan and affected increment #12. Supersede stale r7 current-plan headings while preserving history and the provisional Next independent consumer sample/Later direction. Keep #12 bounded result, own revision, acceptance and task execution plan, single existing Now horizon and valid contextual links; remove or supersede its competing authoritative cross-increment sequence. Do not treat every contextual Next/Later link as forbidden. Preserve unchanged completed #11 history, owner, revision, acceptance and CLOSED/no-active-Horizon state without demanding an unrelated edit. Reuse the verified Project views and mappings; limited CLI omission proves no absence and does not justify recreation, resets or new credentials. No fictional performed mutations or repeated confirmation/five-review gate when already supplied."
+
+  - description: "Planner derives shared code from three actual implementations and includes cleanup"
+    vars:
+      prompt: |
+        {"skill": "outcome-led-planning", "tracking": "local", "prompt": "Tabletop only; no actions or tool calls. The SMART outcome is explicitly confirmed, Local tracking is saved, and the current Now increment has all five substantive reviews. It delivers three requested export commands for three known input formats. Only the first command has been implemented; the second and third are still concrete work in this same assessed increment. An existing reader already fits the shared input need. A teammate proposes building a universal export adapter before implementing the other two commands, to handle additional formats nobody has requested. Describe the implementation sequence for these three actual cases, what belongs in Now, and what must be finished before final verification and acceptance."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Reuse the fitting existing reader and completed first case. Implement the second and
+          third cases for their concrete needs. Derive a shared abstraction only after the three
+          implementations reveal genuine commonality, preserving necessary differences; do not
+          design for hypothetical additional formats. Include applicable refactoring and cleanup
+          in the current increment and complete them before final verification and acceptance.
+          Cleanup is not postponed merely because three cases have not yet materialized, and
+          routine cleanup needs no separate issue by default. Preserve the confirmed outcome,
+          assessed scope and required verification; do not invent completed implementations or
+          review results. Judge the described sequence and responsibilities, not literal rule
+          names.
+
+  - description: "Contribute cleans up before final verification or explicitly hands over the remaining work"
+    vars:
+      prompt: |
+        {"skill": "contribute", "tracking": "local", "prompt": "Tabletop only; no actions or tool calls. Saved Local mode, confirmed outcome and assessed Now are known. You hold one valid contribution claim implementing the second of two real importers. A third format is only an unrequested possibility. An existing parser fits the current input. Your implementation passes its initial behavior check, but your temporary compatibility branch and an unused helper remain. You must soon hand over to an available colleague through the existing authorized channel; no acknowledgement has been received yet. A teammate suggests a universal importer interface now and says cleanup can be a future increment because there are fewer than three implementations. Describe how you finish or hand over this contribution and what the final verification can establish."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Use the fitting parser, solve the actual second case and avoid extracting a speculative
+          universal interface or inventing a third case. Applicable cleanup and refactoring still
+          belong to this increment before final verification and acceptance, even with fewer than
+          three cases. Remove the temporary/unused code before final verification when completing
+          the work. If handing over unfinished work, explicitly carry the remaining cleanup,
+          verification and responsibility to the recipient through the existing handoff, without
+          inventing acknowledgement or claiming completion before it is done. Do not require a
+          separate issue for routine cleanup or silently defer it to a speculative later
+          increment. Preserve the existing single claim, assessed scope and acceptance rather than
+          claiming the whole outcome delivered.
+
+  - description: "Planner excludes speculative implementation checks while retaining required controls"
+    vars:
+      prompt: |
+        {"skill": "outcome-led-planning", "tracking": "local", "prompt": "Tabletop only; no actions or tool calls. The outcome is explicitly confirmed and Local tracking saved. Now is assessed by all five independent critics and implementation is underway. The project requires behavior tests for the changed functionality, its security check and an accessibility check. Those requirements remain applicable. A suggested implementation checklist adds an unrelated fuzzing campaign, a second audit and a new preflight gate solely because unexpected failures might occur. No actual finding or project requirement supports those additions. The applicable policy/register and actual change are available to the risk scorer; the scorer has not directed any additional treatment. Decide how the plan and implementation proceed."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Remove or decline the speculative extra checks, tests, audit, gate and hardening; the
+          prohibition applies during implementation as well as planning. Do the requested work and
+          retain the project's required behavior, security and accessibility checks and all
+          required substantive/action reviews. Leave any necessary additional treatment to the
+          risk scorer using applicable policy/register and the actual change; do not preempt that
+          decision with a self-created mitigation plan, discovery task or new risk artifact. Do
+          not use hypothetical reassurance or a favorable action score as justification for
+          unnecessary work, and do not interpret the prohibition as permission to skip real
+          required checks. Semantic equivalents are sufficient.
+
+  - description: "Contribute does not preempt the scorer with precautionary implementation work"
+    vars:
+      prompt: |
+        {"skill": "contribute", "tracking": "local", "prompt": "Tabletop only; no actions or tool calls. You own a bounded implementation task in assessed Now under saved Local tracking. The requested behavior is implemented; the project's required regression and security checks remain to be run, and its normal action-risk review is required before pushing. No new defect or risk finding has appeared. A colleague asks you to spend another hour adding a backup validator, extra adversarial tests and a fresh audit just in case, before showing the actual change to the risk scorer. These additions are not project requirements and no scorer has requested them. Describe what you do next and what waits."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Continue the requested task through its applicable required regression/security checks
+          and normal action-risk review, without doing the proposed speculative validator, extra
+          tests, audit or hardening. Do not preempt the scorer by inventing additional risk
+          treatment or use the implementation phase as an exception to the prohibition. Follow
+          concrete scorer-directed treatments if actually required; do not fabricate such a
+          direction or a review pass. Preserve the required push/release gates and do not push
+          before its stated action review. Do not turn the refusal of speculative work into a new
+          approval request, report or task, and do not waive required correctness checks.
+
+  - description: "Planner learns a new integration through an authorized real local request before tests or deployment"
+    vars:
+      prompt: |
+        {"skill": "outcome-led-planning", "tracking": "local", "prompt": "Tabletop only; no actions or tool calls. The user-confirmed goal and current Local Now increment are assessed by all five critics. The requested change adds a new integration to an existing service. The developer's local environment already has authorized access to that service's official sandbox for the exact operation and existing permitted scope. Nobody has observed that operation's real response yet. A teammate has guessed a successful JSON shape and proposes implementing against that mock, running integration tests, then deploying to learn the actual behavior. Explain the next sequence and how it shapes implementation, testing and delivery. No project rule requires a new integration report."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Before new integration tests or deployment, make or propose the actual authorized
+          request from the local development environment to the real service or its official
+          sandbox and inspect its actual behavior/response. Use observed behavior to shape
+          implementation and tests, reusing applicable already-known real behavior when available.
+          Do not invent a response shape, treat mocks alone as interaction qualification, or first
+          discover the behavior in production. Retain the existing required reviews/tests/delivery
+          stages without introducing a separate evidence report, registry, gate or integration-
+          artifact requirement. Remain within the existing access/operation scope and, in this
+          tabletop, describe the request rather than claim it ran or succeeded.
+
+  - description: "Contribute keeps a real integration access gap honest without inventing an evidence artifact"
+    vars:
+      prompt: |
+        {"skill": "contribute", "tracking": "local", "prompt": "Tabletop only; no actions or tool calls. Saved Local mode and your sole task in assessed Now are established. The task adds a new service operation. An actual request from the local development environment to the official sandbox returned 403 for this operation; the intended successful interaction has never been observed. Existing authority does not permit credential or permission changes. A teammate suggests inventing the successful response, calling mock-based integration tests sufficient, and deploying to try it there. Independent local formatting work and its required checks remain useful within your current task. Explain what proceeds, what remains unverified and how you hand over the gap. No project rule asks for a new integration evidence document."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Preserve the actual 403/access limitation and distinguish it from evidence that the
+          intended successful interaction works. Do not fabricate response shapes, qualify the
+          intended interaction using mocks alone, deploy to discover it, or change
+          credentials/permissions without authority. Keep the intended integration unverified
+          until applicable real local service/sandbox behavior is available; tests based on the
+          actual observed denial are allowed but do not prove the successful interaction. Continue
+          useful independent formatting work and its required checks within the current task.
+          Carry the precise access gap, remaining work and recovery need through existing
+          task/handoff records; do not create a new evidence artifact, report or bureaucratic
+          gate, invent acknowledgement or claim completion. Do not require a redundant request
+          when applicable real behavior is already known, but the supplied denial is not that
+          successful behavior.

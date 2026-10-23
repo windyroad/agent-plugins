@@ -37,9 +37,16 @@ if [ "$entry" = outcome-led-planning ]; then
 elif [ "$entry" = contribute ]; then
   contract+=$'\n\n'
   contract+="$(awk '
-    /^## / { selected = ($0 == "## Independent increment acceptance"); if (selected) found = 1 }
+    /^## / {
+      selected = ($0 == "## Independent increment acceptance" || $0 == "## New integrations")
+      if ($0 == "## Independent increment acceptance") acceptance = 1
+      if ($0 == "## New integrations") integrations = 1
+    }
     selected { print }
-    END { if (!found) { print "Missing independent increment acceptance section" > "/dev/stderr"; exit 2 } }
+    END {
+      if (!acceptance) { print "Missing independent increment acceptance section" > "/dev/stderr"; exit 2 }
+      if (!integrations) { print "Missing new integrations section" > "/dev/stderr"; exit 2 }
+    }
   ' "$references/planning-details.md")"
 fi
 if [ "$entry" = setup-github-tracking ] && ! jq -e 'type == "object" and .tracking == "local"' <<< "$scenario" >/dev/null 2>&1; then

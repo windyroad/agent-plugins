@@ -99,7 +99,13 @@ or claim a second task. If genuinely blocked with no useful authorized next step
 record the exact blocker and unlock condition and release the reservation under
 the shared rules. Do not manufacture work to retain an In progress status.
 
-The planner MUST NOT add speculative risk-mitigation tasks. Apply scorer findings based on the applicable policy and risk register; availability is not a reason to invent precautionary work.
+## Implement and finish the work
+
+Planner and implementer MUST NOT add speculative risk-reduction tasks, checks, tests, audits, gates or hardening. Do the requested work and required checks; **do not preempt the risk scorer.** The scorer directs additional treatments from the applicable policy/register. Speculative work wastes resources, delays value and creates false confidence; remove it.
+
+Reuse fitting code. Build required real cases fit for purpose: first, second, third; then refactor actual commonality and keep necessary differences. Do not extract a new shared abstraction before the third real implementation. Do not invent cases or abstractions. Every increment includes refactoring/cleanup, called out in Now and completed before final verification/acceptance. Complete applicable cleanup within your contribution and carry remaining responsibility through handover. Cleanup does not require extraction or a separate issue.
+
+For new integrations, make real local requests within existing authority before integration tests or deployment. Inspect actual behaviour/responses; do not invent shapes, qualify with mocks alone or first experiment in production. Read [integration guidance](../outcome-led-planning/references/planning-details.md#new-integrations).
 
 ## Coordinate and report honestly
 

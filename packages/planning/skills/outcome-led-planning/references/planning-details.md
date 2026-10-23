@@ -12,7 +12,7 @@ Iterate each **initial or materially revised executable plan with five independe
 
 - **Architect:** checks structural choices, interfaces and existing decisions.
 - **JTBD:** checks intended beneficiaries and their desired outcomes.
-- **Risk:** checks action risk and whether proposed mitigation work is justified.
+- **Risk:** checks action risk and whether proposed mitigation work is justified. The risk scorer vetoes speculative work justified only by imagined failure or agent discomfort. Necessary treatments require an established risk or applicable requirement, credible impact/likelihood and proportionate reduction relative to cost and delay. A prior incident is not required; established preventive risks and required controls remain valid. An in-appetite action score does not establish necessity or priority. Remove unjustified work rather than invent a registry, report, human gate or discovery increment to justify it.
 - **Cognitive accessibility:** checks whether beneficiaries and contributors can understand the result, choices and next action without unnecessary cognitive work, jargon or human handoffs.
 - **Planning:** tests INVEST for Now, especially whether a smaller still-valuable increment exists, and outcome-directed dependencies and sequencing across Now/Next/Later. Future horizons remain provisional, without full Now detail. For initial or material plan reviews, inspect the authoritative plan in the chosen vehicle and actual affected tracking records, where used, against the assessed revision, including relevant task and selected Project setup evidence. Return concrete discrepancies; have repairs reflected in that same vehicle and rechecked before dependent work. Do not create a new artifact or tracking vehicle just for review. This is the existing planning review, not another five-critic cycle for routine updates.
 
@@ -30,3 +30,7 @@ Give the critic the acceptance criteria, current revision, actual execution resu
 The critic identifies concrete discrepancies or missing results. Withhold Done, repair within existing authority and obtain a recheck of the repaired results and saved state. If the independent reviewer or required results are unavailable, report the precise gap and withhold the completion claim. This review grants no wider access or operation authority.
 
 This is an increment-acceptance boundary. Completing an individual task or making a routine update does not trigger it or another five-critic cycle. Earlier review, coordination and prerequisite obligations still apply.
+
+## New integrations
+
+Make the first real request from the local development environment to the actual service or its official sandbox within existing authority. Inspect actual responses and behaviour before writing integration tests or deploying; use what you observe to shape implementation and tests. Reuse already-known real behaviour where applicable. Do not invent response shapes, qualify an integration solely against mocks, or learn its behaviour by iterating in production. If real access is unavailable, state that gap and continue useful independent work; mocks do not establish that the interaction works. No new report is required.

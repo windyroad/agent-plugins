@@ -66,11 +66,14 @@ def main():
         if entry == 'outcome-led-planning':
             contract += '\n\n' + (references / 'planning-details.md').read_text()
         elif entry == 'contribute':
-            heading = '## Independent increment acceptance\n'
-            _, found, acceptance = ('\n' + (references / 'planning-details.md').read_text()).partition('\n' + heading)
-            if not found:
-                raise ValueError('Missing independent increment acceptance section')
-            contract += '\n\n' + heading + acceptance.split('\n## ', 1)[0]
+            details = '\n' + (references / 'planning-details.md').read_text()
+            for heading, missing in (
+                    ('## Independent increment acceptance\n', 'Missing independent increment acceptance section'),
+                    ('## New integrations\n', 'Missing new integrations section')):
+                _, found, section = details.partition('\n' + heading)
+                if not found:
+                    raise ValueError(missing)
+                contract += '\n\n' + heading + section.split('\n## ', 1)[0]
         tracking = scenario.get('tracking') if isinstance(scenario, dict) else None
         if entry == 'setup-github-tracking' and tracking != 'local':
             sections = (references / 'github-coordination.md').read_text().split('\n## ')

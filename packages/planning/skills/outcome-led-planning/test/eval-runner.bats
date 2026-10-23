@@ -209,8 +209,10 @@ calls.forEach((args, index) => {
   assert.equal(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/SKILL.md'), 'utf8').trimEnd()), false);
   assert.ok(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/references/project-tracking.md'), 'utf8').trimEnd()));
   const details = fs.readFileSync(path.join(root, 'outcome-led-planning/references/planning-details.md'), 'utf8');
-  const acceptance = details.split('\n## Independent increment acceptance\n')[1].split('\n## ')[0].trimEnd();
-  assert.equal(contract.includes('## Independent increment acceptance\n' + acceptance), !direct);
+  for (const heading of ['Independent increment acceptance', 'New integrations']) {
+    const section = details.split('\n## ' + heading + '\n')[1].split('\n## ')[0].trimEnd();
+    assert.equal(contract.includes('## ' + heading + '\n' + section), !direct);
+  }
   assert.equal(contract.includes('## Bounded discovery'), false);
   assert.equal(contract.includes('## Critic responsibilities'), false);
   const protocol = fs.readFileSync(path.join(root, 'outcome-led-planning/references/github-coordination.md'), 'utf8').trimEnd();
@@ -249,6 +251,16 @@ NODE
       run env PLANNING_EVAL_RUNTIME="$runtime" bash "$fixture/skills/outcome-led-planning/eval/run-skill-eval.sh" "$surface" '{"skill":"setup-github-tracking","prompt":"NO_PROVIDER_CALL"}'
       [ "$status" -ne 0 ]
       [[ "$output" == *'Missing required GitHub setup protocol section'* ]]
+    done
+  done
+  for surface in skills skills-codex; do
+    printf '%s\n' '# Details' '## Independent increment acceptance' 'Acceptance fixture context.' > "$fixture/$surface/outcome-led-planning/references/planning-details.md"
+  done
+  for runtime in claude codex; do
+    for surface in source codex; do
+      run env PLANNING_EVAL_RUNTIME="$runtime" bash "$fixture/skills/outcome-led-planning/eval/run-skill-eval.sh" "$surface" '{"skill":"contribute","prompt":"NO_PROVIDER_CALL"}'
+      [ "$status" -ne 0 ]
+      [[ "$output" == *'Missing new integrations section'* ]]
     done
   done
   [ ! -s "$EVAL_ARGV" ]
