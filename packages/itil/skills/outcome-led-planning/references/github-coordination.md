@@ -188,6 +188,12 @@ actual acknowledgement.
 
 At each work checkpoint, reconcile tracking in this order:
 
+For a join/resume checkpoint with a selected Project and working `gh`, MUST use
+the [executable Project checkpoint](github-project-checkpoint.md). Read its
+inspection and handle current discussion before applying it; do not manually
+publish synchronization-success text on that route. Other checkpoints and
+authorized alternatives retain the rules below.
+
 1. **Establish scope.** Reuse the established backend. Establish Project selection
    separately from the backend, using configuration, project requirements or
    explicit direction: selected/required, none, or unresolved. Do not infer none

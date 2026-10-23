@@ -74,7 +74,8 @@ For each separately owned contribution:
 4. Execute within the assessed plan and authority, keeping evidence and status
    current. Small routine steps stay in the task. In GitHub mode, follow the
    [work checkpoints](../outcome-led-planning/references/github-coordination.md#reconcile-tracking-at-work-checkpoints)
-   and read back issue and selected Project changes.
+   and MUST use the [executable checkpoint](../outcome-led-planning/references/github-project-checkpoint.md)
+   for selected-Project join/resume reconciliation. Read back issue and selected Project changes.
 5. Record the verified result and finish, or release with a handover stating
    evidence, blocker and next step when no useful authorized work remains.
 6. Choose and document the next useful contribution from current evidence, then

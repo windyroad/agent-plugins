@@ -195,6 +195,7 @@ calls.forEach((args, index) => {
   assert.equal(contract.includes('## Bounded discovery'), false);
   assert.equal(contract.includes('## Critic responsibilities'), false);
   assert.equal(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/references/github-coordination.md'), 'utf8').trimEnd()), index % 2 === 1);
+  assert.equal(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/references/github-project-checkpoint.md'), 'utf8').trimEnd()), index % 2 === 1);
   assert.equal(args.some(arg => arg.includes('HIDDEN_RUBRIC')), false);
 });
 NODE

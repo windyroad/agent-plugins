@@ -74,6 +74,7 @@ def main():
         tracking = scenario.get('tracking') if isinstance(scenario, dict) else None
         if tracking == 'github':
             contract += '\n\n' + (references / 'github-coordination.md').read_text()
+            contract += '\n\n' + (references / 'github-project-checkpoint.md').read_text()
         if tracking in ('github', 'local'):
             contract += f'\n\nScenario tracking backend: {tracking}.'
         turns = scenario.get('turns') if isinstance(scenario, dict) else None

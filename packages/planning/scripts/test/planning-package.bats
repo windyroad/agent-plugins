@@ -36,6 +36,7 @@ SH
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
+const { spawnSync } = require('node:child_process');
 const root = process.argv[2];
 const manifest = JSON.parse(fs.readFileSync(path.join(root, '.codex-plugin/plugin.json')));
 assert.equal(manifest.name, 'wr-planning');
@@ -44,6 +45,13 @@ assert.ok(fs.existsSync(path.join(root, manifest.skills, 'outcome-led-planning/a
 const reference = 'outcome-led-planning/references/github-coordination.md';
 assert.ok(fs.readFileSync(path.join(root, manifest.skills, reference), 'utf8').length > 0);
 assert.deepEqual(fs.readFileSync(path.join(root, manifest.skills, reference)), fs.readFileSync(path.join(root, 'skills', reference)));
+for (const surface of ['skills', manifest.skills]) {
+  const helper = path.join(root, surface, 'outcome-led-planning/scripts/github-project-checkpoint.mjs');
+  const result = spawnSync(process.execPath, [helper, '--help'], { encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Inspect:.*inspect REQUEST\.json/);
+  assert.match(result.stdout, /Apply:.*apply REQUEST\.json INSPECTION\.json/);
+}
 for (const surface of ['skills', manifest.skills]) {
   const contribute = path.join(root, surface, 'contribute');
   assert.ok(fs.existsSync(path.join(contribute, 'SKILL.md')));
@@ -93,6 +101,8 @@ NODE
   mkdir -p "$TMP/packages/planning/skills/outcome-led-planning/references/nested"
   printf 'Shared tracking fixture.\n' > "$TMP/packages/planning/skills/outcome-led-planning/references/project-tracking.md"
   printf 'Nested detail fixture.\n' > "$TMP/packages/planning/skills/outcome-led-planning/references/nested/details.md"
+  mkdir -p "$TMP/packages/planning/skills/outcome-led-planning/scripts"
+  printf 'console.log("checkpoint fixture");\n' > "$TMP/packages/planning/skills/outcome-led-planning/scripts/github-project-checkpoint.mjs"
   run node "$TMP/scripts/sync-planning-skill.mjs" --check
   [ "$status" -ne 0 ]
   run node "$TMP/scripts/sync-planning-skill.mjs"
@@ -104,6 +114,13 @@ NODE
   cmp "$TMP/packages/planning/skills/outcome-led-planning/references/github-coordination.md" "$TMP/packages/itil/skills/outcome-led-planning/references/github-coordination.md"
   cmp "$TMP/packages/planning/skills/outcome-led-planning/references/project-tracking.md" "$TMP/packages/itil/skills/outcome-led-planning/references/project-tracking.md"
   cmp "$TMP/packages/planning/skills/outcome-led-planning/references/nested/details.md" "$TMP/packages/itil/skills/outcome-led-planning/references/nested/details.md"
+  cmp "$TMP/packages/planning/skills/outcome-led-planning/scripts/github-project-checkpoint.mjs" "$TMP/packages/itil/skills/outcome-led-planning/scripts/github-project-checkpoint.mjs"
+  printf 'stale helper\n' > "$TMP/packages/itil/skills/outcome-led-planning/scripts/github-project-checkpoint.mjs"
+  run node "$TMP/scripts/sync-planning-skill.mjs" --check
+  [ "$status" -ne 0 ]
+  run node "$TMP/scripts/sync-planning-skill.mjs"
+  [ "$status" -eq 0 ]
+  cmp "$TMP/packages/planning/skills/outcome-led-planning/scripts/github-project-checkpoint.mjs" "$TMP/packages/itil/skills/outcome-led-planning/scripts/github-project-checkpoint.mjs"
   printf 'stale protocol\n' > "$TMP/packages/itil/skills/outcome-led-planning/references/github-coordination.md"
   run node "$TMP/scripts/sync-planning-skill.mjs" --check
   [ "$status" -ne 0 ]

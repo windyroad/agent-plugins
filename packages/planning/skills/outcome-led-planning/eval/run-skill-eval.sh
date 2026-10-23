@@ -45,6 +45,8 @@ fi
 if jq -e 'type == "object" and .tracking == "github"' <<< "$scenario" >/dev/null 2>&1; then
   contract+=$'\n\n'
   contract+="$(cat "$references/github-coordination.md")"
+  contract+=$'\n\n'
+  contract+="$(cat "$references/github-project-checkpoint.md")"
 fi
 if jq -e 'type == "object" and (.tracking == "github" or .tracking == "local")' <<< "$scenario" >/dev/null 2>&1; then
   contract+=$'\n\nScenario tracking backend: '
