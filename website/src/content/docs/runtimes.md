@@ -53,6 +53,13 @@ Use `/wr-planning:contribute` in Claude Code or `$wr-planning:contribute` in
 Codex to join a current assessed outcome. This entrypoint belongs to the
 standalone planning package.
 
+For missing selected GitHub setup, both workflows call `setup-github-tracking`.
+It is also available directly as `/wr-planning:setup-github-tracking` in Claude
+Code or `$wr-planning:setup-github-tracking` in Codex, from planning **0.5.0**.
+ITIL **3.5.0** provides the corresponding `wr-itil` compatibility entry.
+The setup skill preserves saved choices, reuses complete setup and verifies
+Increments hierarchy On after saving and reopening the view.
+
 ## Install required reviewers
 
 Initial and materially revised executable plans require five independent critics:

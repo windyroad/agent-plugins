@@ -85,7 +85,8 @@
         "packages/itil/skills/transition-problems/SKILL.md",
         "packages/itil/skills/update-upstream/SKILL.md",
         "packages/itil/skills/work-problem/SKILL.md",
-        "packages/itil/skills/work-problems/SKILL.md"
+        "packages/itil/skills/work-problems/SKILL.md",
+        "packages/itil/skills/setup-github-tracking/SKILL.md"
       ],
       "description": "Service management workflows for Claude Code and Codex."
     },
@@ -166,7 +167,8 @@
       "readme": "packages/planning/README.md",
       "skills": [
         "packages/planning/skills/outcome-led-planning/SKILL.md",
-        "packages/planning/skills/contribute/SKILL.md"
+        "packages/planning/skills/contribute/SKILL.md",
+        "packages/planning/skills/setup-github-tracking/SKILL.md"
       ]
     }
   ],
@@ -201,6 +203,8 @@
     "packages/retrospective/skills/migrate-briefing/SKILL.md": "Split an existing project briefing into topic files for subsequent sessions.",
     "packages/itil/skills/outcome-led-planning/SKILL.md": "Compatibility entrypoint for outcome-led planning, including optional GitHub coordination. Existing ITIL installations remain usable.",
     "packages/planning/skills/outcome-led-planning/SKILL.md": "Confirm a SMART outcome and deliver through Now, Next and Later increments. Obtain five independent reviews of each initial or materially revised plan. Remember the project tracking choice and reconcile shared tickets and selected Project views at work checkpoints.",
-    "packages/planning/skills/contribute/SKILL.md": "Find useful bounded help within an assessed outcome, reuse its saved tracking choice and keep shared evidence current."
+    "packages/planning/skills/contribute/SKILL.md": "Find useful bounded help within an assessed outcome, reuse its saved tracking choice and keep shared evidence current.",
+    "packages/planning/skills/setup-github-tracking/SKILL.md": "Configure missing selected GitHub issue tracking and Project fields and views. Reuse saved choices and complete setup, with Increments hierarchy saved On.",
+    "packages/itil/skills/setup-github-tracking/SKILL.md": "Configure missing selected GitHub issue tracking and Project fields and views. Reuse saved choices and complete setup, with Increments hierarchy saved On."
   }
 }

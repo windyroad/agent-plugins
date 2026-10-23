@@ -74,6 +74,18 @@ source of planning authority.
 
 ### Set up a selected Project
 
+Planning and contribute call the separate `setup-github-tracking` skill when
+selected GitHub setup is missing or incomplete. It reuses the same saved
+configuration and returns to the current work. Local mode bypasses it, and
+verified complete setup is reused.
+
+Invoke `/wr-planning:setup-github-tracking` in Claude Code or
+`$wr-planning:setup-github-tracking` in Codex to configure or repair selected
+setup directly. The ITIL compatibility entry is `/wr-itil:setup-github-tracking`
+or `$wr-itil:setup-github-tracking`. These setup entries require planning
+**0.5.0 or later**, or ITIL **3.5.0 or later**. They configure tracking without
+restarting the outcome interview.
+
 Using a Project is optional. Once selected or required by the project, its setup
 and updates are part of delivery. The agent reuses equivalent existing setup and
 custom views. For a new Project, the defaults are:
@@ -82,8 +94,10 @@ custom views. For a new Project, the defaults are:
   agent identity and sub-issue progress.
 - **Increments:** a table filtered to `label:kind:increment`, grouped by Horizon
   in Now, Next, Later order, with status, ownership, agent identity, linked pull
-  requests and progress. Closed increments remain accessible without an active
-  Horizon.
+  requests and progress. **Show hierarchy is On**, saved and verified after
+  reopening. Related task children remain accessible under increment roots;
+  unrelated roots stay excluded. Closed increments remain accessible without
+  an active Horizon.
 - **Tasks:** a board filtered to `label:kind:task`, with Status columns and cards
   showing ownership, agent identity, parent issue and linked pull requests.
 
