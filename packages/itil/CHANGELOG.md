@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 3.6.0
+
+### Minor Changes
+
+- 209d6f5: Requires increment cleanup and real local integration trials; directs additional risk treatments to the risk scorer.
+
 ## 3.5.0
 
 ### Minor Changes
