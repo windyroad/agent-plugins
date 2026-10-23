@@ -28,7 +28,7 @@ achievable against known constraints, relevant to your job, and time-bound.
 Qualitative evidence can establish completion; arbitrary numerical targets are
 not required.
 
-If information is missing, the agent asks one focused question and waits for
+If outcome information is missing, the agent asks one focused question and waits for
 your answer. It uses existing context before asking for details again. If you
 decline a deadline, it records that exception rather than inventing one.
 The agent preserves your stated timing. When the outcome is ready for
@@ -42,16 +42,28 @@ ordinary replanning of the means does not.
 
 ## Choose where to track the plan
 
-Conversation or local planning remains available. For shared work, you can
-choose **GitHub Issues tracking** after confirming the outcome. The agent honors
-an existing choice; when a choice is needed, it asks one question and waits.
-It does not ask again just because a different agent joins or a session resumes.
-Without an existing GitHub choice or evidence that shared coordination adds
-value, the agent keeps conversation or local tracking.
+Planning and contribute share one project configuration. The agent reads the
+project-declared location, or `.agents/planning.json` by default. After confirming
+the outcome, it reuses a saved or explicit choice. With no choice, it asks
+**GitHub Issues or Local?**, waits for your answer, then saves and reads it back.
+Fresh sessions and both skills reuse that choice without asking again.
 
-The full coordination requirements in this guide use planning **0.3.0 or later**,
-or the ITIL compatibility command in **3.3.0 or later**. [Update your installed
-plugin](../updating/) before relying on it.
+```json
+{"version": 1, "backend": "local"}
+```
+
+Ask to change the choice when needed. The agent preserves unrelated settings and
+contributor mappings. Invalid or unsupported settings remain intact while the
+needed repair is clarified. Configuration grants no access or messaging authority.
+If the runtime protects the default directory, use a writable project-declared
+location such as `planning.json`; a denied write does not establish persistence.
+Local planning needs no GitHub account or Project.
+
+Saved tracking choices, contribute and the workflow below require planning
+**0.4.0 or later**, or ITIL **3.4.0 or later** for the planning compatibility
+command. [Update your installed plugin](../updating/) before relying on them.
+The standalone planning package provides both skills; ITIL retains its planning
+entrypoint.
 
 The agent reads a bundled coordination protocol when GitHub tracking is
 selected. The linked issues become the shared plan. An optional GitHub Project
@@ -60,13 +72,41 @@ policies continue to govern their own domains. Moving a local plan into Issues
 requires a recorded handover and current revision, so agents retain one
 source of planning authority.
 
+### Set up a selected Project
+
+Using a Project is optional. Once selected or required by the project, its setup
+and updates are part of delivery. The agent reuses equivalent existing setup and
+custom views. For a new Project, the defaults are:
+
+- **Outcomes:** a table filtered to `label:kind:outcome`, with status, ownership,
+  agent identity and sub-issue progress.
+- **Increments:** a table filtered to `label:kind:increment`, grouped by Horizon
+  in Now, Next, Later order, with status, ownership, agent identity, linked pull
+  requests and progress. Closed increments remain accessible without an active
+  Horizon.
+- **Tasks:** a board filtered to `label:kind:task`, with Status columns and cards
+  showing ownership, agent identity, parent issue and linked pull requests.
+
+A default unfiltered View 1 does not satisfy this setup. Each real issue needs
+its kind marker and explicit Project membership, plus applicable native fields
+and relationships. The agent saves changed view settings, reopens the views and
+checks persisted settings and real item visibility before reporting success.
+It preserves existing mappings and history, and creates no dummy test issues.
+
+If an operation is unavailable, the existing increment records the exact pending
+setting and recovery action. Useful authorized issue work can continue while
+that gap remains visible. The agent revisits it at the next work checkpoint and
+does not claim selected setup is complete on issue-only evidence.
+
 ### Use outcome, increment and task issues
 
-- **Outcome:** the confirmed SMART result, completion evidence, constraints,
-  timeframe and increment links. Its owner keeps the goal clear and replans.
-- **Increment:** one coherent result, its plan revision, acceptance criteria,
-  assumptions, dependencies, reviews and contribution tasks. Its owner
-  coordinates delivery and verifies the whole increment.
+- **Outcome:** the confirmed SMART result, completion evidence, constraints and
+  timeframe. Its owner maintains the authoritative current Now, Next and Later
+  sequence and plan revision, with increment links.
+- **Increment:** one coherent result and its bounded plan, acceptance criteria,
+  assumptions, dependencies, reviews and contribution tasks. Link it to the
+  outcome's current plan and context. Its owner coordinates delivery and verifies
+  the whole increment.
 - **Task:** one agent's bounded contribution, with its parent increment,
   current plan revision, scope, dependencies, account and distinct agent or
   session identity, status and evidence.
@@ -95,19 +135,27 @@ A prerequisite task must not require its dependent task's result to finish.
 Propose corrections in the increment thread. The increment owner records revised
 task boundaries and acceptance with affected task owners before applying them.
 Give each task an independently verifiable result and retain the combined result
-in increment acceptance. Obtain architecture, Jobs To Be Done (JTBD), and risk
-reviews before executing a materially revised plan.
+in increment acceptance. Obtain independent architecture, Jobs To Be Done (JTBD),
+risk, cognitive accessibility and planning reviews before executing a materially
+revised plan.
 
 ### Join and contribute safely
 
-The contributing agent uses its own authorized account and follows these steps.
+Invoke `/wr-planning:contribute` in Claude Code or `$wr-planning:contribute` in
+Codex to find useful direct or indirect help within the assessed Now. It reuses
+the saved tracking choice. Contributors pull bounded work just before starting;
+the owner exposes opportunities and dependencies without reserving the backlog.
+
+Local contributions record ownership, bounded work, results and handoffs in the
+existing local plan. For GitHub tracking, the contributing agent uses its own
+authorized account and follows these steps.
 
 1. Read the outcome, current increment revision, shared discussion, existing
    tasks and dependencies. Check for overlapping work and stale assumptions.
-2. Hold only one contribution task at a time, including a blocked assignment.
-   Finish it, explicitly hand it over or release it before claiming another.
-   Do not reserve queued tasks. Outcome or increment coordination ownership does
-   not reserve contribution tasks.
+2. Hold at most one contribution claim. Finish it, obtain an acknowledged
+   handover or verify its release before claiming another. A blocked assignment
+   still counts until its removal is saved and read back. Do not reserve queued
+   tasks. Outcome or increment coordination ownership does not reserve tasks.
 3. Claim a separately owned contribution within the authorized, reviewed plan.
    Assign its task to your actual GitHub account and record the particular agent
    or session. Two agents sharing an account remain distinct contributors.
@@ -131,22 +179,47 @@ current preparation. Do not invent speculative work to avoid Blocked.
 Reassess available inputs and useful authorized in-task work before releasing
 a blocked assignment. A stored Blocked status alone does not establish
 exhaustion. Continue useful work; release with a handover only when the required
-input is unavailable and no useful in-task step remains. Record the blocker,
-evidence and next step. Keep the blocked task Blocked and unassigned. Leave
+input is unavailable and no useful in-task step remains. Assigned watcher duties
+count as useful work; routine discussion reads alone do not retain an exhausted
+implementation claim. Record the blocker, evidence, unlock condition and
+handover, then remove the assignment and read back its removal. Preserve
+historical attribution. Keep the task Blocked and leave
 independently actionable work Ready/Unclaimed so another agent can contribute.
 
 Each contributor uses their own existing access. Assignment does not grant
-additional permissions. When an existing Project is selected, verify its actual
-Status and Agent fields. Labels and issue-body text do not establish Project
-field values. Use available authorized tools, a CLI or an authorized operator,
-then read back the saved fields. Record a pending mirror update honestly and
-continue useful issue-side work.
+additional permissions. Keep shared records aligned at these checkpoints:
 
-Keep task scope, ownership, status, dependencies, next action and verified
-evidence current. Coordinate replaced or dropped work with the increment owner
-and affected task owners. Close redundant tasks as **not planned**, with reasons
-and successor links. Preserve required acceptance evidence and prerequisites
-before removing an obsolete dependency; verify saved changes.
+- **Join, resume or start:** reconcile task and increment scope, owner, status
+  and next action before dependent implementation. Verify that saved issues and
+  actual Project fields match current work.
+- **Material milestone or failed verification:** record the result, evidence and
+  next action. Keep In progress while useful repair remains possible. Link the
+  actual result and read back the update.
+- **Plan, dependency or horizon change:** reconcile briefs, native relationships
+  and increment horizons. Verify that saved links, fields and the current
+  assessed revision agree. Material plan revisions still need their reviews.
+- **Block, hand off, finish or yield:** record the remaining gap and next
+  owner/action, or acceptance evidence. Verify the saved handoff or completion
+  record and retain unresolved operations.
+
+For a selected Project, these transitions also update its actual Status and
+Agent fields and increment-only Horizon. Reconcile each item's own verified
+owner; a task contributor does not replace the increment owner. Read back each
+affected issue and its Project fields, including after later completion or
+handoff edits. Labels, body text, local notes and successful commands alone do
+not prove that Project fields changed. Record meaningful changes; unchanged checks need
+no duplicate heartbeat comments.
+
+Revisit a pending Project operation at the next checkpoint using fresh capability
+evidence. A lost browser binding does not establish that every authorized route
+is unavailable. Keep the exact gap visible during handoff or completion reporting,
+and continue useful authorized work without claiming synchronization succeeded.
+
+Coordinate replaced or dropped work with the increment owner and affected task
+owners. Close redundant tasks as **not planned**, with reasons and successor
+links. Preserve required acceptance evidence and prerequisites before removing
+an obsolete dependency; verify saved changes. Preserve retired tasks' Agent
+attribution and history, updating only fields needed to reflect their retirement.
 
 ### Coordinate in the increment thread
 
@@ -180,9 +253,9 @@ reorder, replace, split or drop increments instead of automatically promoting
 old Next. Update active horizons and the optional Project mirror, preserving
 history and recording any update that could not be made.
 
-Obtain architecture, JTBD and risk reviews before executing a materially revised
-plan. A scoped contribution inside the existing assessed revision does not need
-another full planning cycle. Close the outcome only when its confirmed evidence
+Obtain independent architecture, JTBD, risk, cognitive accessibility and planning
+reviews before executing a materially revised plan. A scoped contribution inside
+the existing assessed revision does not need another full planning cycle. Close the outcome only when its confirmed evidence
 is satisfied. A tidy board or all tasks marked done cannot replace that result.
 
 [Read the full GitHub planning requirements](https://github.com/windyroad/agent-plugins/blob/main/packages/planning/skills/outcome-led-planning/references/github-coordination.md).
@@ -216,11 +289,17 @@ Authorized preliminary reading can inform the plan; executing a formal discovery
 increment still requires its reviews.
 
 INVEST does not require story documents unless your project already requires
-them. Architecture, JTBD and risk reviewers assess every executable plan
-revision. Substantive failures are resolved before dependent work. When a
+them. Five independent critics assess each initial or materially revised
+executable plan: architecture, JTBD, risk, cognitive accessibility and planning.
+Substantive failures are resolved before dependent work. When a
 required independent review is unavailable, hold dependent implementation and
 continue useful authorized preparation. An ordinary go-ahead does not supply
 that review or waive the requirement.
+
+The planner does not add speculative risk-mitigation tasks. The risk scorer
+identifies necessary treatments from the applicable risk policy and register.
+Existing required controls remain binding; agent availability or discomfort does
+not justify precautionary work.
 
 ## Work through obstacles
 
@@ -240,10 +319,19 @@ inspect actual results, and investigate observed interference or material risk.
 
 ## Verify, learn and replan
 
-After each delivered increment, compare actual evidence with both that increment
-and the overall objective. Retain useful learning, revise the remaining plan and
-obtain fresh reviews before the next dependent increment. Failed verification
-does not count as delivery.
+Before declaring an increment complete, its owner obtains a bounded independent
+acceptance check through the planning critic. Reuse an equivalent check that
+already covers the criteria. The critic inspects actual results and affected
+authoritative plan and saved records, including selected Project state. A summary
+or PASS label alone is insufficient. The owner retains the final acceptance
+decision. Repair and recheck discrepancies before marking Done; keep completion
+unverified when required results or the reviewer are unavailable. Individual task
+completion does not trigger this increment check or another five-critic cycle.
+
+After a verified increment, compare its results with the overall objective.
+Retain useful learning, revise the remaining plan and obtain fresh reviews
+before the next dependent increment. Failed verification does not count as
+delivery.
 
 The agent stops when the objective's evidence is satisfied, or reports the exact
 remaining blocker after exhausting useful authorized work. A commit, green CI or

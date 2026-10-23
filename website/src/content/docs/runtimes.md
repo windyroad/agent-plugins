@@ -42,14 +42,22 @@ does not offer that runtime selection.
 
 ## Optional GitHub tracking
 
-The full GitHub coordination requirements use planning **0.3.0 or later**,
-or ITIL **3.3.0 or later** through its compatibility command. Follow
+The full GitHub coordination requirements use planning **0.4.0 or later**,
+or ITIL **3.4.0 or later** through its compatibility command. Follow
 [GitHub planning and agent coordination](../outcome-led-planning/#choose-where-to-track-the-plan).
-Conversation and local planning remain available without GitHub access.
+Planning and contribute reuse the project's saved GitHub Issues or Local choice.
+Local planning remains available without GitHub access. A selected Project
+requires saved-view setup and verified updates at work checkpoints.
+
+Use `/wr-planning:contribute` in Claude Code or `$wr-planning:contribute` in
+Codex to join a current assessed outcome. This entrypoint belongs to the
+standalone planning package.
 
 ## Install required reviewers
 
-Outcome-led planning requires architecture, JTBD and risk assessment. Planning bundles no reviewers or hooks and does not require ITIL. Use available
+Initial and materially revised executable plans require five independent critics:
+architecture, JTBD, risk, cognitive accessibility and planning. Planning bundles
+no reviewers or hooks and does not require ITIL. Use available
 independent reviewers, or install the relevant plugins
 for the runtime you will use, following each package's documentation:
 
@@ -57,7 +65,9 @@ for the runtime you will use, following each package's documentation:
 - [JTBD review](../plugins/jtbd/).
 - [Risk assessment](../plugins/risk-scorer/).
 
-Verify that all three substantive reviews are available before starting
+Arrange cognitive accessibility and planning critics through available independent
+reviewers too. Routine task claims and status updates inside the assessed plan
+do not restart all five reviews. Verify that all five are available before starting
 dependent work. The skill reports a missing review capability and holds
 implementation if it cannot obtain a review.
 

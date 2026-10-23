@@ -165,7 +165,8 @@
       "package": "packages/planning/package.json",
       "readme": "packages/planning/README.md",
       "skills": [
-        "packages/planning/skills/outcome-led-planning/SKILL.md"
+        "packages/planning/skills/outcome-led-planning/SKILL.md",
+        "packages/planning/skills/contribute/SKILL.md"
       ]
     }
   ],
@@ -199,6 +200,7 @@
     "packages/itil/skills/work-problem/SKILL.md": "Investigate and repair the highest-priority eligible problem, then follow the project’s delivery workflow.",
     "packages/retrospective/skills/migrate-briefing/SKILL.md": "Split an existing project briefing into topic files for subsequent sessions.",
     "packages/itil/skills/outcome-led-planning/SKILL.md": "Compatibility entrypoint for outcome-led planning, including optional GitHub coordination. Existing ITIL installations remain usable.",
-    "packages/planning/skills/outcome-led-planning/SKILL.md": "Confirm a SMART outcome and deliver through reviewed Now, Next and Later increments. Choose local planning or optional GitHub Issues to coordinate contribution tasks, handoffs and owner replanning."
+    "packages/planning/skills/outcome-led-planning/SKILL.md": "Confirm a SMART outcome and deliver through Now, Next and Later increments. Obtain five independent reviews of each initial or materially revised plan. Remember the project tracking choice and reconcile shared tickets and selected Project views at work checkpoints.",
+    "packages/planning/skills/contribute/SKILL.md": "Find useful bounded help within an assessed outcome, reuse its saved tracking choice and keep shared evidence current."
   }
 }
