@@ -272,7 +272,10 @@ jobs:
       - name: Install locked documentation dependencies
         run: npm ci --ignore-scripts
       - name: Install browser test engines
-        run: npx playwright install --with-deps chromium webkit
+        run: |
+          cat /etc/apt/apt-mirrors.txt
+          sudo sed -i '\|^http://azure\.archive\.ubuntu\.com/ubuntu/|d' /etc/apt/apt-mirrors.txt
+          npx playwright install --with-deps chromium webkit
       - name: Build selected public documentation
         run: npm run website:build
       - name: Verify public content and reading journeys

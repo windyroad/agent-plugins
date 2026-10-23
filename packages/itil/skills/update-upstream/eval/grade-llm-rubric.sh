@@ -44,7 +44,13 @@ if [[ "${WR_EVAL_RUNTIME:-claude}" == "codex" ]]; then
 
 ${1:-}" </dev/null 2>/dev/null)"
 else
-  raw="$(claude -p --append-system-prompt "$GRADER_SYSTEM" "${1:-}")"
+  if raw="$(claude -p --append-system-prompt "$GRADER_SYSTEM" "${1:-}" </dev/null)"; then
+    :
+  else
+    status=$?
+    printf '%s\n' "$raw" >&2
+    exit "$status"
+  fi
 fi
 
 # Defensive extraction: emit the first balanced {...} JSON object found in

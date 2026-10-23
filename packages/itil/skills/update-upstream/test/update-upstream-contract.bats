@@ -117,7 +117,62 @@ EOF
   [ "$status" -eq 0 ]
   [ "$output" = "claude-default" ]
   grep -F 'claude -p' "$fake_bin/log"
+
+  run python3 - "$grader" "$fake_bin" <<'PY'
+import json,os,pathlib,select,subprocess,sys
+grader,fixture=sys.argv[1:]
+fake=pathlib.Path(fixture)/'claude'
+fake.write_text('''#!/usr/bin/env python3
+import os,select,sys
+mode=os.environ.get('FAKE_STDIN_CHECK')
+if mode=='open' and not select.select([sys.stdin],[],[],0)[0]:
+    print('unexpected inherited open stdin',file=sys.stderr)
+    sys.exit(91)
+if mode and sys.stdin.read():
+    print('unexpected inherited stdin data',file=sys.stderr)
+    sys.exit(91)
+sys.stdout.write(os.environ['FAKE_STDOUT'])
+sys.stderr.write(os.environ.get('FAKE_STDERR',''))
+sys.exit(int(os.environ.get('FAKE_STATUS','0')))
+''')
+fake.chmod(0o755)
+false_grade='{"pass":false,"score":0,"reason":"controlled rejection"}'
+env={**os.environ,'PATH':fixture+os.pathsep+os.environ['PATH'],'WR_EVAL_RUNTIME':'claude','FAKE_STDOUT':false_grade}
+results=[]
+for case in ['caller-data','open-pipe','provider-failure','false-grade']:
+    child_env=env.copy()
+    if case in ['caller-data','open-pipe']:
+        child_env['FAKE_STDIN_CHECK']='open' if case=='open-pipe' else 'data'
+    if case=='provider-failure':
+        child_env.update(FAKE_STDOUT='{"pass":true,"score":1,"reason":"failed provider diagnostic"}',FAKE_STDERR='fixture stderr diagnostic\n',FAKE_STATUS='17')
+    args=['bash',grader,'literal rubric argument']
+    if case=='open-pipe':
+        child=subprocess.Popen(args,cwd=fixture,env=child_env,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+        try:
+            child.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            child.kill();child.wait()
+            raise AssertionError('grader did not finish with caller pipe held open')
+        finally:
+            child.stdin.close()
+        output,error=child.stdout.read(),child.stderr.read()
+        status=child.returncode
+    else:
+        child=subprocess.run(args,cwd=fixture,env=child_env,input='unrelated inherited input\n' if case=='caller-data' else '',capture_output=True,text=True,timeout=10)
+        status,output,error=child.returncode,child.stdout,child.stderr
+    if case=='provider-failure':
+        correct=status==17 and output=='' and child_env['FAKE_STDOUT'] in error and child_env['FAKE_STDERR'] in error
+    else:
+        correct=status==0 and output.strip()==false_grade
+    results.append({'case':case,'correct':correct,'status':status,'stdout':output,'stderr':error})
+assert all(result['correct'] for result in results),json.dumps(results,indent=2)
+PY
+  local probe_status="$status"
+  if [ "$probe_status" -ne 0 ]; then
+    printf '%s\n' "$output"
+  fi
   rm -rf "$fake_bin"
+  [ "$probe_status" -eq 0 ]
 }
 
 @test "update-upstream: SKILL.md composes through voice-tone gate (P080 user direction (b) + ADR-028)" {
