@@ -128,21 +128,62 @@ Give the existing planning critic the saved outcome and affected increment recor
 
 **Horizon belongs only to increments**: each planned or active increment has exactly one of Now, Next or Later. Remove completed or superseded increments from active horizons while preserving their prior position in history. **Status** separately describes execution, such as ready, in progress, blocked or done. A blocked Now increment does not automatically become Next; a completed task does not become a completed outcome. Outcomes and tasks do not inherit Horizon. Map these meanings to existing repository labels or Project fields. Replace the previous horizon when replanning rather than accumulating contradictory values.
 
-Use and verify native sub-issue relationships when supported; otherwise record explicit reciprocal parent/child links, read back both affected issue bodies and disclose the limitation. When another task supplies a required result, **create and verify its native blocked-by dependency** whenever the available API and permissions support it. Record real prerequisites even when they constrain a later stage or task completion rather than the next useful step. Name the precise start, stage or completion unlock condition and required evidence. Do not require administrative issue closure in addition to the verified result unless recorded acceptance or an applicable project rule requires it. A Ready or In progress task may retain open dependencies while useful preparation proceeds; those dependencies still gate the dependent stage or completion. Never remove a real dependency merely to make preparation available. If the native capability is unavailable or denied, record the exact limitation and reciprocal dependency links, read back both affected issue bodies. Native write denial establishes neither presence nor absence of existing links; preserve known links and report unreadable native state as unknown. Optional Project membership and fields mirror issue state; do not create a Project or fields merely because the protocol mentions them.
+Maintain parent/child and prerequisite relationships in this order:
 
-Keep completion dependencies acyclic. A prerequisite task cannot also require its dependent's result to close. Propose corrections in the increment thread; the increment owner records revised task boundaries and acceptance with affected task owners before applying them. Obtain the five independent plan reviews before executing a materially revised plan. Give each task an independently verifiable result and retain the combined results in increment acceptance. Reassess the dependent task when a prerequisite is satisfied; independently verify its evidence before clearing that condition.
+1. Inspect the actual relationship and the precise result that unlocks a start,
+   stage or completion. Read current native sub-issue and blocked-by state when
+   supported. A native write denial proves neither presence nor absence:
+   preserve known links and keep unreadable native state unknown.
+2. Keep completion dependencies acyclic. A prerequisite cannot require its
+   dependent's result to close. Propose changed task boundaries and acceptance
+   in the increment thread; the increment owner records agreement with affected
+   task owners before applying them. Obtain the five independent reviews before
+   materially revised execution. Give each task an independently verifiable
+   result and retain the combined results in increment acceptance.
+3. After any required agreement and reviews, use native links when supported;
+   create a missing required link or update a changed one when authorized.
+   Verify saved native state and both relationship directions. If operations are
+   unavailable, record their exact limitation plus reciprocal parent/child or
+   prerequisite/dependent text links on both affected issues; text is not proof
+   of native state. Request capable help through an authorized channel when
+   useful, without inventing a helper or widening access.
+4. Reassess actual useful work and status under the claim table below. A Ready
+   or In progress task may prepare while a real prerequisite remains open;
+   preserve its precise unlock condition and required evidence. Independently
+   verify the prerequisite result before clearing that condition and proceeding
+   with the dependent stage. Administrative issue closure is not another
+   prerequisite unless recorded acceptance or a project rule requires it.
+
+Optional Project membership and fields mirror issue state; do not create them
+merely because this protocol mentions them.
 
 Replan task boundaries at any stage when evidence changes what work is needed. Coordinate narrowed, split, replaced or dropped scope with the increment owner and affected task owners. Close redundant or superseded issues as **not planned**, with the reason and successor links; never mark undelivered work Done merely to retire it. Before removing a dependency, move still-required acceptance evidence to the appropriate task and retain it in increment acceptance. Remove only genuinely obsolete native dependencies and verify the saved result; preserve prerequisites that still constrain the revised work. Keep task briefs, links, ownership and any selected Project fields current. Routine task reconciliation within the assessed outcome and authority needs no new user approval; materially revised executable work still requires the five independent plan reviews.
 
-Reassess scope, available inputs and useful authorized next steps before deciding that a claimed task is blocked. A stored Blocked status alone does not establish exhaustion; when it is unknown, investigate or state the condition. Required watcher duties count as useful work. Apply these linked decisions to the current claim, finishing when recorded acceptance is met:
+### Status and contribution-claim decision
 
-| Actual state of the claimed task | Status | Claim action |
+Use this table whenever work starts, blocks, finishes or is handed over. Inspect
+scope, inputs and actual useful authorized in-task steps first: a stored Blocked
+status alone does not establish exhaustion. Genuine assigned watcher duties
+count as useful work; waiting for an unverified response or routine discussion
+reads alone do not retain an exhausted implementation reservation.
+
+| Actual state of the claimed task | Status | Assignment and saved result |
 | --- | --- | --- |
-| Recorded acceptance is verified with evidence | Done | Finish with evidence; preserve attribution history. |
+| Recorded acceptance is verified with evidence | Done | Post acceptance evidence, finish and preserve attribution history. |
 | Useful authorized in-task work remains | In progress | Retain the single claim and do that work. |
-| A required input is unavailable and no useful authorized in-task step remains | Blocked | Record the blocker, evidence, unlock condition and handover; remove your assignment and read back its removal. Preserve historical attribution. |
+| A required input is unavailable and no useful authorized in-task step remains | Blocked | Save the blocker, evidence, unlock condition and handover; remove your assignment and read back its removal. Preserve historical attribution. |
 
-Keep independently actionable unclaimed work Ready/Unclaimed. Preserve real prerequisites before their dependent stage; never invent busywork to avoid Blocked. Reassess when evidence changes. A blocked task does not block every contribution. If assignment mutation or verification is unavailable, record the exact pending release and current known claim state, use an authorized owner/channel when available, and do not claim an unverified release or take another task while still assigned.
+One contribution claim is a ceiling, not a retention requirement. A blocked
+assignment still counts until release is verified. Apply the table before
+claiming another task; never reserve queued tasks. Outcome/increment ownership
+does not reserve contributions. Agents sharing an account remain distinct by
+their recorded agent/session. Keep actionable unclaimed work Ready/Unclaimed;
+a blocked task does not block every contribution. Never invent busywork.
+
+If assignment mutation or verification is unavailable, record the exact pending
+release and known claim state, use an authorized owner/channel when available,
+and do not claim release or take another task while still assigned. Reassess
+when evidence changes.
 
 ## Join, claim and contribute
 
@@ -151,12 +192,10 @@ Use this contribution lifecycle:
 1. Read the outcome, current Now revision, discussion, dependencies and claims. Reconcile stale scope before dependent work.
 2. Choose a bounded useful result and announce its acceptance and file/operation boundary in the increment thread. Resolve overlap, shared operations or authority questions with affected owners. A non-overlapping task within the assessed Now needs no allocator approval.
 3. Reuse a matching unclaimed task, or create your own just before work. Apply the established task-kind marker (`kind:task` by default). Assign it to the **actual authenticated account** and record the **specific agent/session** and native links; read back kind, assignment, claim and links and recheck competing work. For a selected or required Project, explicitly add the task and read back its membership and applicable fields so it matches the saved view.
-4. Execute within the assessed plan and authority, keeping status and evidence current. Finish with verified evidence or release with a handover stating evidence, blocker and next step.
+4. Execute within the assessed plan and authority; apply the status and contribution-claim decision above, including saved release when exhausted.
 5. Choose and document the next useful contribution from the remaining outcome gap, then repeat these checks before claiming it.
 
 A starting battle plan exposes likely work, dependencies and parallel opportunities without precreating, assigning or reserving every future task. The increment owner keeps acceptance, sequence and integration clear and resolves overlap/dependencies. Explicit assignments and handoffs remain valid. Two agents sharing an account are distinct contributors. Checklists suffice for routine steps; do not create a task for every command. Task creation within assessed scope requires no fresh human approval.
-
-**One contribution claim is a ceiling, not a retention requirement.** A blocked assignment still counts until its release is verified. For an unfinished task, when no useful authorized in-task step remains, hand over the remaining gap, remove your assignment and read back its removal; do not retain it merely because its dependency is unresolved. Preserve genuine assigned watcher duties; routine discussion reads alone do not justify retaining an exhausted reservation. Finish, explicitly hand over or release the current assignment before claiming another. Do not reserve queued tasks. Outcome or increment coordination ownership does not reserve contribution tasks. Agents sharing an account remain distinct through their recorded agent/session identities.
 
 Before declaring a contribution ready to start, complete this claim receipt: **no other contribution assignment held; parent increment; current assessed plan revision; non-overlapping scope; dependencies (or explicitly none); actual account; distinct agent/session; saved claim and reciprocal-link readback; competing-claim recheck.** Record all fields on the task, even when some are already known in conversation. Assignment does not increase authority. When explaining a proposed claim, make these required fields and the before/after overlap checks explicit.
 
@@ -164,27 +203,29 @@ Record scope boundaries and dependencies, then read back the claim, links and an
 
 ## Reconcile tracking at work checkpoints
 
-Use **two complementary discussion checks**:
+During an active work window, follow this coordination sequence while coding
+or waiting:
 
-1. **Throughout active work:** read new increment comments regularly between
-   bounded work cycles while coding or waiting, following the agreed, recorded
-   cadence. Until agreement exists, continue already-authorized regular bounded
-   reads; proposing a cadence does not replace those reads.
-2. **At events:** check on joining or resuming and again at the checkpoints below,
-   including before dependent actions, pushes, scope/ownership changes and handovers.
-   Neither duty replaces the other: regular-only and checkpoint-only reads
-   are both incomplete.
+1. Use the agreed, saved discussion-reading cadence. If none exists, propose a
+   bounded cadence through the authorized increment thread, obtain agreement
+   and verify its saved record. While agreement is pending, continue regular
+   bounded reads; a proposal is not agreement.
+2. Also read new increment comments on joining/resuming and at the event
+   checkpoints below, including before dependent actions, pushes, scope or
+   ownership changes and handovers. Regular reads and event reads are both
+   required; neither replaces the other.
+3. Answer relevant questions and handle handoffs through the authorized channel
+   and handoff rules below: actual recipient
+   acknowledgement and linked task, independent verification of returned
+   evidence, and updates to your task's evidence, dependency and next action.
+   A posted message is not the recipient's acknowledgement.
+4. If the result materially changes the executable plan, reconcile that revision
+   and obtain the five independent reviews before dependent execution. Otherwise
+   continue within the assessed plan. Apply the claim table when work is
+   exhausted rather than retaining it for discussion reads.
 
-Propose an appropriate bounded cadence through the authorized increment thread,
-obtain agreement and verify its saved record before calling it agreed. A suggested
-interval alone is not an agreement. Record pending agreement honestly without
-suspending either kind of check. These are checks during an active work window,
-not a standing poller or a promise to wake an idle agent.
-
-Read relevant new comments, acknowledge handoffs and answer questions affecting
-your work through already-authorized channels. Keep task records current with
-the resulting evidence or changes. A posted message is not the recipient's
-actual acknowledgement.
+These are bounded checks during active work, not a standing poller or a promise
+to wake an idle agent. Use only already-authorized communication channels.
 
 At each work checkpoint, reconcile tracking in this order:
 
@@ -213,19 +254,19 @@ source for the selection decision below, not proof of capability or acceptance.
      there is no established mirror operation to report pending or unsynchronized.
      Omitted information and API availability establish neither selection nor
      an explicit choice to use no Project.
-2. **Inspect each affected record.** Read each outcome, increment and task
-   against the minimum-information table above. Preserve its own owner/account,
-   applicable agent/session, revision and acceptance; mark missing required
-   information unresolved. Record current scope, actual status, increment-only
-   Horizon, dependencies or blocker, next action and state-appropriate evidence.
-   Preserve completed tasks' recorded revisions and acceptance criteria;
-   completion evidence does not replace either. A provisional increment retains
-   its recorded owner, brief revision and tentative acceptance, marking missing
-   values unresolved. These do not imply an executable plan, critic approval or
-   completion evidence.
-   For a selected or required Project, Status reflects actual work and Agent
-   belongs to that item's verified owner/session: never copy the task contributor
-   upward or replace another owner's identity.
+2. **Inspect each affected record before classifying it.** Compare every
+   outcome, increment and task with the minimum-information table. Preserve its
+   own recorded owner/account, applicable agent/session, revision and acceptance,
+   including provisional and completed records. Mark a required value unresolved
+   only when inspection cannot establish it; omission from a scenario or summary
+   does not establish that saved information is missing. Completion evidence
+   does not replace the task's own revision or acceptance. Provisional ownership,
+   revision and tentative acceptance imply neither an executable plan nor
+   critic approval or completion evidence.
+   Record actual scope, status, increment-only Horizon, dependencies/blocker,
+   next action and state-appropriate evidence. For a selected/required Project,
+   each item's Agent remains its verified owner/session, never an identity
+   copied from its parent or child; Status reflects that item's actual work.
 3. **Update and verify.** Make only necessary authorized changes to existing
    records. Read back every changed issue's fields and links, checking both
    directions of parent/dependency relationships. For a selected or required
@@ -245,7 +286,7 @@ system.
 | Join, resume or start implementation | Read current records and discussion; correct stale status, scope and ownership before dependent implementation. Set the active task and increment In progress when useful work starts. Complete missing selected Project setup or record its precise unavailable operation. |
 | Material milestone or failed verification | Record the actual result and evidence before the next dependent action. Keep In progress while useful repair remains; a failed check alone does not mean Blocked. |
 | Scope, dependency, plan or horizon change | Update affected briefs, native relationships and increment horizons; remove superseded active horizons. Obtain the required reviews before materially revised execution. |
-| Block, hand off, finish or yield the active work window | Record the exact remaining gap, next action and owner, or acceptance evidence for completion. Reconcile the increment as well as the task; do not leave an old Todo/Ready or stale next action for someone else to discover. |
+| Block, hand off, finish or yield the active work window | Apply the claim table, saving the gap, next action/owner or acceptance evidence and verifying any required release. Reconcile the increment as well as the task; do not leave stale status or next action. |
 
 For a selected or required Project, when an operation is unavailable, record
 the affected view/field/item,
@@ -281,7 +322,7 @@ When an authorized owner must complete a pending Project operation, request it t
 
 ## Verify, learn and replan as the outcome owner
 
-Post acceptance evidence before completing a task. Preserve its actual recorded acceptance: do not invent a later release check as a repair-task completion condition, or remove an established condition to finish early. At handoff, state one coherent claim transition: retain it while useful authorized work remains within its scope, finish when acceptance is met, release it unassigned with the remaining gap, or transfer to an identified owner after acknowledgement. Do not report both releasing and retaining the same claim. The increment owner verifies the whole increment against its criteria before closing it; task completion alone does not establish delivery. Publication, installed behavior and production/customer verification remain separate evidence stages where applicable.
+Post acceptance evidence before completing a task. Preserve its actual recorded acceptance: do not invent a later release check as a repair-task completion condition, or remove an established condition to finish early. At handoff, apply the claim table; an explicit ownership transfer additionally needs the identified recipient's acknowledgement. Do not report both releasing and retaining the same claim. The increment owner verifies the whole increment against its criteria before closing it; task completion alone does not establish delivery. Publication, installed behavior and production/customer verification remain separate evidence stages where applicable.
 
 After a verified increment, or earlier when evidence invalidates the plan, the outcome owner:
 

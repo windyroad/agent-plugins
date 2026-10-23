@@ -75,9 +75,14 @@ For each separately owned contribution:
    current. Small routine steps stay in the task. In GitHub mode, follow the
    [work checkpoints](../outcome-led-planning/references/github-coordination.md#reconcile-tracking-at-work-checkpoints)
    and MUST use the [executable checkpoint](../outcome-led-planning/references/github-project-checkpoint.md)
-   for selected-Project join/resume reconciliation. Read back issue and selected Project changes.
+   for selected-Project join/resume reconciliation. Read back issue and selected Project changes before dependent work.
 5. Record the verified result and finish, or release with a handover stating
    evidence, blocker and next step when no useful authorized work remains.
+   After those updates, verify the saved task and affected increment records
+   and applicable selected Project fields before reporting that transition current
+   or choosing more work. Read back later handoff/next-action writes too; earlier
+   task-only verification does not verify those increment updates. Reuse
+   still-valid matching field readbacks.
 6. Choose and document the next useful contribution from current evidence, then
    repeat the claim checks before starting it.
 

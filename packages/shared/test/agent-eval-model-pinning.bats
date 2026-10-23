@@ -28,7 +28,7 @@ SH
   cat > "$BIN/npm" <<'SH'
 #!/usr/bin/env bash
 printf 'agent=%s grader=%s argv=%s\n' \
-  "${AGENT_EVAL_MODEL:-}" "${AGENT_EVAL_GRADER_MODEL:-}" "$*" > "$NPM_LOG"
+  "${AGENT_EVAL_MODEL:-}" "${AGENT_EVAL_GRADER_MODEL:-}" "$*" >> "$NPM_LOG"
 SH
   chmod +x "$BIN/npm"
 }
@@ -99,8 +99,13 @@ teardown() {
   done
 }
 
-@test "CI probes Sonnet 5 and delegates both pinned model roles" {
+@test "CI keeps general Sonnet roles and scopes the Opus subject to planning" {
+  cp "$BIN/npm" "$BIN/npx"
+  printf '#!/bin/sh\nexit 0\n' > "$BIN/node"
+  chmod +x "$BIN/node"
   run env PATH="$BIN:$PATH" CLAUDE_LOG="$CLAUDE_LOG" NPM_LOG="$NPM_LOG" \
+    AGENT_EVAL_RUN_AGENTS=true AGENT_EVAL_RUN_SKILLS=false \
+    AGENT_EVAL_RUN_REMEDIATION=false AGENT_EVAL_RUN_PLANNING=true \
     "$REPO_ROOT/scripts/run-agent-evals-ci.sh"
 
   [ "$status" -eq 0 ]
@@ -108,4 +113,7 @@ teardown() {
   [ "$status" -eq 0 ]
   run grep -F 'agent=claude-sonnet-5 grader=claude-opus-5-5 argv=run eval:agents' "$NPM_LOG"
   [ "$status" -eq 0 ]
+  run grep -F 'agent=claude-opus-5-5 grader=claude-opus-5-5 argv=promptfoo eval -c packages/planning/skills/outcome-led-planning/eval/promptfooconfig.yaml' "$NPM_LOG"
+  [ "$status" -eq 0 ]
+  [ "$(wc -l < "$NPM_LOG" | tr -d ' ')" -eq 2 ]
 }

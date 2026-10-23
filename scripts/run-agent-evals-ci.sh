@@ -72,5 +72,5 @@ fi
 if [ "${AGENT_EVAL_RUN_PLANNING:-false}" = true ]; then
   node scripts/sync-codex-plugin-surfaces.mjs planning --build
   export PLANNING_EVAL_RUNTIME=claude
-  run_eval npx promptfoo eval -c packages/planning/skills/outcome-led-planning/eval/promptfooconfig.yaml --max-concurrency 2 --no-table --output docs/audits/agent-evals-workspace/planning-claude.json
+  AGENT_EVAL_MODEL=claude-opus-5-5 run_eval npx promptfoo eval -c packages/planning/skills/outcome-led-planning/eval/promptfooconfig.yaml --max-concurrency 2 --no-table --output docs/audits/agent-evals-workspace/planning-claude.json
 fi

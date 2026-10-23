@@ -15,7 +15,7 @@ Read the relevant current evidence, project instructions, decisions, jobs, risk 
 
 Use SMART to make the objective specific, measurable through observable completion evidence, achievable against known constraints, relevant to the user's job, and time-bound using the user's stated deadline or timeframe. Qualitative evidence can establish success. Surface feasibility uncertainty instead of weakening the objective or promising certainty. Never invent numerical targets or dates. Preserve stated timing and prefer relative wording. Any added date must match verified context and its weekday. Never turn a guessed date into a new timing interview. If neither a time bound nor an explicit decision to omit one is established, ask one timing question and wait. If the user declines a time bound, record the exception honestly rather than claiming full SMART compliance.
 
-If intent is unclear or information is missing, interview the user: **ask one focused question, then stop and wait for their answer before asking the next**. Select the next question from their actual answer and remaining uncertainty. Do not bundle questions, answer on their behalf, invent their intent, or resolve ambiguity by selecting a solution. Bounded read-only investigation can establish facts within existing authority.
+If outcome information is unclear or missing, interview the user: **ask one focused question, then stop and wait for their answer before asking the next**. Select the next question from their actual answer and remaining uncertainty. Do not bundle questions, answer on their behalf, invent their intent, or resolve ambiguity by selecting a solution. Bounded read-only investigation can establish facts within existing authority.
 
 One question requests **one missing fact**. Do not combine multiple information needs, such as who benefits and what is wrong, into a multipart question. Sharing a topic or using one question mark does not make it one question.
 
@@ -103,6 +103,6 @@ Finish when the objective's completion evidence is satisfied. Record the verifie
 
 Recording verified completion is a terminal status update, not another executable plan. Any newly proposed work still needs its own assessed plan.
 
-If blocked, first exhaust useful authorized steps available to the agent. Preserve work, distinguish completed increments from unfinished outcomes, and report the precise missing evidence, capability, authority, or irreducible user action. Resume from fresh evidence when the blocker clears; do not restart completed effects.
+Before handing back a blocker, finish useful authorized work, including running checks. Preserve work, distinguish completed increments from unfinished outcomes, and report the precise missing result, capability, authority or irreducible user action. Resume from fresh evidence when the blocker clears; do not restart completed effects.
 
 Communicate the objective, consequential plan changes, decisions requiring input, exact blockers, and verified outcomes concisely. Avoid narrating routine commands or every review and wait.
