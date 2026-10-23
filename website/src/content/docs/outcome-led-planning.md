@@ -310,10 +310,32 @@ required independent review is unavailable, hold dependent implementation and
 continue useful authorized preparation. An ordinary go-ahead does not supply
 that review or waive the requirement.
 
-The planner does not add speculative risk-mitigation tasks. The risk scorer
-identifies necessary treatments from the applicable risk policy and register.
-Existing required controls remain binding; agent availability or discomfort does
-not justify precautionary work.
+## Implement the requested work
+
+The following guidance requires planning **0.6.0 or later**, or ITIL **3.6.0 or
+later** for the planning compatibility entrypoint.
+
+Reuse fitting existing code and build each required real case for its concrete
+needs. Apply the rule of three: implement the first, second and third real cases,
+then refactor their actual commonality while keeping necessary differences.
+Do not extract a new shared abstraction before the third real implementation.
+Do not create hypothetical cases or abstractions. Every increment includes
+refactoring and cleanup, called out in Now and completed before final verification
+and acceptance. Carry remaining cleanup responsibility through handover. Cleanup
+still applies before three cases exist and needs no separate issue by default.
+
+Planner and implementer **MUST NOT** add speculative risk-reduction tasks, extra
+checks, tests, audits, gates or hardening. Do the requested work and required
+project checks. **Do not preempt the risk scorer.** The scorer directs necessary
+additional treatments from the applicable policy and register. Speculative work
+can waste resources, delay value and create false confidence.
+
+Try new integrations locally with real requests to the service or its official
+sandbox within existing authority, before integration tests or deployment.
+Inspect actual behaviour and responses and build from those observations; reuse
+already-known real behaviour. Do not invent response shapes, qualify with mocks
+alone or first experiment in production. If access is unavailable, state the gap
+and continue useful independent work. No new report is required.
 
 ## Work through obstacles
 
