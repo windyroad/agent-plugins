@@ -19,7 +19,6 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
         run: npm ci || npm install
@@ -225,7 +224,6 @@ jobs:
         if: steps.scope.outputs.run == 'true' && steps.token.outputs.present == 'true'
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
         if: steps.scope.outputs.run == 'true' && steps.token.outputs.present == 'true'
@@ -271,7 +269,6 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-          cache: npm
       - name: Install locked documentation dependencies
         run: npm ci --ignore-scripts
       - name: Install browser test engines
