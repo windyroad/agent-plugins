@@ -1,5 +1,11 @@
 # @windyroad/planning
 
+## 0.5.0
+
+### Minor Changes
+
+- a463228: Adds an independently callable GitHub tracking setup skill with saved Increments hierarchy.
+
 ## 0.4.0
 
 ### Minor Changes
