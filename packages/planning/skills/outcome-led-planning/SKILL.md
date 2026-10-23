@@ -29,7 +29,7 @@ Keep the confirmed objective as the reference point throughout delivery. Ordinar
 
 After confirming the SMART outcome, read [project tracking and shared contributions](references/project-tracking.md). Both planning and `contribute` read the same project configuration, defaulting to `.agents/planning.json`. Reuse a saved or explicit choice. When none exists, ask one question: **GitHub Issues or Local?** Wait, save the answer, read it back, and reuse it across sessions. Preserve unrelated configuration and honor explicit changes; do not silently replace malformed or unsupported settings.
 
-Local mode needs no GitHub account or Project. When GitHub is selected, read [the GitHub coordination protocol](references/github-coordination.md) before planning or tracker mutations; use its [bootstrap instructions](references/github-coordination.md#bootstrap-github-tracking) for missing selected setup. Project fields and views apply only to selected or required Projects. Configuration grants no access, messaging or automation authority.
+Local mode needs no GitHub account or Project. When GitHub is selected, read [the GitHub coordination protocol](references/github-coordination.md) before planning or tracker mutations. Invoke the installed [setup-github-tracking skill](../setup-github-tracking/SKILL.md) when selected setup is missing or incomplete; reuse verified complete setup. Project fields and views apply only to selected or required Projects. Configuration grants no access, messaging or automation authority.
 
 ## Build the current plan
 

@@ -175,12 +175,16 @@ NODE
   [ "$status" -eq 0 ]
 }
 
-@test "both runtimes route contribute explicitly with common guidance and isolate conditional GitHub guidance" {
+@test "both runtimes route contribute and setup explicitly and isolate conditional GitHub guidance" {
   for runtime in claude codex; do
     for surface in source codex; do
       run env PLANNING_EVAL_RUNTIME="$runtime" bash "$SKILL/eval/run-skill-eval.sh" "$surface" '{"skill":"contribute","prompt":"LOCAL_CONTRIBUTION"}' '{"skill":"outcome-led-planning","tracking":"github","rubric":"HIDDEN_RUBRIC"}'
       [ "$status" -eq 0 ]
       run env PLANNING_EVAL_RUNTIME="$runtime" bash "$SKILL/eval/run-skill-eval.sh" "$surface" '{"skill":"contribute","tracking":"github","prompt":"GITHUB_CONTRIBUTION"}'
+      [ "$status" -eq 0 ]
+      run env PLANNING_EVAL_RUNTIME="$runtime" bash "$SKILL/eval/run-skill-eval.sh" "$surface" '{"skill":"setup-github-tracking","prompt":"DIRECT_SETUP"}' '{"tracking":"local","rubric":"HIDDEN_RUBRIC"}'
+      [ "$status" -eq 0 ]
+      run env PLANNING_EVAL_RUNTIME="$runtime" bash "$SKILL/eval/run-skill-eval.sh" "$surface" '{"skill":"setup-github-tracking","tracking":"local","prompt":"LOCAL_SETUP"}' '{"tracking":"github","rubric":"HIDDEN_RUBRIC"}'
       [ "$status" -eq 0 ]
     done
   done
@@ -189,41 +193,62 @@ const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const calls = fs.readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JSON.parse);
-assert.equal(calls.length, 8);
+assert.equal(calls.length, 16);
 calls.forEach((args, index) => {
-  const root = path.join(process.argv[4], Math.floor(index / 2) % 2 ? 'skills-codex' : 'skills');
-  if (index < 4) {
+  const root = path.join(process.argv[4], Math.floor(index / 4) % 2 ? 'skills-codex' : 'skills');
+  const direct = index % 4 >= 2;
+  const github = index % 4 === 1;
+  const setupGithub = index % 4 === 2;
+  if (index < 8) {
     assert.equal(args.filter(arg => arg === '--system-prompt').length, 1);
     assert.equal(args.includes('--append-system-prompt'), false);
   }
-  const contract = index < 4 ? args[args.indexOf('--system-prompt') + 1] : args.at(-1);
-  assert.ok(contract.includes(fs.readFileSync(path.join(root, 'contribute/SKILL.md'), 'utf8').trimEnd()));
+  const contract = index < 8 ? args[args.indexOf('--system-prompt') + 1] : args.at(-1);
+  assert.equal(contract.includes(fs.readFileSync(path.join(root, 'contribute/SKILL.md'), 'utf8').trimEnd()), !direct);
+  assert.equal(contract.includes(fs.readFileSync(path.join(root, 'setup-github-tracking/SKILL.md'), 'utf8').trimEnd()), direct || github);
+  assert.equal(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/SKILL.md'), 'utf8').trimEnd()), false);
   assert.ok(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/references/project-tracking.md'), 'utf8').trimEnd()));
   const details = fs.readFileSync(path.join(root, 'outcome-led-planning/references/planning-details.md'), 'utf8');
   const acceptance = details.split('\n## Independent increment acceptance\n')[1].split('\n## ')[0].trimEnd();
-  assert.ok(contract.includes('## Independent increment acceptance\n' + acceptance));
+  assert.equal(contract.includes('## Independent increment acceptance\n' + acceptance), !direct);
   assert.equal(contract.includes('## Bounded discovery'), false);
   assert.equal(contract.includes('## Critic responsibilities'), false);
-  assert.equal(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/references/github-coordination.md'), 'utf8').trimEnd()), index % 2 === 1);
-  assert.equal(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/references/github-project-checkpoint.md'), 'utf8').trimEnd()), index % 2 === 1);
+  const protocol = fs.readFileSync(path.join(root, 'outcome-led-planning/references/github-coordination.md'), 'utf8').trimEnd();
+  assert.equal(contract.includes(protocol), github);
+  const sections = protocol.split('\n## ');
+  assert.equal(contract.includes(sections[0]), github || setupGithub);
+  for (const heading of ['Establish one shared plan', 'Apply real issue tracking']) {
+    const section = sections.find(section => section.startsWith(heading + '\n'));
+    assert.equal(contract.includes('## ' + heading + '\n'), github || setupGithub);
+    assert.equal(contract.includes('## ' + section.trimEnd()), github || setupGithub);
+  }
+  for (const heading of ['Bootstrap GitHub tracking', 'Outcome → increment → task', 'Join, claim and contribute', 'Reconcile tracking at work checkpoints']) {
+    assert.equal(contract.includes('## ' + heading + '\n'), github);
+  }
+  assert.equal(contract.includes(fs.readFileSync(path.join(root, 'outcome-led-planning/references/github-project-checkpoint.md'), 'utf8').trimEnd()), github);
+  assert.ok(args.at(-1).endsWith(setupGithub ? 'DIRECT_SETUP' : direct ? 'LOCAL_SETUP' : github ? 'GITHUB_CONTRIBUTION' : 'LOCAL_CONTRIBUTION'));
   assert.equal(args.some(arg => arg.includes('HIDDEN_RUBRIC')), false);
 });
 NODE
   [ "$status" -eq 0 ]
 }
 
-@test "contribute rejects a missing acceptance reference before either runtime on both surfaces" {
+@test "contribute and setup reject missing required reference sections before either runtime on both surfaces" {
   local fixture="$TMP/fixture"
   mkdir -p "$fixture"
   cp -R "$PACKAGE/skills" "$PACKAGE/skills-codex" "$fixture/"
   for surface in skills skills-codex; do
     printf '%s\n' '# Details' '## Other guidance' 'Unrelated fixture section.' > "$fixture/$surface/outcome-led-planning/references/planning-details.md"
+    printf '%s\n' '# Protocol' '## Establish one shared plan' 'Shared fixture context.' > "$fixture/$surface/outcome-led-planning/references/github-coordination.md"
   done
   for runtime in claude codex; do
     for surface in source codex; do
       run env PLANNING_EVAL_RUNTIME="$runtime" bash "$fixture/skills/outcome-led-planning/eval/run-skill-eval.sh" "$surface" '{"skill":"contribute","prompt":"NO_PROVIDER_CALL"}'
       [ "$status" -ne 0 ]
       [[ "$output" == *'Missing independent increment acceptance section'* ]]
+      run env PLANNING_EVAL_RUNTIME="$runtime" bash "$fixture/skills/outcome-led-planning/eval/run-skill-eval.sh" "$surface" '{"skill":"setup-github-tracking","prompt":"NO_PROVIDER_CALL"}'
+      [ "$status" -ne 0 ]
+      [[ "$output" == *'Missing required GitHub setup protocol section'* ]]
     done
   done
   [ ! -s "$EVAL_ARGV" ]
@@ -233,7 +258,7 @@ NODE
   for runtime in claude codex; do
     run env PLANNING_EVAL_RUNTIME="$runtime" bash "$SKILL/eval/run-skill-eval.sh" source '{"skill":"../../private","prompt":"NO_CALL"}'
     [ "$status" -ne 0 ]
-    [[ "$output" == *'Expected outcome-led-planning or contribute'* ]]
+    [[ "$output" == *'Expected outcome-led-planning, contribute or setup-github-tracking'* ]]
   done
   [ ! -s "$EVAL_ARGV" ]
 }
@@ -248,14 +273,17 @@ NODE
       done
     done
   done
-  run node - "$EVAL_ARGV" <<'NODE'
+  run node - "$EVAL_ARGV" "$PACKAGE" <<'NODE'
 const fs = require('node:fs');
+const path = require('node:path');
 const assert = require('node:assert/strict');
 const calls = fs.readFileSync(process.argv[2], 'utf8').trim().split('\n').map(JSON.parse);
 assert.equal(calls.length, 12);
 calls.forEach((args, index) => {
   const contract = args.includes('--system-prompt') ? args[args.indexOf('--system-prompt') + 1] : args.at(-1);
   const backend = ['github', 'local', 'unset'][index % 3];
+  const root = path.join(process.argv[3], Math.floor(index / 3) % 2 ? 'skills-codex' : 'skills');
+  assert.equal(contract.includes(fs.readFileSync(path.join(root, 'setup-github-tracking/SKILL.md'), 'utf8').trimEnd()), backend === 'github');
   assert.equal(contract.includes('Scenario tracking backend: '), backend !== 'unset');
   if (backend !== 'unset') assert.ok(contract.includes(`Scenario tracking backend: ${backend}.`));
   assert.equal(args.some(arg => arg.includes('DO_NOT_FORWARD')), false);

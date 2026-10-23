@@ -1,0 +1,3 @@
+interface:
+  display_name: "Set up GitHub Tracking"
+  short_description: "Configure selected issue tracking and Project views"

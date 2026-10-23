@@ -103,6 +103,7 @@ require the new package. New users can install planning without ITIL.
 | Skill | Purpose | Maturity |
 | ------- | --------- | --- |
 | `/wr-itil:outcome-led-planning` | Compatibility entrypoint for the standalone planning workflow; remains usable without installing planning | Experimental |
+| `/wr-itil:setup-github-tracking` | Configure missing selected GitHub tracking for the planning compatibility workflow | Experimental |
 | `/wr-itil:manage-problem` | Create, update, and close problem tickets through the Open → Known Error → Verifying → Closed lifecycle | Alpha |
 | `/wr-itil:capture-problem` | Foreground-lightweight aside-invocation variant of `manage-problem` (per ADR-032 background-capture pattern + P078 capture-on-correction) — drafts a ticket scaffold without losing the operational thread when a problem signal surfaces mid-conversation | Experimental |
 | `/wr-itil:work-problem` | Pick the highest-WSJF actionable ticket and work it to completion | Experimental |

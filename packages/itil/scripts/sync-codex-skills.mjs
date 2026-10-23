@@ -166,7 +166,7 @@ git commit -m "docs(problems): capture P<NNN> <title>"
 \`\`\``);
   result = result.replace(/(?<![\w/])(wr-itil-[a-z0-9-]+)/g, "<itil-plugin-root>/bin/$1");
   result = runtimeTerms(sanitizeMarkdown(result));
-  const runtimeNote = skill === "outcome-led-planning"
+  const runtimeNote = ["outcome-led-planning", "setup-github-tracking"].includes(skill)
     ? preamble.replace(/> Spawn `wr-itil:hang-off-check`[^\n]*\n> for it, and close that same agent\.\n/, "")
     : preamble;
   if (!result.startsWith("---\n")) return runtimeNote + result;

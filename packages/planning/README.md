@@ -24,7 +24,8 @@ npx @windyroad/planning --runtime codex --scope user
 Use `--runtime both` for both runtimes. Restart the runtime after installation
 and check its plugin and skill lists.
 
-This package installs planning and contribute, with no hooks or reviewer agents.
+This package installs planning, contribute and GitHub tracking setup, with no hooks
+or reviewer agents.
 ITIL is not required. Initial and materially revised executable plans require
 five independent critics: architecture, JTBD, risk, cognitive accessibility and
 planning. Use available independent reviewers,
@@ -92,12 +93,28 @@ status is separate. Contributors check existing claims, identify their account
 and agent/session, and coordinate dependencies and evidence in the increment
 thread. The outcome owner verifies delivery and replans. A GitHub Project can
 mirror those issues when available; it is optional. Conversation and local
-planning remain available. Bootstrap preserves equivalent existing setup;
-Project fields and default views apply only to a selected or required Project.
+planning remain available. For missing selected setup, planning and contribute
+call the bundled setup skill. Complete setup and equivalent custom mappings are
+reused; Project fields and views apply only to a selected or required Project.
 
 Each contributor uses their own access. Tracker selection does not authorize
 new messaging, broader permissions or persistent automation. Issue comments
 do not guarantee an idle agent will wake up.
+
+## Set up GitHub tracking
+
+Invoke `/wr-planning:setup-github-tracking` in Claude Code or
+`$wr-planning:setup-github-tracking` in Codex when you need to configure or repair
+selected GitHub tracking. Planning and contribute call it when setup is missing
+or incomplete. It reuses the same project configuration and returns to the
+current work without interviewing you about the outcome again.
+
+Issues-only tracking needs no Project. For a selected Project, the skill reuses
+equivalent setup and configures missing fields and Outcomes, Increments and Tasks
+views. Increments uses a table grouped by Horizon with **Show hierarchy On**.
+Changed settings are saved and reopened; related task children remain accessible
+beneath their increment. Existing custom views, ownership and history are preserved.
+Local tracking bypasses this setup.
 
 ## Join an outcome with contribute
 
@@ -119,6 +136,7 @@ Saved project tracking and contribute require planning **0.4.0 or later**.
 | --- | --- | --- |
 | `/wr-planning:outcome-led-planning` | Confirm a SMART outcome and iteratively deliver through reviewed Now, Next and Later increments | Experimental |
 | `/wr-planning:contribute` | Find and carry out useful bounded help within the current assessed increment | Experimental |
+| `/wr-planning:setup-github-tracking` | Configure missing selected GitHub issue tracking and Project views | Experimental |
 
 ## Existing installations
 
@@ -141,8 +159,8 @@ Include the same runtime and scope flags used for installation.
 
 ## Maintain the source
 
-The canonical workflow lives in `skills/outcome-led-planning/SKILL.md`. In the
-monorepo, run `npm run sync:planning-skill` after changing it; the checked sync
-keeps the ITIL compatibility body and all supporting references equivalent while
-preserving its old name.
+Canonical planning and GitHub setup live under `skills/`. In the monorepo, run
+`npm run sync:planning-skill` after changing either; the checked sync keeps both
+ITIL compatibility skills and their supporting resources equivalent while
+preserving their names.
 The personal skill is user-managed and is not a synchronization target.

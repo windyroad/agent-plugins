@@ -15,8 +15,8 @@ if jq -e 'type == "object" and has("skill")' <<< "$scenario" >/dev/null 2>&1; th
   entry="$(jq -r .skill <<< "$scenario")"
 fi
 case "$entry" in
-  outcome-led-planning|contribute) ;;
-  *) echo 'Expected outcome-led-planning or contribute skill envelope.' >&2; exit 2 ;;
+  outcome-led-planning|contribute|setup-github-tracking) ;;
+  *) echo 'Expected outcome-led-planning, contribute or setup-github-tracking skill envelope.' >&2; exit 2 ;;
 esac
 if [ "${PLANNING_EVAL_RUNTIME:-claude}" = codex ]; then
   exec python3 "$HERE/codex-eval.py" subject "${1:?expected scenario}" "$skill"
@@ -26,7 +26,7 @@ contract='This is a tabletop evaluation. No tools, including independent reviewe
 contract+=$'\n\n'
 contract+="$(cat "$HERE/fixture-context.txt")"
 references="$(dirname "$skill")/references"
-[ "$entry" != contribute ] || skill="$(dirname "$skill")/../contribute/SKILL.md"
+[ "$entry" = outcome-led-planning ] || skill="$(dirname "$skill")/../$entry/SKILL.md"
 contract+=$'\n\n'
 contract+="$(cat "$skill")"
 contract+=$'\n\n'
@@ -34,7 +34,7 @@ contract+="$(cat "$references/project-tracking.md")"
 if [ "$entry" = outcome-led-planning ]; then
   contract+=$'\n\n'
   contract+="$(cat "$references/planning-details.md")"
-else
+elif [ "$entry" = contribute ]; then
   contract+=$'\n\n'
   contract+="$(awk '
     /^## / { selected = ($0 == "## Independent increment acceptance"); if (selected) found = 1 }
@@ -42,9 +42,24 @@ else
     END { if (!found) { print "Missing independent increment acceptance section" > "/dev/stderr"; exit 2 } }
   ' "$references/planning-details.md")"
 fi
+if [ "$entry" = setup-github-tracking ] && ! jq -e 'type == "object" and .tracking == "local"' <<< "$scenario" >/dev/null 2>&1; then
+  contract+=$'\n\n'
+  contract+="$(awk '
+    BEGIN { selected = 1 }
+    /^## / {
+      selected = ($0 == "## Establish one shared plan" || $0 == "## Apply real issue tracking")
+      if ($0 == "## Establish one shared plan") shared = 1
+      if ($0 == "## Apply real issue tracking") issues = 1
+    }
+    selected { print }
+    END { if (!shared || !issues) { print "Missing required GitHub setup protocol section" > "/dev/stderr"; exit 2 } }
+  ' "$references/github-coordination.md")"
+fi
 # Only an explicit selected-mode envelope loads the conditional reference.
 # Provider metadata/rubrics and future turns never select or reach the subject.
-if jq -e 'type == "object" and .tracking == "github"' <<< "$scenario" >/dev/null 2>&1; then
+if [ "$entry" != setup-github-tracking ] && jq -e 'type == "object" and .tracking == "github"' <<< "$scenario" >/dev/null 2>&1; then
+  contract+=$'\n\n'
+  contract+="$(cat "$(dirname "$skill")/../setup-github-tracking/SKILL.md")"
   contract+=$'\n\n'
   contract+="$(cat "$references/github-coordination.md")"
   contract+=$'\n\n'

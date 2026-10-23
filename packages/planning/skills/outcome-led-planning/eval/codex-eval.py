@@ -57,22 +57,31 @@ def main():
         except json.JSONDecodeError:
             scenario = {}
         entry = scenario.get('skill', 'outcome-led-planning') if isinstance(scenario, dict) else 'outcome-led-planning'
-        if entry not in ('outcome-led-planning', 'contribute'):
-            raise ValueError('Expected outcome-led-planning or contribute skill envelope')
+        if entry not in ('outcome-led-planning', 'contribute', 'setup-github-tracking'):
+            raise ValueError('Expected outcome-led-planning, contribute or setup-github-tracking skill envelope')
         references = skill.parent / 'references'
-        if entry == 'contribute':
-            skill = skill.parent.parent / 'contribute/SKILL.md'
+        if entry != 'outcome-led-planning':
+            skill = skill.parent.parent / entry / 'SKILL.md'
         contract = fixture + '\n\n' + skill.read_text() + '\n\n' + (references / 'project-tracking.md').read_text()
         if entry == 'outcome-led-planning':
             contract += '\n\n' + (references / 'planning-details.md').read_text()
-        else:
+        elif entry == 'contribute':
             heading = '## Independent increment acceptance\n'
             _, found, acceptance = ('\n' + (references / 'planning-details.md').read_text()).partition('\n' + heading)
             if not found:
                 raise ValueError('Missing independent increment acceptance section')
             contract += '\n\n' + heading + acceptance.split('\n## ', 1)[0]
         tracking = scenario.get('tracking') if isinstance(scenario, dict) else None
-        if tracking == 'github':
+        if entry == 'setup-github-tracking' and tracking != 'local':
+            sections = (references / 'github-coordination.md').read_text().split('\n## ')
+            contract += '\n\n' + sections[0]
+            for heading in ('Establish one shared plan', 'Apply real issue tracking'):
+                selected = [section for section in sections[1:] if section.startswith(heading + '\n')]
+                if not selected:
+                    raise ValueError('Missing required GitHub setup protocol section')
+                contract += '\n## ' + selected[0]
+        if tracking == 'github' and entry != 'setup-github-tracking':
+            contract += '\n\n' + (skill.parent.parent / 'setup-github-tracking/SKILL.md').read_text()
             contract += '\n\n' + (references / 'github-coordination.md').read_text()
             contract += '\n\n' + (references / 'github-project-checkpoint.md').read_text()
         if tracking in ('github', 'local'):

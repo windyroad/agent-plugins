@@ -13,7 +13,7 @@ contributor's work easier. Do not sit idle waiting for work, and do not make
 
 Read the [project tracking and shared contributions](../outcome-led-planning/references/project-tracking.md)
 for context selection, identity, authority, reviews, task claims, dependencies,
-selected-backend records, communication and human-request preparation. Resolve the saved backend first. Local mode uses its agreed plan and channel without GitHub setup; GitHub mode also reads [the GitHub coordination protocol](../outcome-led-planning/references/github-coordination.md). This skill guides
+selected-backend records, communication and human-request preparation. Resolve the saved backend first. Local mode uses its agreed plan and channel without GitHub setup; GitHub mode also reads [the GitHub coordination protocol](../outcome-led-planning/references/github-coordination.md) and invokes the installed [setup-github-tracking skill](../setup-github-tracking/SKILL.md) only when selected setup is missing or incomplete. This skill guides
 useful assistance within the existing plan; it can be used on its own.
 
 ## Choose the outcome you are helping

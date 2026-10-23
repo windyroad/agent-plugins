@@ -12,67 +12,15 @@ Before creation, search existing open and closed issues and read likely matches.
 
 ## Bootstrap GitHub tracking
 
-Inspect before changing setup: the chosen repository/owner, authenticated actor,
-permissions, planning configuration, linked Project, labels or issue types,
-fields/options, saved views and relevant built-in workflows. Reuse equivalent
-existing mappings and custom organization; names alone do not establish that
-something is missing. Preserve IDs, existing options, labels, colours, layouts
-and user-saved filters. Setup intent grants no new credentials, owner scope or
-public visibility. Use supported APIs/CLI or an authorized browser, not guessed
-view mutations or new access grants.
+When GitHub tracking is selected and its applicable setup is missing or incomplete,
+invoke the installed [setup-github-tracking skill](../../setup-github-tracking/SKILL.md).
+Reuse verified complete setup. Local needs no GitHub setup; Issues-only needs no
+Project. The setup skill preserves the same project configuration, authority,
+equivalent mappings and real records. A selected Project remains a delivery
+obligation; unavailable settings stay precisely pending rather than claimed complete.
+Ongoing issue creation and work checkpoints below still apply after setup.
 
-Project fields and views apply **only when Project tracking is selected or
-repository-required**. Reuse the configured Project; create one only when that
-choice requires it, none exists and existing authority permits it. GitHub
-Issues-only and conversation/local tracking need no Project, views or fields.
-Once selected or required, Project setup and updates are part of delivery.
-Optional describes the choice to use a Project, not permission to skip that
-choice after it is made. Complete missing applicable setup at the first work
-checkpoint using available authorized tools. A default unfiltered View 1 is not
-equivalent to the three kind-specific views below. If setup cannot be completed,
-record the exact missing settings and next recovery action on the existing
-increment; keep setup incomplete until its saved state is verified.
-For shared Project tracking, reuse the same project-declared configuration
-(default `.agents/planning.json`), following the shared project-tracking
-preservation rules. Create or update only needed settings: `version: 1`, `backend: github`,
-`github.repository`, `github.projectUrl` and `contributors` entries mapping each
-actual contributor's `agent` and responsible `human`. Derive identities and URLs
-from verified context; store no tokens or connection identifiers. Agent and human
-may be the same account. Record different semantic mappings in existing project
-guidance/configuration, not another registry.
-
-Create only missing essentials, using these defaults when no equivalent mapping
-is established:
-
-- **Record kinds:** `kind:outcome`, `kind:increment`, `kind:task` labels. Reuse an
-  existing equivalent issue-type/label mapping; do not migrate organization issue
-  types or add a duplicate Kind field merely to follow this convention.
-- **Increment horizons:** `horizon:now`, `horizon:next`, `horizon:later` labels,
-  mirrored by the Horizon field. Each open planned increment has one horizon;
-  outcomes/tasks have none. Clear completed/superseded increments' active horizons.
-- **Status:** single-select Ready, In progress, Blocked, Reviewing, Done. An
-  established equivalent such as Todo for Ready is valid. Add missing semantic
-  options without replacing existing option IDs or unrelated configured values.
-- **Horizon:** single-select Now, Next, Later; **Agent:** text containing the exact
-  distinct agent/session or Unclaimed. Reuse native Title, Assignees, Parent
-  issue, Sub-issues progress and Linked pull requests fields. Add no default
-  priority, estimate, iteration or date fields without an outcome-specific need.
-
-Create a saved view only when its equivalent is missing. These are **new-Project
-defaults**, not instructions to reset existing saved layouts or filters:
-
-1. **Outcomes:** table, filter `label:kind:outcome`; show Title, Status, Assignees,
-   Agent and Sub-issues progress.
-2. **Increments:** table, filter `label:kind:increment`; group by Horizon
-   ordered Now/Next/Later; show Title, Parent issue, Horizon, Status, Assignees,
-   Agent, Linked pull requests and Sub-issues progress. Retain closed increments
-   without an active Horizon so delivery history remains accessible.
-3. **Tasks:** board, filter `label:kind:task`; use Status columns and show Title,
-   Assignees, Agent, Parent issue and Linked pull requests on cards as available.
-
-Preserve existing custom views and access to closed/history records. Show
-hierarchy only where it does not leak unrelated record kinds into a filtered
-view; inspect actual visible items. No mandatory roadmap or per-agent view.
+## Apply real issue tracking
 
 Apply each real issue's correct kind marker and explicitly add it to the selected
 Project when creating it. Set native parent/sub-issue and genuine blocked-by
@@ -81,30 +29,6 @@ saved issue and Project fields. Kind alone does not add Project membership, and
 membership alone does not satisfy a saved kind filter. Verify both, then check
 that the legitimate record appears in its intended view. Do not create dummy
 issues to test setup or add an auto-add workflow in place of explicit membership.
-
-Inspect relevant existing built-in automation for effects conflicting with
-verified closure or manual ownership. Do not silently disable/replace it, enable
-auto-close/archive or add recurring jobs/GitHub Actions merely for bootstrap.
-
-Save changed layouts, filters, grouping and visible fields, then reopen the view
-or read its persisted configuration. Verify the Project link, semantic
-fields/options, view names/layouts/filters/grouping/columns and the first real
-issues' kind, membership and native relationships when those issues exist.
-A temporary unsaved view,
-accepted API request or empty item list does not prove setup. A second pass
-reuses complete setup and creates nothing. If permission or tooling cannot
-configure or inspect a specific setting, record that exact gap and pending mirror;
-preserve issue-side truth and continue useful authorized work. Do not claim a
-view property that was not inspected or block all work on an optional mirror.
-
-Use GitHub's current controls for [managing and saving views][github-views],
-[table fields/grouping][github-table], [board columns/cards][github-board] and
-[view filters][github-filters].
-
-[github-views]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/managing-your-views
-[github-table]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/customizing-the-table-layout
-[github-board]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/customizing-the-board-layout
-[github-filters]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/filtering-projects
 
 ## Outcome → increment → task
 

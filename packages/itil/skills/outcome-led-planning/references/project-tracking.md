@@ -30,7 +30,7 @@ Optional `contributors` mappings may identify an agent account and responsible h
 
 **Local:** use the existing conversation or agreed local plan/artifact for the confirmed outcome, current Now revision, owners, contributions, dependencies and evidence. Shared local work uses its agreed records and authorized channel. It needs no GitHub accounts, issues, labels, Project, fields or views. If no contributor is available, continue useful authorized solo work without inventing helpers.
 
-**GitHub:** read [the GitHub coordination protocol](github-coordination.md) before planning, claims or issue/Project mutations. Issues carry outcome → increment → task; an optional selected Project mirrors them. Bootstrap only missing selected setup, preserve equivalent existing configuration and verify actual saved results. Backend choice grants no authentication, access, messaging, public visibility or recurring automation authority.
+**GitHub:** read [the GitHub coordination protocol](github-coordination.md) before planning, claims or issue/Project mutations. Issues carry outcome → increment → task; an optional selected Project mirrors them. For missing or incomplete selected setup, invoke the installed [setup-github-tracking skill](../../setup-github-tracking/SKILL.md); reuse verified complete setup, preserve equivalent existing configuration and verify actual saved results. Backend choice grants no authentication, access, messaging, public visibility or recurring automation authority.
 
 ## Expose useful contributions without reserving the backlog
 
