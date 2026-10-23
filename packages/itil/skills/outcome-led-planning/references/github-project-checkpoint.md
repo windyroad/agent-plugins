@@ -1,6 +1,72 @@
-# Execute a selected-Project resume checkpoint
+# Inspect and reconcile GitHub records
 
-For a join/resume checkpoint with a selected GitHub Project and working `gh`,
+Resolve `scripts/github-project-checkpoint.mjs` relative to this installed
+planning skill, including when called from `contribute`. Use the existing
+authenticated `gh` account and saved project configuration. The default is
+`.agents/planning.json`; an existing project-declared configuration path may be
+supplied last. These operations require no new grants, account changes or tokens.
+Local tracking keeps its existing path.
+
+## Inspect the hierarchy
+
+When reconciling an outcome, current Now, an affected provisional Next and a
+task together with working `gh`, planning and `contribute` MUST first use the
+read-only hierarchy inspector. Supply those actual distinct issue numbers;
+do not invent a Next issue to satisfy the command. Other record sets retain
+their existing coordination path.
+
+```json
+{
+  "outcome": 1,
+  "increment": {"issue": 2},
+  "next": {"issue": 3},
+  "task": {"issue": 4}
+}
+```
+
+Run `node <installed-planning-skill>/scripts/github-project-checkpoint.mjs inspect-hierarchy request.json`.
+This reads the four actual issues and their returned comments. It writes
+nothing and makes no Project or native-link request. Read the raw records and
+consume `findings` before claiming that the records are correct:
+
+- `projectSelection` reports configuration facts. `not-recorded` means selection
+  is unresolved from that configuration, not an explicit choice to use no
+  Project. `recorded` does not prove capability; consider actual project
+  requirements and explicit direction too. Preserve invalid configuration.
+- Each record's `inspection` reports literal owner, revision, acceptance and
+  Parent candidates with raw line evidence. `candidate` is text, not verified
+  ownership or passed acceptance. `explicitly-unresolved` preserves a recorded
+  unknown. Empty/missing literals, unsupported syntax and multiple candidates
+  remain unestablished by this inspector; they do not prove semantic information
+  is absent or that the issue is invalid. Inspect the actual prose/history
+  rather than forcing a new format or choosing a historical value.
+- `textLinks` compares the three requested textual relationships. A mention is
+  observed text, not proof of a current native relationship. Inspect both sides
+  and repair known reciprocal gaps under the existing coordination rules.
+- `capabilities` are `not-probed`; do not turn that into an outage or native-link
+  absence. `inspection-unavailable` means the read/report operation failed,
+  not that a Project mirror is pending.
+
+A successful command produces a diagnostic report, never a correctness or
+synchronization verdict. Identical drafts and saved bodies do not establish
+completeness. Before claiming completeness, account for every finding through
+actual semantic review, authorized repair with saved readback where needed, or
+honest unresolved recording in the existing plan or record. Follow the selection
+finding's conditional next action, which targets the existing outcome issue
+for saving and reading back a still-unresolved gap. Reuse an already saved gap
+without an unchanged write. Configuration alone may leave the choice unresolved
+while requirements or explicit direction establish it. Unsupported
+syntax does not force normalization or another artifact.
+Apply the existing per-record rules to known gaps, marking missing
+required information unresolved rather than inventing it; preserve completed
+acceptance and attribution. Read back authorized changes and compare reciprocal
+links before reporting reconciliation. Unsupported syntax needs actual review,
+not automatic normalization. Semantic acceptance remains with the caller and
+required independent review.
+
+## Synchronize selected Project fields
+
+For a join/resume checkpoint on an active open task with a selected GitHub Project and working `gh`,
 planning and `contribute` MUST use the bundled
 `scripts/github-project-checkpoint.mjs` operation. Do not manually publish a
 Project synchronization-success claim on this route. The operation reads the
@@ -8,10 +74,8 @@ records/discussion, updates the two items, verifies their saved fields and only
 then generates the task's synchronization result. It does not allocate owners,
 approve a plan, acknowledge another person or complete the increment.
 
-Resolve the script relative to this installed planning skill, including when
-called from `contribute`. Use the existing authenticated `gh` account and saved
-project configuration; no new grants, account changes or tokens are required by
-the operation. Local and GitHub Issues-only tracking keep their existing paths.
+This mutation route applies to its open outcome, increment and active task.
+GitHub Issues-only tracking uses no Project field mutations.
 
 ## Inspect, decide, apply
 

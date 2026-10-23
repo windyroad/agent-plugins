@@ -115,7 +115,7 @@ contribution. Explicit assignments still require verified availability and
 acknowledgement. Before declaring the increment complete, its owner obtains the
 [independent acceptance check](../outcome-led-planning/references/planning-details.md#independent-increment-acceptance)
 through the existing planning critic, including repair and recheck. Individual
-task completion alone does not trigger that increment-level check. Preserve current claims. If no useful action is available,
+task completion alone does not trigger that increment-level check. Preserve other contributors' claims; release your own exhausted claim through the handover and readback rules above. If no useful action is available,
 state the concrete limit instead of inventing busywork or asking the human to
 manage routine allocation.
 

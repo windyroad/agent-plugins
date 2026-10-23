@@ -22,7 +22,9 @@ if [ "${PLANNING_EVAL_RUNTIME:-claude}" = codex ]; then
   exec python3 "$HERE/codex-eval.py" subject "${1:?expected scenario}" "$skill"
 fi
 [ "${PLANNING_EVAL_RUNTIME:-claude}" = claude ] || { echo 'Expected explicit claude or codex runtime.' >&2; exit 2; }
-contract="$(cat "$HERE/fixture-context.txt")"
+contract='This is a tabletop evaluation. No tools, including independent reviewer tools, are available. Respond only as the assistant to the current user turn; do not invent or role-play other actors’ replies, decisions or review verdicts. Describe proposed external actions rather than executing tools or emitting a tool call. Ask any required question or confirmation directly in the current reply, then wait for the next user turn. Distinguish supplied observations from proposed actions and required checks. Leave unspecified facts unresolved; mentioning a check does not establish that it passed.'
+contract+=$'\n\n'
+contract+="$(cat "$HERE/fixture-context.txt")"
 references="$(dirname "$skill")/references"
 [ "$entry" != contribute ] || skill="$(dirname "$skill")/../contribute/SKILL.md"
 contract+=$'\n\n'

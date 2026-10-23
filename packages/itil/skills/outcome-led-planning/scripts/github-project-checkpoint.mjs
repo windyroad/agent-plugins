@@ -26,10 +26,14 @@ function json(args, input) {
   if (value.errors?.length) throw new Error(value.errors.map(error => error.message).join('; '));
   return value;
 }
-function scope(request, config) {
-  requireValue(config.version === 1 && config.backend === 'github', 'This operation requires the saved GitHub backend.');
+function repositoryFor(config) {
+  requireValue(config?.version === 1 && config.backend === 'github', 'This operation requires the saved GitHub backend.');
   const repository = config.github?.repository;
-  requireValue(typeof repository === 'string' && /^[\w.-]+\/[\w.-]+$/.test(repository), 'Invalid configured GitHub repository.');
+  requireValue(typeof repository === 'string' && /^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\/[\w.-]+$/.test(repository) && !['.', '..'].includes(repository.split('/')[1]), 'Invalid configured GitHub repository.');
+  return repository;
+}
+function scope(request, config) {
+  const repository = repositoryFor(config);
   const url = new URL(config.github?.projectUrl);
   const match = url.pathname.match(/^\/(?:users|orgs)\/([\w.-]+)\/projects\/([1-9]\d*)(?:\/views\/[1-9]\d*)?\/?$/);
   requireValue(url.protocol === 'https:' && url.hostname === 'github.com' && match && !url.username && !url.password, 'A selected GitHub Project URL is required.');
@@ -43,6 +47,66 @@ function scope(request, config) {
 }
 function issue(number, bound) {
   return json(['issue', 'view', String(number), '--repo', bound.repository, '--json', 'number,url,body,state,assignees,labels,comments']);
+}
+function briefField(body, pattern, cue) {
+  // shortcut: observed literal brief fields only; extend when an actual brief needs another syntax.
+  const lines = body.split(/\r?\n/).map((text, index) => ({ line: index + 1, text }));
+  const matches = lines.flatMap(line => {
+    const match = line.text.match(pattern);
+    return match ? [{ ...line, value: match[1].trim() }] : [];
+  });
+  const literalEvidence = matches.map(({ line, text }) => ({ line, text }));
+  if (matches.length > 1) return { state: 'multiple-candidates', evidence: literalEvidence };
+  if (matches.length === 1) {
+    const { value } = matches[0];
+    return { state: !value ? 'empty' : /^(?:unresolved|unknown|tbd|unclaimed)(?:\b|$)/i.test(value) ? 'explicitly-unresolved' : 'candidate', value, evidence: literalEvidence };
+  }
+  const evidence = lines.filter(line => cue.test(line.text));
+  return { state: evidence.length ? 'unsupported-format' : 'literal-field-missing', evidence };
+}
+function textReference(body, number, repository) {
+  const escaped = repository.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const reference = new RegExp(`(?:(?<![\\w./#:-])#${number}\\b|https://github\\.com/${escaped}/issues/${number}(?![\\w/]))`, 'i');
+  const evidence = body.split(/\r?\n/).flatMap((text, index) => reference.test(text) ? [{ line: index + 1, text }] : []);
+  return { observed: evidence.length > 0, evidence };
+}
+function inspectHierarchy(request, config) {
+  const repository = repositoryFor(config);
+  const roles = { outcome: request?.outcome, increment: request?.increment?.issue, next: request?.next?.issue, task: request?.task?.issue };
+  requireValue(Object.values(roles).every(n => Number.isSafeInteger(n) && n > 0) && new Set(Object.values(roles)).size === 4, 'Four distinct outcome, increment, next and task issue numbers are required.');
+  const projectSelection = { state: 'not-recorded', source: 'configuration' };
+  if (Object.hasOwn(config.github, 'projectUrl')) {
+    try {
+      const url = new URL(config.github.projectUrl);
+      requireValue(url.protocol === 'https:' && url.hostname === 'github.com' && !url.username && !url.password && !url.search && !url.hash && /^\/(?:users|orgs)\/[\w.-]+\/projects\/[1-9]\d*(?:\/views\/[1-9]\d*)?\/?$/.test(url.pathname), 'Invalid recorded Project URL.');
+      Object.assign(projectSelection, { state: 'recorded', url: `https://github.com${url.pathname.split('/views/')[0].replace(/\/$/, '')}` });
+    } catch { projectSelection.state = 'invalid'; }
+  }
+  const records = {};
+  const findings = projectSelection.state === 'recorded' ? [] : [{ issue: roles.outcome, field: 'projectSelection', state: projectSelection.state, nextAction: `Establish selection from applicable project requirements and explicit direction. If it remains unresolved, save that selection gap and conditional Project work on outcome #${roles.outcome} and read back its saved body before claiming reconciliation complete. Reuse an already saved gap without an unchanged write.` }];
+  for (const [role, number] of Object.entries(roles)) {
+    const record = issue(number, { repository });
+    requireValue(record.number === number && record.url?.toLowerCase() === `https://github.com/${repository}/issues/${number}`.toLowerCase() && typeof record.body === 'string', 'Returned issue does not match its requested repository/number or brief.');
+    const inspection = {
+      owner: briefField(record.body, /^\s*(?:(?:Outcome|Increment|Task) )?Owner:\s*(.*)$/i, /\bowner\b/i),
+      revision: briefField(record.body, /^\s*Revision:\s*(.*)$/i, /\brevision\b/i),
+      acceptance: briefField(record.body, /^\s*(?:Tentative )?Acceptance(?: criteria| evidence)?:\s*(.*)$/i, /\bacceptance\b/i),
+      parent: briefField(record.body, /^\s*Parent(?: outcome| increment)?:\s*(.*)$/i, /\bparent\b/i)
+    };
+    records[role] = { ...record, inspection };
+    for (const field of ['owner', 'revision', 'acceptance']) {
+      if (!['candidate', 'explicitly-unresolved'].includes(inspection[field].state)) findings.push({ issue: number, field, state: inspection[field].state });
+    }
+  }
+  const textLinks = [[records.outcome, records.increment], [records.outcome, records.next], [records.increment, records.task]].map(([parent, child]) => {
+    const parentMentionsChild = textReference(parent.body, child.number, repository);
+    const field = child.inspection.parent;
+    const referencesExpected = 'value' in field ? textReference(field.value, parent.number, repository).observed : null;
+    if (!parentMentionsChild.observed) findings.push({ issue: parent.number, field: 'child-text-reference', state: 'not-established', child: child.number });
+    if (referencesExpected !== true) findings.push({ issue: child.number, field: 'parent-text-reference', state: 'not-established', parent: parent.number });
+    return { parent: parent.number, child: child.number, parentMentionsChild, childParent: { ...field, referencesExpected } };
+  });
+  return { repository, projectSelection, capabilities: { project: 'not-probed', nativeLinks: 'not-probed' }, records, textLinks, findings };
 }
 function items(request, bound, projectId) {
   const response = json(['api', 'graphql', '--input', '-'], JSON.stringify({ query: itemQuery, variables: { ids: [request.increment.itemId, request.task.itemId], agentFieldId: request.agentFieldId } }));
@@ -125,18 +189,20 @@ function apply(request, inspection, config) {
 }
 
 if (process.argv[2] === '--help') {
-  console.log('Inspect: node github-project-checkpoint.mjs inspect REQUEST.json [CONFIG.json]\nApply: node github-project-checkpoint.mjs apply REQUEST.json INSPECTION.json [CONFIG.json]');
+  console.log('Hierarchy: node github-project-checkpoint.mjs inspect-hierarchy REQUEST.json [CONFIG.json]\nInspect: node github-project-checkpoint.mjs inspect REQUEST.json [CONFIG.json]\nApply: node github-project-checkpoint.mjs apply REQUEST.json INSPECTION.json [CONFIG.json]');
 } else {
   try {
     const [mode, requestPath, third, fourth] = process.argv.slice(2);
-    requireValue(mode === 'inspect' || mode === 'apply', 'Expected inspect or apply; use --help for usage.');
+    requireValue(['inspect', 'apply', 'inspect-hierarchy'].includes(mode), 'Expected inspect-hierarchy, inspect or apply; use --help for usage.');
     const request = load(requestPath);
-    const config = load((mode === 'inspect' ? third : fourth) || '.agents/planning.json');
-    const result = mode === 'inspect' ? inspect(request, config) : apply(request, load(third), config);
+    const config = load((mode === 'apply' ? fourth : third) || '.agents/planning.json');
+    const result = mode === 'inspect-hierarchy' ? inspectHierarchy(request, config) : mode === 'inspect' ? inspect(request, config) : apply(request, load(third), config);
     console.log(JSON.stringify(result));
     if (result.status && result.status !== 'synchronized') process.exitCode = 1;
   } catch (error) {
-    console.log(JSON.stringify({ status: 'pending', reason: error.message, nextAction: 'Inspect the affected record and resolve this operation before claiming synchronization.' }));
+    console.log(JSON.stringify(process.argv[2] === 'inspect-hierarchy'
+      ? { status: 'inspection-unavailable', reason: error.message, nextAction: 'Read the affected configuration or record before claiming a completed inspection.' }
+      : { status: 'pending', reason: error.message, nextAction: 'Inspect the affected record and resolve this operation before claiming synchronization.' }));
     process.exitCode = 1;
   }
 }

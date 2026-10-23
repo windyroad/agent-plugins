@@ -156,7 +156,7 @@ Use this contribution lifecycle:
 
 A starting battle plan exposes likely work, dependencies and parallel opportunities without precreating, assigning or reserving every future task. The increment owner keeps acceptance, sequence and integration clear and resolves overlap/dependencies. Explicit assignments and handoffs remain valid. Two agents sharing an account are distinct contributors. Checklists suffice for routine steps; do not create a task for every command. Task creation within assessed scope requires no fresh human approval.
 
-**Each agent holds only one contribution task at a time**, including a blocked assignment. Finish, explicitly hand over or release the current assignment before claiming another. Do not reserve queued tasks. Outcome or increment coordination ownership does not reserve contribution tasks. Agents sharing an account remain distinct through their recorded agent/session identities.
+**One contribution claim is a ceiling, not a retention requirement.** A blocked assignment still counts until its release is verified. For an unfinished task, when no useful authorized in-task step remains, hand over the remaining gap, remove your assignment and read back its removal; do not retain it merely because its dependency is unresolved. Preserve genuine assigned watcher duties; routine discussion reads alone do not justify retaining an exhausted reservation. Finish, explicitly hand over or release the current assignment before claiming another. Do not reserve queued tasks. Outcome or increment coordination ownership does not reserve contribution tasks. Agents sharing an account remain distinct through their recorded agent/session identities.
 
 Before declaring a contribution ready to start, complete this claim receipt: **no other contribution assignment held; parent increment; current assessed plan revision; non-overlapping scope; dependencies (or explicitly none); actual account; distinct agent/session; saved claim and reciprocal-link readback; competing-claim recheck.** Record all fields on the task, even when some are already known in conversation. Assignment does not increase authority. When explaining a proposed claim, make these required fields and the before/after overlap checks explicit.
 
@@ -188,21 +188,31 @@ actual acknowledgement.
 
 At each work checkpoint, reconcile tracking in this order:
 
-For a join/resume checkpoint with a selected Project and working `gh`, MUST use
-the [executable Project checkpoint](github-project-checkpoint.md). Read its
-inspection and handle current discussion before applying it; do not manually
-publish synchronization-success text on that route. Other checkpoints and
-authorized alternatives retain the rules below.
+When the affected records include an outcome, current Now, provisional Next and
+a task, and `gh` works, MUST first use the [read-only hierarchy inspector](github-project-checkpoint.md#inspect-the-hierarchy).
+Construct its request from those actual records and consume its findings before
+claiming completeness; identical draft/remote text is not that comparison.
+Do not manufacture a Next issue for this route. Its configuration report is one
+source for the selection decision below, not proof of capability or acceptance.
 
-1. **Establish scope.** Reuse the established backend. Establish Project selection
-   separately from the backend, using configuration, project requirements or
-   explicit direction: selected/required, none, or unresolved. Do not infer none
-   or an unset configuration from omitted information. An established choice to
-   use no Project needs no setup. While selection remains unresolved, inspect available
-   records and keep Project work conditional; do not assert a pending or
-   unsynchronized mirror. An unavailable API or bootstrap default proves neither
-   selection nor a missing view, field or membership; inspect saved setup before
-   naming gaps.
+1. **Establish selection before checking Project capability.** Reuse the
+   established backend. From configuration, project requirements or explicit
+   direction, choose the applicable branch:
+   - **Selected/required:** verify the repository, Project and account, then
+     inspect its saved setup and applicable operations. For join/resume of an
+     active open task with working `gh`, MUST use the [executable Project checkpoint](github-project-checkpoint.md).
+     Read its inspection and handle current discussion before applying it;
+     do not manually publish synchronization-success text on that route.
+     If an applicable operation is unavailable, retain its exact pending state
+     under the recovery rules below. An unavailable API or bootstrap default
+     does not prove a missing view, field or membership.
+   - **Established none:** continue issue-side reconciliation without Project
+     setup, fields or synchronization.
+   - **Unresolved:** inspect available configuration, requirements, direction and
+     issue records. Record the selection gap and keep Project work conditional;
+     there is no established mirror operation to report pending or unsynchronized.
+     Omitted information and API availability establish neither selection nor
+     an explicit choice to use no Project.
 2. **Inspect each affected record.** Read each outcome, increment and task
    against the minimum-information table above. Preserve its own owner/account,
    applicable agent/session, revision and acceptance; mark missing required
