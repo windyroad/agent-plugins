@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.20.2
+
+### Patch Changes
+
+- d818f3a: Qualify configured CI workflows against the current origin source, so unrelated Preview runs do not block delivery while failed or unavailable selected qualification remains blocked.
+
 ## 0.20.1
 
 ### Patch Changes
