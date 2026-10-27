@@ -179,7 +179,8 @@ print(('yes' if score > N else 'no') + ' ' + str(N))
 #
 # Consults `gh run list --branch <current-branch> --limit 1 --json
 # status,conclusion,databaseId,url` for the working branch's most recent
-# CI run.
+# CI run. A configured windyroadRiskScorer.ciWorkflow instead selects that
+# workflow at the current remote branch source; unavailable proof cannot qualify.
 #
 # Decision table (no override — ci-bypass removed P377/RFC-029):
 #   - gh failure (auth / timeout / API error) → DENY (fail-CLOSED, per
@@ -219,19 +220,74 @@ _check_ci_evidence() {
     return 0
   fi
 
+  local CI_WORKFLOW REMOTE_SHA="" REMOTE_REF ROOT CI_ORIGIN
+  ROOT=$(git rev-parse --show-toplevel)
+  if CI_WORKFLOW=$(python3 - "$ROOT/package.json" <<'PY'
+import json, pathlib, re, sys
+try:
+    path = pathlib.Path(sys.argv[1])
+    config = json.loads(path.read_text()).get('windyroadRiskScorer', {}) if path.exists() else {}
+except Exception:
+    sys.exit(2)
+if not isinstance(config, dict):
+    sys.exit(2)
+if 'ciWorkflow' in config:
+    workflow = config['ciWorkflow']
+    if not isinstance(workflow, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*\.ya?ml', workflow):
+        sys.exit(1)
+    print(workflow)
+PY
+  ); then
+    :
+  else
+    local CONFIG_EXIT=$?
+    if [ "$CONFIG_EXIT" = 2 ]; then
+      _governance_advisory "CI workflow configuration could not be read from package.json. Checking the latest branch run instead; verify CI through the standard watcher."
+      CI_WORKFLOW=""
+    else
+      CI_GATE_CATEGORY="qualification-unavailable"
+      CI_GATE_REASON="Configured CI qualification unavailable: windyroadRiskScorer.ciWorkflow must name a workflow YAML filename in valid package.json. Correct the configuration before pushing/releasing."
+      return 1
+    fi
+  fi
+
+  local RUN_ARGS=(--branch "$BRANCH" --limit 1)
+  local RUN_FIELDS=status,conclusion,databaseId,url
+  if [ -n "$CI_WORKFLOW" ]; then
+    CI_ORIGIN=$(git remote get-url origin 2>/dev/null) || CI_ORIGIN=""
+    if command -v timeout >/dev/null 2>&1; then
+      REMOTE_REF=$(timeout 10s git ls-remote --exit-code "$CI_ORIGIN" "refs/heads/$BRANCH" 2>/dev/null) || REMOTE_REF=""
+    else
+      REMOTE_REF=$(git ls-remote --exit-code "$CI_ORIGIN" "refs/heads/$BRANCH" 2>/dev/null) || REMOTE_REF=""
+    fi
+    REMOTE_SHA=$(printf '%s\n' "$REMOTE_REF" | awk -v ref="refs/heads/$BRANCH" 'NF==2 && $2==ref {print $1}')
+    if [ -z "$CI_ORIGIN" ] || ! [[ "$REMOTE_SHA" =~ ^[0-9a-f]{40}$|^[0-9a-f]{64}$ ]]; then
+      CI_GATE_CATEGORY="qualification-unavailable"
+      CI_GATE_REASON="Configured CI workflow '$CI_WORKFLOW' cannot qualify: current origin branch '$BRANCH' source is unavailable. Restore remote access before pushing/releasing."
+      return 1
+    fi
+    RUN_ARGS+=(--repo "$CI_ORIGIN" --workflow "$CI_WORKFLOW" --commit "$REMOTE_SHA")
+    RUN_FIELDS+=,headSha,headBranch
+  fi
+
   # Query GitHub. Bounded at 10s wall-clock so a network stall cannot
   # hang push:watch indefinitely. `command -v timeout` because macOS
   # default install does not ship GNU `timeout`.
   local JSON GH_EXIT
   if command -v timeout >/dev/null 2>&1; then
-    JSON=$(timeout 10s gh run list --branch "$BRANCH" --limit 1 \
-        --json status,conclusion,databaseId,url 2>/dev/null) || GH_EXIT=$?
+    JSON=$(timeout 10s gh run list "${RUN_ARGS[@]}" \
+        --json "$RUN_FIELDS" 2>/dev/null) || GH_EXIT=$?
   else
-    JSON=$(gh run list --branch "$BRANCH" --limit 1 \
-        --json status,conclusion,databaseId,url 2>/dev/null) || GH_EXIT=$?
+    JSON=$(gh run list "${RUN_ARGS[@]}" \
+        --json "$RUN_FIELDS" 2>/dev/null) || GH_EXIT=$?
   fi
 
   if [ -n "${GH_EXIT:-}" ] && [ "$GH_EXIT" != "0" ]; then
+    if [ -n "$CI_WORKFLOW" ]; then
+      CI_GATE_CATEGORY="qualification-unavailable"
+      CI_GATE_REASON="Configured CI workflow '$CI_WORKFLOW' at '$REMOTE_SHA' is unavailable (gh exit $GH_EXIT). Verify that exact workflow/source before pushing/releasing."
+      return 1
+    fi
     CI_GATE_CATEGORY="gh-error"
     CI_GATE_REASON="CI status unavailable (gh exit ${GH_EXIT}: lookup, auth, timeout or API error). Verify CI through the standard watcher."
     return 1
@@ -242,6 +298,11 @@ _check_ci_evidence() {
   local TRIMMED
   TRIMMED=$(printf '%s' "$JSON" | tr -d '[:space:]')
   if [ -z "$TRIMMED" ] || [ "$TRIMMED" = "[]" ]; then
+    if [ -n "$CI_WORKFLOW" ]; then
+      CI_GATE_CATEGORY="qualification-unavailable"
+      CI_GATE_REASON="Configured CI workflow '$CI_WORKFLOW' has no qualification for current source '$REMOTE_SHA'. Wait for that workflow before pushing/releasing."
+      return 1
+    fi
     CI_GATE_CATEGORY="no-history"
     return 0
   fi
@@ -252,6 +313,18 @@ _check_ci_evidence() {
 import sys, json
 try:
     runs = json.load(sys.stdin)
+    if sys.argv[1]:
+        if not isinstance(runs, list) or len(runs) != 1:
+            raise ValueError('one qualified run required')
+        r = runs[0]
+        if r.get('headSha') != sys.argv[2] or r.get('headBranch') != sys.argv[3]:
+            raise ValueError('source or branch mismatch')
+        if type(r.get('databaseId')) is not int or r['databaseId'] <= 0 or not isinstance(r.get('url'), str) or not r['url'].startswith('https://github.com/'):
+            raise ValueError('run identity required')
+        if r.get('status') not in ('completed', 'queued', 'in_progress', 'pending', 'requested', 'waiting'):
+            raise ValueError('unknown status')
+        if r['status'] == 'completed' and r.get('conclusion') not in ('success', 'failure', 'cancelled', 'timed_out', 'action_required', 'startup_failure'):
+            raise ValueError('qualification requires terminal success')
     if not isinstance(runs, list) or not runs:
         print('||')
         sys.exit(0)
@@ -259,7 +332,7 @@ try:
     print('{}|{}|{}'.format(r.get('status') or '', r.get('conclusion') or '', r.get('url') or ''))
 except Exception:
     print('PARSE_ERROR||')
-" 2>/dev/null || echo "PARSE_ERROR||")
+" "$CI_WORKFLOW" "$REMOTE_SHA" "$BRANCH" 2>/dev/null || echo "PARSE_ERROR||")
 
   local STATUS CONCLUSION URL
   STATUS="${PARSED%%|*}"
@@ -268,15 +341,24 @@ except Exception:
   URL="${REST#*|}"
 
   if [ "$STATUS" = "PARSE_ERROR" ]; then
+    if [ -n "$CI_WORKFLOW" ]; then
+      CI_GATE_CATEGORY="qualification-unavailable"
+      CI_GATE_REASON="Configured CI workflow '$CI_WORKFLOW' has invalid qualification for current source '$REMOTE_SHA'. Inspect that exact run before pushing/releasing."
+      return 1
+    fi
     CI_GATE_CATEGORY="gh-error"
     CI_GATE_REASON="CI status unavailable: lookup returned an unparseable response. Verify CI through the standard watcher."
     return 1
   fi
 
+  local CI_DESCRIPTION="Latest CI run on branch '${BRANCH}'"
+  if [ -n "$CI_WORKFLOW" ]; then
+    CI_DESCRIPTION="CI workflow '$CI_WORKFLOW' at '$REMOTE_SHA' on branch '$BRANCH'"
+  fi
   case "$STATUS" in
     queued|in_progress|pending|requested|waiting)
       CI_GATE_CATEGORY="pending"
-      CI_GATE_REASON="Latest CI run on branch '${BRANCH}' is still in flight (status: ${STATUS}). Wait for it to settle before pushing/releasing: ${URL} (no override — P377/RFC-029)."
+      CI_GATE_REASON="${CI_DESCRIPTION} is still in flight (status: ${STATUS}). Wait for it to settle before pushing/releasing: ${URL} (no override)."
       return 1
       ;;
     completed)
@@ -288,9 +370,9 @@ except Exception:
         failure|cancelled|timed_out|action_required|startup_failure)
           CI_GATE_CATEGORY="red"
           if [ "$ACTION" = "push" ]; then
-            CI_GATE_REASON="Latest CI run on branch '${BRANCH}' concluded ${CONCLUSION}: ${URL}. Red CI is not itself a goal blocker. Inspect that run, verify the outgoing commits directly repair that exact failure, then delegate to wr-risk-scorer:pipeline with CI-recovery context. Retry \`npm run push:watch\` only after a net risk-reducing verdict creates the existing reducing-push marker. Unrelated outgoing commits remain blocked; there is no generic override (P377/RFC-029)."
+            CI_GATE_REASON="${CI_DESCRIPTION} concluded ${CONCLUSION}: ${URL}. Red CI is not itself a goal blocker. Inspect that run, verify the outgoing commits directly repair that exact failure, then delegate to wr-risk-scorer:pipeline with CI-recovery context. Retry \`npm run push:watch\` only after a net risk-reducing verdict creates the existing reducing-push marker. Unrelated outgoing commits remain blocked; there is no generic override."
           else
-            CI_GATE_REASON="Latest CI run on branch '${BRANCH}' concluded ${CONCLUSION}: ${URL}. Release remains blocked. Fix and push the CI repair, wait for green CI, then retry \`npm run release:watch\`. A live-outage restore-service release uses the separate incident-release path; there is no generic override (P377/RFC-029)."
+            CI_GATE_REASON="${CI_DESCRIPTION} concluded ${CONCLUSION}: ${URL}. Release remains blocked. Fix and push the CI repair, wait for green CI, then retry \`npm run release:watch\`. A live-outage restore-service release uses the separate incident-release path; there is no generic override."
           fi
           return 1
           ;;
@@ -334,7 +416,7 @@ check_risk_gate() {
 }
 check_ci_status() {
     if _check_ci_evidence "$@"; then return 0; fi
-    case "$CI_GATE_CATEGORY" in red|pending) return 1 ;; esac
+    case "$CI_GATE_CATEGORY" in red|pending|qualification-unavailable) return 1 ;; esac
     _governance_advisory "CI status unavailable. $CI_GATE_REASON"
     return 0
 }

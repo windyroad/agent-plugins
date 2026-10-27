@@ -15,10 +15,9 @@
 # - Allow on conclusion ∈ {success, skipped, neutral} or unknown.
 # - Empty array (no CI history yet) → allow. Handles the documented
 #   "first push triggers CI" case naturally — no bypass marker required.
-# - `gh` failure (auth/timeout/API error) → DENY (fail-closed per the
-#   safe-high-fix-risk classifier on P208).
-# - `${RDIR}/ci-bypass-${ACTION}` one-shot bypass marker — consumed on
-#   use, same family as reducing-push / incident-release.
+# - Unconfigured lookup failures remain advisory. Configured workflows require
+#   valid current-remote-source evidence; unavailable qualification denies.
+# - Obsolete ci-bypass markers cannot override this check.
 # - Integration: in git-push-gate.sh, the ordering is bypass-markers →
 #   CI status → risk gate. The `incident-release` bypass MUST short-
 #   circuit BEFORE the CI check fires (per JTBD-201 + ADR-018).
@@ -46,7 +45,16 @@ setup() {
   STUB_DIR="$(mktemp -d)"
   cat > "$STUB_DIR/gh" <<'STUB'
 #!/bin/bash
+printf '%s\n' "$*" >> "$STUB_DIR/gh-args"
 if [ -n "${FAKE_GH_DELAY:-}" ]; then sleep "$FAKE_GH_DELAY"; fi
+if [ -n "${FAKE_IMPLICIT_OUTPUT:-}" ] && [[ " $* " != *" --repo "* ]]; then
+  printf '%s' "$FAKE_IMPLICIT_OUTPUT"
+  exit 0
+fi
+if [[ " $* " == *" --workflow "* ]] && [ -n "${FAKE_SELECTED_OUTPUT:-}" ]; then
+  printf '%s' "$FAKE_SELECTED_OUTPUT"
+  exit "${FAKE_GH_EXIT:-0}"
+fi
 if [ -n "${FAKE_GH_OUTPUT:-}" ]; then
   printf '%s' "$FAKE_GH_OUTPUT"
 fi
@@ -65,6 +73,112 @@ teardown() {
   rm -rf "$RDIR" "$TEST_REPO" "$OTHER_REPO" "$STUB_DIR"
   export PATH="$ORIG_PATH"
   unset FAKE_GH_OUTPUT FAKE_GH_EXIT FAKE_GH_DELAY CI_GATE_REASON CI_GATE_CATEGORY 2>/dev/null || true
+  unset FAKE_SELECTED_OUTPUT FAKE_IMPLICIT_OUTPUT GH_REPO
+}
+
+_configure_ci_workflow() {
+  printf '%s\n' '{"windyroadRiskScorer":{"ciWorkflow":"main-pipeline.yml"}}' > "$TEST_REPO/package.json"
+  git -C "$TEST_REPO" remote add origin "$OTHER_REPO"
+  REMOTE_SHA=$(git -C "$OTHER_REPO" rev-parse HEAD)
+  export FAKE_SELECTED_OUTPUT="[{\"status\":\"completed\",\"conclusion\":\"success\",\"databaseId\":42,\"url\":\"https://github.com/x/y/actions/runs/42\",\"headSha\":\"$REMOTE_SHA\",\"headBranch\":\"main\"}]"
+}
+
+@test "configured CI selects current remote Main despite unrelated failed Preview" {
+  _configure_ci_workflow
+  export FAKE_GH_OUTPUT='[{"status":"completed","conclusion":"failure","databaseId":43,"url":"https://github.com/x/y/actions/runs/43"}]'
+  result=$(_run_check push)
+  [[ "$result" == ALLOW ]]
+  args=$(cat "$STUB_DIR/gh-args")
+  [[ "$args" == *"--workflow main-pipeline.yml"* ]]
+  [[ "$args" == *"--commit $REMOTE_SHA"* ]]
+  [[ "$args" != *"--status success"* ]]
+}
+
+@test "configured CI rejects selected failed and pending Main without falling back to green" {
+  _configure_ci_workflow
+  export FAKE_GH_OUTPUT='[{"status":"completed","conclusion":"success"}]'
+  for state in failure in_progress; do
+    if [ "$state" = failure ]; then
+      export FAKE_SELECTED_OUTPUT="${FAKE_SELECTED_OUTPUT/\"success\"/\"failure\"}"
+    else
+      export FAKE_SELECTED_OUTPUT="${FAKE_SELECTED_OUTPUT/\"completed\"/\"in_progress\"}"
+    fi
+    result=$(_run_check push)
+    [[ "$result" == DENY:* ]]
+    [[ "$result" == *"$state"* ]]
+  done
+}
+
+@test "configured CI rejects absent malformed unreadable and unknown qualification" {
+  _configure_ci_workflow
+  for response in '[]' 'not-json' '{}' '[{}]' '[{"status":"completed","conclusion":"neutral"}]'; do
+    export FAKE_SELECTED_OUTPUT="$response"
+    result=$(_run_check release)
+    [[ "$result" == DENY:* ]]
+    [[ "$result" == *main-pipeline.yml* ]]
+  done
+  export FAKE_GH_EXIT=1
+  result=$(_run_check push)
+  [[ "$result" == DENY:* ]]
+}
+
+@test "configured CI rejects stale source wrong branch and changed remote without qualification" {
+  _configure_ci_workflow
+  original="$FAKE_SELECTED_OUTPUT"
+  export FAKE_SELECTED_OUTPUT="${original/$REMOTE_SHA/0000000000000000000000000000000000000000}"
+  [[ "$(_run_check push)" == DENY:* ]]
+  export FAKE_SELECTED_OUTPUT="${original/\"main\"/\"other\"}"
+  [[ "$(_run_check push)" == DENY:* ]]
+  export FAKE_SELECTED_OUTPUT="$original"
+  git -C "$OTHER_REPO" -c user.email=t@e -c user.name=t commit --allow-empty -qm advance
+  [[ "$(_run_check push)" == DENY:* ]]
+}
+
+@test "configured CI rejects missing remote and invalid workflow configuration" {
+  _configure_ci_workflow
+  git -C "$TEST_REPO" remote remove origin
+  [[ "$(_run_check push)" == DENY:* ]]
+  git -C "$TEST_REPO" remote add origin "$OTHER_REPO"
+  for config in '{"windyroadRiskScorer":{"ciWorkflow":true}}' '{"windyroadRiskScorer":{"ciWorkflow":""}}'; do
+    printf '%s' "$config" > "$TEST_REPO/package.json"
+    [[ "$(_run_check push)" == DENY:* ]]
+  done
+}
+
+@test "configured CI binds origin repository despite GH_REPO selecting a different green repository" {
+  _configure_ci_workflow
+  export GH_REPO=other/repository
+  export FAKE_IMPLICIT_OUTPUT="$FAKE_SELECTED_OUTPUT"
+  export FAKE_SELECTED_OUTPUT='[]'
+  [[ "$(_run_check push)" == DENY:* ]]
+  [[ "$(cat "$STUB_DIR/gh-args")" == *"--repo $OTHER_REPO"* ]]
+}
+
+@test "unreadable ambient package configuration retains its advisory policy" {
+  printf '%s' '{bad-json' > "$TEST_REPO/package.json"
+  result=$(_run_check push)
+  [[ "$result" == *ALLOW* ]]
+  [[ "$result" == *'configuration could not be read'* ]]
+  export FAKE_GH_OUTPUT='[{"status":"completed","conclusion":"failure","databaseId":43,"url":"https://github.com/x/y/actions/runs/43"}]'
+  result=$(_run_check push)
+  [[ "$result" == *DENY:* ]]
+  [[ "$result" == *failure* ]]
+}
+
+@test "configured unavailable and failed qualification deny through actual push and release callers" {
+  _configure_ci_workflow
+  echo 1 > "$RDIR/push"
+  echo 1 > "$RDIR/release"
+  failed="${FAKE_SELECTED_OUTPUT/\"success\"/\"failure\"}"
+  for response in '[]' "$failed"; do
+    export FAKE_SELECTED_OUTPUT="$response"
+    for action in push release; do
+      INPUT=$(_build_input "npm run $action:watch")
+      output=$(cd "$TEST_REPO" && printf '%s' "$INPUT" | "$HOOKS_DIR/git-push-gate.sh")
+      [[ "$output" == *'"deny"'* ]]
+      [[ "$output" == *main-pipeline.yml* ]]
+    done
+  done
 }
 
 # Run check_ci_status inside the fake repo so branch resolution works.

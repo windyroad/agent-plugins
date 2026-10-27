@@ -17,6 +17,35 @@ The risk-scorer plugin brings ISO 31000-aligned risk management to your AI codin
 
 All thresholds are configurable through your project's `RISK-POLICY.md`.
 
+### Choose the qualifying CI workflow
+
+If a repository runs several workflows, name its qualifying workflow file in
+the existing `package.json` configuration:
+
+```json
+{
+  "windyroadRiskScorer": {
+    "ciWorkflow": "main-pipeline.yml"
+  }
+}
+```
+
+The push/release gate checks the newest run of that workflow for the current
+branch's exact source on `origin`. It never searches backwards for a successful
+run. Failed or pending runs, missing runs, unavailable remote/API access and
+invalid qualification cannot pass this check. A project that already declares
+`watchersOwnCiWait: true` keeps its existing pending-run handoff to its watcher;
+that watcher must qualify CI before pushing. The project watcher still owns
+any finer job, event and artifact checks.
+
+Use a workflow YAML filename, not its display name. Without `ciWorkflow`, the
+existing latest-branch-run behaviour remains unchanged, including advisory
+lookup failures and the no-history first-push allowance. Configured projects
+require evidence, including for their first push.
+Unreadable package configuration retains the existing advisory policy; an
+advisory does not establish qualification. Keep the project watcher responsible
+for checking CI when configuration cannot be read.
+
 ## Install
 
 ```bash
