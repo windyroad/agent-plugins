@@ -81,7 +81,12 @@ Execute the assessed **Now** increment through the applicable delivery workflow.
 
 Before tests or deployment, try new integrations locally with real requests within existing authority. Inspect actual behaviour/responses; build from these, not guessed shapes or mocks. Never first experiment in production. Read [integration guidance](references/planning-details.md#new-integrations).
 
-For GitHub delivery, follow the [work checkpoints](references/github-coordination.md#reconcile-tracking-at-work-checkpoints), with regular discussion reads AND event checks. Reconcile each affected record and selected Project from saved state; read back changes.
+For GitHub delivery, both discussion-reading checks are required during active work:
+
+- **Regular reads:** read at bounded intervals while coding or waiting, including while cadence agreement is pending.
+- **Event reads:** also read on joining or resuming and before dependent actions, pushes, scope or ownership changes, and handovers.
+
+Follow the [work checkpoints](references/github-coordination.md#reconcile-tracking-at-work-checkpoints). Reconcile each affected record and selected Project from saved state; read back changes.
 
 At each increment boundary:
 
