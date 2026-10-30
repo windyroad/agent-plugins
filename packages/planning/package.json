@@ -1,6 +1,6 @@
 {
   "name": "@windyroad/planning",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Outcome-led planning with SMART objectives and iterative Now, Next, Later delivery",
   "type": "module",
   "bin": {
