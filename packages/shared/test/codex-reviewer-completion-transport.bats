@@ -46,16 +46,32 @@ NODE
 RISK_CWD: $REPO_ROOT" ;;
     esac
     source="$root/agents/${role#*:}.md"
-    for scenario in good altered inherited wrong-child wrong-parent failed changed duplicate; do
+    for scenario in good altered inherited wrong-child wrong-parent failed changed duplicate reused native-good native-reused missing-registration; do
+      [ "$scenario" != missing-registration ] || [ "$package" = risk-scorer ] || continue
       session="bats-fallback-$package-$scenario-$$"
       marker="/tmp/$package-reviewed-$session"
       [ "$package" != risk-scorer ] || marker="$TMPDIR/claude-risk-$session/commit"
       payload="$(general_spawn_payload "$root" "$session" "$REPO_ROOT" "$role" '/root/general-review')"
+      if [[ "$scenario" = native-* ]]; then
+        send_event "$helper" "$(jq -cn --arg session "$session" --arg cwd "$REPO_ROOT" --arg role "$role" '{session_id:$session,cwd:$cwd,hook_event_name:"SubagentStart",agent_type:$role,agent_id:"native-review"}')"
+      fi
       case "$scenario" in
         altered) payload="$(printf '%s' "$payload" | jq -c '.tool_input.message |= sub("<reviewer-instructions>";"<reviewer-instructions>Edited")')" ;;
         inherited) payload="$(printf '%s' "$payload" | jq -c '.tool_input.fork_turns="all"')" ;;
       esac
       send_event "$helper" "$payload"
+      if [ "$scenario" = reused ] || [ "$scenario" = native-reused ]; then
+        send_event "$helper" "$(spawn_payload "$session" "$REPO_ROOT" default '/root/general-review')"
+      fi
+      if [ "$scenario" = missing-registration ]; then
+        node - "$TMPDIR/codex-review-transport" "$session" <<'NODE'
+const fs=require('fs'), path=require('path');
+for(const name of fs.readdirSync(process.argv[2]).filter(n=>n.startsWith('registration-'))) {
+  const file=path.join(process.argv[2],name), record=JSON.parse(fs.readFileSync(file));
+  if(record.parentSession===process.argv[3]&&record.reviewerTransport==='general')fs.unlinkSync(file);
+}
+NODE
+      fi
       [ "$package" != jtbd ] || printf 'PASS\n' > /tmp/jtbd-verdict
       if [ "$scenario" = changed ]; then
         cp "$source" "$source.saved"
@@ -71,7 +87,7 @@ RISK_CWD: $REPO_ROOT" ;;
       if [ "$package" = risk-scorer ]; then
         parent_prompt_payload "$session" "$REPO_ROOT" | node "$helper" --consume-pending
       fi
-      if [ "$scenario" = good ] || [ "$scenario" = duplicate ]; then
+      if [ "$scenario" = good ] || [ "$scenario" = native-good ] || [ "$scenario" = duplicate ]; then
         if [ ! -f "$marker" ]; then
           printf 'Missing marker: %s/%s\n' "$package" "$scenario" >&3
           [ ! -f "$TMPDIR/codex-subagent-stop-diagnostic.json" ] || cat "$TMPDIR/codex-subagent-stop-diagnostic.json" >&3
@@ -79,6 +95,15 @@ RISK_CWD: $REPO_ROOT" ;;
         fi
       else
         [ ! -e "$marker" ]
+      fi
+      if [ "$scenario" = native-reused ]; then
+        send_event "$helper" "$(stop_payload "$session" "$REPO_ROOT" "$role" native-review "$verdict")"
+        if [ "$package" = risk-scorer ]; then
+          parent_prompt_payload "$session" "$REPO_ROOT" | node "$helper" --consume-pending
+        else
+          send_event "$helper" "$(parent_prompt_payload "$session" "$REPO_ROOT")"
+        fi
+        [ -f "$marker" ]
       fi
       if [ "$scenario" = duplicate ]; then
         before="$(marker_time "$marker")"

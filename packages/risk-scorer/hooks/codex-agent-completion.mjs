@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameS
 import { dirname, isAbsolute, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response, reviewerDispatch, reviewerInstructionsMatch } from "./lib/codex-completion-input.mjs";
+import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response, reviewerDispatch, reviewerInstructionsMatch, clearGeneralReview } from "./lib/codex-completion-input.mjs";
 
 import { riskReviewerInstructions } from "../scripts/codex-agents.mjs";
 
@@ -194,13 +194,23 @@ function rememberNativePipeline(input) {
 function rememberSpawn(input) {
   reapRegisteredTransport();
   const dispatch = reviewerDispatch(input, riskReviewerInstructions);
-  if (!dispatch) return;
-  const { role, prompt, reviewerTransport, reviewerInstructionsHash } = dispatch;
-  if (!reviewerTransport && role === "wr-risk-scorer:pipeline" && existsSync(nativePipelinePath(input.session_id))) return;
   const target = spawnTarget(input);
   if (typeof target !== "string" || !target) return;
+  let clearedGeneral = false;
+  if (!dispatch?.reviewerTransport && existsSync(nativePipelinePath(input.session_id))) {
+    const state = statePath(input, target);
+    if (existsSync(state)) {
+      const previousRole = readFileSync(state, "utf8");
+      if (riskAgentRoles.has(previousRole)) clearedGeneral = clearGeneralReview(input, previousRole, normalizeTarget(target),
+        { state, registration: transportRegistrationPath(input.session_id, previousRole, normalizeTarget(target)),
+          receipt: transportReceiptPath(input.session_id, previousRole, normalizeTarget(target)) });
+    }
+    if (dispatch?.role === "wr-risk-scorer:pipeline") return;
+  }
   mkdirSync(riskDir(input.session_id), { recursive: true });
-  clearTarget(input, target);
+  if (!clearedGeneral) clearTarget(input, target);
+  if (!dispatch) return;
+  const { role, prompt, reviewerTransport, reviewerInstructionsHash } = dispatch;
   if (!riskAgentRoles.has(role)) return;
   writeFileSync(statePath(input, target), role, "utf8");
   const normalized = normalizeTarget(target);
@@ -315,7 +325,8 @@ function markTarget(input, target, output) {
   const role = readFileSync(state, "utf8");
   if (!riskAgentRoles.has(role)) return;
   const registrationPath = transportRegistrationPath(input.session_id, role, normalizeTarget(target));
-  if (existsSync(registrationPath)) {
+  if (!existsSync(registrationPath)) return;
+  {
     const registered = JSON.parse(readFileSync(registrationPath, "utf8"));
     if (registered.reviewerTransport === "general") {
       // Reuse the receipt checks and parent consumption, not the legacy writer.

@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync, rmSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -37,6 +37,22 @@ export function reviewerInstructionsMatch(registered, loadInstructions) {
     return Boolean(instructions && registered.reviewerInstructionsHash ===
       createHash("sha256").update(instructions).digest("hex"));
   } catch { return false; }
+}
+
+// Native replay claims share a target key with legacy receipts. In native mode
+// invalidate only a demonstrably owned general registration, never its claims.
+export function clearGeneralReview(input, role, target, paths) {
+  const owned = value => value.reviewerTransport === "general" && value.role === role &&
+    value.parentSession === input.session_id && value.target === target;
+  try {
+    if (!owned(JSON.parse(readFileSync(paths.registration, "utf8")))) return false;
+  } catch { return false; }
+  rmSync(paths.state, { force: true });
+  rmSync(paths.registration, { force: true });
+  try {
+    if (owned(JSON.parse(readFileSync(paths.receipt, "utf8")))) rmSync(paths.receipt, { force: true });
+  } catch { /* No pending general receipt to invalidate. */ }
+  return true;
 }
 
 // Resolve only this session's state files, including completed claims so an

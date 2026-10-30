@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { reviewerDispatch, reviewerInstructionsMatch } from '../hooks/lib/codex-completion-input.mjs';
+import { reviewerDispatch, reviewerInstructionsMatch, clearGeneralReview } from '../hooks/lib/codex-completion-input.mjs';
+import { mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const role = 'wr-risk-scorer:pipeline';
 const instructions = 'Full installed reviewer instructions.\nPreserve the output contract.\n';
@@ -35,4 +38,26 @@ test('named reviewers remain preferred and do not depend on fallback prompt form
   assert.equal(named.prompt, 'Original request');
   assert.equal(named.reviewerTransport, undefined);
   assert.ok(reviewerInstructionsMatch(named, load));
+});
+
+test('general cleanup owns its registration and pending receipt but preserves native replay claims', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'review-cleanup-'));
+  try {
+    const input = { session_id: 'parent' }, target = 'child';
+    const paths = { state: join(dir, 'state'), registration: join(dir, 'registration'), receipt: join(dir, 'receipt') };
+    const general = { reviewerTransport: 'general', parentSession: 'parent', role, target };
+    for (const nativeReceipt of [false, true]) {
+      writeFileSync(paths.state, 'old identity');
+      writeFileSync(paths.registration, JSON.stringify(general));
+      writeFileSync(paths.receipt, JSON.stringify(nativeReceipt ? { ...general, reviewerTransport: undefined, source: 'subagent-start' } : general));
+      writeFileSync(paths.receipt + '.done', 'native replay claim');
+      assert.equal(clearGeneralReview({ session_id: 'unrelated' }, role, target, paths), false);
+      assert.ok(existsSync(paths.state));
+      assert.equal(clearGeneralReview(input, role, target, paths), true);
+      assert.ok(!existsSync(paths.state));
+      assert.ok(!existsSync(paths.registration));
+      assert.equal(existsSync(paths.receipt), nativeReceipt);
+      assert.equal(readFileSync(paths.receipt + '.done', 'utf8'), 'native replay claim');
+    }
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });

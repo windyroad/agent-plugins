@@ -251,7 +251,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameS
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response, reviewerDispatch, reviewerInstructionsMatch } from "../hooks/lib/codex-completion-input.mjs";
+import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response, reviewerDispatch, reviewerInstructionsMatch, clearGeneralReview } from "../hooks/lib/codex-completion-input.mjs";
 
 const hookDir = dirname(fileURLToPath(import.meta.url));
 const role = ${JSON.stringify(completion.role)};
@@ -413,13 +413,17 @@ function rememberNative(input) {
 
 function remember(input) {
   const dispatch = reviewerDispatch(input, reviewerInstructions);
-  if (!dispatch) return;
-  if (!dispatch.reviewerTransport && nativeEnabled(input)) return;
   reapTransport();
   const target = normalizeTarget(targetFromSpawn(input));
   if (!target) return;
+  if (!dispatch?.reviewerTransport && nativeEnabled(input)) {
+    clearGeneralReview(input, role, target, { state: statePath(input, target),
+      registration: registrationPath(input.session_id, target), receipt: receiptPath(input.session_id, target) });
+    return;
+  }
   mkdirSync(stateDir(input.session_id), { recursive: true });
   clear(input, target);
+  if (!dispatch) return;
   const bound = checkout(input.cwd || process.cwd());
   if (!bound) {
     diagnostic("invalid-spawn-checkout", input);

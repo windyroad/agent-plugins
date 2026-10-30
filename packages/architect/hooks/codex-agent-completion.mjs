@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameS
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response, reviewerDispatch, reviewerInstructionsMatch } from "./lib/codex-completion-input.mjs";
+import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response, reviewerDispatch, reviewerInstructionsMatch, clearGeneralReview } from "./lib/codex-completion-input.mjs";
 
 const hookDir = dirname(fileURLToPath(import.meta.url));
 const role = "wr-architect:agent";
@@ -116,14 +116,18 @@ function rememberNative(input) {
 
 function remember(input) {
   const dispatch = reviewerDispatch(input, reviewerInstructions);
-  if (!dispatch) return;
-  if (!dispatch.reviewerTransport && existsSync(nativePath(input.session_id))) return;
   reapTransport();
   const result = response(input);
   const target = normalizeTarget(result.agent_id ?? result.task_name);
   if (!target) return;
+  if (!dispatch?.reviewerTransport && existsSync(nativePath(input.session_id))) {
+    clearGeneralReview(input, role, target, { state: statePath(input.session_id, target),
+      registration: registrationPath(input.session_id, target), receipt: receiptPath(input.session_id, target) });
+    return;
+  }
   mkdirSync(riskDir(input.session_id), { recursive: true });
   clear(input.session_id, target);
+  if (!dispatch) return;
   const bound = checkout(input.cwd || process.cwd());
   const hash = bound && policyHash(bound.root);
   if (!bound || !hash) return diagnostic(bound ? "policy-hash-failed" : "invalid-spawn-checkout", input);
