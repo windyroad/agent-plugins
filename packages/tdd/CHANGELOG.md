@@ -1,5 +1,11 @@
 # @windyroad/tdd
 
+## 0.7.1
+
+### Patch Changes
+
+- 49f3228: Support independent general reviewers with the complete installed reviewer instructions when named reviewers are unavailable in Codex. Preserve named dispatch, read-only review scope, required verdict formats and existing completion checks.
+
 ## 0.7.0
 
 ### Minor Changes
