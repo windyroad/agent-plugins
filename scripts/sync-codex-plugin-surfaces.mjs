@@ -70,13 +70,24 @@ function runtimeTerms(text) {
     .replaceAll(".claude", ".codex");
 }
 
+const reviewerNote = existsSync(join(root, "agents")) ? `> Prefer the named
+> reviewer. If unavailable, or named selection is unsupported, start a fresh
+> general/default subagent with \`fork_turns: "none"\`, the complete installed
+> \`agents/<reviewer-name>.md\` and the original review request. Keep its
+> read-only scope and required verdict format. For receipt-bearing reviews,
+> prepare the exact message with \`node "<plugin-root>/hooks/lib/codex-completion-input.mjs" --fallback-prompt <role> "<plugin-root>/agents/<reviewer-name>.md" < request.txt\`.
+> Resolve \`<plugin-root>\` two directories above this installed skill's
+> directory; pass the command output verbatim. Wait for completion, then call
+> \`interrupt_agent\` once on the completed child. A FAIL requires remediation,
+> not fallback. Never write markers manually or claim unverified completion.` : "";
+
 function transformSkill(text) {
   const note = `<!-- Generated from the runtime-neutral skill source. Do not edit. -->
 
 > Codex runtime note: invoke installed skills directly, use
 > \`request_user_input\` only when the contract requires a human decision, and
 > use native Codex subagents for agent delegation. Resolve bundled files from
-> this installed plugin instead of the adopter repository.
+> this installed plugin instead of the adopter repository.${reviewerNote ? "\n" + reviewerNote : ""}
 
 `;
   const result = runtimeTerms(text);
@@ -240,12 +251,15 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameS
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response } from "../hooks/lib/codex-completion-input.mjs";
+import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response, reviewerDispatch, reviewerInstructionsMatch } from "../hooks/lib/codex-completion-input.mjs";
 
 const hookDir = dirname(fileURLToPath(import.meta.url));
 const role = ${JSON.stringify(completion.role)};
 const writer = join(hookDir, "..", "hooks", ${JSON.stringify(completion.writer)});
 const policy = ${JSON.stringify(completion.policy)};
+function reviewerInstructions(candidate) {
+  return candidate === role ? readFileSync(join(hookDir, "..", "agents", ${JSON.stringify(completion.role.split(":")[1] + ".md")}), "utf8") : null;
+}
 const passPattern = new RegExp(${JSON.stringify(completion.passPattern)}, "m");
 const firstLineOnly = ${JSON.stringify(Boolean(completion.firstLineOnly))};
 const verdictFile = ${JSON.stringify(completion.verdictFile ?? null)};
@@ -398,13 +412,14 @@ function rememberNative(input) {
 }
 
 function remember(input) {
-  if (nativeEnabled(input)) return;
+  const dispatch = reviewerDispatch(input, reviewerInstructions);
+  if (!dispatch) return;
+  if (!dispatch.reviewerTransport && nativeEnabled(input)) return;
   reapTransport();
   const target = normalizeTarget(targetFromSpawn(input));
   if (!target) return;
   mkdirSync(stateDir(input.session_id), { recursive: true });
   clear(input, target);
-  if (input.tool_input?.agent_type !== role) return;
   const bound = checkout(input.cwd || process.cwd());
   if (!bound) {
     diagnostic("invalid-spawn-checkout", input);
@@ -415,9 +430,9 @@ function remember(input) {
     diagnostic("policy-hash-failed", input);
     return;
   }
-  const prompt = input.tool_input?.message ?? input.tool_input?.prompt ?? "";
+  const prompt = dispatch.prompt;
   const externalKey = expectedExternalKey(prompt);
-  const registered = { parentSession: input.session_id, role, target, ...bound, policyHash: hash,
+  const registered = { parentSession: input.session_id, role, target, reviewerTransport: dispatch.reviewerTransport, reviewerInstructionsHash: dispatch.reviewerInstructionsHash, ...bound, policyHash: hash,
     promptDigest: createHash("sha256").update(prompt).digest("hex"), expectedKey: externalKey, createdAt: Date.now() };
   writeFileSync(statePath(input, target), JSON.stringify(registered), { mode: 0o600 });
   if (role === "wr-voice-tone:external-comms" && !externalKey) {
@@ -441,6 +456,7 @@ function claim(input, target) {
 }
 
 function validRegistration(registered, input, target, age) {
+  if (!reviewerInstructionsMatch(registered, reviewerInstructions)) return diagnostic("reviewer-instructions-changed", input), false;
   if (registered.role !== role || registered.target !== target) {
     diagnostic("registration-mismatch", input);
     return false;
@@ -508,7 +524,6 @@ function writeMarker(input, registered, target, output, completedAt, claimed) {
 }
 
 function complete(input, target, output) {
-  if (nativeEnabled(input)) return;
   target = completionTarget(target, stateDir(input.session_id), "codex-review-", role + ":");
   if (!target || typeof output !== "string" || !output) return;
   const path = statePath(input, target);
@@ -527,6 +542,7 @@ function complete(input, target, output) {
     diagnostic("malformed-registration", input);
     return;
   }
+  if (nativeEnabled(input) && registered.reviewerTransport !== "general") return;
   if (!validRegistration(registered, input, target, age)) {
     rmSync(path, { force: true });
     rmSync(registrationPath(registered.parentSession || input.session_id, target), { force: true });
@@ -601,7 +617,7 @@ function consumePending(input) {
       continue;
     }
     if (pending.parentSession !== input.session_id || pending.role !== role) continue;
-    if (nativeEnabled(input) && pending.source !== "subagent-start") continue;
+    if (nativeEnabled(input) && pending.source !== "subagent-start" && pending.reviewerTransport !== "general") continue;
     if (!validRegistration(pending, input, pending.target, age)) continue;
     const claimPath = path + ".claim";
     const donePath = path + ".done";

@@ -162,6 +162,23 @@ The canonical hook lives at `packages/shared/hooks/external-comms-gate.sh` and
 is synced into each consumer plugin via `scripts/sync-external-comms-gate.sh`
 per ADR-017 (CI runs `npm run check:external-comms-gate` to detect drift).
 
+## Codex reviewers when named selection is unavailable
+
+Use the installed named reviewer when available. If the reviewer or native
+selector is unavailable, give an independent general/default subagent the
+complete installed instructions and original request. Prepare the message with:
+
+```bash
+node "<plugin-root>/scripts/codex-agents.mjs" --fallback-prompt pipeline < request.txt
+```
+
+Resolve `<plugin-root>` from the installed skill and replace `pipeline` with
+the requested reviewer mode. Pass the output verbatim with `fork_turns: "none"`.
+Keep the review read-only. Wait for completion, then call `interrupt_agent` once
+on that child so normal hooks process the result. The fallback preserves the
+required verdict and completion checks; a failed review still requires
+remediation. Missing instructions or completion evidence cannot satisfy a gate.
+
 ## Updating and Uninstalling
 
 ```bash

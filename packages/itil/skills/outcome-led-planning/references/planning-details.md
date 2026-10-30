@@ -20,6 +20,15 @@ Iterate each **initial or materially revised executable plan with five independe
 
 Use the installed review roles or available independent agents assigned those responsibilities. The JTBD reviewer checks the objective and plan against the relevant persona and desired outcomes. Follow its recommendation-review contract, including a `RECOMMENDATION REVIEW` prompt prefix where required; recommendation review does not authorize file edits. Identify any substitution and its limits. If a substantive review cannot be obtained, report the exact missing capability and hold dependent implementation. Continue useful authorized preparation within existing authority. An ordinary go-ahead does not provide the missing review or itself waive this gate; do not infer informed risk acceptance or substitute another confirmation for that capability. Do not claim the plan passed or silently substitute self-approval.
 
+Prefer a named installed reviewer when available. If the reviewer or named-agent
+selector is unavailable, give an independent general reviewer the complete
+installed reviewer's instructions and the original request. Use a fresh context
+and preserve its read-only scope and verdict format. For reviews that satisfy a
+plugin gate, follow that installed plugin's fallback dispatch and completion
+instructions. A failed review requires remediation; it is not a reason to switch
+reviewers. Missing instructions or completion evidence still means the review is
+unavailable.
+
 
 ## Independent increment acceptance
 

@@ -7,6 +7,7 @@ setup() {
 }
 
 teardown() {
+  rm -f /tmp/{architect,jtbd,style-guide,voice-tone}-reviewed-bats-fallback-*-"$$"{,.hash}
   rm -f /tmp/{style-guide,voice-tone}-{reviewed,plan-reviewed}-bats-p402-*-"$$"{,.hash,-other,-other.hash,-child,-child.hash}
   rm -f /tmp/{style-guide,voice-tone,jtbd}-{reviewed,plan-reviewed}-bats-p539-*-"$$"{,.hash}
   rm -f /tmp/architect-{reviewed,plan-reviewed}-bats-p539-architect-"$$"{,.hash}
@@ -14,6 +15,81 @@ teardown() {
   rm -f /tmp/jtbd-{reviewed,plan-reviewed}-bats-p539-jtbd-stop-"$$"{,.hash}
   rm -f /tmp/jtbd-{reviewed,plan-reviewed}-bats-p539-jtbd-ambiguous-"$$"{,.hash}
   rm -f /tmp/jtbd-verdict
+}
+
+general_spawn_payload() {
+  node --input-type=module - "$1" "$2" "$3" "$4" "$5" <<'NODE'
+import { readFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
+const [root, session_id, cwd, role, target] = process.argv.slice(2);
+const instructions = role.startsWith('wr-risk-scorer:')
+  ? (await import(pathToFileURL(root + '/scripts/codex-agents.mjs'))).riskReviewerInstructions(role)
+  : readFileSync(root + '/agents/' + role.split(':')[1] + '.md', 'utf8');
+const request = 'Review read-only.\nRISK_CWD: ' + cwd;
+const message = `WR_REVIEWER_FALLBACK: ${role}\n<reviewer-instructions>\n${instructions}</reviewer-instructions>\n\n${request}`;
+console.log(JSON.stringify({session_id,cwd,tool_name:'collaboration.spawn_agent',
+  tool_input:{fork_turns:'none',message},tool_response:{task_name:target}}));
+NODE
+}
+
+@test "packed reviewers qualify instruction-backed general children and reject substituted reviews" {
+  local package root helper role verdict session marker scenario payload source original before
+  for package in architect jtbd style-guide voice-tone risk-scorer; do
+    root="$(pack_plugin "$package")"
+    helper="$root/hooks-codex/codex-agent-completion.mjs"
+    case "$package" in
+      architect) helper="$root/hooks/codex-agent-completion.mjs"; role='wr-architect:agent'; verdict='**Architecture Review: PASS**' ;;
+      jtbd) role='wr-jtbd:agent'; verdict='**JTBD Review: PASS**' ;;
+      style-guide) role='wr-style-guide:agent'; verdict='**Style Guide Review: PASS**' ;;
+      voice-tone) role='wr-voice-tone:agent'; verdict='**Voice & Tone Review: PASS**' ;;
+      risk-scorer) helper="$root/hooks/codex-agent-completion.mjs"; role='wr-risk-scorer:pipeline'; verdict="RISK_SCORES: commit=4 push=4 release=4
+RISK_CWD: $REPO_ROOT" ;;
+    esac
+    source="$root/agents/${role#*:}.md"
+    for scenario in good altered inherited wrong-child wrong-parent failed changed duplicate; do
+      session="bats-fallback-$package-$scenario-$$"
+      marker="/tmp/$package-reviewed-$session"
+      [ "$package" != risk-scorer ] || marker="$TMPDIR/claude-risk-$session/commit"
+      payload="$(general_spawn_payload "$root" "$session" "$REPO_ROOT" "$role" '/root/general-review')"
+      case "$scenario" in
+        altered) payload="$(printf '%s' "$payload" | jq -c '.tool_input.message |= sub("<reviewer-instructions>";"<reviewer-instructions>Edited")')" ;;
+        inherited) payload="$(printf '%s' "$payload" | jq -c '.tool_input.fork_turns="all"')" ;;
+      esac
+      send_event "$helper" "$payload"
+      [ "$package" != jtbd ] || printf 'PASS\n' > /tmp/jtbd-verdict
+      if [ "$scenario" = changed ]; then
+        cp "$source" "$source.saved"
+        printf '\nChanged installed instructions.\n' >> "$source"
+      fi
+      payload="$(close_payload "$session" "$REPO_ROOT" '/root/general-review' "$verdict")"
+      case "$scenario" in
+        wrong-child) payload="$(printf '%s' "$payload" | jq -c '.tool_input.target="unrelated"')" ;;
+        wrong-parent) payload="$(printf '%s' "$payload" | jq -c '.session_id += "-other"')" ;;
+        failed) payload="$(printf '%s' "$payload" | jq -c '.tool_response.previous_status.completed="ISSUES FOUND"')" ;;
+      esac
+      send_event "$helper" "$payload"
+      if [ "$package" = risk-scorer ]; then
+        parent_prompt_payload "$session" "$REPO_ROOT" | node "$helper" --consume-pending
+      fi
+      if [ "$scenario" = good ] || [ "$scenario" = duplicate ]; then
+        if [ ! -f "$marker" ]; then
+          printf 'Missing marker: %s/%s\n' "$package" "$scenario" >&3
+          [ ! -f "$TMPDIR/codex-subagent-stop-diagnostic.json" ] || cat "$TMPDIR/codex-subagent-stop-diagnostic.json" >&3
+          return 1
+        fi
+      else
+        [ ! -e "$marker" ]
+      fi
+      if [ "$scenario" = duplicate ]; then
+        before="$(marker_time "$marker")"
+        send_event "$helper" "$payload"
+        [ "$package" != risk-scorer ] || parent_prompt_payload "$session" "$REPO_ROOT" | node "$helper" --consume-pending
+        [ "$(marker_time "$marker")" = "$before" ]
+      fi
+      [ "$scenario" != changed ] || mv "$source.saved" "$source"
+      rm -f "$marker" "$marker.hash"
+    done
+  done
 }
 
 pack_plugin() {

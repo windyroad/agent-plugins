@@ -86,7 +86,9 @@ behavioural or structural:
 
   Use the Agent tool with subagent_type 'wr-tdd:review-test' (or the
   equivalent agent invocation surface for your harness) and pass the
-  test file path.
+  test file path. If that named reviewer is unavailable, use an independent
+  general reviewer with the complete installed agents/review-test.md and the
+  same test path. Preserve read-only scope and the required JSON verdict.
 
 The agent will return a JSON verdict with fields {verdict, evidence,
 suggestion, harness_gap}. If the verdict is 'structural', either:

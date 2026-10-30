@@ -61,8 +61,6 @@ setup() {
   [ "$status" -eq 0 ]
   run grep -n "codex-agents.mjs\" --session-start" "$PACKAGE/hooks/risk-scorer-dispatch.sh"
   [ "$status" -eq 0 ]
-  run grep -n "Do not substitute" "$PACKAGE/scripts/sync-codex-skills.mjs"
-  [ "$status" -eq 0 ]
 }
 
 @test "risk-scorer Codex skills are generated during pack and source skills restore after pack" {
@@ -73,10 +71,6 @@ setup() {
   run grep -n "packages/risk-scorer/.pack-claude-skills/" "$REPO_ROOT/.gitignore"
   [ "$status" -eq 0 ]
   run grep -n "request_user_input" "$PACKAGE/scripts/sync-codex-skills.mjs"
-  [ "$status" -eq 0 ]
-  run grep -n "native Codex subagent workflow" "$PACKAGE/scripts/sync-codex-skills.mjs"
-  [ "$status" -eq 0 ]
-  run grep -n 'Do not parse transcripts or launch nested.*codex exec' "$PACKAGE/scripts/sync-codex-skills.mjs"
   [ "$status" -eq 0 ]
 }
 

@@ -5,10 +5,13 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameS
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response } from "./lib/codex-completion-input.mjs";
+import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response, reviewerDispatch, reviewerInstructionsMatch } from "./lib/codex-completion-input.mjs";
 
 const hookDir = dirname(fileURLToPath(import.meta.url));
 const role = "wr-architect:agent";
+function reviewerInstructions(candidate) {
+  return candidate === role ? readFileSync(join(hookDir, "..", "agents", "agent.md"), "utf8") : null;
+}
 const ttlText = process.env.REVIEW_TTL ?? "3600";
 const ttl = Number(ttlText) * 1000;
 
@@ -112,24 +115,26 @@ function rememberNative(input) {
 }
 
 function remember(input) {
-  if (existsSync(nativePath(input.session_id))) return;
+  const dispatch = reviewerDispatch(input, reviewerInstructions);
+  if (!dispatch) return;
+  if (!dispatch.reviewerTransport && existsSync(nativePath(input.session_id))) return;
   reapTransport();
   const result = response(input);
   const target = normalizeTarget(result.agent_id ?? result.task_name);
   if (!target) return;
   mkdirSync(riskDir(input.session_id), { recursive: true });
   clear(input.session_id, target);
-  if (input.tool_input?.agent_type !== role) return;
   const bound = checkout(input.cwd || process.cwd());
   const hash = bound && policyHash(bound.root);
   if (!bound || !hash) return diagnostic(bound ? "policy-hash-failed" : "invalid-spawn-checkout", input);
-  const registered = { parentSession: input.session_id, role, target, ...bound, policyHash: hash, createdAt: Date.now() };
+  const registered = { parentSession: input.session_id, role, target, reviewerTransport: dispatch.reviewerTransport, reviewerInstructionsHash: dispatch.reviewerInstructionsHash, ...bound, policyHash: hash, createdAt: Date.now() };
   writeFileSync(statePath(input.session_id, target), JSON.stringify(registered), { mode: 0o600 });
   mkdirSync(transportDir(), { recursive: true, mode: 0o700 });
   writeFileSync(registrationPath(input.session_id, target), JSON.stringify(registered), { mode: 0o600 });
 }
 
 function valid(registered, input, target, age) {
+  if (!reviewerInstructionsMatch(registered, reviewerInstructions)) return diagnostic("reviewer-instructions-changed", input), false;
   if (registered.role !== role || registered.target !== target) return diagnostic("registration-mismatch", input), false;
   if (!Number.isFinite(age) || age < 0) return diagnostic("invalid-registration-age", input), false;
   if (age >= ttl) return diagnostic("stale-registration", input), false;
@@ -159,7 +164,6 @@ function writeMarker(input, registered, target, output, completedAt, claim, done
 }
 
 function complete(input, rawTarget, output) {
-  if (existsSync(nativePath(input.session_id))) return;
   const target = completionTarget(rawTarget, riskDir(input.session_id), "codex-architect-");
   if (!target || typeof output !== "string" || !output) return;
   const state = statePath(input.session_id, target);
@@ -167,6 +171,7 @@ function complete(input, rawTarget, output) {
   let registered, age;
   try { registered = JSON.parse(readFileSync(state, "utf8")); age = Date.now() - statSync(state).mtimeMs; }
   catch { return diagnostic("malformed-registration", input); }
+  if (existsSync(nativePath(input.session_id)) && registered.reviewerTransport !== "general") return;
   if (!valid(registered, input, target, age)) {
     rmSync(state, { force: true });
     rmSync(registrationPath(registered.parentSession || input.session_id, target), { force: true });
@@ -220,7 +225,7 @@ function consume(input) {
     let pending;
     try { pending = JSON.parse(readFileSync(path, "utf8")); } catch { diagnostic("malformed-receipt", input); continue; }
     if (pending.parentSession !== input.session_id || pending.role !== role) continue;
-    if (existsSync(nativePath(input.session_id)) && pending.source !== "subagent-start") continue;
+    if (existsSync(nativePath(input.session_id)) && pending.source !== "subagent-start" && pending.reviewerTransport !== "general") continue;
     if (!valid(pending, input, pending.target, Date.now() - pending.completedAt)) continue;
     const claim = `${path}.claim`;
     try { writeFileSync(claim, "", { flag: "wx", mode: 0o600 }); }

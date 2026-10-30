@@ -5,7 +5,9 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameS
 import { dirname, isAbsolute, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response } from "./lib/codex-completion-input.mjs";
+import { CLOSE_TOOLS, SPAWN_TOOLS, WAIT_TOOLS, completionTarget, response, reviewerDispatch, reviewerInstructionsMatch } from "./lib/codex-completion-input.mjs";
+
+import { riskReviewerInstructions } from "../scripts/codex-agents.mjs";
 
 const hookDir = dirname(fileURLToPath(import.meta.url));
 const markedPipelineRoots = new Set();
@@ -191,8 +193,10 @@ function rememberNativePipeline(input) {
 
 function rememberSpawn(input) {
   reapRegisteredTransport();
-  const role = input.tool_input?.agent_type;
-  if (role === "wr-risk-scorer:pipeline" && existsSync(nativePipelinePath(input.session_id))) return;
+  const dispatch = reviewerDispatch(input, riskReviewerInstructions);
+  if (!dispatch) return;
+  const { role, prompt, reviewerTransport, reviewerInstructionsHash } = dispatch;
+  if (!reviewerTransport && role === "wr-risk-scorer:pipeline" && existsSync(nativePipelinePath(input.session_id))) return;
   const target = spawnTarget(input);
   if (typeof target !== "string" || !target) return;
   mkdirSync(riskDir(input.session_id), { recursive: true });
@@ -202,7 +206,6 @@ function rememberSpawn(input) {
   const normalized = normalizeTarget(target);
   const bound = directoryBinding(input.cwd || process.cwd());
   if (!bound) return;
-  const prompt = input.tool_input?.message ?? input.tool_input?.prompt ?? "";
   const policy = policyBinding(bound.root);
   if (!policy) return;
   const wipStateHash = role === "wr-risk-scorer:wip" ? stateHash(bound.root) : null;
@@ -211,6 +214,7 @@ function rememberSpawn(input) {
   const registered = {
     parentSession: input.session_id,
     role,
+    reviewerTransport, reviewerInstructionsHash,
     target: normalized,
     ...bound,
     policy,
@@ -310,6 +314,15 @@ function markTarget(input, target, output) {
   if (!existsSync(state)) return;
   const role = readFileSync(state, "utf8");
   if (!riskAgentRoles.has(role)) return;
+  const registrationPath = transportRegistrationPath(input.session_id, role, normalizeTarget(target));
+  if (existsSync(registrationPath)) {
+    const registered = JSON.parse(readFileSync(registrationPath, "utf8"));
+    if (registered.reviewerTransport === "general") {
+      // Reuse the receipt checks and parent consumption, not the legacy writer.
+      persistRegisteredPending({ ...input, agent_id: normalizeTarget(target), last_assistant_message: output }, role);
+      return;
+    }
+  }
   if (role === "wr-risk-scorer:pipeline" && existsSync(nativePipelinePath(input.session_id))) return;
   const claim = claimTarget(input, target);
   if (!claim) return;
@@ -398,8 +411,10 @@ function registrationCandidates(input, role, target) {
       try {
         const registered = JSON.parse(readFileSync(path, "utf8"));
         if (registered.role !== role) return [];
+        if (registered.reviewerTransport === "general" &&
+            (registered.parentSession !== input.session_id || registered.target !== target)) return [];
         if (role === "wr-risk-scorer:pipeline" && existsSync(nativePipelinePath(input.session_id)) &&
-            registered.source !== "subagent-start") return [];
+            registered.source !== "subagent-start" && registered.reviewerTransport !== "general") return [];
         if (registered.source === "subagent-start" &&
             (registered.parentSession !== input.session_id || registered.target !== input.agent_id)) return [];
         if (role !== "wr-risk-scorer:pipeline" && (!current || registered.root !== current.root || registered.physical !== current.physical)) return [];
@@ -471,12 +486,12 @@ function registrationValid(input, registered) {
   if (!ttl) return diagnoseSubagentStop(input, "rejected", "invalid-risk-ttl"), false;
   if (!Number.isFinite(age) || age < 0 || age >= ttl) return diagnoseSubagentStop(input, "rejected", "stale-parent-registration"), false;
   if (!registered.policy || !["absent", "hash"].includes(registered.policy.kind)) return diagnoseSubagentStop(input, "rejected", "invalid-policy-binding"), false;
+  if (!reviewerInstructionsMatch(registered, riskReviewerInstructions)) return diagnoseSubagentStop(input, "rejected", "reviewer-instructions-changed"), false;
   if (!policyMatches(registered.root, registered.policy)) return diagnoseSubagentStop(input, "rejected", "policy-changed"), false;
   return true;
 }
 
-function persistRegisteredPending(input) {
-  const role = input.agent_type;
+function persistRegisteredPending(input, role = input.agent_type) {
   const reportedTarget = normalizeTarget(input.task_name || input.agent_name || input.agent_id);
   if (!riskAgentRoles.has(role) || !reportedTarget) return false;
   const candidates = registrationCandidates(input, role, reportedTarget);
@@ -526,7 +541,7 @@ function consumeRegisteredPending(input) {
     let pending;
     try { pending = JSON.parse(readFileSync(path, "utf8")); } catch { continue; }
     if (pending.parentSession !== input.session_id || !riskAgentRoles.has(pending.role)) continue;
-    if (pending.role === "wr-risk-scorer:pipeline" && existsSync(nativePipelinePath(input.session_id)) && pending.source !== "subagent-start") continue;
+    if (pending.role === "wr-risk-scorer:pipeline" && existsSync(nativePipelinePath(input.session_id)) && pending.source !== "subagent-start" && pending.reviewerTransport !== "general") continue;
     if (!registrationValid(input, pending)) continue;
     if (pending.role === "wr-risk-scorer:pipeline") {
       if (!current || checkoutId(current.root) !== pending.checkoutId || stateHash(current.root) !== pending.stateHash) continue;

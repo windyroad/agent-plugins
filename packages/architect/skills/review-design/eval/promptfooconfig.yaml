@@ -12,6 +12,38 @@ prompts:
   - '{{prompt}}'
 
 tests:
+  - description: General fallback when the hosted selector is unavailable
+    vars:
+      prompt: |
+        This is a dispatch-decision test. Do not run tools or perform a review.
+        The hosted native subagent tool supports fresh general agents but has
+        no agent_type selector. The installed architect instructions and
+        fallback prompt helper are readable. No reviewer reported a failure.
+        Apply the skill and return only JSON with reviewer_kind (named,
+        general, or unavailable), copy_full_installed_instructions,
+        fresh_context, original_request_preserved, manual_marker, and reason.
+    assert:
+      - type: javascript
+        value: |
+          const r = JSON.parse(output.replace(/^```(?:json)?\s*|\s*```$/g, '').trim());
+          return r.reviewer_kind === 'general' && r.copy_full_installed_instructions === true
+            && r.fresh_context === true && r.original_request_preserved === true
+            && r.manual_marker === false;
+  - description: Failed architecture review requires remediation rather than fallback
+    vars:
+      prompt: |
+        This is a dispatch-decision test. Do not run tools or change files.
+        The named architect is available and completed the review, finding
+        a violation of a ratified decision. The team agrees to correct the
+        implementation. Someone suggests using a general reviewer to get a pass.
+        Apply the skill and return only JSON with switch_to_general,
+        remediate, new_review_required, may_proceed, and reason.
+    assert:
+      - type: javascript
+        value: |
+          const r = JSON.parse(output.replace(/^```(?:json)?\s*|\s*```$/g, '').trim());
+          return r.switch_to_general === false && r.remediate === true
+            && r.new_review_required === true && r.may_proceed === false;
   - description: ratified conflicts require a new superseding ADR
     vars:
       prompt: |

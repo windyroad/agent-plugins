@@ -49,7 +49,12 @@ const preamble = `<!-- Generated from the runtime-neutral skill source. Do not e
 > directory. Run bundled commands from \`<itil-plugin-root>/bin/\`; do not
 > search the adopter repository or rely on those commands being on \`PATH\`.
 > Spawn \`wr-itil:hang-off-check\` with the native Codex subagent tool, wait
-> for it, and close that same agent.
+> for it, and close that same agent. If the named reviewer is unavailable or
+> named selection is unsupported, use an independent general/default subagent
+> with \`fork_turns: "none"\`, the complete installed
+> \`<itil-plugin-root>/agents/hang-off-check.md\` and the original request.
+> Preserve read-only scope and the required verdict; do not replace a failed
+> assessment with another reviewer or claim completion without evidence.
 
 `;
 

@@ -8,6 +8,35 @@ setup() {
   TARGET="$TMP/agents"
 }
 
+@test "general reviewer prompt includes the named reviewer's runtime instructions and original request" {
+  local role
+  for role in pipeline plan wip policy external-comms inbound-report; do
+    printf 'Original review request.\n' | node "$SCRIPT" --fallback-prompt "$role" > "$TMP/message"
+    run node --input-type=module - "$SCRIPT" "$role" "$TMP/message" <<'NODE'
+import { readFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
+import assert from 'node:assert/strict';
+const [script, mode, message] = process.argv.slice(2);
+const { riskReviewerInstructions, riskAgentSpecs, renderRiskAgent } = await import(pathToFileURL(script));
+const { reviewerDispatch } = await import(pathToFileURL(script.replace('/scripts/codex-agents.mjs', '/hooks/lib/codex-completion-input.mjs')));
+const input = { tool_input: { fork_turns: 'none', message: readFileSync(message, 'utf8') } };
+const dispatch = reviewerDispatch(input, riskReviewerInstructions);
+assert.equal(dispatch.role, `wr-risk-scorer:${mode}`);
+assert.equal(dispatch.prompt, 'Original review request.\n');
+const named = renderRiskAgent(riskAgentSpecs.find(spec => spec.mode === mode));
+if (mode === 'pipeline') {
+  assert.ok(input.tool_input.message.includes('## Codex assessed-checkout binding'));
+  assert.ok(named.includes('## Codex assessed-checkout binding'));
+}
+if (mode === 'external-comms') {
+  assert.ok(input.tool_input.message.includes('EXTERNAL_COMMS_RISK_KEY'));
+  assert.ok(named.includes('EXTERNAL_COMMS_RISK_KEY'));
+}
+NODE
+    [ "$status" -eq 0 ]
+  done
+}
+
 @test "packed Codex skill keeps YAML frontmatter first" {
   pkg="$TMP/package"
   mkdir -p "$pkg/scripts" "$pkg/skills/demo"
@@ -18,8 +47,8 @@ setup() {
   [ "$(head -1 "$pkg/skills/demo/SKILL.md")" = "---" ]
   grep -q "Generated from packages/risk-scorer" "$pkg/skills/demo/SKILL.md"
   grep -q "request_user_input" "$pkg/skills/demo/SKILL.md"
-  grep -q 'invoke `interrupt_agent` once on that completed target' "$pkg/skills/demo/SKILL.md"
-  grep -q 'Do not parse transcripts or launch nested `codex exec`' "$pkg/skills/demo/SKILL.md"
+  grep -q -- '--fallback-prompt <mode>' "$pkg/skills/demo/SKILL.md"
+  grep -q 'transcripts, launch nested `codex exec`' "$pkg/skills/demo/SKILL.md"
   # P527: the packed name stays bare, so Codex prepends the plugin prefix once.
   grep -Fxq 'name: demo' "$pkg/skills/demo/SKILL.md"
 }

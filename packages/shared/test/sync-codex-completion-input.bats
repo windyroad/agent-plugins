@@ -9,6 +9,11 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
+@test "instruction-backed reviewer dispatch rejects substituted or inherited instructions" {
+  run node --test "$REPO_ROOT/packages/shared/test/reviewer-fallback.test.mjs"
+  [ "$status" -eq 0 ]
+}
+
 @test "canonical decoder unwraps input_text JSON and fails closed on malformed arrays" {
   run node --input-type=module -e '
     const { response } = await import(process.argv[1]);

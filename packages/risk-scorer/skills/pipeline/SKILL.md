@@ -22,15 +22,22 @@ This SKILL is an **invokable wrapper** around the `wr-risk-scorer:pipeline` agen
 
 Invoke the pipeline subagent via the Agent tool with the caller's `$ARGUMENTS` verbatim. Dispatch it **synchronously** (`run_in_background: false`) — the `PostToolUse:Agent` mark hook that writes the risk-gate marker fires reliably only for a synchronous agent; a background-launched scorer's mark hook does not fire in time, so no marker persists and the commit/push gate re-blocks despite a within-appetite score (P402):
 
-On Codex, when the Agent tool is exposed as `spawn_agent`, pass
+On Codex, when the named reviewer is available, pass
 `agent_type: wr-risk-scorer:pipeline` with `fork_turns: "none"`. Codex rejects an
-explicit agent type on a full-history fork; omitting the type on retry also
-prevents the completion bridge from binding the returned verdict. `$ARGUMENTS`
+explicit agent type on a full-history fork. If the named reviewer or selector
+is unavailable, prepare the complete fallback message with
+`node "<risk-scorer-plugin-root>/scripts/codex-agents.mjs" --fallback-prompt pipeline < request.txt`
+and pass that output verbatim to an independent general/default subagent with
+`fork_turns: "none"`. Resolve the root from this installed skill. The original
+request must remain in `request.txt`, including its exact `RISK_CWD` line.
+The normal completion hook verifies the supplied installed instructions and
+binds the review to the actual child and parent. Do not switch reviewers in
+response to a failed assessment. `$ARGUMENTS`
 is already self-contained, so no forked conversation context is required.
 After the Codex agent reports completion, invoke `interrupt_agent` exactly once
 on that completed target so the compatibility hook receives the structured
-result. After remediation changes the assessed risk, spawn a **new** typed
-reviewer with the updated state. `followup_task` on a completed reviewer does
+result. After remediation changes the assessed risk, spawn a **new**
+reviewer using the same named-first dispatch rule with the updated state. `followup_task` on a completed reviewer does
 not create a new marker generation, so its later score cannot replace the
 recorded score. Do not relaunch the same target or inspect a transcript.
 

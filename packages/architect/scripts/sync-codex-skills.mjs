@@ -84,7 +84,14 @@ const preamble = `<!-- Generated from the Claude skill source during npm pack. -
 > that token with the absolute path before running a bundled script; never
 > search the adopter repository or rely on a \`wr-architect-*\` command being
 > on \`PATH\`. Spawn the installed \`wr-architect:agent\` custom agent with the
-> native Codex subagent tool, wait for it, and close the same agent.
+> native Codex subagent tool when available. Otherwise start an independent
+> general/default subagent with \`fork_turns: "none"\`. Prepare its message with
+> \`node "<architect-plugin-root>/hooks/lib/codex-completion-input.mjs" --fallback-prompt wr-architect:agent "<architect-plugin-root>/agents/agent.md" < request.txt\`.
+> Pass that output verbatim, preserve read-only scope, wait, and call
+> \`interrupt_agent\` once on the completed child. For cognitive review, supply
+> the complete installed \`agents/cog-a11y.md\`, rubric and ADR to an independent
+> general reviewer if its named reviewer is unavailable. A FAIL requires
+> remediation, not fallback; never write markers or claim unverified completion.
 
 `;
 

@@ -24,7 +24,19 @@ const restoreMode = process.argv.includes("--restore-pack");
 
 const preamble = `<!-- Generated from packages/risk-scorer/skills/*/SKILL.md by packages/risk-scorer/scripts/sync-codex-skills.mjs during npm pack. Do not edit packaged output directly. -->
 
-> Codex runtime note: use \`request_user_input\` only in Plan Mode where this skill needs structured user input. Outside Plan Mode, ask one concise direct question only when no safe assumption exists. If a step refers to Claude-style agent dispatch or \`subagent_type\`, use a native Codex subagent workflow and spawn the matching installed \`wr-risk-scorer:<mode>\` custom agent. Wait for it to finish, then invoke \`interrupt_agent\` once on that completed target so the PostToolUse compatibility hook can persist its structured verdict. Do not parse transcripts or launch nested \`codex exec\`. Do not substitute the built-in \`default\` agent when a hook consumes the subagent identity; restart Codex if the installed agent is not yet visible.
+> Codex runtime note: use \`request_user_input\` only when this contract requires
+> a human decision. Prefer the installed \`wr-risk-scorer:<mode>\` reviewer.
+> If unavailable, or the native tool cannot select a named reviewer, use an
+> independent general/default subagent with \`fork_turns: "none"\`. Prepare its
+> complete message with \`node "<plugin-root>/scripts/codex-agents.mjs" --fallback-prompt <mode> < request.txt\`.
+> Resolve \`<plugin-root>\` from this installed skill, two directories above
+> the skill directory. The command includes the complete installed reviewer
+> instructions, runtime requirements and original request. Pass its output
+> verbatim as the subagent message; omit \`agent_type\` if unsupported.
+> Keep the review read-only. Wait for completion, then call \`interrupt_agent\`
+> once on that completed child so the normal hooks process its result. A FAIL
+> requires remediation, not fallback. Never write markers manually, parse
+> transcripts, launch nested \`codex exec\` or claim success without completion evidence.
 
 `;
 
@@ -34,7 +46,7 @@ const updatePolicyCodexAgentStep = `Run the Codex policy reviewer with this prom
 >
 > [paste the full draft policy content here]
 
-Use a native Codex subagent workflow with the installed custom agent named \`wr-risk-scorer:policy\`. If it is not visible in the current session, restart Codex; do not substitute a different agent identity because the policy marker hook consumes it.`;
+Use the installed \`wr-risk-scorer:policy\` reviewer when available. Otherwise use the instruction-backed general-reviewer fallback above with mode \`policy\`.`;
 
 // Codex namespaces every skill by the plugin manifest `name`, so a skill's own
 // frontmatter `name:` must be BARE or the prefix lands twice and the advertised
