@@ -82,6 +82,8 @@ Build a self-contained prompt for the architect subagent that includes:
 
 For an applied review, also request the simplest-design comparison and original-defect verification check. Ask which additions can be removed and whether the actual verification would pass with the original defect present. For a plan review, give the exact plan revision and ask the architect to sketch the simplest design that meets its acceptance criteria and constraints. In either mode, require the report to name the artifact it reviewed.
 
+Ask the reviewer to ground each blocking design or verification finding in the applicable requirement, its source, the enforcement owner, and evidence from the artifact. Ask whether the suggested mechanism or test is needed at that boundary.
+
 The architect permits implementation against documented proposals without prior ratification. It flags **[Premature Acceptance]** when acceptance lacks either final human ratification or successful actual production-use evidence. Apply this distinction to plans and edits alike; missing ratification alone does not block building.
 
 ### 5. Delegate to the architect agent
@@ -116,6 +118,8 @@ Present the full compliance report to the user. The architect subagent will repo
 - NEW ADR NEEDED: decisions that should be recorded before proceeding
 
 Return avoidable mechanisms and missed-defect verification to the author for revision and recheck the revised artifact. No new approval is needed to make those corrections within the reviewed scope and existing authority.
+
+Keep conditional suggestions advisory until their premise is established. If a blocking verdict lacks grounding, ask the reviewer to clarify it before adding dependent work or treating the review as passed. Resolve evidenced violations within existing authority; a suggested fix does not itself establish a requirement.
 
 If a substantive architecture decision or exception needs human direction, use the runtime's structured question mechanism to ask how the user wants to proceed:
 - (a) Address the violations before continuing

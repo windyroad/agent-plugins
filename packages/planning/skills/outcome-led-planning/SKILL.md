@@ -73,6 +73,8 @@ Planner and implementer MUST NOT add speculative risk-reduction tasks, checks, t
 
 Resolve substantive findings from all five critics and reduce above-appetite risk under the applicable policy. Reassess affected critics after material changes until the exact plan revision is coherent and within appetite. Record the reviewer identities, assessed revision, verdicts and evidence in the existing issue or plan artifact; no new report or template is required. A completed review with unresolved substantive findings is not a pass. Distinguish forecast controls from controls already verified. Plan assessment does not replace concrete code, commit, push, release, or operational reviews required by the project.
 
+When consuming plan or applied-diff reviews, check the requirement or invariant, its source, the enforcement owner and the evidence before turning a finding into blocking design or verification work. Keep unestablished assumptions as questions or advice. Ask the reviewer to clarify an unsupported blocking verdict before adding dependent work or treating the review as passed. Clarification alone does not reopen the plan review. Resolve demonstrated violations of established boundaries; adopt only the mechanism and verification needed to address them.
+
 Perform reviews within existing authorization and policy. Replanning grants no wider scope, new external effects, persistent goals or automation authority.
 
 ## Deliver, verify, learn, replan

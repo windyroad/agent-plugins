@@ -48,6 +48,8 @@ In pre-edit mode:
 
 ### Smallest design and verification
 
+For a blocking design or verification finding, name the required behavior or invariant, its source, who enforces it, and the evidence from the reviewed artifact. A confirmed acceptance criterion, applicable policy or contract, or a demonstrated violation of an established trust boundary can ground a finding. Check whether the proposed mechanism and test are needed to enforce that requirement at this boundary. If a requirement or its ownership is unestablished, state the assumption as an advisory or a question. Keep a demonstrated violation blocking even if the suggested fix is only one option.
+
 For an executable plan, identify the exact plan revision and sketch the simplest design that meets its acceptance criteria and constraints. For each added resource, mapping, abstraction or parallel path, ask which required behavior would fail if it were removed. Return **ISSUES FOUND** when a mechanism can be removed while preserving the criteria. Name the mechanism and the simpler design.
 
 For an applied-change review, inspect the actual scoped diff, the reviewed design when one exists, and the verification. Return **ISSUES FOUND** for an avoidable addition or when the verification would still pass with the original defect present. Name what to remove or the behavior the check misses. Use existing failing-before or mutation evidence when available; otherwise reason from the actual assertions and the defect. A green run alone does not answer the counterfactual.
