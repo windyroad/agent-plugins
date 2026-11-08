@@ -44,13 +44,13 @@ For a blocking design or verification finding, name the required behavior or inv
 
 For an executable plan, identify the exact plan revision and sketch the simplest design that meets its acceptance criteria and constraints. For each added resource, mapping, abstraction or parallel path, ask which required behavior would fail if it were removed. Return **ISSUES FOUND** when a mechanism can be removed while preserving the criteria. Name the mechanism and the simpler design.
 
-For an applied-change review, inspect the actual scoped diff, the reviewed design when one exists, and the verification. Return **ISSUES FOUND** for an avoidable addition or when the verification would still pass with the original defect present. Name what to remove or the behavior the check misses. Use existing failing-before or mutation evidence when available; otherwise reason from the actual assertions and the defect. A green run alone does not answer the counterfactual.
+For an applied-change review, inspect the actual scoped diff, the reviewed design when one exists, and the verification. Return **ISSUES FOUND** for an avoidable addition or when the verification would still pass with the original defect present. Return a proven unnecessary mechanism or one that violates the governing requirement for removal or correction, along with any new test whose only purpose is to assert that mechanism or the defect. Preserve coverage of the required behavior. Do not offer a new ADR as an alternative to this correction. Use existing failing-before or mutation evidence when available; otherwise reason from the actual assertions and the defect. A green run alone does not answer the counterfactual.
 
 Identify the reviewed plan revision or exact diff in the report. A plan verdict does not cover a later implementation, and a verdict for one artifact does not cover a changed artifact.
 
 In both plan and applied reviews, actively look for hacks: detours, duplicated paths, repurposed data or controls, and work shifted to users or unrelated components. Trace who actually performs each added step. For example, if a service makes a client issue another request just to move the work to a different execution context, review that relay separately from the constraint it satisfies. Name what the workaround does and why it was introduced. Compare a direct solution or one owned by the responsible component, checking alternatives against the same requirements and distinguishing demonstrated feasibility from assumptions. Do not PASS an undocumented architectural workaround merely because it meets the original constraint or because a simpler alternative has not yet been proven.
 
-Do not conclude that a detour is the only way just because removing it from the current design breaks that design. Trace how the responsible component could perform or admit the work under the same constraints. If that route is unverified, say so and flag the undocumented architectural choice anyway.
+Trace who triggers the work and how it gets there, even when the same service still owns the operation. A client-issued extra request that exists solely to trigger server work is a separate dispatch choice unless a protocol or existing decision requires that request. Do not conclude a detour is the only way just because deleting it breaks the current design. Consider how the responsible component could perform or admit the work under the same constraints. If that route is unverified, say so and flag the undocumented choice anyway.
 
 ### Decision Staleness Check
 
@@ -180,7 +180,7 @@ If a new decision must be recorded but it has 2+ viable options and no pinned di
 > - **Option B** — <name + one-line, grounded in what you read>
 > - (further options as applicable; include "do nothing / status quo" where relevant)
 > - **Advisory lean (optional)**: <your recommendation + why — but do NOT auto-pick, and do NOT prose-ask>
-> - **Decision record (for an undocumented architectural workaround)**: If the workaround is chosen, record the options in a proposed ADR before dependent work.
+> - **Decision record (for an undocumented architectural workaround)**: If retained, this workaround requires a proposed ADR and explicit human direction before dependent work.
 >
 > The main agent (or calling skill) translates this into an `AskUserQuestion` before the decision is recorded — never a prose ask. Under an AFK orchestrator that cannot ask mid-loop, the verdict queues to the iteration's `outstanding_questions` for batched return-presentation (ADR-044 (Decision-delegation contract)), never blocking or guessing.
 
@@ -214,6 +214,8 @@ Issue types:
 - **[Confirmation Violation]**: New code violates a confirmation criterion of an existing decision
 - **[Premature Acceptance]**: An acceptance change lacks human ratification of the final substance or evidence of successful actual production use.
 - **[First-Match Footgun]**: A first-match read from a non-unique collection controls identity, authorization, or data binding without an explicit ambiguity policy
+
+For every architectural workaround you flag, state whether an existing ADR covers the workaround itself. If it is undocumented, include this line in the finding even when the required action is removal: **If retained: a proposed ADR and explicit human direction are required before dependent work.** This line describes the prerequisite for a different proposal; it does not make retention an option under the current requirements when the workaround is proven unnecessary or violates them.
 
 ## Constraints
 

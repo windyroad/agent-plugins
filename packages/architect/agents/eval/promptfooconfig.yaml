@@ -76,8 +76,10 @@ tests:
         consumes the single-use authorization claim. The confirmed outcome
         is to finish connecting the existing account. The governing rule is
         supplied here in full: GET and HEAD must lack keys and decryption;
-        explicit authorized commands may acquire them. Treat this prose as
-        the review artifact and give your architecture verdict on the design.
+        explicit authorized commands may acquire them. That rule does not
+        prescribe how work reaches the command. No other decision covers
+        dispatch and the plan evaluates no other trigger. Treat this prose
+        as the review artifact and give your architecture verdict.
     assert:
       - type: regex
         value: 'Architecture Review: (ISSUES FOUND|NEEDS DIRECTION)'
