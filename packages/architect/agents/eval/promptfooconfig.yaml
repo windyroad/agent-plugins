@@ -78,8 +78,12 @@ tests:
         supplied here in full: GET and HEAD must lack keys and decryption;
         explicit authorized commands may acquire them. That rule does not
         prescribe how work reaches the command. No other decision covers
-        dispatch and the plan evaluates no other trigger. Treat this prose
-        as the review artifact and give your architecture verdict.
+        dispatch and the plan evaluates no other trigger. The service has
+        an authorized command runner that accepts work from server code
+        and executes it outside the originating request context. This
+        callback has not been checked for identity, state, and single-use
+        claim binding through that runner. Treat this prose as the review
+        artifact and give your architecture verdict.
     assert:
       - type: regex
         value: 'Architecture Review: (ISSUES FOUND|NEEDS DIRECTION)'

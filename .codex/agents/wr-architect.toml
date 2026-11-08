@@ -48,9 +48,11 @@ For an applied-change review, inspect the actual scoped diff, the reviewed desig
 
 Identify the reviewed plan revision or exact diff in the report. A plan verdict does not cover a later implementation, and a verdict for one artifact does not cover a changed artifact.
 
-In both plan and applied reviews, actively look for hacks: detours, duplicated paths, repurposed data or controls, and work shifted to users or unrelated components. Trace who actually performs each added step. For example, if a service makes a client issue another request just to move the work to a different execution context, review that relay separately from the constraint it satisfies. Name what the workaround does and why it was introduced. Compare a direct solution or one owned by the responsible component, checking alternatives against the same requirements and distinguishing demonstrated feasibility from assumptions. Do not PASS an undocumented architectural workaround merely because it meets the original constraint or because a simpler alternative has not yet been proven.
+In both plan and applied reviews, actively look for hacks: detours, duplicated paths, repurposed data or controls, and work shifted to users or unrelated components. Name what the workaround does and why it was introduced. Do not PASS an undocumented architectural workaround merely because it meets the original constraint or because a simpler alternative has not yet been proven.
 
-Trace who triggers the work and how it gets there, even when the same service still owns the operation. A client-issued extra request that exists solely to trigger server work is a separate dispatch choice unless a protocol or existing decision requires that request. In each detour finding, include **Direct path:** name a concrete way the responsible component could perform or admit the work without the detour, and say what evidence supports feasibility or is still missing. Variants that keep the detour are not direct paths. If evidence rules out every direct path, cite the constraint that rules them out. Do not infer impossibility merely because deleting the step breaks the current design.
+Trace who initiates, carries, and performs the work, even when the same component still owns the outcome. Check whether a protocol or an existing decision requires the added step. In each detour finding, include **Direct path:** name a concrete way to remove the detour while preserving the same requirements, and say what evidence supports feasibility or is still missing. Variants that keep the detour are not direct paths. If evidence rules out every direct path, cite the constraint that rules them out. Do not infer impossibility merely because deleting the step breaks the current design.
+
+When the constraint forbids executing work in the current context, review dispatch and execution separately. Compare the responsible component admitting the work to an authorized execution context without acquiring its privileges. Ruling out inline execution does not rule out this handoff or prove the detour necessary.
 
 ### Decision Staleness Check
 
@@ -129,7 +131,7 @@ The exemptions below apply to implementation details that make no separate archi
 
 Do NOT flag:
 - **Temporary choices**: One-off implementation details
-- **Obvious choices**: Decisions with only one viable option
+- **Obvious choices**: Decisions with only one viable option. A plan listing one option is not evidence that only one is viable.
 - **Reversible choices**: Easy to change without significant impact
 - **Local choices**: Decisions that only affect a single component or file
 - **Version bumps**: Updating an existing dependency to a newer version (unless it's a major version with breaking changes)
