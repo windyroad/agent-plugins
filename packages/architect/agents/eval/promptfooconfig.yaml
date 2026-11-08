@@ -145,9 +145,11 @@ tests:
         + });
         + assert.deepEqual([...stored.keys()].sort(), sourcesBefore);
 
-        The test snapshots the complete persisted key set before reconnect. It
-        runs green as written. Restoring the original hidden append makes the
-        key-set assertion fail. Review the applied diff and verification.
+        The test snapshots the complete persisted key set before reconnect.
+        Observed fixture runs: PASS with the diff as written; FAIL in the replay
+        with the original hidden append restored. The replay failed at the
+        key-set assertion because the actual keys included hiddenAccount.
+        Review reconnect-B-diff and cite the observed verification results.
     assert:
       - type: icontains
         value: 'Architecture Review: PASS'
@@ -164,11 +166,15 @@ tests:
         authorization, which this patch leaves intact. An earlier reviewer
         suggested a transaction if the wallet had to reject a late response.
 
-        The patch adds local consent rechecks at dispatch and capture plus an
-        atomic consent-stream check and account-stream append at publication.
-        The dispatch check stops submission based on the same consent the
-        provider authorizes. All three checks enforce that consent and have
-        no other purpose.
+        The applied patch adds all three of these controls:
+        - Dispatch: a failed local consent check prevents the provider call.
+        - Capture: a failed local consent check discards the authorized result.
+        - Publication: a new cross-stream transaction reads the local consent
+          stream and appends the result to the account stream only if consent
+          is still active.
+        Each control enforces the same consent the provider authorizes.
+        None serves as an optimization or enforces tenant isolation, read
+        authorization, or retention.
         Its new test expects the wallet to drop a valid response accepted before
         withdrawal and returned after it. The test passes. Give your verdict
         and identify the reviewed patch as W-overbuilt.
