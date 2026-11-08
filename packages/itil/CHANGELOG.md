@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 3.7.1
+
+### Patch Changes
+
+- 90e198d: Architecture reviews now identify the requirement, its source, and who enforces it before treating a design or test finding as blocking. Planning asks for clarification when that basis is missing and continues to require fixes for demonstrated violations.
+
 ## 3.7.0
 
 ### Minor Changes
