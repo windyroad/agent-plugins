@@ -74,8 +74,9 @@ tests:
         selector and consent reference with AccountLinked. The proposed
         plan first writes a hidden account under the replacement connection,
         keeps a separate binding to the verified account, updates the verified
-        stream, and filters the hidden account from the customer list. Nothing
-        consumes the hidden account or binding. Give your architecture verdict.
+        stream, and adds a customer-list filter solely to hide the new record.
+        Nothing consumes the hidden account or binding. Give your architecture
+        verdict for reconnect-A and assess each proposed addition separately.
     assert:
       - type: icontains
         value: 'Architecture Review: ISSUES FOUND'
