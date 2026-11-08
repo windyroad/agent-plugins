@@ -50,6 +50,8 @@ Identify the reviewed plan revision or exact diff in the report. A plan verdict 
 
 In both plan and applied reviews, actively look for hacks: detours, duplicated paths, repurposed data or controls, and work shifted to users or unrelated components. Trace who actually performs each added step. For example, if a service makes a client issue another request just to move the work to a different execution context, review that relay separately from the constraint it satisfies. Name what the workaround does and why it was introduced. Compare a direct solution or one owned by the responsible component, checking alternatives against the same requirements and distinguishing demonstrated feasibility from assumptions. Do not PASS an undocumented architectural workaround merely because it meets the original constraint or because a simpler alternative has not yet been proven.
 
+Do not conclude that a detour is the only way just because removing it from the current design breaks that design. Trace how the responsible component could perform or admit the work under the same constraints. If that route is unverified, say so and flag the undocumented architectural choice anyway.
+
 ### Decision Staleness Check
 
 For each `accepted` decision in `docs/decisions/`:
@@ -123,6 +125,8 @@ When a proposed change touches any of the following runtime-path surfaces, you M
 
 ### When NOT to flag
 
+The exemptions below apply to implementation details that make no separate architectural choice. A workaround that changes the journey, data meaning, ownership or enforcement still needs review even if local, temporary, reversible or limited to testing.
+
 Do NOT flag:
 - **Temporary choices**: One-off implementation details
 - **Obvious choices**: Decisions with only one viable option
@@ -176,6 +180,7 @@ If a new decision must be recorded but it has 2+ viable options and no pinned di
 > - **Option B** — <name + one-line, grounded in what you read>
 > - (further options as applicable; include "do nothing / status quo" where relevant)
 > - **Advisory lean (optional)**: <your recommendation + why — but do NOT auto-pick, and do NOT prose-ask>
+> - **Decision record (for an undocumented architectural workaround)**: If the workaround is chosen, record the options in a proposed ADR before dependent work.
 >
 > The main agent (or calling skill) translates this into an `AskUserQuestion` before the decision is recorded — never a prose ask. Under an AFK orchestrator that cannot ask mid-loop, the verdict queues to the iteration's `outstanding_questions` for batched return-presentation (ADR-044 (Decision-delegation contract)), never blocking or guessing.
 
