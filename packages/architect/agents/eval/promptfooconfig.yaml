@@ -132,8 +132,9 @@ tests:
         reviewed plan reconnect-B. The plan updates the existing verified
         stream with the new selector and authorized consent reference and
         forbids any new persisted account source, including hidden discovery.
-        Both streams already exist. Existing consent authorization is
-        unchanged context.
+        The verified account and authorized consent streams already exist.
+        No hiddenAccount key exists before reconnect. Existing consent
+        authorization is unchanged context.
 
           append(consent, { type: 'Authorized' });
         - append(hiddenAccount, { type: 'AccountDiscovered' });
@@ -196,7 +197,7 @@ tests:
         local late-drop check makes that assertion fail. The other check
         asserts that provider denial produces no observation. An earlier
         reviewer suggested a transaction if the wallet had to reject a late
-        response. Give your verdict on this scoped fixture.
+        response. Give your verdict and identify the reviewed patch as W-lean.
     assert:
       - type: icontains
         value: 'Architecture Review: PASS'
