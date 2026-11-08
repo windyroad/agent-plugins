@@ -1,5 +1,12 @@
 # @windyroad/architect
 
+## 1.1.2
+
+### Patch Changes
+
+- 859a79e: Keep UTF-8 characters intact when shortening decision compendium summaries. This fixes generation on Ubuntu 26.04 and preserves validation of source files.
+- fd5319d: Use the existing architecture reviews to catch avoidable design complexity and tests that would pass with the original defect present. Planning requests the review for the exact implementation diff before integration and reuses its verdict at acceptance when the diff is unchanged.
+
 ## 1.1.1
 
 ### Patch Changes
