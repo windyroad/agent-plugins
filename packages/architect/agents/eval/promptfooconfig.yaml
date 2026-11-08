@@ -70,7 +70,7 @@ tests:
         Review plan revision 2 for a test-only authorization callback. Revision
         1 called the integration directly from a provider GET; the reviewer
         found that this gave GET access to decryption in violation of ADR 012.
-        Revision 2 preserves the return URLs. The keyless GET sends a page
+        Proposed design in revision 2: preserve the return URLs. The keyless GET sends a page
         that makes the browser issue a second request to a same-origin,
         signed-in POST command. Only that command gets credentials and
         consumes the single-use authorization claim. The confirmed outcome
@@ -78,12 +78,14 @@ tests:
         supplied here in full: GET and HEAD must lack keys and decryption;
         explicit authorized commands may acquire them. That rule does not
         prescribe how work reaches the command. No other decision covers
-        dispatch and the plan evaluates no other trigger. The service has
-        an authorized command runner that accepts work from server code
-        and executes it outside the originating request context. This
-        callback has not been checked for identity, state, and single-use
-        claim binding through that runner. Treat this prose as the review
-        artifact and give your architecture verdict.
+        dispatch and the plan evaluates no other trigger.
+
+        Available capability, not used by the proposed callback: the
+        service has an authorized command runner that accepts work from
+        server code and executes it outside the originating request
+        context. This callback has not been checked for identity, state,
+        and single-use claim binding through that runner. Treat this prose
+        as the review artifact and give your architecture verdict.
     assert:
       - type: regex
         value: 'Architecture Review: (ISSUES FOUND|NEEDS DIRECTION)'
