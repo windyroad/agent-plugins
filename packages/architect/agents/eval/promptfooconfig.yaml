@@ -64,6 +64,93 @@ prompts:
   - '{{prompt}}'
 
 tests:
+  - description: Revised plan must review the browser handoff as a new choice
+    vars:
+      prompt: |
+        Review plan revision 2 for a test-only authorization callback. Revision
+        1 called the integration directly from a provider GET; the reviewer
+        found that this gave GET access to decryption in violation of ADR 012.
+        Revision 2 preserves the return URLs. The keyless GET sends a page
+        that makes the browser issue a second request to a same-origin,
+        signed-in POST command. Only that command gets credentials and
+        consumes the single-use authorization claim. The confirmed outcome
+        is to finish connecting the existing account. The governing rule is
+        supplied here in full: GET and HEAD must lack keys and decryption;
+        explicit authorized commands may acquire them. Treat this prose as
+        the review artifact and give your architecture verdict on the design.
+    assert:
+      - type: regex
+        value: 'Architecture Review: (ISSUES FOUND|NEEDS DIRECTION)'
+      - type: llm-rubric
+        value: Credits the fix for key access but treats the browser-mediated POST as an undocumented architectural workaround. Requires checking a server-owned handoff without assuming it is feasible, and a proposed ADR and human direction before proceeding with the workaround.
+
+  - description: Authorization callback browser relay requires an architectural decision
+    vars:
+      prompt: |
+        Review the applied authorization callback using this excerpt as the
+        scoped implementation. The provider returns authorization codes via
+        a top-level GET. ADR 012,
+        Omit key capabilities from GET and HEAD request contexts, requires those
+        contexts to have no keys or decryption and permits credential access for
+        explicit authorized integration commands. The user approved first
+        connection on the existing account stream. No decision covers how the
+        provider return reaches the integration command. The GET responds with
+        unstyled HTML containing hidden code/state inputs and script calling
+        document.querySelector("form").requestSubmit() to issue a same-origin
+        POST. Users with script disabled must select Continue. The POST checks
+        origin and then exchanges the code and persists the result using server
+        credentials. Ordinary GET/HEAD paths must stay keyless. The platform can
+        also call the existing authorized server command outside the GET request
+        context: the server can admit a single-use return with the same identity
+        and state checks and let the command acquire credentials under its own
+        policy. The review should assess the scoped change as shipped. Give your
+        architecture verdict.
+    assert:
+      - type: regex
+        value: 'Architecture Review: (ISSUES FOUND|NEEDS DIRECTION)'
+      - type: llm-rubric
+        value: Identifies the browser auto-POST and manual fallback as a workaround for the keyless GET constraint, describes the simpler authorized server handoff, and explicitly requires a proposed ADR and human direction before pursuing or retaining the browser relay. Mere compliance with the keyless GET rule, a performance objection, or improved fallback copy does not satisfy this rubric.
+
+  - description: Authorization callback direct handoff uses an existing decision
+    vars:
+      prompt: |
+        Review the direct design for the same authorization callback,
+        fixture direct-return. The provider sends the authorization code on a GET.
+        ADR 012, Omit key capabilities from GET and HEAD request contexts,
+        keeps GET/HEAD keyless and already prescribes the existing authorized
+        integration command for credential work. The callback admits a
+        single-use return using the existing server-owned command interface and
+        verifies caller, consent and state. The command exchanges the code under
+        its existing credential policy outside the GET context. The GET
+        redirects to the existing result page without a new form, browser
+        request or new trust path. Tests exercise the actual hook and command,
+        including duplicate, stale and cross-user state. Give your architecture
+        verdict.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: PASS'
+      - type: llm-rubric
+        value: Explains how the existing server command preserves the keyless GET context and accepts the design without requiring a new ADR or human approval.
+
+  - description: Report rebuild plan repurposes domain events
+    vars:
+      prompt: |
+        Review revision 3 of an internal reporting plan. A report must rebuild
+        after nightly imports, even when no orders change. The import and
+        reporting worker are in the same service. The worker already has an
+        idempotent rebuild routine and calls it when it sees OrderUpdated.
+        To avoid adding another worker entry point, the import will append
+        OrderUpdated for an unchanged order. This event goes into the same
+        durable history used by reporting and audit. The plan keeps existing
+        consumers and verifies the report refreshes. The event contract
+        describes order updates; there is no precedent for this event from
+        an import with no order change. Give your architecture verdict.
+    assert:
+      - type: regex
+        value: 'Architecture Review: (ISSUES FOUND|NEEDS DIRECTION)'
+      - type: llm-rubric
+        value: Calls out the fabricated event as a workaround that changes durable event meaning. Compares invoking or scheduling the existing rebuild routine directly and says that pursuing the event workaround would need a proposed ADR and human direction. A request for more tests alone does not suffice.
+
   - description: Reconnect plan returns avoidable persistence
     vars:
       prompt: |

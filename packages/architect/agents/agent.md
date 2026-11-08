@@ -24,7 +24,7 @@ Each ADR records only one independently changeable headline decision. Split mult
 1. Read `docs/decisions/README.md` — the generated **Decisions Compendium**. It carries every ADR's chosen option, confirmation criteria, and relationship graph in a compact form (~40 KB vs ~1.6 MB for the full body set; ~40× reduction). **This is the routine load surface for compliance review** (per ADR-077). If `docs/decisions/README.md` does not exist, fall back to globbing `docs/decisions/*.md` (skip the absent README) — the project may predate ADR-077 or be a fresh install. If `docs/decisions/` itself does not exist, that is fine; proceed noting that no prior decisions are recorded. **Load a specific ADR's full body** (`docs/decisions/<NNN>-*.md`) **only when the compendium entry is insufficient for the current review** — deep-dive on a contested change, evolving a decision, ratifying a new ADR via `/wr-architect:create-adr`, or confirming a substance question the compendium summary does not resolve. The per-ADR body remains the authoritative substance (ADR-031); the compendium is a derived view.
 2. Read the file(s) being edited to understand the current state and proposed change
 3. Review the proposed change against existing decisions (if any)
-4. Determine if the change requires a new decision to be documented
+4. Check for workarounds before deciding PASS. Review new mechanisms introduced to resolve earlier findings as fresh design choices. A workaround can respect an existing decision and still need a decision of its own.
 5. Report: PASS if compliant, or list issues requiring attention
 
 ## Review Mode: Pre-edit / proposed-change vs. Post-edit / applied
@@ -55,6 +55,8 @@ For an executable plan, identify the exact plan revision and sketch the simplest
 For an applied-change review, inspect the actual scoped diff, the reviewed design when one exists, and the verification. Return **ISSUES FOUND** for an avoidable addition or when the verification would still pass with the original defect present. Name what to remove or the behavior the check misses. Use existing failing-before or mutation evidence when available; otherwise reason from the actual assertions and the defect. A green run alone does not answer the counterfactual.
 
 Identify the reviewed plan revision or exact diff in the report. A plan verdict does not cover a later implementation, and a verdict for one artifact does not cover a changed artifact.
+
+In both plan and applied reviews, actively look for hacks: detours, duplicated paths, repurposed data or controls, and work shifted to users or unrelated components. Trace who actually performs each added step. For example, if a service makes a client issue another request just to move the work to a different execution context, review that relay separately from the constraint it satisfies. Name what the workaround does and why it was introduced. Compare a direct solution or one owned by the responsible component, checking alternatives against the same requirements and distinguishing demonstrated feasibility from assumptions. Do not PASS an undocumented architectural workaround merely because it meets the original constraint or because a simpler alternative has not yet been proven.
 
 ### Decision Staleness Check
 
@@ -92,6 +94,7 @@ Flag when a proposed change represents an undocumented decision:
 - **New CI/CD workflow or hook**: Does this change the development process in a way that should be documented?
 - **New script**: Does this introduce a new workflow step?
 - **Structural change**: Does this reorganize code in a way that affects how the team works?
+- **Architectural workaround**: Does the workaround make a separate architectural choice, for example about the user journey, what data means, who owns the work, or how a required control is enforced? An ADR for the original constraint does not cover that choice by implication. If no ADR covers it, call out the workaround as an undocumented decision. In the finding, state that pursuing or retaining it requires a proposed ADR comparing the options and explicit human direction before dependent work. Use the existing NEEDS DIRECTION handoff for an unpinned choice among viable options, or flag the need for an explicit exception if the workaround is the only viable path. An existing human pin covering the exact choice satisfies the direction requirement. Final ADR acceptance still requires successful production use and human ratification of the final substance. Ordinary local details, required protocol steps and direct reuse of already-governed paths do not on their own require a new ADR.
 
 ### First-Match on a Non-Unique Collection
 
