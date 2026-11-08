@@ -181,11 +181,14 @@ tests:
   - description: Provider consent boundary accepts recording the authorized result
     vars:
       prompt: |
-        APPLIED DIFF REVIEW, wallet patch W-lean. Confirmed requirement:
-        The provider alone authorizes consent for its request; the wallet records what
-        the authorized request returned, even if withdrawal occurs after the
-        provider has accepted it. The wallet owns tenant isolation and read ACLs;
-        this change leaves existing checks on every read route untouched.
+        APPLIED DIFF REVIEW, wallet patch W-lean. Existing accepted
+        ADR-096 (Use the provider's authorization decision when recording its
+        response) governs this change. The provider alone authorizes consent
+        for its request; the wallet records what the authorized request
+        returned, even if withdrawal occurs after the provider accepted it.
+        The wallet owns tenant isolation and read ACLs. This patch implements
+        the existing decision and changes neither that boundary nor read,
+        retention or erasure policy.
         The complete change to capture is the following, after the existing
         tenant context is verified and a provider denial is handled:
 
