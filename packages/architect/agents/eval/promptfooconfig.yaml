@@ -105,9 +105,10 @@ tests:
         Applied diff review of exact fixture diff reconnect-A-diff, for a
         reconnect that must update the verified account without creating any
         second persisted account. The review concern is the original hidden
-        account write, which may be invisible to the customer list.
+        account write, which may be invisible to the customer list. The
+        existing consent authorization is unchanged context.
 
-        + append(consent, { type: 'Authorized' });
+          append(consent, { type: 'Authorized' });
         + append(hiddenAccount, { type: 'AccountDiscovered' });
         + append(account, { type: 'AccountLinked', connectionId: consent, providerAccountId });
         + assert.equal(stored.get(account).at(-1).providerAccountId, 'changed-selector');
@@ -127,9 +128,10 @@ tests:
         Applied diff review of exact fixture diff reconnect-B-diff, for a
         reconnect that must update the verified account without creating any
         second persisted account. The consent and verified account already exist.
+        The existing consent authorization is unchanged context.
 
+          append(consent, { type: 'Authorized' });
         - append(hiddenAccount, { type: 'AccountDiscovered' });
-        + append(consent, { type: 'Authorized' });
         + append(account, { type: 'AccountLinked', connectionId: consent, providerAccountId });
         + assert.equal(stored.get(account).at(-1).providerAccountId, 'changed-selector');
         + assert.deepEqual([...stored.keys()].sort(), sourcesBefore);
