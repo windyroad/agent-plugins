@@ -64,6 +64,85 @@ prompts:
   - '{{prompt}}'
 
 tests:
+  - description: Reconnect plan returns avoidable persistence
+    vars:
+      prompt: |
+        Review executable plan reconnect-A. Acceptance requires reconnecting a
+        verified bank account when the provider changes its selector, keeping the
+        account identity and history, and refreshing balances without creating a
+        second persisted account. The existing account stream can store the new
+        selector and consent reference with AccountLinked. The proposed
+        plan first writes a hidden account under the replacement connection,
+        keeps a separate binding to the verified account, updates the verified
+        stream, and filters the hidden account from the customer list. Nothing
+        consumes the hidden account or binding. Give your architecture verdict.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: ISSUES FOUND'
+      - type: llm-rubric
+        value: Names reconnect-A as the reviewed revision, returns the hidden account and its binding and filter as avoidable, and identifies direct AccountLinked on the existing account stream as the simpler design.
+
+  - description: Reconnect plan accepts the existing account stream
+    vars:
+      prompt: |
+        Review executable plan reconnect-B. Acceptance requires reconnecting a
+        verified bank account when the provider changes its selector, keeping
+        the account identity and history, and refreshing balances without
+        creating a second persisted account. The plan records the authorized
+        consent and appends AccountLinked with its consent reference and
+        new selector directly to the existing verified account stream. The
+        existing balance refresh reads the updated observation. No separate
+        account, mapping or filter is needed. Give your architecture verdict.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: PASS'
+      - type: llm-rubric
+        value: Names reconnect-B as the reviewed revision and explains why the existing stream satisfies the criteria without an added mechanism.
+
+  - description: Reconnect diff returns a green test that misses the hidden write
+    vars:
+      prompt: |
+        Applied diff review of exact fixture diff reconnect-A-diff, for a
+        reconnect that must update the verified account without creating any
+        second persisted account. The review concern is the original hidden
+        account write, which may be invisible to the customer list.
+
+        + append(consent, { type: 'Authorized' });
+        + append(hiddenAccount, { type: 'AccountDiscovered' });
+        + append(account, { type: 'AccountLinked', connectionId: consent, providerAccountId });
+        + assert.equal(stored.get(account).at(-1).providerAccountId, 'changed-selector');
+        + assert.deepEqual([...stored.keys()].filter(id => id.startsWith('/verified/')), [account]);
+
+        The hidden account's key starts with /provider-discovery/. The test run was
+        green. Review the applied diff and verification and give your verdict.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: ISSUES FOUND'
+      - type: llm-rubric
+        value: Names reconnect-A-diff, returns the unnecessary hidden write for removal, and explains that the filtered list assertion passes with the hidden write present because it excludes that namespace.
+
+  - description: Reconnect diff accepts the assertion that detects the original write
+    vars:
+      prompt: |
+        Applied diff review of exact fixture diff reconnect-B-diff, for a
+        reconnect that must update the verified account without creating any
+        second persisted account. The consent and verified account already exist.
+
+        - append(hiddenAccount, { type: 'AccountDiscovered' });
+        + append(consent, { type: 'Authorized' });
+        + append(account, { type: 'AccountLinked', connectionId: consent, providerAccountId });
+        + assert.equal(stored.get(account).at(-1).providerAccountId, 'changed-selector');
+        + assert.deepEqual([...stored.keys()].sort(), sourcesBefore);
+
+        The test snapshots the complete persisted key set before reconnect. It
+        runs green as written. Restoring the original hidden append makes the
+        key-set assertion fail. Review the applied diff and verification.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: PASS'
+      - type: llm-rubric
+        value: Names reconnect-B-diff, accepts direct use of the existing stream, and explains how the unfiltered persisted-source assertion catches the original write, corroborated by the failing replay.
+
   - description: PASS on a proposal aligned with ratified ADR-052, no over-fire
     vars:
       prompt: |

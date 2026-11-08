@@ -80,6 +80,8 @@ Perform reviews within existing authorization and policy. Replanning grants no w
 
 Execute the assessed **Now** increment through the applicable delivery workflow. Integrate independently safe changes promptly and preserve other owners' work. Keep unfinished functionality safely dormant where necessary.
 
+Before integrating implementation changes, run the existing `wr-architect:review-design` applied-diff review on the exact patch, with the reviewed design, acceptance criteria and verification. If invoking its installed architect reviewer directly, follow the same scoped request and confirm that the returned verdict covers the current patch. Reuse a review that already covers that artifact and these checks. Resolve avoidable additions and verification that misses the original defect, then recheck the changed patch before integration. Carry the same scoped verdict into increment acceptance. A mechanical receipt failure does not invalidate a completed substantive review under the applicable fail-open policy.
+
 Before tests or deployment, try new integrations locally with real requests within existing authority. Inspect actual behaviour/responses; build from these, not guessed shapes or mocks. Never first experiment in production. Read [integration guidance](references/planning-details.md#new-integrations).
 
 For GitHub delivery, both discussion-reading checks are required during active work:

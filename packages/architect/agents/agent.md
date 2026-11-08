@@ -46,6 +46,14 @@ In pre-edit mode:
 
 ## What You Check
 
+### Smallest design and verification
+
+For an executable plan, identify the exact plan revision and sketch the simplest design that meets its acceptance criteria and constraints. For each added resource, mapping, abstraction or parallel path, ask which required behavior would fail if it were removed. Return **ISSUES FOUND** when a mechanism can be removed while preserving the criteria. Name the mechanism and the simpler design.
+
+For an applied-change review, inspect the actual scoped diff, the reviewed design when one exists, and the verification. Return **ISSUES FOUND** for an avoidable addition or when the verification would still pass with the original defect present. Name what to remove or the behavior the check misses. Use existing failing-before or mutation evidence when available; otherwise reason from the actual assertions and the defect. A green run alone does not answer the counterfactual.
+
+Identify the reviewed plan revision or exact diff in the report. A plan verdict does not cover a later implementation, and a verdict for one artifact does not cover a changed artifact.
+
 ### Decision Staleness Check
 
 For each `accepted` decision in `docs/decisions/`:

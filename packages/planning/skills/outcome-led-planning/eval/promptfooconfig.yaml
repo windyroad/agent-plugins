@@ -85,6 +85,28 @@ tests:
           Obtain all five reviews for the revised executable plan; old P1
           reviews do not qualify P2. Do not count the increment as delivered.
 
+  - description: Plan verdict cannot clear a changed implementation diff
+    vars:
+      prompt: |
+        Tabletop only; perform no actions. The assessed plan P1 fixes duplicate
+        records by updating the existing record. An earlier applied-diff review
+        passed patch D1. The current patch D2 adds a hidden record and filters
+        it out of the displayed list. All tests are green, but the test checks
+        only the displayed list. The executor wants to integrate D2 now and says
+        both prior reviews are on file. What must happen before integration and
+        which evidence can be reused at acceptance?
+    assert:
+      - type: llm-rubric
+        value: |
+          Require the existing applied architecture review of the exact current
+          patch before integration. Neither the plan verdict nor D1 clears D2.
+          Identify the avoidable hidden record and explain why the green list
+          check would miss its persistence. Return the patch for revision,
+          require a check that would catch the original behavior, and recheck
+          the corrected patch before integration. Reuse its scoped verdict at
+          acceptance if unchanged. Do not require new human approval or a
+          parallel gate.
+
   - description: Failed verification cannot substitute for the outcome
     vars:
       prompt: |

@@ -75,9 +75,12 @@ Do not ask if there is an obvious set of changed files.
 
 Build a self-contained prompt for the architect subagent that includes:
 - The list of changed/staged files
-- The git diff summary (stat output)
+- For an applied review, the actual scoped patch or read-only access to it. Identify the checkout and selected commit base/head, or HEAD and a digest of the exact staged patch (for example, `git diff --cached --no-ext-diff --binary | git hash-object --stdin`, without writing an object). A diffstat alone is insufficient.
+- The reviewed plan revision if applicable, acceptance criteria, original defect if any, and the actual verification and results
 - Any explicit scope from the user
-- The request: "Review these proposed changes against the project's ADRs. Flag any violations, gaps that need a new ADR, or compliance questions."
+- Label the request `PLAN REVIEW` for a proposed plan or `APPLIED DIFF REVIEW` for changes on disk. Request review against the project's ADRs and ask for any violations, gaps that need a new ADR, or compliance questions.
+
+For an applied review, also request the simplest-design comparison and original-defect verification check. Ask which additions can be removed and whether the actual verification would pass with the original defect present. For a plan review, give the exact plan revision and ask the architect to sketch the simplest design that meets its acceptance criteria and constraints. In either mode, require the report to name the artifact it reviewed.
 
 The architect permits implementation against documented proposals without prior ratification. It flags **[Premature Acceptance]** when acceptance lacks either final human ratification or successful actual production-use evidence. Apply this distinction to plans and edits alike; missing ratification alone does not block building.
 
@@ -103,6 +106,8 @@ The Codex installer generates `.codex/agents/wr-architect-agent.toml` from the i
 
 Wait for the agent to complete.
 
+Match the verdict to the requested artifact and confirm that the selected patch or plan revision is still current before using it. A changed artifact needs a fresh applicable review. A missing mechanical receipt after a completed applicable review follows the existing fail-open policy; it does not erase a substantive finding or supply an absent review.
+
 ### 6. Present results
 
 Present the full compliance report to the user. The architect subagent will report:
@@ -110,7 +115,9 @@ Present the full compliance report to the user. The architect subagent will repo
 - FLAGGED: specific violations or compliance questions with ADR references
 - NEW ADR NEEDED: decisions that should be recorded before proceeding
 
-If violations are flagged, use the runtime's structured question mechanism to ask how the user wants to proceed:
+Return avoidable mechanisms and missed-defect verification to the author for revision and recheck the revised artifact. No new approval is needed to make those corrections within the reviewed scope and existing authority.
+
+If a substantive architecture decision or exception needs human direction, use the runtime's structured question mechanism to ask how the user wants to proceed:
 - (a) Address the violations before continuing
 - (b) Proceed with a documented exception
 - (c) Draft a new ADR that supersedes the ratified decision, or edit the existing ADR only when it is still unratified

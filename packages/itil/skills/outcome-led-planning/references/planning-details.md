@@ -10,7 +10,7 @@ If material uncertainty prevents a small, estimable implementation increment, ma
 
 Iterate each **initial or materially revised executable plan with five independent critics before dependent execution**. Give them the confirmed objective, exact revision, evidence, scope, assumptions, dependencies and project rules:
 
-- **Architect:** checks structural choices, interfaces and existing decisions.
+- **Architect:** checks structural choices, interfaces and existing decisions. Ask the architect to sketch the simplest design that meets the exact revision's acceptance criteria and constraints. For each new resource, mapping, abstraction or parallel path, ask what required behavior would fail without it. An avoidable mechanism is a substantive finding: name what to remove and revise the plan before dependent execution.
 - **JTBD:** checks intended beneficiaries and their desired outcomes.
 - **Risk:** checks action risk and whether proposed mitigation work is justified. The risk scorer vetoes speculative work justified only by imagined failure or agent discomfort. Necessary treatments require an established risk or applicable requirement, credible impact/likelihood and proportionate reduction relative to cost and delay. A prior incident is not required; established preventive risks and required controls remain valid. An in-appetite action score does not establish necessity or priority. Remove unjustified work rather than invent a registry, report, human gate or discovery increment to justify it.
 - **Cognitive accessibility:** checks whether beneficiaries and contributors can understand the result, choices and next action without unnecessary cognitive work, jargon or human handoffs.
