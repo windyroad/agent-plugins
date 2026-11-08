@@ -27,8 +27,8 @@ set -uo pipefail
 # Without this, BSD awk on macOS (default byte-counting for length/substr) and
 # GNU awk on Linux (default character-counting under any UTF-8 locale) produce
 # divergent output when ADR bodies contain multi-byte chars (em-dashes, smart
-# quotes, etc.). LC_ALL=C makes both treat input as raw bytes — the truncated
-# slice may cut mid-UTF-8 on long lines, but the output is byte-identical
+# quotes, etc.). LC_ALL=C makes both treat input as raw bytes. Truncation
+# backs up to a complete UTF-8 character so the output is byte-identical
 # across platforms (which is what the CI drift gate at test 2145 enforces).
 # Companion to the ASCII `...` change in compact_join_bullets/chosen
 # truncation — both halves are needed to close P334.
@@ -214,13 +214,16 @@ compact_join_bullets() {
             gsub(/`/, "")
             # Drop nested-bullet continuation lines that survived earlier filters.
             if (length($0) == 0) next
-            if (length($0) > n) line = substr($0, 1, n) "..."
-            else line = $0
+            if (length($0) > n) {
+                cut = n
+                while (substr($0, cut + 1, 1) ~ /[\200-\277]/) cut--
+                line = substr($0, 1, cut) "..."
+            } else line = $0
             if (out == "") out = line
             else out = out "; " line
         }
         END { print out }
-    ' | iconv -f UTF-8 -t UTF-8 -c); then
+    '); then
         echo "generate-decisions-compendium: failed to truncate confirmation text safely" >&2
         return 1
     fi
@@ -259,7 +262,7 @@ oneline() {
     tr '\n\r' '  ' | tr -s ' ' | sed 's/^ *//; s/ *$//'
 }
 
-# Truncate a string to N chars + ellipsis if longer. Avoids slicing a `**`
+# Truncate to at most N UTF-8 bytes before adding an ellipsis. Avoids slicing a `**`
 # marker in half and closes emphasis when truncation lands inside it.
 truncate_with_ellipsis() {
     local s="$1" n="$2" truncated remainder pairs=0
@@ -267,6 +270,10 @@ truncate_with_ellipsis() {
         printf '%s' "$s"
         return
     fi
+    # A continuation byte immediately after the cut means the cut splits a character.
+    while [[ "${s:n:1}" == [$'\200'-$'\277'] ]]; do
+        n=$((n - 1))
+    done
     truncated="${s:0:n}"
     if [[ "$truncated" == *\* && "${s:n:1}" == "*" ]]; then
         truncated="${truncated%?}"
@@ -308,11 +315,7 @@ emit_entry() {
 
     # Chosen-option line — truncate to a comfortable summary length.
     chosen=$(get_chosen "$file" | strip_links | oneline)
-    if ! chosen=$(truncate_with_ellipsis "$chosen" 240 \
-        | iconv -f UTF-8 -t UTF-8 -c); then
-        echo "generate-decisions-compendium: failed to truncate chosen text safely for $file" >&2
-        return 1
-    fi
+    chosen=$(truncate_with_ellipsis "$chosen" 240)
 
     # Confirmation: preserve every top-level item, ≤ 110 chars each, joined
     # with "; " on one line for the routine-compliance scannable view.

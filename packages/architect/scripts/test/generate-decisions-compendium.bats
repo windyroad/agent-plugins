@@ -82,8 +82,9 @@ mk_adr() {
 }
 
 @test "generator preserves UTF-8 at byte truncation boundaries and rejects invalid source without clobbering output" {
-  local prefix out before mode
+  local prefix chosen_prefix out before mode
   prefix="$(printf '%109s' '' | tr ' ' x)"
+  chosen_prefix="$(printf '%224s' '' | tr ' ' y)"
   {
     echo "---"
     echo 'status: "accepted"'
@@ -94,7 +95,7 @@ mk_adr() {
     echo ""
     echo "## Decision Outcome"
     echo ""
-    echo 'Chosen option: **"Boundary implementation"**, because reasons.'
+    printf '%s\n' "Chosen option: ${chosen_prefix}—tail"
     echo ""
     echo "## Confirmation"
     echo ""
@@ -111,6 +112,8 @@ mk_adr() {
   out="$DIR/docs/decisions/README.md"
   run iconv -f UTF-8 -t UTF-8 "$out"
   [ "$status" -eq 0 ]
+  grep -Fq "Chosen option: ${chosen_prefix}..." "$out"
+  grep -Fq "${prefix}..." "$out"
   [ "$(grep -c '^## In-force decisions$' "$out")" -eq 1 ]
   [ "$(grep -c '^## Historical decisions$' "$out")" -eq 1 ]
   run grep -F $'\357\277\275' "$out"
