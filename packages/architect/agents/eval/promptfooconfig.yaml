@@ -102,16 +102,19 @@ tests:
   - description: Reconnect diff returns a green test that misses the hidden write
     vars:
       prompt: |
-        Applied diff review of exact fixture diff reconnect-A-diff, for a
-        reconnect that must update the verified account without creating any
-        second persisted account. The review concern is the original hidden
-        account write, which may be invisible to the customer list. The
-        existing consent authorization is unchanged context.
+        Applied diff review of exact fixture diff reconnect-A-diff against
+        reviewed plan reconnect-B. The plan updates the existing verified
+        stream with the new selector and authorized consent reference and
+        forbids any new persisted account source, including hidden discovery.
+        The hidden write has no consumer or approved exception. Existing
+        consent authorization is unchanged context.
 
           append(consent, { type: 'Authorized' });
         + append(hiddenAccount, { type: 'AccountDiscovered' });
         + append(account, { type: 'AccountLinked', connectionId: consent, providerAccountId });
-        + assert.equal(stored.get(account).at(-1).providerAccountId, 'changed-selector');
+        + assert.deepEqual(stored.get(account).at(-1), {
+        +   type: 'AccountLinked', connectionId: consent, providerAccountId: 'changed-selector'
+        + });
         + assert.deepEqual([...stored.keys()].filter(id => id.startsWith('/verified/')), [account]);
 
         The hidden account's key starts with /provider-discovery/. The test run was
@@ -125,15 +128,19 @@ tests:
   - description: Reconnect diff accepts the assertion that detects the original write
     vars:
       prompt: |
-        Applied diff review of exact fixture diff reconnect-B-diff, for a
-        reconnect that must update the verified account without creating any
-        second persisted account. The consent and verified account already exist.
-        The existing consent authorization is unchanged context.
+        Applied diff review of exact fixture diff reconnect-B-diff against
+        reviewed plan reconnect-B. The plan updates the existing verified
+        stream with the new selector and authorized consent reference and
+        forbids any new persisted account source, including hidden discovery.
+        Both streams already exist. Existing consent authorization is
+        unchanged context.
 
           append(consent, { type: 'Authorized' });
         - append(hiddenAccount, { type: 'AccountDiscovered' });
         + append(account, { type: 'AccountLinked', connectionId: consent, providerAccountId });
-        + assert.equal(stored.get(account).at(-1).providerAccountId, 'changed-selector');
+        + assert.deepEqual(stored.get(account).at(-1), {
+        +   type: 'AccountLinked', connectionId: consent, providerAccountId: 'changed-selector'
+        + });
         + assert.deepEqual([...stored.keys()].sort(), sourcesBefore);
 
         The test snapshots the complete persisted key set before reconnect. It
