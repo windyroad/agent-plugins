@@ -165,8 +165,12 @@ tests:
 
         The patch adds local consent rechecks at dispatch and capture plus an
         atomic consent-stream check and account-stream append at publication.
+        The dispatch check stops submission based on the same consent the
+        provider authorizes. All three checks enforce that consent and have
+        no other purpose.
         Its new test expects the wallet to drop a valid response accepted before
-        withdrawal and returned after it. The test passes. Give your verdict.
+        withdrawal and returned after it. The test passes. Give your verdict
+        and identify the reviewed patch as W-overbuilt.
     assert:
       - type: icontains
         value: 'Architecture Review: ISSUES FOUND'
@@ -181,9 +185,9 @@ tests:
   - description: Provider consent boundary accepts recording the authorized result
     vars:
       prompt: |
-        APPLIED DIFF REVIEW, wallet patch W-lean. Existing accepted
-        ADR-096 (Use the provider's authorization decision when recording its
-        response) governs this change. The provider alone authorizes consent
+        APPLIED DIFF REVIEW, wallet patch W-lean. The existing accepted decision
+        in docs/decisions/096-provider-request-authorization.accepted.md
+        governs this change. The provider alone authorizes consent
         for its request; the wallet records what the authorized request
         returned, even if withdrawal occurs after the provider accepted it.
         The wallet owns tenant isolation and read ACLs. This patch implements

@@ -3,7 +3,7 @@ status: accepted
 human-oversight: confirmed
 ---
 
-# ADR-096: Use the provider's authorization decision when recording its response
+# Decision 096: Use the provider's authorization decision when recording its response
 
 Synthetic decision for the isolated wallet review fixture.
 
