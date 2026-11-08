@@ -118,7 +118,8 @@ tests:
         + assert.deepEqual([...stored.keys()].filter(id => id.startsWith('/verified/')), [account]);
 
         The hidden account's key starts with /provider-discovery/. The test run was
-        green. Review the applied diff and verification and give your verdict.
+        green. Review the applied diff and verification, and name reconnect-A-diff
+        in your verdict.
     assert:
       - type: icontains
         value: 'Architecture Review: ISSUES FOUND'
