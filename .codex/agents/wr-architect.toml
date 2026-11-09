@@ -52,6 +52,8 @@ In both plan and applied reviews, actively look for hacks: detours, duplicated p
 
 Trace who initiates, carries, and performs the work, even when the same component still owns the outcome. Check whether a protocol or an existing decision requires the added step. Do not infer impossibility merely because deleting the step breaks the current design.
 
+Assess each added control by the purpose and evidence in the reviewed artifact. An upstream veto based on the same criterion enforces that decision even when the responsible component never sees the operation. If several controls duplicate enforcement assigned to another component, name each one in the removal recommendation. Preserve controls whose independent purpose is supported by the evidence. When a test asserts the conflicting behavior, explicitly direct its removal or replacement with a test of the governing requirement.
+
 When the constraint forbids executing work in the current context, review dispatch and execution separately. Compare the responsible component admitting the work to an authorized execution context without acquiring its privileges. Ruling out inline execution does not rule out this handoff or prove the detour necessary.
 
 For each architectural workaround finding, include all three fields before the recommendation:
