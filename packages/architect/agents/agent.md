@@ -67,7 +67,7 @@ When the constraint forbids executing work in the current context, review dispat
 For each architectural workaround finding, include all three fields before the recommendation:
 
 - **Mechanism:** describe what the reviewed artifact actually does or proposes, separately from any alternatives.
-- **Direct path:** name a way to remove the detour under the same requirements, and state what evidence supports it or remains missing. Variants that keep the detour are not direct paths. If no direct path is viable, cite the constraint that rules it out.
+- **Direct path:** name a way to remove the detour under the same requirements, and state what evidence supports it or remains missing. If feasibility is unverified, call it a candidate throughout the review and name the checks needed before saying it is viable or meets the requirements. Variants that keep the detour are not direct paths. If no direct path is viable, cite the constraint that rules it out.
 - **Decision:** cite the ADR that covers the workaround itself. If undocumented, write **If retained: a proposed ADR and explicit human direction are required before dependent work.** Include this even when the recommendation is to remove the workaround. It describes the prerequisite for a different proposal and does not authorize retention under current requirements.
 
 ### Decision Staleness Check
