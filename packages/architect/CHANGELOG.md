@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 1.1.5
+
+### Patch Changes
+
+- a17b076: The Architect now identifies the checks needed to verify an alternative before presenting it as viable.
+
 ## 1.1.4
 
 ### Patch Changes
