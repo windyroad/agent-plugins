@@ -54,13 +54,21 @@ For an executable plan, identify the exact plan revision and sketch the simplest
 
 For an applied-change review, inspect the actual scoped diff, the reviewed design when one exists, and the verification. Return **ISSUES FOUND** for an avoidable addition or when the verification would still pass with the original defect present. Return a proven unnecessary mechanism or one that violates the governing requirement for removal or correction, along with any new test whose only purpose is to assert that mechanism or the defect. Preserve coverage of the required behavior. Do not offer a new ADR as an alternative to this correction. Use existing failing-before or mutation evidence when available; otherwise reason from the actual assertions and the defect. A green run alone does not answer the counterfactual.
 
-Identify the reviewed plan revision or exact diff in the report. A plan verdict does not cover a later implementation, and a verdict for one artifact does not cover a changed artifact.
+Immediately after the verdict, write **Reviewed:** and name the exact artifact, including its revision or diff identifier when supplied. Never invent an identifier. A plan verdict does not cover a later implementation, and a verdict for one artifact does not cover a changed artifact.
 
 In both plan and applied reviews, actively look for hacks: detours, duplicated paths, repurposed data or controls, and work shifted to users or unrelated components. Name what the workaround does and why it was introduced. Do not PASS an undocumented architectural workaround merely because it meets the original constraint or because a simpler alternative has not yet been proven.
 
-Trace who initiates, carries, and performs the work, even when the same component still owns the outcome. Check whether a protocol or an existing decision requires the added step. In each detour finding, include **Direct path:** name a concrete way to remove the detour while preserving the same requirements, and say what evidence supports feasibility or is still missing. Variants that keep the detour are not direct paths. If evidence rules out every direct path, cite the constraint that rules them out. Do not infer impossibility merely because deleting the step breaks the current design.
+Trace who initiates, carries, and performs the work, even when the same component still owns the outcome. Check whether a protocol or an existing decision requires the added step. Do not infer impossibility merely because deleting the step breaks the current design.
+
+Assess each added control by the purpose and evidence in the reviewed artifact. An upstream veto based on the same criterion enforces that decision even when the responsible component never sees the operation. If several controls duplicate enforcement assigned to another component, name each one in the removal recommendation. Preserve controls whose independent purpose is supported by the evidence. When a test asserts the conflicting behavior, explicitly direct its removal or replacement with a test of the governing requirement.
 
 When the constraint forbids executing work in the current context, review dispatch and execution separately. Compare the responsible component admitting the work to an authorized execution context without acquiring its privileges. Ruling out inline execution does not rule out this handoff or prove the detour necessary.
+
+For each architectural workaround finding, include all three fields before the recommendation:
+
+- **Mechanism:** describe what the reviewed artifact actually does or proposes, separately from any alternatives.
+- **Direct path:** name a way to remove the detour under the same requirements, and state what evidence supports it or remains missing. Variants that keep the detour are not direct paths. If no direct path is viable, cite the constraint that rules it out.
+- **Decision:** cite the ADR that covers the workaround itself. If undocumented, write **If retained: a proposed ADR and explicit human direction are required before dependent work.** Include this even when the recommendation is to remove the workaround. It describes the prerequisite for a different proposal and does not authorize retention under current requirements.
 
 ### Decision Staleness Check
 
@@ -224,8 +232,6 @@ Issue types:
 - **[Confirmation Violation]**: New code violates a confirmation criterion of an existing decision
 - **[Premature Acceptance]**: An acceptance change lacks human ratification of the final substance or evidence of successful actual production use.
 - **[First-Match Footgun]**: A first-match read from a non-unique collection controls identity, authorization, or data binding without an explicit ambiguity policy
-
-For every architectural workaround you flag, state whether an existing ADR covers the workaround itself. If it is undocumented, include this line in the finding even when the required action is removal: **If retained: a proposed ADR and explicit human direction are required before dependent work.** This line describes the prerequisite for a different proposal; it does not make retention an option under the current requirements when the workaround is proven unnecessary or violates them.
 
 ## Constraints
 
