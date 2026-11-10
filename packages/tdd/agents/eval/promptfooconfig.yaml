@@ -27,7 +27,7 @@
 #      grep on an executable bash hook must NOT be failed as structural
 #      (inverse over-fire guard: the hardening narrows prose-document greps,
 #      not artefact/executable-state checks);
-#   4. a browser test that mixes navigation and incidental copy → MIXED.
+#   4. a browser test that mixes required output and incidental copy → MIXED.
 #
 # Run from repo root:
 #   npx promptfoo eval -c packages/tdd/agents/eval/promptfooconfig.yaml
@@ -141,7 +141,7 @@ tests:
           verdict is not structural, OR if any escape-hatch / permitted /
           justified framing is offered.
 
-  - description: MIXED — browser navigation and required output alongside incidental copy
+  - description: MIXED — required browser output alongside incidental copy
     vars:
       prompt: |
         Classify this Playwright file from its inline source and return the JSON verdict.
@@ -151,7 +151,6 @@ tests:
         test('research page and export', async ({ page }) => {
           await page.goto('/');
           await page.getByRole('link', { name: 'Research' }).click();
-          await expect(page).toHaveURL(/\/research$/);
           await expect(page.getByRole('main')).toContainText('Those additions are not available yet.');
           await page.getByRole('button', { name: 'Export' }).click();
           // Export contract EX-4 requires the exact status token EXPORT_READY.
@@ -163,11 +162,13 @@ tests:
         value: '"mixed"'
       - type: llm-rubric
         value: |
-          PASS only if the final JSON verdict is mixed and the explanation
-          identifies the availability sentence as structural, navigation as
-          behavioural, and the status token as behavioural because EX-4
-          requires it. The suggestion removes the copy match or replaces it
-          with behaviour or release evidence, not another phrasing match.
+          PASS only if the final JSON verdict is mixed, the explanation
+          rejects the availability sentence check because it freezes incidental
+          copy without verifying availability, and it accepts the status token
+          check because EX-4 explicitly requires that token. Accept equivalent
+          explanations without requiring classification labels in the prose.
+          The suggestion must remove the copy match or replace it with an
+          observable behaviour or release evidence. A new wording match fails.
 
   - description: Over-fire guard — ADR-005 safety-construct grep on executable hook is NOT failed
     vars:
