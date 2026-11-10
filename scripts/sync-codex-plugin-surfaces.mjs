@@ -141,6 +141,9 @@ if (existsSync(hooks)) {
   for (const [event, groups] of Object.entries(config.hooks || {})) {
     for (const group of groups) {
       if (group.matcher) group.matcher = group.matcher.replaceAll("AskUserQuestion", "request_user_input");
+      const tddTestReview = packageName === "tdd" && event === "PostToolUse" &&
+        group.matcher === "Edit|Write" && group.hooks.some((hook) => hook.command?.endsWith("/tdd-review-test.sh"));
+      if (tddTestReview) group.matcher += "|apply_patch";
       for (const hook of group.hooks || []) {
         if (hook.command) hook.command = hook.command.replaceAll("${CLAUDE_PLUGIN_ROOT}", "${PLUGIN_ROOT}");
         if (packageName === "voice-tone" && event === "UserPromptSubmit") hook.additionalContextLimit = 0;
@@ -148,7 +151,8 @@ if (existsSync(hooks)) {
       if ((event === "PreToolUse" || event === "PostToolUse") && /Edit|Write|Agent/.test(group.matcher || "")) {
         for (const hook of group.hooks || []) {
           const command = hook.command;
-          hook.command = `bash "\${PLUGIN_ROOT}/hooks-codex/codex-adapter.sh" ${JSON.stringify(command)}`;
+          const mode = tddTestReview && command.endsWith("/tdd-review-test.sh") ? " post-tool-context" : "";
+          hook.command = `bash "\${PLUGIN_ROOT}/hooks-codex/codex-adapter.sh" ${JSON.stringify(command)}${mode}`;
         }
       }
     }
@@ -190,10 +194,12 @@ if (existsSync(hooks)) {
 set -uo pipefail
 
 target="$1"
+output_mode="\${2:-json}"
 input="$(cat)"
 tool="$(printf '%s' "$input" | jq -r '.tool_name // empty')"
 
 ADVISORIES=""
+CONTEXT=""
 collect_gate_output() {
   local output="$1" parsed
   [ -n "$output" ] || return 0
@@ -211,8 +217,12 @@ collect_gate_output() {
 $parsed"
 }
 flush_advisories() {
-  [ -n "$ADVISORIES" ] || return 0
-  printf '%s' "$ADVISORIES" | jq -s '{systemMessage: map(.systemMessage // .hookSpecificOutput.permissionDecisionReason // "Governance evidence unavailable; action permitted.") | join("\\n")}'
+  [ -n "$ADVISORIES$CONTEXT" ] || return 0
+  printf '%s' "$ADVISORIES" | jq -s --arg context "$CONTEXT" '
+    (if length == 0 then {} else
+      {systemMessage: map(.systemMessage // .hookSpecificOutput.permissionDecisionReason // "Governance evidence unavailable; action permitted.") | join("\\n")} end) +
+    (if $context == "" then {} else
+      {hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext: $context}} end)'
 }
 run_hook() {
   local output
@@ -220,7 +230,14 @@ run_hook() {
     collect_gate_output '{"systemMessage":"Governance evaluator unavailable; action permitted. A crashed hook output was discarded."}'
     return 0
   fi
-  collect_gate_output "$output"
+  if [ "$output_mode" = "post-tool-context" ]; then
+    if [ -n "$output" ]; then
+      [ -z "$CONTEXT" ] || CONTEXT="$CONTEXT"$'\\n'
+      CONTEXT="$CONTEXT$output"
+    fi
+  else
+    collect_gate_output "$output"
+  fi
 }
 
 if [ "$tool" = "apply_patch" ]; then

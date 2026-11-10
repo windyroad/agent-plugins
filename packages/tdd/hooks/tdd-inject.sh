@@ -73,7 +73,9 @@ STATE RULES (per test file — each component has independent state):
   Implementation file edits are BLOCKED for files whose associated test is BLOCKED.
 
 WORKFLOW:
-1. Write a test file (*.test.ts or *.spec.ts) that describes the desired behavior
+1. Write a test that detects a concrete behavioural failure or protects a required contract.
+   Editorial rewrites that preserve meaning must not break tests, including browser tests.
+   Assert exact wording only when an explicit requirement specifies that text. State that requirement in the test.
 2. The test MUST fail (RED state) -- this proves the test is meaningful
 3. Write the minimum implementation to make the test pass (GREEN state)
 4. Refactor while keeping tests green

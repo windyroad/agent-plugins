@@ -101,3 +101,28 @@ JSON
   [ "$status" -eq 0 ]
   grep -Fxq '# user edit' "$agent"
 }
+
+@test "packed TDD hook delivers a review instruction after a native browser test edit" {
+  local version tarball hook matcher
+  version="$(jq -r .version "$REPO_ROOT/packages/tdd/package.json")"
+  run npm pack "$REPO_ROOT/packages/tdd" --pack-destination "$BATS_TEST_TMPDIR/packs"
+  [ "$status" -eq 0 ]
+  tarball="$BATS_TEST_TMPDIR/packs/windyroad-tdd-$version.tgz"
+  tar -xzf "$tarball" -C "$BATS_TEST_TMPDIR"
+  export PLUGIN_ROOT="$BATS_TEST_TMPDIR/package"
+
+  hook=$(jq -r '.hooks.PostToolUse[].hooks[].command | select(contains("tdd-review-test.sh") and contains("codex-adapter.sh"))' "$PLUGIN_ROOT/hooks-codex/hooks.json")
+  matcher=$(jq -r '.hooks.PostToolUse[] | select(any(.hooks[]; (.command | contains("tdd-review-test.sh") and contains("codex-adapter.sh")))) | .matcher' "$PLUGIN_ROOT/hooks-codex/hooks.json")
+  [[ apply_patch =~ ^($matcher)$ ]]
+
+  mkdir "$BATS_TEST_TMPDIR/project"
+  cd "$BATS_TEST_TMPDIR/project"
+  printf 'test("research page", async () => {});\n' > research.pwtest.ts
+  run bash -c "$hook" <<'JSON'
+{"tool_name":"apply_patch","tool_input":{"command":"*** Begin Patch\n*** Update File: research.pwtest.ts\n*** End Patch"}}
+JSON
+  [ "$status" -eq 0 ]
+  printf '%s\n' "$output" | jq -e --arg path "$(pwd -P)/research.pwtest.ts" '
+    .hookSpecificOutput | .hookEventName == "PostToolUse" and
+    (.additionalContext | contains($path) and contains("wr-tdd:review-test"))'
+}

@@ -70,7 +70,7 @@ The `test/`-mirror rule replaces the **last** `src` path segment with `test`, so
 | `tdd-inject.sh` | Every prompt | Injects the current TDD state into the prompt |
 | `tdd-enforce-edit.sh` | Edit or Write | Blocks implementation edits in IDLE or BLOCKED state |
 | `tdd-post-write.sh` | After edit | Runs tests and transitions the state machine |
-| `tdd-review-test.sh` | After edit | Classifies new test files as STRUCTURAL (asserts source content) or BEHAVIOURAL (exercises the target) and surfaces structural-test regressions per [ADR-052](../../docs/decisions/052-behavioural-tests-default-for-skill-testing.proposed.md) |
+| `tdd-review-test.sh` | After edit | Prompts for review of changed test files, including Playwright `.pwtest.*` files. Review checks whether assertions detect a behavioural failure or protect a required contract. It flags incidental editorial wording even in rendered output. See [ADR-052](../../docs/decisions/052-behavioural-tests-default-for-skill-testing.proposed.md). |
 | `tdd-setup-marker.sh` | Skill completes | Marks test setup as done |
 | `tdd-reset.sh` | Session end | Resets the TDD state |
 

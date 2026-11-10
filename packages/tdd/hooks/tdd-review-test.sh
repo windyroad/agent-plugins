@@ -30,9 +30,19 @@ if [ "${WR_TDD_REVIEW_TEST:-}" = "skip" ]; then
   exit 0
 fi
 
-# Outside-PWD check — avoid classifying vendored / node_modules tests.
+# Resolve native relative edit paths, then check the physical project boundary.
+PROJECT_DIR=$(pwd -P)
 case "$FILE_PATH" in
-  "$PWD"/*) ;;
+  /*) ;;
+  *)
+    EDIT_DIR=$(printf '%s' "$INPUT" | jq -r '.cwd // empty')
+    FILE_PATH="${EDIT_DIR:-$PROJECT_DIR}/$FILE_PATH"
+    ;;
+esac
+FILE_DIR=$(cd -- "$(dirname -- "$FILE_PATH")" 2>/dev/null && pwd -P) || exit 0
+FILE_PATH="$FILE_DIR/$(basename -- "$FILE_PATH")"
+case "$FILE_PATH" in
+  "$PROJECT_DIR"/*) ;;
   *) exit 0 ;;
 esac
 
@@ -49,6 +59,7 @@ is_test_file() {
     *.feature) return 0 ;;
     *.test.ts|*.test.tsx|*.test.js|*.test.jsx|*.test.mjs|*.test.cjs) return 0 ;;
     *.spec.ts|*.spec.tsx|*.spec.js|*.spec.jsx|*.spec.mjs|*.spec.cjs) return 0 ;;
+    *.pwtest.ts|*.pwtest.tsx|*.pwtest.js|*.pwtest.jsx|*.pwtest.mjs|*.pwtest.cjs) return 0 ;;
     *.test.py|*.spec.py) return 0 ;;
     test_*.py|*_test.py) return 0 ;;
     *_test.go) return 0 ;;
@@ -63,7 +74,7 @@ fi
 
 # File-not-yet-on-disk → bail. The PreToolUse-Edit-on-new-file case is rare
 # but the agent has nothing to read until the Write completes.
-if [ ! -f "$FILE_PATH" ]; then
+if [ ! -f "$FILE_PATH" ] || [ -L "$FILE_PATH" ]; then
   exit 0
 fi
 
@@ -90,19 +101,15 @@ behavioural or structural:
   general reviewer with the complete installed agents/review-test.md and the
   same test path. Preserve read-only scope and the required JSON verdict.
 
-The agent will return a JSON verdict with fields {verdict, evidence,
-suggestion, harness_gap}. If the verdict is 'structural', either:
+Ask what concrete failure each assertion detects. An editorial rewrite
+that preserves meaning must not break a test, including a browser test.
+Assert exact wording only when an explicit requirement specifies that text.
 
-  1. Replace the structural assertions with behavioural ones using the
-     suggestion as a starting point, OR
-  2. Add a comment like:
-       # tdd-review: structural-permitted (justification: <ticket-ID>
-       <reason>)
-     citing a specific P012-descendant harness-gap ticket per ADR-052
-     Surface 2.
-
-To skip review for this session (ADR-044 category 3 strategic override),
-set WR_TDD_REVIEW_TEST=skip in the environment.
+The agent returns {verdict, evidence, suggestion, harness_gap}. For
+'structural' or 'mixed', replace or remove the structural assertions and
+review the revised test. For 'unclear', resolve the ambiguity before
+counting the test as evidence. If a behavioural replacement needs a missing
+harness capability, track the gap instead of shipping the structural test.
 EOF
 
 exit 0

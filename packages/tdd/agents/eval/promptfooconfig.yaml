@@ -18,7 +18,7 @@
 #     BEHAVIOURAL, NOT structural"). See docs/briefing/promptfoo-eval-
 #     authoring.md.
 #
-# Three fixtures pin the load-bearing properties of the hardened vocabulary:
+# The fixtures pin the load-bearing properties of the hardened vocabulary:
 #   1. a behavioural bats test (exercises a hook, asserts exit + output) →
 #      BEHAVIOURAL;
 #   2. a prose-document grep test (greps SKILL.md content) → STRUCTURAL, and
@@ -26,7 +26,8 @@
 #   3. the ADR-005 preserved-exception carve-out guard — a safety-construct
 #      grep on an executable bash hook must NOT be failed as structural
 #      (inverse over-fire guard: the hardening narrows prose-document greps,
-#      not artefact/executable-state checks).
+#      not artefact/executable-state checks);
+#   4. a browser test that mixes navigation and incidental copy → MIXED.
 #
 # Run from repo root:
 #   npx promptfoo eval -c packages/tdd/agents/eval/promptfooconfig.yaml
@@ -139,6 +140,34 @@ tests:
           or to BLOCK on a harness-gap ticket, satisfies (2). FAIL if the
           verdict is not structural, OR if any escape-hatch / permitted /
           justified framing is offered.
+
+  - description: MIXED — browser navigation and required output alongside incidental copy
+    vars:
+      prompt: |
+        Classify this Playwright file from its inline source and return the JSON verdict.
+
+        File: tests/research.pwtest.ts
+        ```ts
+        test('research page and export', async ({ page }) => {
+          await page.goto('/');
+          await page.getByRole('link', { name: 'Research' }).click();
+          await expect(page).toHaveURL(/\/research$/);
+          await expect(page.getByRole('main')).toContainText('Those additions are not available yet.');
+          await page.getByRole('button', { name: 'Export' }).click();
+          // Export contract EX-4 requires the exact status token EXPORT_READY.
+          await expect(page.getByRole('status')).toHaveText('EXPORT_READY');
+        });
+        ```
+    assert:
+      - type: icontains
+        value: '"mixed"'
+      - type: llm-rubric
+        value: |
+          PASS only if the final JSON verdict is mixed and the explanation
+          identifies the availability sentence as structural, navigation as
+          behavioural, and the status token as behavioural because EX-4
+          requires it. The suggestion removes the copy match or replaces it
+          with behaviour or release evidence, not another phrasing match.
 
   - description: Over-fire guard — ADR-005 safety-construct grep on executable hook is NOT failed
     vars:

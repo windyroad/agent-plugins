@@ -184,6 +184,10 @@ run_hook_with_path() {
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 
+  run run_hook_with_path "../$(basename "$outside")/foo.bats"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+
   rm -rf "$outside"
 }
 
@@ -201,25 +205,15 @@ run_hook_with_path() {
 
 # --- Additional behavioural assertions ---
 
-@test "advisory text mentions ADR-052" {
+@test "review advisory does not offer new structural-test suppressions" {
   local f="$WORKDIR/foo.bats"
   printf '%s\n' "$STRUCTURAL_BATS_BODY" > "$f"
 
   run run_hook_with_path "$f"
 
   [ "$status" -eq 0 ]
-  [[ "$output" == *"ADR-052"* ]]
-}
-
-@test "advisory text mentions both escape hatches" {
-  local f="$WORKDIR/foo.bats"
-  printf '%s\n' "$STRUCTURAL_BATS_BODY" > "$f"
-
-  run run_hook_with_path "$f"
-
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"WR_TDD_REVIEW_TEST=skip"* ]]
-  [[ "$output" == *"structural-permitted"* ]]
+  [[ "$output" != *"WR_TDD_REVIEW_TEST=skip"* ]]
+  [[ "$output" != *"structural-permitted"* ]]
 }
 
 @test "exit status is always 0 (advisory, never blocking)" {
