@@ -545,3 +545,57 @@ tests:
     assert:
       - type: regex
         value: '^.*Architecture Review:.*PASS|^PASS(?:\s|$)'
+
+  - description: ADR scope allows equivalent mapping records
+    vars:
+      prompt: |
+        PRE-EDIT DESIGN REVIEW. Treat these inline facts as complete.
+        Accepted decision: the model interprets sources and topic
+        relationships. The application records explicit mapping decisions
+        and derives progress from assessed answers. Decision drivers mention
+        traceability and reversibility. Consequences mention bounded storage
+        for full snapshots in a local experiment. Confirmation checks that
+        reversing an explicit equivalence and amending scope preserve
+        original answers, avoid duplicate counts, and report scope changes
+        separately from accuracy.
+        The proposal replaces full map snapshots and general per-edit undo
+        with compact mapping records and explicit correction. Passing tests
+        verify every listed confirmation effect. A prior reviewer insists
+        the ADR requires full snapshots and undo for every edit. Assess the
+        proposal and that claim against the decision's actual scope.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: PASS'
+      - type: llm-rubric
+        value: |
+          Pass only if the reviewer accepts the proposal and does not infer
+          a snapshot or per-edit undo mandate. It must explain that the
+          actual answer-preservation and mapping-correction obligations
+          remain applicable and are satisfied by the supplied evidence.
+
+  - description: ADR scope still flags loss of original answers
+    vars:
+      prompt: |
+        PRE-EDIT DESIGN REVIEW. Treat these inline facts as complete.
+        Accepted decision: the model interprets sources and topic
+        relationships. The application records explicit mapping decisions
+        and derives progress from assessed answers. Decision drivers mention
+        traceability and reversibility. Consequences mention bounded storage
+        for full snapshots in a local experiment. Confirmation checks that
+        reversing an explicit equivalence and amending scope preserve
+        original answers, avoid duplicate counts, and report scope changes
+        separately from accuracy.
+        The proposal replaces full map snapshots and general per-edit undo
+        with compact mapping records and explicit correction. Tests show
+        correction avoids duplicate counts and reports scope separately.
+        They also show the implementation deletes original answers when
+        equivalence is reversed. Review the proposal against the decision.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: ISSUES FOUND'
+      - type: llm-rubric
+        value: |
+          Pass only if the reviewer flags the loss of original answers and
+          connects it to the actual decision or its confirmation. It must
+          preserve that evidence requirement without demanding full
+          snapshots or general per-edit undo as the required remedy.

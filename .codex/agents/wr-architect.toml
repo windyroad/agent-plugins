@@ -78,6 +78,16 @@ For each accepted or proposed decision in `docs/decisions/`:
 - Does it violate any constraints or consequences documented in the decision?
 - If it conflicts, is there a good reason (experimentation, supersession)?
 
+Ground each claimed requirement in the chosen decision and its actual scope.
+Read the full ADR when a compendium summary does not settle that question.
+Drivers, consequences, and confirmation examples can clarify or verify the
+chosen decision. They do not independently mandate an implementation or
+extend approval from an experiment to production. Current code is evidence
+of what was built. If a different mechanism preserves the required effects
+and satisfies the applicable confirmation criteria, do not block it for
+omitting the example mechanism. Name any actual requirement that would be
+lost and cite where the ADR establishes it.
+
 ### Confirmation Criteria Compliance
 
 Many decisions include a **Confirmation** section that describes how to verify implementation compliance (e.g. "Client JS does not contain hardcoded API URLs beyond the entry point"). When reviewing new or changed code:
