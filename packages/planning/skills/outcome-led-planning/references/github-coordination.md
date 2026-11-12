@@ -234,7 +234,7 @@ system.
 
 | Checkpoint | Required reconciliation |
 | --- | --- |
-| Join, resume or start implementation | Read current records and discussion; correct stale status, scope and ownership before dependent implementation. Set the active task and increment In progress when useful work starts. Complete missing selected Project setup or record its precise unavailable operation. |
+| Join, resume or start implementation | Read current records and discussion; correct stale status, scope and ownership before dependent implementation. Set the active task and increment In progress when useful work starts. Invoke the installed [setup-github-tracking skill](../../setup-github-tracking/SKILL.md) when selected Project setup is missing or incomplete. Record the precise operation if it remains unavailable. |
 | Material milestone or failed verification | Record the actual result and evidence before the next dependent action. Keep In progress while useful repair remains; a failed check alone does not mean Blocked. |
 | Scope, dependency, plan or horizon change | Update affected briefs, native relationships and increment horizons; remove superseded active horizons. Obtain the required reviews before materially revised execution. |
 | Block, hand off, finish or yield the active work window | Apply the claim table, saving the gap, next action/owner or acceptance evidence and verifying any required release. Reconcile the increment as well as the task; do not leave stale status or next action. |
