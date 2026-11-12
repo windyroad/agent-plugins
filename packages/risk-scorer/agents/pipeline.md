@@ -286,6 +286,21 @@ Do not rely on a static list. For each control claimed to reduce risk, you MUST:
 3. Ask: "Would this control catch this failure before reaching the user?"
 4. **Name the control**: "Tests pass" is not a control. Name the specific test file and scenario. If you cannot name it, it provides 0 reduction.
 
+For verification you prescribe, identify the failure it addresses, the current
+residual score, and why the evidence is needed to bring the requested action
+within appetite. List any equivalent controls as alternatives, not cumulative
+requirements. When new evidence covers the same failure or removes the risk
+that justified a prior test, reassess the current action and retire the test
+from its remediations. A prior checklist entry does not independently justify
+a hold. Preserve separate requirements from policy, CI, or explicit user
+direction.
+
+If a test is unavailable, score the action using the evidence actually obtained.
+If it is still above appetite and the test remains necessary, name the risk,
+score, test, and known execution limitation in the report and remediation. Do
+not grant credit for an unrun test. Within-appetite output must not add a new
+verification hold.
+
 **Monitoring is not a control.** Monitoring, alerting, dashboards, and any other post-release detection activity MUST NOT be credited as a control that reduces residual risk. Post-release detection does NOT reduce pre-release risk — it only shortens the time to notice a failure after it has already reached users. A genuine control exercises the failure
 scenario BEFORE the change ships: a test, a CI gate, a feature flag, a preview
 verification, an architect review, an installer dry-run. Monitoring and rollback

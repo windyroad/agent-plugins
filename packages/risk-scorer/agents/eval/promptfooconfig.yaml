@@ -210,6 +210,51 @@ tests:
       - type: icontains
         value: 'RISK_REMEDIATIONS:'
 
+  - description: Pipeline retires a verification hold when equivalent evidence resolves it
+    vars:
+      prompt: |
+        AGENT: pipeline
+        POLICY_THRESHOLD: 5
+        The fixture facts are complete. A previous release assessment required
+        a manual browser reconnect to exercise session refresh on the candidate.
+        An authenticated integration check passed against that candidate in
+        Preview before promotion or customer traffic. It exercised the same
+        refresh path and failure mode. The manual browser is unavailable.
+        Commit, push and release now each score 5. All independent checks passed.
+        Reassess the release and emit the required report.
+    assert:
+      - type: contains
+        value: 'RISK_SCORES: commit=5 push=5 release=5'
+      - type: not-icontains
+        value: 'RISK_REMEDIATIONS:'
+      - type: llm-rubric
+        value: |
+          Pass if the scorer leaves no hold or request to repeat the
+          superseded browser test. A report with the required scores and
+          no further action is sufficient.
+
+  - description: Pipeline grounds a hold in a necessary unavailable control
+    vars:
+      prompt: |
+        AGENT: pipeline
+        POLICY_THRESHOLD: 5
+        The fixture facts are complete. Release risk is 8 because a migrated
+        customer can lose access on token refresh. The only qualifying control
+        is the signed-in migration refresh test, which needs an identity fixture
+        that is unavailable. Unit tests cover fresh sign-in only. There are no
+        additional risks in the push or commit layers. Reassess and report the
+        specific unresolved risk and control.
+    assert:
+      - type: contains
+        value: 'RISK_SCORES: commit=8 push=8 release=8'
+      - type: contains
+        value: 'RISK_REMEDIATIONS:'
+      - type: llm-rubric
+        value: |
+          Pass if the report holds release, connects the missing signed-in
+          refresh test to loss of access for migrated customers, explains the
+          missing identity fixture, and gives no credit for an unrun test.
+
   - description: Pipeline rejects branch or metadata deferral as a control
     vars:
       prompt: |
