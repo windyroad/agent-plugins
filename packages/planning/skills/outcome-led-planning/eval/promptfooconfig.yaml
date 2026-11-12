@@ -867,3 +867,21 @@ tests:
           gate, invent acknowledgement or claim completion. Do not require a redundant request
           when applicable real behavior is already known, but the supplied denial is not that
           successful behavior.
+
+  - description: Readable GitHub task retains the required parent fallback
+    vars:
+      prompt: |
+        {"tracking": "github", "prompt": "Tabletop only. Draft just the body of a new contribution task for an assessed Now increment. The task title is \u201cValidate duplicate account import\u201d. The actual owner account is @agent and the distinct contributor session is agent-qa. Revision R2. Result: verify duplicate imports resolve to one account. Next action: rerun the import against the signed fixture. Acceptance: the repeat import returns one account per stable ID and preserves both source records. The issue parent API is unavailable and the parent is #101; give the new task its required text fallback. The parent will be updated separately once the task number is known. The task has no blocker. This is a pre-creation draft on GitHub Issues with no Project. The task has not been created or assigned, and no claim or readback has happened. The five-critic review is at https://github.com/example/project/issues/101#issuecomment-12345. The parent outcome already explains why import matters. Do not simulate writes or invent results."}
+    assert:
+      - type: llm-rubric
+        value: |
+          In the proposed issue body, a reader can find the intended result and the signed-fixture rerun immediately, with the next action on its own plain Next action: line. Preserve the verified owner, distinct session, revision, the parent #101 text fallback, and both acceptance conditions. Put any evidence after acceptance. Do not repeat the title, parent purpose, critic history, or claim mechanics. Do not invent a saved claim or readback. No blocker section is needed. Evaluate the ticket body, not a brief response wrapper.
+
+  - description: Readable GitHub update gives the actual blocker and unlock once
+    vars:
+      prompt: |
+        {"tracking": "github", "prompt": "Tabletop only. Draft just the replacement body of a live increment after a routine milestone. The issue title is \u201cImport accounts by stable ID\u201d. Native GitHub links already show parent #100, task #102 and blocked-by #103. The selected board already shows In progress, Now and owner @agent. Revision R2 passed five critics at https://github.com/example/project/issues/101#issuecomment-12345. Result: import accounts by stable ID. The stable ID lookup passed CI at https://github.com/example/project/issues/102#issuecomment-23456. The duplicate-import fixture is missing; #103 will supply it. Next action: rerun the import once that fixture arrives. Acceptance: repeat the import and show one account per ID. The old body repeats its title, parent purpose, R1 history, reviewer quotes, raw CI log and board fields. Preserve information that has an independent workflow purpose. Do not simulate writes or invent results."}
+    assert:
+      - type: llm-rubric
+        value: |
+          In the proposed issue body, a reader can find the intended result and the rerun as soon as #103 supplies the missing duplicate fixture. Keep the plain Next action: line near the top. Fail if the same missing fixture or unlock is restated in a separate blocker or status line, even in different words. Retain the current revision and acceptance; put any critic and CI evidence after acceptance. Native parent and task links and board fields need no standalone copies. Do not repeat superseded history, reviewer prose or logs. Evidence should link to supplied destinations with readable labels if cited. Evaluate the ticket body, not a brief response wrapper.

@@ -30,11 +30,38 @@ membership alone does not satisfy a saved kind filter. Verify both, then check
 that the legitimate record appears in its intended view. Do not create dummy
 issues to test setup or add an auto-add workflow in place of explicit membership.
 
+## Write issues people can scan
+
+For both new issues and updates, start with the intended result, or the
+verified result if acceptance has passed. Follow it with one plain
+`Next action:` line, starting at the left margin. For blocked work, use
+this one line to state the blocker and what clears it. Remove a separate
+blocker field that repeats the same condition.
+Omit empty blocker and other optional fields. Put acceptance before
+review, claim and delivery evidence. A new task body records the owner
+account and distinct agent or session. Leave pending claim and readback
+checks out of the creation draft. Add the full receipt after they run. When asked for only the body, start with the body and
+end with it. Keep decision and review
+evidence behind descriptive Markdown links to verified destinations.
+If an exact comment URL is unknown, link the issue and name the evidence.
+
+Give each fact one home. Omit copies of verified native fields and
+relationships unless the workflow requires them in the issue body. Keep
+the complete task claim receipt, the outcome's ordered plan links,
+revision, acceptance, checkpoint labels and required text fallbacks.
+Mention a related issue when it explains the next action, blocker or evidence.
+
+Replace stale progress and next steps in place. Keep prior decisions and
+evidence in their existing records, or leave a short linked history note if
+needed. Avoid repeating the title, parent plan, old revisions, reviewer prose,
+raw logs or task timelines. At a routine checkpoint, record what changed and
+its effect on the next step.
+
 ## Outcome → increment → task
 
 Use three linked issue levels, without introducing an epic or story tier:
 
-| Record    | Owns               | Minimum shared information                                                                                                                               |
+| Record    | Owns               | Required information across the issue, native fields and linked records |
 | --------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Outcome   | Outcome owner      | Its recorded owner, confirmed SMART result, acceptance evidence, constraints, deadline, ordered increment links and current plan revision |
 | Increment | Increment owner    | Its recorded owner, intended result, horizon, own revision and acceptance (known or explicitly unresolved), assumptions/dependencies, contribution tasks; five critic results for executable work and delivery evidence when delivered |
