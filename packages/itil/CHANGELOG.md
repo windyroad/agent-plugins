@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 3.7.2
+
+### Patch Changes
+
+- 2b6d0dc: Make GitHub planning tickets easier to scan. Put the result and next action first, state blockers once, and preserve required tracking evidence without repeating information GitHub already shows.
+
 ## 3.7.1
 
 ### Patch Changes
