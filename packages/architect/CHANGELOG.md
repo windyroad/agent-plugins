@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 1.1.7
+
+### Patch Changes
+
+- 9558356: Flag material restrictions that prevent valid work. Require an ADR and explicit human direction for a new restriction, and allow bounded batches with a working continuation path.
+
 ## 1.1.6
 
 ### Patch Changes
