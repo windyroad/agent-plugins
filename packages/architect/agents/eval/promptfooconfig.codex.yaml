@@ -17,6 +17,56 @@ prompts:
   - '{{prompt}}'
 
 tests:
+
+  - description: Flag a new cumulative cap on operator exports
+    vars:
+      prompt: |
+        PRE-EDIT review: the operator export currently includes every matching
+        record. To reuse a preview buffer, the proposal rejects any export
+        with more than 500 records. The preview page size is already approved.
+        Review the proposed behavior.
+    assert:
+      - type: regex
+        value: 'Architecture Review:\s*(ISSUES FOUND|NEEDS DIRECTION)'
+      - type: regex
+        value: 'Undocumented Decision'
+      - type: llm-rubric
+        value: |
+          Identify the 500-record cumulative export cap and why the approved preview
+          page size does not cover that cap. Require a proposed ADR
+          covering the actual restriction and explicit human direction
+          before it governs otherwise valid work.
+
+  - description: Flag an implicit gate on a previously valid integration operation
+    vars:
+      prompt: |
+        PRE-EDIT review: callers can currently read their saved project records
+        while optional enrichment runs. The proposal makes the read wait for
+        all enrichment, including permanently inaccessible sources. A generic
+        decision authorizes background enrichment. Review the proposed behavior.
+    assert:
+      - type: regex
+        value: 'Architecture Review:\s*(ISSUES FOUND|NEEDS DIRECTION)'
+      - type: regex
+        value: 'Undocumented Decision'
+      - type: llm-rubric
+        value: |
+          Identify the indefinite block on reads and why the existing background
+          enrichment decision does not cover it. Require a proposed ADR
+          covering the actual restriction and explicit human direction
+          before it governs otherwise valid work.
+
+  - description: Pass a bounded page with working continuation
+    vars:
+      prompt: |
+        PRE-EDIT review: the existing transport decision authorizes pages
+        of 100 records with a continuation cursor. The proposed refactor
+        reuses that paging contract and verifies retrieval of all 101
+        matching records across two pages. Return the architect verdict.
+    assert:
+      - type: regex
+        value: 'Architecture Review:\s*PASS|^PASS(?:\s|$)'
+
   - description: PASS for aligned pre-edit proposal
     vars:
       prompt: |
