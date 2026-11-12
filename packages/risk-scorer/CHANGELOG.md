@@ -1,5 +1,11 @@
 # @windyroad/risk-scorer
 
+## 0.20.4
+
+### Patch Changes
+
+- 6b07a12: Keep release verification tied to the risks it controls. Risk Scorer now directs necessary checks, reassesses them when evidence changes, and explains an unavailable check that still leaves risk above appetite.
+
 ## 0.20.3
 
 ### Patch Changes
