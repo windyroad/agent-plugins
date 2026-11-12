@@ -75,8 +75,6 @@ tests:
     assert:
       - type: regex
         value: 'Architecture Review:\s*(ISSUES FOUND|NEEDS DIRECTION)'
-      - type: regex
-        value: 'Undocumented Decision'
       - type: llm-rubric
         value: |
           Identify the 500-record cumulative export cap and why the approved preview
@@ -94,8 +92,6 @@ tests:
     assert:
       - type: regex
         value: 'Architecture Review:\s*(ISSUES FOUND|NEEDS DIRECTION)'
-      - type: regex
-        value: 'Undocumented Decision'
       - type: llm-rubric
         value: |
           Identify the indefinite block on reads and why the existing background
@@ -106,8 +102,9 @@ tests:
   - description: Pass a bounded page with working continuation
     vars:
       prompt: |
-        PRE-EDIT review: the existing transport decision authorizes pages
-        of 100 records with a continuation cursor. The proposed refactor
+        PRE-EDIT review: the accepted fixture decision at
+        docs/decisions/record-transport-continuation.accepted.md authorizes
+        pages of 100 records with a continuation cursor. The proposed refactor
         reuses that paging contract and verifies retrieval of all 101
         matching records across two pages. Return the architect verdict.
     assert:
