@@ -110,6 +110,8 @@ merely because this protocol mentions them.
 
 Replan task boundaries at any stage when evidence changes what work is needed. Coordinate narrowed, split, replaced or dropped scope with the increment owner and affected task owners. Close redundant or superseded issues as **not planned**, with the reason and successor links; never mark undelivered work Done merely to retire it. Before removing a dependency, move still-required acceptance evidence to the appropriate task and retain it in increment acceptance. Remove only genuinely obsolete native dependencies and verify the saved result; preserve prerequisites that still constrain the revised work. Keep task briefs, links, ownership and selected Project fields truthful. Preserve retired tasks' Agent attribution and saved history; update only fields needed to reflect their retirement. Never blanket-clear a closed task's Project fields. Clear an active Horizon only for completed or superseded increments. Routine task reconciliation within the assessed outcome and authority needs no new user approval; materially revised executable work still requires the five independent plan reviews.
 
+When retiring or narrowing a task within the confirmed outcome, settle its remaining acceptance work with the affected owners. If either an existing task or a successor could own the work, choose with those owners using scope and prerequisites. Continue after applicable review and readback without asking the user to choose the task boundary.
+
 ### Status and contribution-claim decision
 
 Use this table whenever work starts, blocks, finishes or is handed over. Inspect

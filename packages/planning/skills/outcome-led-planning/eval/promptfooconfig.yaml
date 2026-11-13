@@ -339,7 +339,7 @@ tests:
   - description: GitHub hierarchy separates horizon and execution status
     vars:
       prompt: |
-        {"tracking":"github","prompt":"Tabletop only; no tools. Goal confirmed, user chose GitHub tracking. Existing outcome #10 has owner Alex and reviewed Now increment #11 blocked on input; Next #12 is provisional. Task #13 is done. Optional Project API is unavailable, native sub-issue API is denied, but issue body reads/writes are authorized. Describe the correct records and immediate permitted coordination. No communication beyond issue record maintenance is authorized."}
+        {"tracking": "github", "prompt": "Tabletop only; no tools. Goal confirmed, user chose GitHub tracking. Existing outcome #10 has owner Alex and reviewed Now increment #11 blocked on input; Next #12 is provisional. Task #13 is done. Project selection has not been established and the Project API is unavailable, native sub-issue API is denied, but issue body reads/writes are authorized. Give a compact table with one row for each of #10–#13 and columns for its own owner, revision, acceptance, horizon and execution status. Then describe permitted edits, how you would verify them, and what the completed task means for its parent. Treat any unsupplied values as facts to inspect. No communication beyond issue record maintenance is authorized. State whether any Project operation is actually pending at this checkpoint and explain what establishes that."}
     assert:
       - type: llm-rubric
         value: |
