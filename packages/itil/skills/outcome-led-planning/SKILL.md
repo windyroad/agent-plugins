@@ -54,6 +54,8 @@ Use INVEST as a quality check for **Now**: independently deliverable, negotiable
 
 Choose the smallest independently useful business result. Name who benefits and the observable improvement, validated decision or capability. Split again if a smaller result has value; shared code does not justify bundling. Technical activity alone is insufficient. Retain required security, integrity, recovery and acceptance. Foundations need explicit value and limits; environment promotion stages are not automatically increments. Deliver the verified minimum and replan before adding work. Apply whenever Now changes; keep remaining delivery plans provisional.
 
+When the outcome includes a workflow, use [use-case slicing](references/planning-details.md#use-case-slicing) to find useful increments. For other outcomes, use the beneficiary's observable improvement or a specific decision the work resolves. Check the proposed sequence against every outcome completion criterion, including obligations beyond the workflow, and place them according to their actual dependencies.
+
 If uncertainty prevents bounded implementation, read [bounded discovery guidance](references/planning-details.md#bounded-discovery) and propose a small discovery increment with value, finite scope, stopping condition, output, verification and grounded qualitative effort. Keep implementation provisional and the final outcome unchanged.
 
 Follow the project's existing delivery/promotion workflow, checks and authority. Do not invent preflights, resource/diff allowlists, gates, scripts or pipelines for hypothetical interference. Inspect test-environment results, repair through that workflow and promote when qualified; investigate actual interference and reassess material risk.

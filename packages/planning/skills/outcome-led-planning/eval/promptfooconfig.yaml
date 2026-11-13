@@ -420,6 +420,22 @@ tests:
           authorized owner assistance via allowed increment thread, continue
           independent work without inventing authority or claiming board success.
 
+  - description: Use-case slicing finds a useful Now and retains the full outcome
+    vars:
+      prompt: |
+        {"tracking":"github","prompt":"Tabletop only. The confirmed ASAP outcome is installed support triage with owner approval and scoped delegation, a public research page and launch announcement. Current proposed Now is a hidden Type change on a synthetic ticket. Its reviewer passed it because it was bounded and linked. A larger candidate is all reviewed triage. Authorised search returns either an eligible ticket or no match, and a conversation read takes a selected ticket. The proposed workflow selects a ticket, reads its conversation, assesses spam, then prepares Type and a reply or asks for clarification. A separate existing entry supplies a selected ticket and a prepared reply. A provider send takes the ticket and exact approved text and returns a confirmation. The owner currently switches to Zendesk for these actions. Provider checks on synthetic tickets are required during the build. Store submission needs verified reviewed triage; public install needs store approval. Research can publish when ready and announcement needs research and verified public install. Review the proposed Now and outline the corrected sequence."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Reject the hidden check as its own increment and retain it as build
+          verification. Compare the two smaller usable paths with their distinct
+          real starting points and named owner benefit. Choose just one feasible
+          Now and give the other a provisional place. Preserve reviewed and
+          delegated triage and the actual dependencies for submission, approval,
+          public install, research and announcement. Do not claim reviews or
+          delivery occurred. Do not require complete triage before either small
+          slice can count as useful, or put both slices in Now.
+
   - description: Outcome owner replans from evidence rather than promoting Next
     vars:
       prompt: |
