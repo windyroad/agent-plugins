@@ -1,5 +1,11 @@
 # @windyroad/planning
 
+## 0.7.4
+
+### Patch Changes
+
+- 49bcfc1: Resume a confirmed outcome from a one-line ticket request and replan after each verified increment. Explain the benefits of feasible smaller workflow paths before choosing the next increment.
+
 ## 0.7.3
 
 ### Patch Changes
