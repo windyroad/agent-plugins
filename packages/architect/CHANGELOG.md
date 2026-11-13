@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 1.1.8
+
+### Patch Changes
+
+- 49bcfc1: Compare direct use of existing operations before proposing new mechanisms. For applied boundary violations, identify the smallest check that verifies the repair and require removal of proven duplicate controls.
+
 ## 1.1.7
 
 ### Patch Changes
