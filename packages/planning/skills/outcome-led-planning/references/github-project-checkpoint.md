@@ -1,8 +1,10 @@
 # Inspect and reconcile GitHub records
 
 Resolve `scripts/github-project-checkpoint.mjs` relative to this installed
-planning skill, including when called from `contribute`. Use the existing
-authenticated `gh` account and saved project configuration. The default is
+planning skill, including when called from `contribute`. Reuse saved project configuration. Before GitHub operations, verify which
+account is authenticated and that it has access to the target repository. A
+saved GitHub choice or permission to track work does not establish runtime
+authentication or access. The default is
 `.agents/planning.json`; an existing project-declared configuration path may be
 supplied last. These operations require no new grants, account changes or tokens.
 Local tracking keeps its existing path.
