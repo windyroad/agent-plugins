@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 3.7.3
+
+### Patch Changes
+
+- da21e9b: Use workflow paths to find the smallest useful planning increment. Ask the planning reviewer to compare feasible slices and verify that the plan covers the full outcome.
+
 ## 3.7.2
 
 ### Patch Changes
