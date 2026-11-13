@@ -23,7 +23,7 @@ Once confident the outcome is captured correctly, **play back the complete objec
 
 For a fully specified outcome, ask only whether that exact playback is correct or needs changes, then wait. Do not append examples, clarification questions or a menu about formats, interfaces, technologies, beneficiaries or delivery options. Resolve necessary means after confirmation.
 
-Keep the confirmed objective as the reference point throughout delivery. Ordinary replanning changes the means and does not repeat goal confirmation. A substantive change to the desired result, completion evidence or constraints requires renewed user confirmation before dependent planning or execution.
+Keep the confirmed objective as the reference point throughout delivery. Ordinary replanning changes the means and does not repeat goal confirmation. A substantive change to the desired result, completion evidence or constraints requires renewed user confirmation before dependent planning or execution. Once the user has confirmed the exact outcome and authorised delivery, proceed through planning and the required independent reviews without asking for the same go-ahead again.
 
 ## Choose the tracking vehicle
 
