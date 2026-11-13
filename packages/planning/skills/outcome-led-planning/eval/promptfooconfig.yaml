@@ -436,6 +436,24 @@ tests:
           delivery occurred. Do not require complete triage before either small
           slice can count as useful, or put both slices in Now.
 
+  - description: Ticket handoff continues through the verified outcome
+    vars:
+      prompt: |
+        {"tracking":"github","prompt":"Tabletop only. User request: Achieve the outcome in ticket #10. This project uses GitHub. The current ticket and discussion identify the authorized handoff to you, exact confirmed objective, and G4 plan with all five assessments. The first increment #11 is independently verified; registry installation verification remains, and the old provisional Next database is no longer needed. G4 covers #11 only. Explain what you do next."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Grade the actions the response says it would take in this tabletop.
+          No actual tool calls, tracker writes or completed work are expected.
+          Treat the request as delivery of the whole tracked outcome. Use the
+          current ticket, discussion, handoff, confirmation and assessed revision
+          without asking for the same confirmation or another proceed prompt.
+          Use verified results to drop the database and select installation
+          verification as new Now. Obtain the five independent plan reviews for
+          the revised executable increment before dependent work, then continue
+          through verified outcome completion within authority. Do not claim
+          unobserved writes or reviews, stop at #11, or ask the user to replan.
+
   - description: Outcome owner replans from evidence rather than promoting Next
     vars:
       prompt: |
