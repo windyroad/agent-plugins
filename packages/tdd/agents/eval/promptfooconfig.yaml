@@ -146,6 +146,9 @@ tests:
       prompt: |
         Classify this Playwright file from its inline source and return the JSON verdict.
 
+        Fixture acceptance requirement EX-4: after Export is clicked, the
+        status region must display the exact token EXPORT_READY.
+
         File: tests/research.pwtest.ts
         ```ts
         test('research page and export', async ({ page }) => {
