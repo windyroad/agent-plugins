@@ -70,6 +70,31 @@ function textReference(body, number, repository) {
   const evidence = body.split(/\r?\n/).flatMap((text, index) => reference.test(text) ? [{ line: index + 1, text }] : []);
   return { observed: evidence.length > 0, evidence };
 }
+function nativeOutcomeChildren(repository, number) {
+  const result = call(['api', '--paginate', '--slurp', `repos/${repository}/issues/${number}/sub_issues?per_page=100`]);
+  if (result.failure) {
+    const stdout = result.stdout?.trim();
+    if (stdout) {
+      let response;
+      try { response = JSON.parse(stdout); }
+      catch { throw new Error('Native child read returned incomplete output.'); }
+      requireValue(Array.isArray(response) && response.length === 1
+        && typeof response[0]?.message === 'string' && /^[45]\d{2}$/.test(response[0]?.status),
+      'Native child read returned only part of the list.');
+    }
+    return { state: 'unavailable' };
+  }
+  const pages = JSON.parse(result.stdout);
+  requireValue(Array.isArray(pages) && pages.length && pages.every(Array.isArray), 'Native child response is incomplete.');
+  const children = pages.flat().map(child => {
+    const url = child?.html_url?.toLowerCase();
+    const match = url?.match(/^https:\/\/github\.com\/([\w.-]+\/[\w.-]+)\/issues\/([1-9]\d*)$/);
+    requireValue(match && Number.isSafeInteger(child.number) && Number(match[2]) === child.number, 'Native child identity is missing or inconsistent.');
+    return { url, repository: match[1], number: child.number };
+  });
+  requireValue(new Set(children.map(child => child.url)).size === children.length, 'Native child response repeats an issue.');
+  return { state: 'read', numbers: children.filter(child => child.repository === repository.toLowerCase()).map(child => child.number) };
+}
 function inspectHierarchy(request, config) {
   const repository = repositoryFor(config);
   const roles = { outcome: request?.outcome, increment: request?.increment?.issue, next: request?.next?.issue, task: request?.task?.issue };
@@ -83,30 +108,36 @@ function inspectHierarchy(request, config) {
     } catch { projectSelection.state = 'invalid'; }
   }
   const records = {};
-  const findings = projectSelection.state === 'recorded' ? [] : [{ issue: roles.outcome, field: 'projectSelection', state: projectSelection.state, nextAction: `Establish selection from applicable project requirements and explicit direction. If it remains unresolved, save that selection gap and conditional Project work on outcome #${roles.outcome} and read back its saved body before claiming reconciliation complete. Reuse an already saved gap without an unchanged write.` }];
+  const findings = projectSelection.state === 'recorded' ? [] : [{ issue: roles.outcome, field: 'projectSelection', state: projectSelection.state, nextAction: `Establish selection from applicable project requirements and explicit direction. If it remains unresolved, save that selection gap and conditional Project work on the verified current increment and read back its saved body before claiming reconciliation complete. Reuse an already saved gap without an unchanged write.` }];
   for (const [role, number] of Object.entries(roles)) {
     const record = issue(number, { repository });
     requireValue(record.number === number && record.url?.toLowerCase() === `https://github.com/${repository}/issues/${number}`.toLowerCase() && typeof record.body === 'string', 'Returned issue does not match its requested repository/number or brief.');
     const inspection = {
       owner: briefField(record.body, /^\s*(?:(?:Outcome|Increment|Task) )?Owner:\s*(.*)$/i, /\bowner\b/i),
-      revision: briefField(record.body, /^\s*Revision:\s*(.*)$/i, /\brevision\b/i),
+      ...(role === 'outcome' ? {} : { revision: briefField(record.body, /^\s*Revision:\s*(.*)$/i, /\brevision\b/i) }),
       acceptance: briefField(record.body, /^\s*(?:Tentative )?Acceptance(?: criteria| evidence)?:\s*(.*)$/i, /\bacceptance\b/i),
       parent: briefField(record.body, /^\s*Parent(?: outcome| increment)?:\s*(.*)$/i, /\bparent\b/i)
     };
     records[role] = { ...record, inspection };
     for (const field of ['owner', 'revision', 'acceptance']) {
-      if (!['candidate', 'explicitly-unresolved'].includes(inspection[field].state)) findings.push({ issue: number, field, state: inspection[field].state });
+      if (inspection[field] && !['candidate', 'explicitly-unresolved'].includes(inspection[field].state)) findings.push({ issue: number, field, state: inspection[field].state });
     }
   }
+  const outcomeChildren = nativeOutcomeChildren(repository, roles.outcome);
+  if (records.increment.state !== 'OPEN') findings.push({ issue: roles.increment, field: 'current-increment', state: 'not-open' });
   const textLinks = [[records.outcome, records.increment], [records.outcome, records.next], [records.increment, records.task]].map(([parent, child]) => {
     const parentMentionsChild = textReference(parent.body, child.number, repository);
     const field = child.inspection.parent;
     const referencesExpected = 'value' in field ? textReference(field.value, parent.number, repository).observed : null;
-    if (!parentMentionsChild.observed) findings.push({ issue: parent.number, field: 'child-text-reference', state: 'not-established', child: child.number });
-    if (referencesExpected !== true) findings.push({ issue: child.number, field: 'parent-text-reference', state: 'not-established', parent: parent.number });
+    if (parent === records.outcome && outcomeChildren.state === 'read') {
+      if (!outcomeChildren.numbers.includes(child.number)) findings.push({ issue: child.number, field: 'native-child', state: 'not-linked', parent: parent.number });
+    } else {
+      if (!parentMentionsChild.observed) findings.push({ issue: parent.number, field: 'child-text-reference', state: 'not-established', child: child.number });
+      if (referencesExpected !== true) findings.push({ issue: child.number, field: 'parent-text-reference', state: 'not-established', parent: parent.number });
+    }
     return { parent: parent.number, child: child.number, parentMentionsChild, childParent: { ...field, referencesExpected } };
   });
-  return { repository, projectSelection, capabilities: { project: 'not-probed', nativeLinks: 'not-probed' }, records, textLinks, findings };
+  return { repository, projectSelection, capabilities: { project: 'not-probed', nativeLinks: 'not-probed' }, outcomeChildren, records, textLinks, findings };
 }
 function items(request, bound, projectId) {
   const response = json(['api', 'graphql', '--input', '-'], JSON.stringify({ query: itemQuery, variables: { ids: [request.increment.itemId, request.task.itemId], agentFieldId: request.agentFieldId } }));

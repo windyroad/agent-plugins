@@ -27,15 +27,15 @@ their existing coordination path.
 ```
 
 Run `node <installed-planning-skill>/scripts/github-project-checkpoint.mjs inspect-hierarchy request.json`.
-This reads the four actual issues and their returned comments. It writes
-nothing and makes no Project or native-link request. Read the raw records and
+This reads the four issues, their returned comments and the outcome’s native child list. It writes nothing and makes no Project request. Read the raw records and
 consume `findings` before claiming that the records are correct:
 
 - `projectSelection` reports configuration facts. `not-recorded` means selection
   is unresolved from that configuration, not an explicit choice to use no
   Project. `recorded` does not prove capability; consider actual project
   requirements and explicit direction too. Preserve invalid configuration.
-- Each record's `inspection` reports literal owner, revision, acceptance and
+- `outcomeChildren` reports the native child read or its unavailability. A successful read controls outcome-to-increment relationships, even if a child is missing from that list. When unavailable, inspect reciprocal text references and record the limitation. The command checks supplied records. For initial discovery, read the full set of child increments before selecting one assessed Now.
+- Each record's `inspection` reports literal owner, increment/task revision, acceptance and
   Parent candidates with raw line evidence. `candidate` is text, not verified
   ownership or passed acceptance. `explicitly-unresolved` preserves a recorded
   unknown. Empty/missing literals, unsupported syntax and multiple candidates
@@ -54,7 +54,7 @@ synchronization verdict. Identical drafts and saved bodies do not establish
 completeness. Before claiming completeness, account for every finding through
 actual semantic review, authorized repair with saved readback where needed, or
 honest unresolved recording in the existing plan or record. Follow the selection
-finding's conditional next action, which targets the existing outcome issue
+finding's conditional next action, which targets the current increment
 for saving and reading back a still-unresolved gap. Reuse an already saved gap
 without an unchanged write. Configuration alone may leave the choice unresolved
 while requirements or explicit direction establish it. Unsupported

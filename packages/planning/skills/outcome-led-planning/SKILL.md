@@ -11,11 +11,11 @@ Keep the confirmed outcome as the reference point; replan the means from evidenc
 
 When asked to achieve the outcome in an existing ticket, follow this workflow through verified outcome completion. Resolve the ticket in the current project or from its link. Read the outcome, current plan revision and assessment, relevant discussion, and ownership before acting. Reuse the recorded confirmation and reviews when they cover the current outcome and executable plan. Apply the confirmation or assessment steps below when that evidence is missing or no longer applies. Honor active ownership and existing handoff rules.
 
-Start with the current assessed Now. After each verified increment, replan from the remaining gap and continue within authority. Use `contribute` for requests limited to helping with part of the outcome.
+In GitHub, find the current assessed Now among the outcome’s child increments using the GitHub coordination protocol. In Local tracking, read the separate delivery plan. Start with the current assessed Now. After each verified increment, replan from the remaining gap and continue within authority. Use `contribute` for requests limited to helping with part of the outcome.
 
 ## Establish and confirm the SMART objective
 
-State the result the user wants and the observable evidence that will establish completion. Separate that result from proposed technologies, activities, and delivery mechanisms. Preserve explicit user constraints and any prescribed means; do not rewrite the objective to fit an easier implementation.
+State the intended result, observable completion evidence and required constraints. Put proposed technologies, delivery steps, order and tasks in the plan. Preserve mechanisms explicitly required by the user or an applicable decision as constraints.
 
 Read the relevant current evidence, project instructions, decisions, jobs, risk policy, and delivery workflow. Use that context before asking for information the user has already supplied.
 
@@ -39,11 +39,11 @@ Local mode needs no GitHub account or Project. When GitHub is selected, read [th
 
 ## Build the current plan
 
-Keep one authoritative plan in the conversation or an agreed artifact. Honor any required project vehicle. Save continuity in a permitted document location outside runtime configuration directories. Keep updates proportional.
+Keep one authoritative plan separate from the outcome. In GitHub, the child increment issues together form the plan. Each child carries its own part. Remove or mark superseded any complete plan copied into the Now issue. Keep Now/Next/Later summaries and current-revision headings out of the outcome ticket and its comments. In Local tracking, keep separate Outcome and Delivery plan sections in the existing record. Save continuity in a permitted document location outside runtime configuration directories. Keep updates proportional.
 
 Include:
 
-- **Objective and completion evidence:** the desired result and how to verify it.
+- **Outcome reference:** point to the confirmed result and completion evidence.
 - **Now:** one coherent release increment to work on now. Specify its intended result, scope, important assumptions or dependencies, verification, and what counts as delivered. Make it small enough to test, integrate, and learn from safely. A foundation increment is valid when its contribution and limits are explicit.
 - **Next:** provisional subsequent release increments, describing their results and major dependencies with less detail. Their sequence and scope can change.
 - **Later:** the broad direction beyond Next, at the highest level of uncertainty. Avoid speculative implementation detail and implied commitments.

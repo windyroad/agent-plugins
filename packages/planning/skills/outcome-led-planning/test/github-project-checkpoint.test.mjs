@@ -72,6 +72,22 @@ const finish = (output, failure) => {
 const event = { args };
 state.events.push(event);
 if (args[0] === 'api' && args[1] === 'user') finish({ login: 'fixture-owner' });
+else if (args[0] === 'api' && args.at(-1) === 'repos/${repository}/issues/1/sub_issues?per_page=100') {
+  if (!args.includes('--paginate') || !args.includes('--slurp')) finish({}, 'Child listing must cover all pages');
+  if (state.fault === 'incomplete-native-pages') {
+    process.stdout.write('[[]');
+    process.exit(1);
+  }
+  if (state.fault === 'failed-after-native-page') {
+    process.stdout.write('[[],{"message":"Not Found","status":"404"}]');
+    process.exit(1);
+  }
+  if (!state.outcomeChildPages) {
+    process.stdout.write('[{"message":"Not Found","documentation_url":"https://docs.github.com/rest/issues/sub-issues#list-sub-issues","status":"404"}]');
+    finish({}, 'gh: Not Found (HTTP 404)');
+  }
+  finish(state.outcomeChildPages);
+}
 else if (args[0] === 'api' && args[1] === 'graphql') {
   const input = JSON.parse(fs.readFileSync(0, 'utf8'));
   if (!input.query.includes('ProjectV2Item') || JSON.stringify(input.variables.ids) !== JSON.stringify(['item2', 'item4'])) finish({}, 'Unexpected GraphQL request');
@@ -324,11 +340,12 @@ test('hierarchy inspection preserves actual records and reports missing Next met
   const result = f.inspectHierarchy();
   assert.equal(result.status, 0, result.stdout);
   const report = result.output;
+  assert.equal(report.outcomeChildren.state, 'unavailable');
   assert.equal(report.repository, repository);
   assert.deepEqual(report.projectSelection, { state: 'not-recorded', source: 'configuration' });
   const selectionFinding = report.findings.find(finding => finding.field === 'projectSelection');
   assert.equal(selectionFinding.issue, hierarchyRequest.outcome);
-  assert.match(selectionFinding.nextAction, /outcome #1\b/i);
+  assert.doesNotMatch(selectionFinding.nextAction, /#1\b|#2\b/);
   assert.match(selectionFinding.nextAction, /if.*unresolved/i);
   assert.match(selectionFinding.nextAction, /selection gap.*conditional Project work/i);
   assert.match(selectionFinding.nextAction, /read.*back.*saved body/i);
@@ -367,6 +384,51 @@ test('hierarchy inspection preserves actual records and reports missing Next met
   assert.equal(writes(saved).length, 0);
   assert.equal(saved.events.some(event => event.args[0] === 'project' || event.args[1] === 'graphql'), false);
   assert.deepEqual(saved.events.filter(event => event.args[0] === 'issue').map(event => Number(event.args[2])), [1, 2, 3, 4]);
+});
+
+test('native child records establish relationships without a plan on the outcome', t => {
+  const f = fixture(t, '', 'hierarchy');
+  const outcome = 'Owner: fixture-owner\nAcceptance: maintain the records accurately.\n';
+  f.change(state => {
+    state.issues[1].body = outcome;
+    state.issues[1].comments = [{ body: 'Now: #19. Old plan.' }];
+    state.outcomeChildPages = [[{ number: 2, html_url: state.issues[2].url }], [{ number: 3, html_url: state.issues[3].url }]];
+  });
+  const result = f.inspectHierarchy();
+  assert.equal(result.status, 0, result.stdout);
+  assert.deepEqual(result.output.outcomeChildren, { state: 'read', numbers: [2, 3] });
+  assert.equal(result.output.records.outcome.body, outcome);
+  assert.equal(result.output.records.outcome.inspection.revision, undefined);
+  assert.equal(result.output.findings.some(finding =>
+    finding.issue === 1 && ['revision', 'child-text-reference'].includes(finding.field)), false);
+  assert.equal(result.output.findings.some(finding => finding.field === 'native-child'), false);
+  assert.equal(writes(f.state()).length, 0);
+});
+
+test('a complete native child read overrides reciprocal text and a closed child cannot be current', t => {
+  const f = fixture(t, '', 'hierarchy');
+  f.change(state => {
+    state.issues[2].state = 'CLOSED';
+    state.issues[2].labels.push({ name: 'horizon:now' });
+    state.outcomeChildPages = [[{ number: 3, html_url: state.issues[3].url }, { number: 2, html_url: 'https://github.com/other/repo/issues/2' }]];
+  });
+  const result = f.inspectHierarchy();
+  assert.equal(result.status, 0, result.stdout);
+  assert.equal(result.output.textLinks.find(link => link.child === 2).parentMentionsChild.observed, true);
+  assert.ok(result.output.findings.some(finding => finding.issue === 2 && finding.field === 'native-child' && finding.state === 'not-linked'));
+  assert.ok(result.output.findings.some(finding => finding.issue === 2 && finding.field === 'current-increment' && finding.state === 'not-open'));
+  assert.equal(writes(f.state()).length, 0);
+});
+
+test('an interrupted native listing does not authorize text fallback', t => {
+  for (const fault of ['incomplete-native-pages', 'failed-after-native-page']) {
+    const f = fixture(t, fault, 'hierarchy');
+    const result = f.inspectHierarchy();
+    assert.equal(result.status, 1);
+    assert.equal(result.output.status, 'inspection-unavailable');
+    assert.equal(result.output.outcomeChildren, undefined);
+    assert.equal(writes(f.state()).length, 0);
+  }
 });
 
 test('hierarchy inspection distinguishes literal candidates, unresolved, empty, unsupported and multiple evidence', t => {

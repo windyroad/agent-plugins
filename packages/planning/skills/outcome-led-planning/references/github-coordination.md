@@ -6,7 +6,7 @@ Use this protocol only when GitHub tracking is selected. Preserve the confirmed 
 
 Read the repository's instructions and existing planning records. Confirm the repository and outcome issue from supplied context before writing. Use each contributor's own authenticated account and existing permissions. Inspect available tools, issue features, labels, Project fields and access instead of assuming support or requesting broader access by default.
 
-Use GitHub Issues as the authoritative outcome plan when that is the agreed tracking choice. An optional GitHub Project mirrors those same issues for visibility; it is not a second plan. Existing architecture decisions, jobs, risk policy and technical documents remain authoritative in their own domains. If moving an existing plan into Issues, record the handover, current revision and links in both places before retiring the former plan. Do not silently migrate records or create competing plans.
+Use the child increment issues as the authoritative delivery plan when GitHub is selected. An optional GitHub Project mirrors those same issues for visibility; it is not a second plan. Existing architecture decisions, jobs, risk policy and technical documents remain authoritative in their own domains. If moving an existing plan into Issues, record the handover, current revision and links in both places before retiring the former plan. Do not silently migrate records or create competing plans.
 
 Before creation, search existing open and closed issues and read likely matches. Reuse the correct existing records. After a timed-out or otherwise ambiguous mutation, read the exact remote state before retrying. Use a stable task/session marker to reconcile uncertain creates; never blindly duplicate an issue, comment, assignment or Project update.
 
@@ -47,8 +47,7 @@ If an exact comment URL is unknown, link the issue and name the evidence.
 
 Give each fact one home. Omit copies of verified native fields and
 relationships unless the workflow requires them in the issue body. Keep
-the complete task claim receipt, the outcome's ordered plan links,
-revision, acceptance, checkpoint labels and required text fallbacks.
+the complete task claim receipt, the increment’s revision, acceptance, checkpoint labels and required text fallbacks.
 Mention a related issue when it explains the next action, blocker or evidence.
 
 Replace stale progress and next steps in place. Keep prior decisions and
@@ -63,7 +62,7 @@ Use three linked issue levels, without introducing an epic or story tier:
 
 | Record    | Owns               | Required information across the issue, native fields and linked records |
 | --------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Outcome   | Outcome owner      | Its recorded owner, confirmed SMART result, acceptance evidence, constraints, deadline, ordered increment links and current plan revision |
+| Outcome   | Outcome owner      | Its recorded owner, confirmed SMART result, acceptance evidence, constraints, deadline and discoverable child increments |
 | Increment | Increment owner    | Its recorded owner, intended result, horizon, own revision and acceptance (known or explicitly unresolved), assumptions/dependencies, contribution tasks; five critic results for executable work and delivery evidence when delivered |
 | Task      | Contributing agent | Its recorded owner/account and distinct agent/session, parent increment, bounded scope, own revision and acceptance, dependencies, status and completion evidence when complete |
 
@@ -71,9 +70,9 @@ Do not infer a child owner from its parent. On tasks, identify the actual accoun
 
 Keep the planning responsibilities distinct:
 
-- **Outcome issue:** owns the authoritative current Now/Next/Later plan and its revision: one coherent Now increment, with Next and Later provisional.
-- **Increment issue:** owns its bounded result, revision, acceptance and task execution plan, with one horizon. Link to the outcome plan or other increments for context. Remove or clearly mark superseded any copied cross-increment plan still presented as current.
-- **Replacing Now:** reconcile the outcome and affected increment records to the approved revision, carrying forward its provisional Next/Later without requiring their completion evidence. Preserve superseded history. Read back both bodies and compare their current plan, scope and ownership with that revision; fetching the records alone is not verification. Treat a needed change to the assessed sequence as replanning under the existing assessment rules, rather than silently changing it during routine reconciliation.
+- **Outcome issue:** keep the confirmed result, completion evidence and required constraints. Native child links expose the increments. Use reciprocal references only when the native relationship is unavailable. Keep delivery steps, sequence and plan revision out of the outcome body and its comments.
+- **Increment issues:** together own the plan. Each child describes only its own delivery work, with links for dependencies. No single child holds the authoritative Now/Next/Later sequence. Each carries its result, horizon, revision, assessment, task execution plan and relevant order or dependencies. Read the actual child records and select the single open, assessed Now. Closed children and superseded prose cannot select work. If a complete native read contradicts a text link, or the available evidence cannot establish one assessed Now, resolve the discrepancy before dependent execution.
+- **Replacing Now:** update the affected increment records and relationships. Read back their horizons, revisions, assessment and dependencies. Read the saved outcome body after cleanup and compare its confirmed result, completion evidence and constraints with the prior body. Remove any stale Now heading or revision from the outcome rather than refreshing it. Remove or mark superseded any duplicate cross-increment plan presented as current. Keep the increment’s own tasks and useful links to other increments. Leave Next and Later provisional. Preserve legacy plan prose as history where needed. A changed executable plan still requires the existing assessment.
 
 Give the existing planning critic the saved outcome and affected increment records, relevant tasks and any selected Project setup evidence claimed by the plan. After saving the proposed or revised records, resolve concrete record discrepancies and have the critic recheck the saved repairs before dependent work. Reuse the existing review; routine checkpoint updates do not require another five-critic cycle.
 
@@ -203,7 +202,7 @@ source for the selection decision below, not proof of capability or acceptance.
    - **Established none:** continue issue-side reconciliation without Project
      setup, fields or synchronization.
    - **Unresolved:** inspect available configuration, requirements, direction and
-     issue records. Record the selection gap and keep Project work conditional;
+     issue records. Record the selection gap and conditional Project work on the current increment;
      there is no established mirror operation to report pending or unsynchronized.
      Omitted information and API availability establish neither selection nor
      an explicit choice to use no Project.
@@ -280,9 +279,10 @@ Post acceptance evidence before completing a task. Preserve its actual recorded 
 After a verified increment, or earlier when evidence invalidates the plan, the outcome owner:
 
 1. Compares evidence with the confirmed outcome and records what changed understanding.
-2. Rewrites the current plan revision and increment sequence from the remaining gap. Reorders, splits, replaces or drops speculative work rather than mechanically promoting Next.
+2. Updates the child increment records with the revised plan based on the remaining gap. Reorders, splits, replaces or drops speculative work rather than mechanically promoting Next.
 3. Updates the Now/Next/Later assignment on increment issues and removes superseded horizons. Reconciles the optional Project mirror and records any update it could not make.
 4. Iterates the materially revised executable plan with the five independent critics in the planning skill before dependent execution. Scoped contributions inside the assessed revision do not each trigger full replanning.
 5. Records reassigned, dropped or superseded tasks with their reasons and explicit ownership handoffs, preserving history and evidence.
+6. Once the new Now is assessed and authorized, carries it through delivery and independent verification, then repeats this loop until the outcome is verified or a real blocker prevents further progress.
 
 Close the outcome only when its confirmed acceptance evidence is satisfied. Stop unnecessary work. A tidy Project board, merged change or all tasks marked done does not replace the user's result. If blocked, finish useful independent work, record exact missing authority/capability/evidence and the smallest action that unlocks progress, then resume from fresh evidence without repeating completed effects.

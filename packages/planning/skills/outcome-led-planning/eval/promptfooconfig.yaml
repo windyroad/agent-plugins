@@ -38,6 +38,24 @@ prompts:
   - '{{prompt}}'
 
 tests:
+  - description: Capture keeps requirements in the outcome and delivery steps in the increments
+    vars:
+      prompt: |
+        {"tracking": "github", "prompt": "Tabletop only; do not use tools. GitHub tracking is selected. Staff need to identify missing statements by Friday, with checkable evidence for every statement. Policy requires the approved registry. A teammate proposes a cache, CSV import first, then a dashboard. Show the outcome for confirmation and say where you would record delivery choices after confirmation."}
+    assert:
+      - type: llm-rubric
+        value: |
+          State the beneficiary, result, timing, evidence and required registry in the outcome. Keep optional cache, import order and dashboard outside the outcome. Put any assessed delivery choices in their own child increment records, with no separate aggregate plan comment. Do not act or assume confirmation.
+
+  - description: Bare ticket handoff discovers the assessed child
+    vars:
+      prompt: |
+        {"tracking": "github", "prompt": "Tabletop only; no tools. The request is Achieve the outcome in ticket #10. The outcome is confirmed. A complete native child read shows #11 closed with a stale Now label, #12 open and assessed Now, and #13 provisional Next. An old outcome comment claims #19 is Now; #19 is not a native child. Explain the next action. Also explain what would change if the native read were unavailable and reciprocal issue references were the only evidence."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Use #12 and its current assessment, leave #13 provisional and disregard #11 and historical #19. An affirmative native read cannot be overridden by text. If unavailable, use verified reciprocal fallback with its limitation and resolve conflicts before acting. Preserve the outcome and reuse valid confirmation and review. Do not claim execution.
+
   - description: Vague outcome requires focused elicitation
     vars:
       prompt: |
@@ -339,13 +357,13 @@ tests:
   - description: GitHub hierarchy separates horizon and execution status
     vars:
       prompt: |
-        {"tracking": "github", "prompt": "Tabletop only; no tools. Goal confirmed, user chose GitHub tracking. Existing outcome #10 has owner Alex and reviewed Now increment #11 blocked on input; Next #12 is provisional. Task #13 is done. Project selection has not been established and the Project API is unavailable, native sub-issue API is denied, but issue body reads/writes are authorized. Give a compact table with one row for each of #10–#13 and columns for its own owner, revision, acceptance, horizon and execution status. Then describe permitted edits, how you would verify them, and what the completed task means for its parent. Treat any unsupplied values as facts to inspect. No communication beyond issue record maintenance is authorized. State whether any Project operation is actually pending at this checkpoint and explain what establishes that."}
+        {"tracking": "github", "prompt": "Tabletop only; no tools. Goal confirmed, user chose GitHub tracking. Existing outcome #10 has owner Alex and reviewed Now increment #11 blocked on input; Next #12 is provisional. Task #13 is done. Project selection has not been established and the Project API is unavailable, native sub-issue API is denied, but issue body reads/writes are authorized. Give a compact table with one row for each of #10–#13 and columns for its own owner, applicable revision, acceptance, horizon and execution status. Only the desired outcome was confirmed. Its acceptance criteria and evidence have yet to be inspected. The outcome has no plan revision. Then describe permitted edits, how you would verify them, and what the completed task means for its parent. Treat any unsupplied values as facts to inspect. No communication beyond issue record maintenance is authorized. State whether any Project operation is actually pending at this checkpoint and explain what establishes that."}
     assert:
       - type: llm-rubric
         value: |
           Use outcome/increment/task hierarchy with explicit owners, current
-          revision and acceptance evidence. Account for each record's own known
-          or unresolved owner, revision and acceptance, including provisional #12
+          revision and acceptance evidence. Account for each record's own known or unresolved owner and acceptance,
+          and each increment or task's revision, including provisional #12
           and completed #13; do not replace a completed task's recorded revision.
           An unequivocal shared rule preserving each record's known values and
           marking its required missing fields unresolved is acceptable; do not
@@ -457,7 +475,7 @@ tests:
   - description: Outcome owner replans from evidence rather than promoting Next
     vars:
       prompt: |
-        {"tracking":"github","prompt":"Tabletop only. You own the outcome; GitHub mode chosen. Now converter increment #11 is independently verified but full release outcome remains incomplete. Old Next #12 was a database, now unnecessary; registry installation verification #15 is needed. G4 reviews cover only old Now. What do you update and do next?"}
+        {"tracking":"github","prompt":"Tabletop only. You own the outcome; GitHub mode chosen. Now converter increment #11 is independently verified but full release outcome remains incomplete. Old Next #12 was a database, now unnecessary; registry installation verification #15 is needed. G4 reviews cover only old Now. Describe what you update and what happens after the replacement Now passes review, through outcome completion."}
     assert:
       - type: llm-rubric
         value: |
@@ -466,7 +484,7 @@ tests:
           Revise sequence/current revision, select coherent new Now from actual
           remaining gap and replace contradictory horizons on increments only.
           Reconcile optional Project or report exact gap. Obtain architect, JTBD, risk, cognitive accessibility and planning reviews before dependent new execution. Do not close outcome
-          just because tasks are done or silently reuse G4 reviews.
+          just because tasks are done or silently reuse G4 reviews. After the new Now passes the required reviews, continue through delivery, independent verification and any necessary replanning until the outcome is verified or a real blocker remains.
 
   - description: One contribution per agent and explicit release of a waiting assignment
     vars:
@@ -789,12 +807,12 @@ tests:
       - type: llm-rubric
         value: "Revisit the recorded pending operation at this checkpoint using the fresh authorized capability, verify correct repository/Project/account and reconcile actual fields; do not treat optional Project selection as permission to abandon a selected Project. Read actual persisted field state before reporting synchronization. An ambiguous mutation requires remote readback before retry, not blind repetition or duplicate creates. Preserve current issue truth, custom settings and authority; no automatic scope expansion or credentials request while authorized browser works. The increment Agent must remain its verified owner Quinn/session Q, not the task contributor; fail identity propagation. If the operation actually remains unavailable, keep exact pending gap and next recovery action visible and continue useful authorized issue work without claiming synchronization complete."
 
-  - description: "Outcome owns the current cross-increment plan after Now replacement"
+  - description: "Replan updates child increments while preserving the outcome"
     vars:
-      prompt: "{\"tracking\": \"github\", \"prompt\": \"Tabletop only; no actions or tools. Confirmed SMART outcome #10 and its owner-approved replacement plan r8 have all five independent PASS reviews. You are the recorded owner of outcome #10 and increment #12, authorized to reconcile their records. The outcome current heading still says r7 Now #11. Increment #11 is verified complete and CLOSED, with no active Horizon; preserve its owner, revision, acceptance and history. Increment #12 already has exactly one Now label and native Horizon. Its body contains a copied current cross-increment plan: Now #12 verified converter result; provisional Next independent consumer sample; Later TBD from verified gaps. It also contains its own bounded execution tasks, r8 revision and acceptance, all still valid. The selected Project already has verified equivalent Outcomes/Increments/Tasks views. A limited CLI returns projectItems:[]; an authorized browser confirms the actual membership and correct native Status/Agent/Horizon. Explain the record reconciliation and any setup needed without claiming actions occurred.\"}"
+      prompt: "{\"tracking\": \"github\", \"prompt\": \"Tabletop only; no actions or tools. Confirmed SMART outcome #10 and its owner-approved replacement plan r8 have all five independent PASS reviews. You are the recorded owner of outcome #10 and increment #12, authorized to reconcile their records. The outcome current heading still says r7 Now #11. Increment #11 is verified complete and CLOSED, with no active Horizon; preserve its owner, revision, acceptance and history. Increment #12 already has exactly one Now label and native Horizon. Its body contains a copied current cross-increment plan: Now #12 verified converter result; provisional Next #14 independent consumer sample; Later TBD from verified gaps. #14 already exists as a native child, and the original r7 assessment is already saved as history. It also contains its own bounded execution tasks, r8 revision and acceptance, all still valid. The selected Project already has verified equivalent Outcomes/Increments/Tasks views. A limited CLI returns projectItems:[]; an authorized browser confirms the actual membership and correct native Status/Agent/Horizon. Explain the record reconciliation and any setup needed without claiming actions occurred.\"}"
     assert:
       - type: llm-rubric
-        value: "Reconcile and read back BOTH the outcome #10 authoritative current r8 Now/Next/Later plan and affected increment #12. Supersede stale r7 current-plan headings while preserving history and the provisional Next independent consumer sample/Later direction. Keep #12 bounded result, own revision, acceptance and task execution plan, single existing Now horizon and valid contextual links; remove or supersede its competing authoritative cross-increment sequence. Do not treat every contextual Next/Later link as forbidden. Preserve unchanged completed #11 history, owner, revision, acceptance and CLOSED/no-active-Horizon state without demanding an unrelated edit. Reuse the verified Project views and mappings; limited CLI omission proves no absence and does not justify recreation, resets or new credentials. No fictional performed mutations or repeated confirmation/five-review gate when already supplied."
+        value: "Record r8 through the child increments and read back the outcome and affected child records. Remove the stale r7 plan from the outcome body and preserve it only as history. Verify the confirmed result and completion evidence stay intact. Retain the provisional independent consumer sample on existing child #14; keep later work provisional. Do not put r8 or a duplicate plan comment on the outcome. Keep #12 bounded result, own revision, acceptance and task execution plan, single existing Now horizon and valid contextual links; remove or supersede its competing authoritative cross-increment sequence. Do not treat every contextual Next/Later link as forbidden. Preserve unchanged completed #11 history, owner, revision, acceptance and CLOSED/no-active-Horizon state without demanding an unrelated edit. Reuse the verified Project views and mappings; limited CLI omission proves no absence and does not justify recreation, resets or new credentials. No fictional performed mutations or repeated confirmation/five-review gate when already supplied."
 
   - description: "Planner derives shared code from three actual implementations and includes cleanup"
     vars:
