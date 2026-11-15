@@ -12,11 +12,11 @@ Keep the confirmed outcome as the reference point; replan the means from evidenc
 
 When asked to achieve the outcome in an existing ticket, follow this workflow through verified outcome completion. Resolve the ticket in the current project or from its link. Read the outcome, current plan revision and assessment, relevant discussion, and ownership before acting. Reuse the recorded confirmation and reviews when they cover the current outcome and executable plan. Apply the confirmation or assessment steps below when that evidence is missing or no longer applies. Honor active ownership and existing handoff rules.
 
-In GitHub, find the current assessed Now among the outcome’s child increments using the GitHub coordination protocol. In Local tracking, read the separate delivery plan. Start with the current assessed Now. After each verified increment, replan from the remaining gap and continue within authority. Use `contribute` for requests limited to helping with part of the outcome.
+In GitHub, find the current assessed Now among the outcome’s child increments using the GitHub coordination protocol. In Local tracking, read the separate delivery plan. Start with the current assessed Now. After each verified increment, replan from the remaining gap. When the replacement Now passes review and is authorized, execute it in the same handoff, verify its result and repeat until the outcome is verified or a concrete blocker prevents progress. Use `contribute` for requests limited to helping with part of the outcome.
 
 ## Establish and confirm the SMART objective
 
-State the intended result, observable completion evidence and required constraints. Put proposed technologies, delivery steps, order and tasks in the plan. Preserve mechanisms explicitly required by the user or an applicable decision as constraints.
+State the intended result, observable completion evidence and required constraints. Put proposed technologies, delivery steps, order and tasks in the plan. Preserve mechanisms explicitly required by the user or an applicable decision as constraints. Keep optional or rejected approaches out of the outcome, including notes that say an approach is merely optional.
 
 Read the relevant current evidence, project instructions, decisions, jobs, risk policy, and delivery workflow. Use that context before asking for information the user has already supplied.
 
