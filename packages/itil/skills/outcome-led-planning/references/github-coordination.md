@@ -35,8 +35,9 @@ issues to test setup or add an auto-add workflow in place of explicit membership
 For both new issues and updates, start with the intended result, or the
 verified result if acceptance has passed. Follow it with one plain
 `Next action:` line, starting at the left margin. For blocked work, use
-this one line to state the blocker and what clears it. Remove a separate
-blocker field that repeats the same condition.
+this one line to state the blocker and what clears it. Keep Progress for
+distinct verified evidence. Omit any other sentence that repeats the blocker
+or what clears it.
 Omit empty blocker and other optional fields. Put acceptance before
 review, claim and delivery evidence. A new task body records the owner
 account and distinct agent or session. Leave pending claim and readback
@@ -268,7 +269,7 @@ Use existing shared records and already-authorized communication channels. Choos
 
 A handoff request is incomplete without identifying the upstream and dependent task links, current revision, requested evidence and recipient. Explicitly ask the receiving contributor to acknowledge in the shared thread and link the task that will address it; include these steps when explaining the proposed handoff. The receiving contributor then acknowledges and supplies that link. The dependent owner independently verifies returned evidence before clearing a blocker. An unsupported assertion of completion does not close a dependency. Link the handoff and resulting evidence in both relevant tasks.
 
-Comments and mentions **do not guarantee an idle agent wakes up**. State that limitation; do not promise automatic execution. Do not create standing pollers, scheduled jobs, messaging infrastructure or an orchestration service without explicit authorization.
+Comments and mentions **do not guarantee an idle agent wakes up**. State that limitation; do not promise automatic execution. During active work and active waiting, continue regular bounded discussion reads as well as reads at event checkpoints. Do not create standing pollers, scheduled jobs, messaging infrastructure or an orchestration service without explicit authorization.
 
 When an authorized owner must complete a pending Project operation, request it through the agreed channel only when messaging is authorized. Obtain the actual saved field/view readback before claiming synchronization; a posted request does not establish that the owner acted.
 
