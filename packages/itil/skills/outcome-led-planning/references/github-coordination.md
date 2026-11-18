@@ -32,8 +32,12 @@ issues to test setup or add an auto-add workflow in place of explicit membership
 
 ## Write issues people can scan
 
-For both new issues and updates, start with the intended result, or the
-verified result if acceptance has passed. Follow it with one plain
+For issue bodies and comments, choose content by record kind before writing.
+Keep the intended result, or the verified result if acceptance has passed.
+Outcomes follow the outcome-content rule below; do not add delivery actions
+or child blockers to make them match an operational issue template.
+
+For increment and task bodies, follow the result with one plain
 `Next action:` line, starting at the left margin. For blocked work, use
 this one line to state the blocker and what clears it. Keep Progress for
 distinct verified evidence. Omit any other sentence that repeats the blocker
@@ -51,9 +55,9 @@ relationships unless the workflow requires them in the issue body. Keep
 the complete task claim receipt, the increment’s revision, acceptance, checkpoint labels and required text fallbacks.
 Mention a related issue when it explains the next action, blocker or evidence.
 
-Replace stale progress and next steps in place. Keep prior decisions and
-evidence in their existing records, or leave a short linked history note if
-needed. Avoid repeating the title, parent plan, old revisions, reviewer prose,
+Replace stale content in its owning record. Keep prior decisions and
+evidence in their existing records. Plan history belongs with the child plan,
+not in an outcome history note. Avoid repeating the title, parent plan, old revisions, reviewer prose,
 raw logs or task timelines. At a routine checkpoint, record what changed and
 its effect on the next step.
 
@@ -71,9 +75,9 @@ Do not infer a child owner from its parent. On tasks, identify the actual accoun
 
 Keep the planning responsibilities distinct:
 
-- **Outcome issue:** keep the confirmed result, completion evidence and required constraints. Native child links expose the increments. Use reciprocal references only when the native relationship is unavailable. Keep delivery steps, sequence, plan revisions and optional approaches out of the outcome body and its comments. When saving a new outcome, compare the saved result, evidence and constraints with what was confirmed and remove any proposed method that slipped in.
+- **Outcome issue:** keep the confirmed result, completion evidence, required constraints and its own required ownership/relationship information. Explicitly required mechanisms remain constraints; actual outcome evidence and unmet completion criteria may be stated honestly. Delivery actions, child dependencies/blockers, sequence, plan revisions, optional approaches and plan history belong on their owning child increments, not in the outcome body or comments. Native child links expose the increments; use reciprocal references only when the native relationship is unavailable. For every creation, update, comment or replacement, compare the actual proposed and saved content with the confirmed result, evidence and constraints. Move misplaced current plan content to its owning child and remove it from the outcome within existing edit authority. Do not retain it there as a quotation, superseded plan or history note. Preserve substantive goal-change confirmation. Do not claim immutable edit history or uneditable third-party content was changed; retain any real cleanup gap on the current increment.
 - **Increment issues:** together own the plan. Each child describes only its own delivery work, with links for dependencies. No single child holds the authoritative Now/Next/Later sequence. Each carries its result, horizon, revision, assessment, task execution plan and relevant order or dependencies. Read the actual child records and select the single open, assessed Now. A complete native child list with one open, assessed Now is sufficient to select it. Ignore stale text pointing to non-children and old horizon labels on closed children when selecting Now. Before starting or resuming implementation or claiming a task, apply [increment admission](project-tracking.md#admit-one-increment-to-execution): actual unfinished sibling delivery can contradict the labels even when one assessed Now is selectable. Routine cleanup can happen independently, within existing authority. Resolve discrepancies affecting the assessed Now, its scope or execution admission before dependent implementation. Harmless administrative cleanup does not block work whose admission is established.
-- **Replacing Now:** update the affected increment records and relationships. Read back their horizons, revisions, assessment and dependencies. Read the saved outcome body after cleanup and compare its confirmed result, completion evidence and constraints with the prior body. Remove any stale Now heading or revision from the outcome rather than refreshing it. Remove or mark superseded any duplicate cross-increment plan presented as current. Keep the increment’s own tasks and useful links to other increments. Leave Next and Later provisional. Preserve legacy plan prose as history where needed. A changed executable plan still requires the existing assessment.
+- **Replacing Now:** update the affected increment records and relationships. Read back their horizons, revisions, assessment and dependencies. Apply the outcome-content comparison to its body and affected comments. Remove any stale Now heading or revision from the outcome rather than refreshing it. Remove or mark superseded any duplicate cross-increment plan presented as current on a child. Keep each increment’s own tasks and useful links to other increments. Leave Next and Later provisional. Preserve legacy plan history only on its owning children or an existing linked plan record, never in the outcome body or comments. A changed executable plan still requires the existing assessment.
 
 Give the existing planning critic the saved outcome and affected increment records, relevant tasks and any selected Project setup evidence claimed by the plan. After saving the proposed or revised records, resolve concrete record discrepancies and have the critic recheck the saved repairs before dependent work. Reuse the existing review; routine checkpoint updates do not require another five-critic cycle.
 
@@ -216,8 +220,12 @@ source for the selection decision below, not proof of capability or acceptance.
    does not replace the task's own revision or acceptance. Provisional ownership,
    revision and tentative acceptance imply neither an executable plan nor
    critic approval or completion evidence.
-   Record actual scope, status, increment-only Horizon, dependencies/blocker,
-   next action and state-appropriate evidence. For a selected/required Project,
+   Keep outcome content to its confirmed result, evidence, constraints and
+   required ownership/relationships, applying the outcome-content comparison
+   to any body or comment change. Record operational scope, dependencies/blocker,
+   next action, own revision and increment-only Horizon on the appropriate
+   increment/task; preserve state-appropriate evidence for each record.
+   For a selected/required Project,
    each item's Agent remains its verified owner/session, never an identity
    copied from its parent or child; Status reflects that item's actual work.
 3. **Update and verify.** Make only necessary authorized changes to existing

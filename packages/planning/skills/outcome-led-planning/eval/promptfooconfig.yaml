@@ -1044,3 +1044,57 @@ tests:
       - type: llm-rubric
         value: |
           In the proposed issue body, a reader can find the intended result and the rerun as soon as #103 supplies the missing duplicate fixture. Keep the plain Next action: line near the top. Fail if the same missing fixture or unlock is restated in a separate blocker or status line, even in different words. Retain the current revision and acceptance; put any critic and CI evidence after acceptance. Native parent and task links and board fields need no standalone copies. Do not repeat superseded history, reviewer prose or logs. Evidence should link to supplied destinations with readable labels if cited. Evaluate the ticket body, not a brief response wrapper.
+
+  - description: Outcome writer creates a confirmed result without its optional plan
+    vars:
+      prompt: |
+        {"tracking": "github", "prompt": "Tabletop only; no actions or tools. Draft only the body of new outcome #100. Its exact SMART result is already confirmed: staff can recover an interrupted import without lost or duplicated accepted records, verified by stopping and resuming an import and comparing accepted records. ASAP. Offline use with SQLite is explicitly required by the user. Owner is @agent. GitHub Issues is saved; no Project is selected. Native children will hold delivery work. Separately, the proposed means are: first add a journal, next migrate stored records, then build the resume screen. Those means are optional and not user constraints. No plan has been assessed. Do not simulate creation, interviews or reviews."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Judge the actual outcome body. Preserve the confirmed recovery result, verification evidence, ASAP, offline/SQLite requirement and owner. Exclude the optional journal/migration/screen sequence and operational next actions, whether headed as a plan or written in ordinary prose. Do not require a new confirmation for the supplied exact confirmed result or invent an assessed plan. A required mechanism is a valid constraint, not forbidden planning.
+
+  - description: Outcome writer checkpoint keeps child work on the increment
+    vars:
+      prompt: |
+        {"tracking": "github", "prompt": "Tabletop only; no actions or tools. Draft replacement bodies, labelled outcome #100 and increment #101. You own both; no tools or writes. The confirmed outcome is analysts can export accurate reports, demonstrated by matching exported totals to the supplied source, ASAP. Preserve it. Native links show #101 under #100; no Project. #101 R2 is the admitted Now with five reviews already passed. Its acceptance is CSV and JSON exports matching source totals, publication and independent acceptance. CSV verification passed at https://github.com/example/repo/issues/102. JSON verification is blocked by fixture #103; the next action is rerun JSON once that fixture arrives. Publication and acceptance have not happened. The old outcome has the confirmed result, evidence, owner @agent and the line Next action: rerun JSON once #103 supplies the fixture. The old increment repeats that line and its valid R2 acceptance. Reconcile the actual content without inventing completed checks."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Judge both actual draft bodies. The outcome retains its confirmed result/evidence/ASAP/owner and truthful completion uncertainty, without the JSON-fixture rerun, child dependency or other delivery step. The increment retains R2, both formats and remaining publication/acceptance, and its necessary fixture-dependent next action. Do not erase all next actions globally, claim completion, create a Project or require new outcome confirmation/reviews already supplied.
+
+  - description: Outcome writer comment reports evidence without a successor plan
+    vars:
+      prompt: |
+        {"tracking": "github", "prompt": "Tabletop only; no actions or tools. Draft only a progress comment on confirmed outcome #200. You own it and may comment; this is a no-tools draft. Its result is staff can recover stopped imports without duplicate accepted records. The first child increment #201 is independently accepted: repeat imports of the supplied fixture produce one accepted record per stable ID. The full recovery outcome is not yet verified. A provisional child #202 contains the next proposed work: add restart checkpoints, build a resume command, then qualify interrupted recovery. That plan is unassessed and already belongs on #202. Native child links work. Keep the comment useful to someone checking the outcome, without inventing results."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Judge the actual outcome comment, not promises about later writing. Report the verified deduplication evidence and that full recovery remains unverified. Do not reproduce or summarize the restart-checkpoint/resume/qualification plan in the outcome comment, including as provisional or historical prose. It is fine to point readers to the existing child record without copying its plan. Do not claim the full outcome or #202 accepted.
+
+  - description: Outcome writer replacement moves plan history off the outcome
+    vars:
+      prompt: |
+        {"tracking": "github", "prompt": "Tabletop only; no actions or tools. Draft labelled replacement bodies for outcome #300 and its child #302, the current comment edit, and any relevant child history text. All content described is yours and editable; immutable GitHub edit history is outside this operation. Outcome #300 is confirmed: operators can resume interrupted exports with correct totals, verified against supplied source totals, ASAP. Owner @agent. Its body adds Legacy plan R1: implement a cursor, then add a retry screen. Its sole current comment quotes that same retired plan for history. The completed old child #301 already owns the cursor result and its acceptance evidence. Child #302 is the sole reviewed Now R2, with acceptance: resume after an interruption and match source totals. Its own plan is implement a resume command, verify interrupted runs, publish and obtain independent acceptance. Five critics passed R2. Native children work; no Project. Preserve honest history without describing any write as performed."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Judge the proposed current content and placement. The outcome body preserves the confirmed result/evidence/ASAP/owner. Its current comment may briefly restate that confirmed result or provide a concise history pointer; neither form or duplicated fields are mandatory. Neither contains retained or quoted cursor/retry plan history or #302 delivery steps. Keep relevant old plan history on its owning child or another existing linked plan record, not in the outcome; preserve #301 accepted evidence and #302 R2 acceptance and own useful plan. Do not fabricate deletion of immutable edit history, erase accepted evidence or request renewed outcome confirmation or a new five-critic assessment. Reusing the existing planning critic to verify saved record repairs is permitted; it is not another plan-review cycle.
+
+  - description: Outcome writer holds a substantive result change for confirmation
+    vars:
+      prompt: |
+        {"tracking": "github", "prompt": "Tabletop only; no actions or tools. A user asks: update outcome #400 to reflect progress. Draft the next reply and identify any outcome edit ready to save; no tools. Confirmed #400 is finance staff can export reports in both CSV and JSON, verified by comparing each format's totals to source, ASAP. Owner @agent. A proposed progress update changes the result to CSV only because JSON is difficult. The user has not confirmed that reduced result. The existing result and both-format acceptance remain saved, and no work is completed. No Project is selected."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Recognize the proposed CSV-only result as a substantive change requiring explicit outcome confirmation before changing the goal or executing a dependent reduced plan. Ask the concrete missing confirmation without answering for the user. Do not draft a ready-to-save CSV-only outcome, invent progress, silently discard JSON or reopen the already confirmed original result as though no confirmation existed. The original outcome remains intact pending the answer.
+
+  - description: Outcome writer permits a separate delivery plan in Local tracking
+    vars:
+      prompt: |
+        {"tracking": "local", "prompt": "Tabletop only; no actions or tools. Draft one Local planning document with separate Outcome and Delivery plan sections. The exact confirmed result is analysts can export accurate CSV and JSON reports, verified against source totals, ASAP; offline use is required. The current Now R2 has all five reviews and delivers correct CSV export with its verification and release; Next provisionally adds JSON from the same source. Owner @agent. Local tracking is saved, no GitHub tracking or Project is requested. This is a draft; no implementation or acceptance has occurred."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Permit the single Local document with distinct Outcome and Delivery plan sections. Keep the confirmed two-format result, source-total evidence, ASAP and offline constraint in Outcome; place useful R2 CSV work/verification/release and provisional JSON detail in the separate Delivery plan. Do not reject all planning in the same Local file, create GitHub records, pretend work passed, or ask for already-supplied confirmation/reviews.
