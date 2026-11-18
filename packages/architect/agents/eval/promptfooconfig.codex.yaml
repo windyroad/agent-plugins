@@ -34,14 +34,19 @@ tests:
           performance or test gaps. The current-public-rows/producer-output
           continuation is not established as restoring the shared recent-record
           projection and following its declared direct inputs. The representation
-          ADR does not authorize replacing that contract. Pass if the reviewer
-          identifies this substantive conflict and requires resolving it before
-          treating the API as a migration prerequisite. Explicit successor-ADR
-          and human-direction language is required when proposing to retain the
-          incompatible replacement; do not require both resolution routes.
-          Allow actual downstream public-output composition, but do not
-          invent an unstated downstream projection to justify this plan or defer
-          the contract question until browser edits.
+          ADR does not authorize replacing that contract. Pass when the reviewer
+          identifies the substantive conflict or unresolved boundary and requires
+          resolving it before accepting the API as a browser-migration prerequisite.
+          Removing the unsupported prerequisite claim, or requiring a defined
+          downstream composition to be checked against the accepted decisions,
+          satisfies this resolution requirement. Neither establishes permission
+          to replace the accepted loading contract. Do not infer such permission
+          merely from a request to specify the missing projection or input boundary.
+          If the response explicitly authorizes retaining or implementing an
+          incompatible replacement, require a proposed successor ADR and explicit
+          human direction. Still fail reviews that accept the current premise,
+          invent a compliant downstream projection, or defer resolving the contract
+          until browser implementation.
 
   - description: Loading contract rejects an API prerequisite that replaces the shared projection
     vars:
