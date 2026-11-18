@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 1.1.10
+
+### Patch Changes
+
+- 2a3c5fd: Ground blocking architecture findings in described mechanisms. Keep omitted lookup details advisory while preserving actual first-match and unresolved consumer-contract findings.
+
 ## 1.1.9
 
 ### Patch Changes
