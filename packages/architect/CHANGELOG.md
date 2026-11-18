@@ -1,5 +1,14 @@
 # @windyroad/architect
 
+## 1.1.9
+
+### Patch Changes
+
+- 2a26d2a: Check the consumer's computation and required inputs before accepting an API
+  as a migration prerequisite. Distinguish representation changes from changes
+  to projection loading, and independently challenge unsupported foundation work.
+  Preserve documented downstream compositions and useful API-only increments.
+
 ## 1.1.8
 
 ### Patch Changes
