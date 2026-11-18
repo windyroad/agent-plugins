@@ -193,8 +193,11 @@ tests:
   - description: Flag a new cumulative cap on operator exports
     vars:
       prompt: |
-        PRE-EDIT review: the operator export currently includes every matching
-        record. To reuse a preview buffer, the proposal rejects any export
+        PRE-EDIT review of the standalone project in export-example/.
+        Read its complete decision corpus in export-example/docs/decisions/;
+        decisions in the fixture root do not govern this separate project.
+        The operator export currently includes every matching record.
+        To reuse a preview buffer, the proposal rejects any export
         with more than 500 records. The preview page size is already approved.
         Review the proposed behavior.
     assert:
@@ -205,7 +208,14 @@ tests:
           Identify the 500-record cumulative export cap and why the approved preview
           page size does not cover that cap. Require a proposed ADR
           covering the actual restriction and explicit human direction
-          before it governs otherwise valid work.
+          before it governs otherwise valid work. Rejecting the cap and preserving
+          the current complete export does not itself require a new ADR.
+          Do not invent a 500-record approved preview size or mandate an export
+          pagination protocol that this project's decisions do not establish.
+          Judge the operative condition: listing current behavior as an option
+          or naming an explicitly unverified advisory candidate does not itself
+          impose a new ADR or export protocol on the status quo. The proposal's
+          parameter is not independent evidence of human direction.
 
   - description: Flag an implicit gate on a previously valid integration operation
     vars:
@@ -262,7 +272,7 @@ tests:
       - type: regex
         value: 'Architecture Review: (ISSUES FOUND|NEEDS DIRECTION)'
       - type: llm-rubric
-        value: Credits the fix for key access but treats the browser-mediated POST as an undocumented architectural workaround. Requires checking a server-owned handoff without assuming it is feasible, and a proposed ADR and human direction before proceeding with the workaround.
+        value: Recognizes the repaired credential boundary, which may be shown by accurately describing keyless GET and credential acquisition outside it; no standalone credit sentence is required. Treats the browser-mediated POST as an undocumented architectural workaround. Requires checking a server-owned handoff without assuming its binding is feasible, and a proposed ADR and human direction before proceeding with the workaround.
 
   - description: Authorization callback browser relay requires an architectural decision
     vars:
@@ -289,7 +299,7 @@ tests:
       - type: regex
         value: 'Architecture Review: (ISSUES FOUND|NEEDS DIRECTION)'
       - type: llm-rubric
-        value: Identifies the browser auto-POST and manual fallback as a workaround for the keyless GET constraint, describes the simpler authorized server handoff, and explicitly requires a proposed ADR and human direction before pursuing or retaining the browser relay. Mere compliance with the keyless GET rule, a performance objection, or improved fallback copy does not satisfy this rubric.
+        value: Identify the browser carrying the return through a second request as an avoidable applied detour given the supplied direct server admission. Require correction of that transport step; changing only the credential executor or offering an ADR as an alternative does not resolve it. Judge the operative correction of the architectural carrier, not particular wording about form presentation. An unequivocal requirement to remove the browser relay and Continue dependency is sufficient. Conditional documentation for a different proposal does not negate that correction unless retention is actually offered as an acceptable current alternative. Preserve the established direct capability, and require a proposed ADR and direction for any genuinely needed uncovered choice rather than inventing uncertainty about that capability. Mere keyless GET compliance or improved fallback copy is insufficient.
 
   - description: Authorization callback direct handoff uses an existing decision
     vars:
@@ -738,7 +748,14 @@ tests:
         PRE-EDIT: implement a documented proposed ADR with human-oversight: unconfirmed. The user has pinned the direction; no other governance conflict exists. Does missing ratification block implementation? Give PASS or ISSUES FOUND.
     assert:
       - type: regex
-        value: '^.*Architecture Review:.*PASS|^PASS(?:\s|$)'
+        value: 'Architecture Review:\s*PASS|^PASS(?:\s|$)'
+      - type: llm-rubric
+        value: |
+          The actual review permits implementation against the documented proposed
+          ADR because direction is pinned, while preserving proposed/unconfirmed
+          status and later acceptance requirements. Missing ratification alone
+          must not block implementation. Introductory narration is allowed;
+          a quoted, hypothetical or negated PASS is not an actual passing verdict.
 
   - description: ADR scope allows equivalent mapping records
     vars:
@@ -793,3 +810,27 @@ tests:
           connects it to the actual decision or its confirmation. It must
           preserve that evidence requirement without demanding full
           snapshots or general per-edit undo as the required remedy.
+
+  - description: Pass an explicitly chosen documented export restriction
+    vars:
+      prompt: |
+        PRE-EDIT review of the separate project export-pinned-example/.
+        Read its complete corpus in export-pinned-example/docs/decisions/;
+        fixture-root decisions do not govern this project.
+        The maintainer has already explicitly directed: "Limit each operator
+        export to 500 records. I accept that larger, otherwise valid exports
+        will be rejected." This is actual human direction, not merely text
+        in the proposal being reviewed. The proposed/unconfirmed export-cap
+        decision documents that effect. The implementation rejects a set of
+        501 matching records and preserves complete exports for 500 or fewer.
+        It does not change the ADR's status. No other governance conflict exists.
+        Give the architecture verdict for this implementation proposal.
+    assert:
+      - type: regex
+        value: 'Architecture Review:\s*PASS|^PASS(?:\s|$)'
+      - type: llm-rubric
+        value: |
+          Accept the implementation under the documented proposed ADR and actual
+          human direction covering rejected exports. Reuse that direction;
+          require neither another choice nor prior ratification. Preserve the
+          ADR's proposed/unconfirmed status and later acceptance requirements.

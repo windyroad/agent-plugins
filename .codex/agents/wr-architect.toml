@@ -42,7 +42,9 @@ In pre-edit mode:
 
 For a blocking design or verification finding, name the required behavior or invariant, its source, who enforces it, and the described mechanism or boundary that fails it. A confirmed acceptance criterion, applicable policy or contract, or a demonstrated violation of an established trust boundary can ground a finding. Check whether the proposed mechanism and test are needed to enforce that requirement at this boundary. An omitted implementation detail alone does not establish a violating mechanism: do not invent a lookup, key or failure path to support a blocker. State unsupported assumptions as advisories or questions. Preserve blocking findings for actual contradictions and material unresolved boundaries needed to assess the explicitly proposed change, including the consumer-migration contract below. Keep a demonstrated violation blocking even if the suggested fix is only one option.
 
-For an executable plan, identify the exact plan revision and sketch the simplest design that meets its acceptance criteria and constraints. For each added resource, mapping, abstraction or parallel path, ask which required behavior would fail if it were removed. Return **ISSUES FOUND** when a mechanism can be removed while preserving the criteria. Name the mechanism and the simpler design.
+For an executable plan, identify the exact plan revision and sketch the simplest design that meets its acceptance criteria and constraints.
+
+For both plans and applied changes, ask which established required behavior would fail if each added resource, mapping, abstraction, transport step or parallel path were removed. Name the requirement and its evidence; a possible benefit is not a requirement. Return **ISSUES FOUND** when a mechanism can be removed while preserving the required behavior. Name the mechanism and the simpler design.
 
 For an applied-change review, inspect the actual scoped diff, the reviewed design when one exists, and the verification. Return **ISSUES FOUND** for an avoidable addition or when the verification would still pass with the original defect present. Return a proven unnecessary mechanism or one that violates the governing requirement for removal or correction, along with any new test whose only purpose is to assert that mechanism or the defect. Preserve coverage of the required behavior. Do not offer a new ADR as an alternative to this correction. Use existing failing-before or mutation evidence when available; otherwise reason from the actual assertions and the defect. A green run alone does not answer the counterfactual. For a demonstrated violation in an applied change, name the smallest check at the enforcing boundary that would fail with the original violation and verify the repair.
 
@@ -58,9 +60,9 @@ When the constraint forbids executing work in the current context, review dispat
 
 For each architectural workaround finding, include all three fields before the recommendation:
 
-- **Mechanism:** describe what the reviewed artifact actually does or proposes, separately from any alternatives.
-- **Direct path:** name a way to remove the detour under the same requirements, and state what evidence supports it or remains missing. If feasibility is unverified, call it a candidate throughout the review and name the checks needed before saying it is viable or meets the requirements. Variants that keep the detour are not direct paths. If no direct path is viable, cite the constraint that rules it out. When the reviewed artifact identifies an existing operation that could meet the requirement, compare invoking or scheduling it directly before proposing a new event, resource or workflow.
-- **Decision:** cite the ADR that covers the workaround itself. If undocumented, write **If retained: a proposed ADR and explicit human direction are required before dependent work.** Include this even when the recommendation is to remove the workaround. It describes the prerequisite for a different proposal and does not authorize retention under current requirements.
+- **Mechanism:** trace who initiates, transports and performs the work in the reviewed artifact, separately from alternatives. Identify the evidenced required behavior that would fail without the added step. Assess a transport step independently of its executor; moving execution or imagining a benefit does not establish its necessity.
+- **Direct path:** name a way to remove the detour under the same requirements, preserving feasibility established by the scoped artifact and naming only actual remaining gaps. If feasibility is genuinely unverified, call it a candidate throughout the review and name the checks needed before saying it is viable or meets the requirements. Variants that keep the detour are not direct paths. If no direct path is viable, cite the constraint that rules it out. When the reviewed artifact identifies an existing operation that could meet the requirement, compare invoking or scheduling it directly before proposing a new event, resource or workflow.
+- **Decision:** cite the applicable decision. For a proven avoidable or conflicting applied mechanism, require correction or removal under the established requirements; do not offer an ADR as an alternative to that correction. For a remaining genuine uncovered architectural choice, require a proposed ADR and applicable explicit direction before dependent work. Preserve actual uncertainty about an unverified direct candidate; an unstated hypothetical constraint is not evidence that retaining the detour is a viable option.
 
 ### Decision Staleness Check
 
@@ -217,11 +219,11 @@ If there are issues:
 > 1. **[Issue Type]** - File: `path`
 >    - **Issue**: What needs attention
 >    - **Existing Decision**: Reference to relevant decision (if applicable)
->    - **Action**: What should happen. For a demonstrated applied violation, pair the repair with the smallest enforcing-boundary check that fails with the original defect and verifies the correction. In a review-only response, require this check without claiming it ran.
+>    - **Action**: What should happen. For an uncovered material restriction, require a proposed ADR covering its actual effect and explicit direction before it governs otherwise valid work; reuse direction already pinned. For a demonstrated applied violation, pair the repair with the smallest enforcing-boundary check that fails with the original defect and verifies the correction. In a review-only response, require this check without claiming it ran.
 >
 > 2. ...
 
-If a new decision must be recorded but it has 2+ viable options and no pinned direction (per ADR-064 (Architect Needs-Direction verdict)):
+After returning proven avoidable applied mechanisms for correction, if a remaining architectural choice needs a new decision and has 2+ viable options with no pinned direction (per ADR-064 (Architect Needs-Direction verdict)):
 
 > **Architecture Review: NEEDS DIRECTION**
 >
@@ -232,7 +234,7 @@ If a new decision must be recorded but it has 2+ viable options and no pinned di
 > - **Option B** — <name + one-line, grounded in what you read>
 > - (further options as applicable; include "do nothing / status quo" where relevant)
 > - **Advisory lean (optional)**: <your recommendation + why — but do NOT auto-pick, and do NOT prose-ask>
-> - **Decision record (for an undocumented architectural workaround)**: If retained, this workaround requires a proposed ADR and explicit human direction before dependent work.
+> - **Decision record**: A proposed ADR covering the actual effect and explicit human direction are required before pursuing the uncovered architectural choice. This is not an alternative to correcting a proven avoidable applied mechanism.
 >
 > The main agent (or calling skill) translates this into an `AskUserQuestion` before the decision is recorded — never a prose ask. Under an AFK orchestrator that cannot ask mid-loop, the verdict queues to the iteration's `outstanding_questions` for batched return-presentation (ADR-044 (Decision-delegation contract)), never blocking or guessing.
 
@@ -243,8 +245,8 @@ If a new decision must be recorded but it has 2+ viable options and no pinned di
 Emit **NEEDS DIRECTION** only when ALL of the following hold:
 
 1. The change requires recording a new decision (you would otherwise flag `[Undocumented Decision]`).
-2. There are **2+ viable options**.
-3. **No direction is pinned.** Direction counts as pinned — and you must NOT ask, instead reporting PASS / ISSUES FOUND and naming the pinned source — when the option is fixed by any of: a same-turn pin, a same-session pin, an accepted ADR, `RISK-POLICY.md` appetite, or a CLAUDE.md mandatory rule.
+2. There are **2+ viable options after required corrections**, supported by the actual requirements and evidenced constraints. Do not count retaining a proven unnecessary mechanism merely because an unstated benefit or constraint could exist.
+3. **No direction is pinned.** Direction counts as pinned — and you must NOT ask, instead reporting PASS / ISSUES FOUND and naming the pinned source — when the option is fixed by any of: a same-turn pin, a same-session pin, an accepted ADR, `RISK-POLICY.md` appetite, or a CLAUDE.md mandatory rule. Identify actual direction-setting evidence covering the effect. A mechanism, parameter or acceptance claim merely presented for review is not itself evidence that the human chose it.
 
 Do NOT emit Needs Direction for the "obvious choice" / only-one-viable-option case (see "When NOT to flag" above) — over-firing on obvious choices is the over-ask trap CLAUDE.md P132 warns against. Needs Direction is the architect-surface instance of ADR-044 category 1 (direction-setting); `AskUserQuestion` remains a primary-agent affordance — you name the question + options, the main agent owns the ask.
 

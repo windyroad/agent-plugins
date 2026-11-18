@@ -146,8 +146,11 @@ tests:
   - description: Flag a new cumulative cap on operator exports
     vars:
       prompt: |
-        PRE-EDIT review: the operator export currently includes every matching
-        record. To reuse a preview buffer, the proposal rejects any export
+        PRE-EDIT review of the standalone project in export-example/.
+        Read its complete decision corpus in export-example/docs/decisions/;
+        decisions in the fixture root do not govern this separate project.
+        The operator export currently includes every matching record.
+        To reuse a preview buffer, the proposal rejects any export
         with more than 500 records. The preview page size is already approved.
         Review the proposed behavior.
     assert:
@@ -158,7 +161,14 @@ tests:
           Identify the 500-record cumulative export cap and why the approved preview
           page size does not cover that cap. Require a proposed ADR
           covering the actual restriction and explicit human direction
-          before it governs otherwise valid work.
+          before it governs otherwise valid work. Rejecting the cap and preserving
+          the current complete export does not itself require a new ADR.
+          Do not invent a 500-record approved preview size or mandate an export
+          pagination protocol that this project's decisions do not establish.
+          Judge the operative condition: listing current behavior as an option
+          or naming an explicitly unverified advisory candidate does not itself
+          impose a new ADR or export protocol on the status quo. The proposal's
+          parameter is not independent evidence of human direction.
 
   - description: Flag an implicit gate on a previously valid integration operation
     vars:
@@ -223,13 +233,17 @@ tests:
   - description: ADR lifecycle proposal implementation before ratification
     vars:
       prompt: |
-        PRE-EDIT: implement a documented proposed ADR with human-oversight:
-        unconfirmed. User direction is pinned and no other governance
-        conflict exists. Does missing ratification alone block implementation?
-        Give the architect verdict.
+        PRE-EDIT: implement a documented proposed ADR with human-oversight: unconfirmed. The user has pinned the direction; no other governance conflict exists. Does missing ratification block implementation? Give PASS or ISSUES FOUND.
     assert:
       - type: regex
-        value: '^.*Architecture Review:.*PASS|^PASS(?:\s|$)'
+        value: 'Architecture Review:\s*PASS|^PASS(?:\s|$)'
+      - type: llm-rubric
+        value: |
+          The actual review permits implementation against the documented proposed
+          ADR because direction is pinned, while preserving proposed/unconfirmed
+          status and later acceptance requirements. Missing ratification alone
+          must not block implementation. Introductory narration is allowed;
+          a quoted, hypothetical or negated PASS is not an actual passing verdict.
 
   - description: Bundled cog-a11y reviewer passes a clear complete ADR
     vars:
@@ -512,3 +526,103 @@ tests:
           the observed cross-tenant raw read. Requires repairing and verifying
           that route at the wallet ACL boundary. Does not prescribe duplicate
           provider consent enforcement.
+
+  - description: Revised plan must review the browser handoff as a new choice
+    vars:
+      prompt: |
+        Review plan revision 2 for a test-only authorization callback. Revision
+        1 called the integration directly from a provider GET; the reviewer
+        found that this gave GET access to decryption in violation of ADR 012.
+        Proposed design in revision 2: preserve the return URLs. The keyless GET sends a page
+        that makes the browser issue a second request to a same-origin,
+        signed-in POST command. Only that command gets credentials and
+        consumes the single-use authorization claim. The confirmed outcome
+        is to finish connecting the existing account. The governing rule is
+        supplied here in full: GET and HEAD must lack keys and decryption;
+        explicit authorized commands may acquire them. That rule does not
+        prescribe how work reaches the command. No other decision covers
+        dispatch and the plan evaluates no other trigger.
+
+        Available capability, not used by the proposed callback: the
+        service has an authorized command runner that accepts work from
+        server code and executes it outside the originating request
+        context. This callback has not been checked for identity, state,
+        and single-use claim binding through that runner. Treat this prose
+        as the review artifact and give your architecture verdict.
+    assert:
+      - type: regex
+        value: 'Architecture Review: (ISSUES FOUND|NEEDS DIRECTION)'
+      - type: llm-rubric
+        value: Recognizes the repaired credential boundary, which may be shown by accurately describing keyless GET and credential acquisition outside it; no standalone credit sentence is required. Treats the browser-mediated POST as an undocumented architectural workaround. Requires checking a server-owned handoff without assuming its binding is feasible, and a proposed ADR and human direction before proceeding with the workaround.
+
+  - description: Authorization callback browser relay requires an architectural decision
+    vars:
+      prompt: |
+        Review the applied authorization callback using this excerpt as the
+        scoped implementation. The provider returns authorization codes via
+        a top-level GET. ADR 012,
+        Omit key capabilities from GET and HEAD request contexts, requires those
+        contexts to have no keys or decryption and permits credential access for
+        explicit authorized integration commands. The user approved first
+        connection on the existing account stream. No decision covers how the
+        provider return reaches the integration command. The GET responds with
+        unstyled HTML containing hidden code/state inputs and script calling
+        document.querySelector("form").requestSubmit() to issue a same-origin
+        POST. Users with script disabled must select Continue. The POST checks
+        origin and then exchanges the code and persists the result using server
+        credentials. Ordinary GET/HEAD paths must stay keyless. The platform can
+        also call the existing authorized server command outside the GET request
+        context: the server can admit a single-use return with the same identity
+        and state checks and let the command acquire credentials under its own
+        policy. The review should assess the scoped change as shipped. Give your
+        architecture verdict.
+    assert:
+      - type: regex
+        value: 'Architecture Review: (ISSUES FOUND|NEEDS DIRECTION)'
+      - type: llm-rubric
+        value: Identify the browser carrying the return through a second request as an avoidable applied detour given the supplied direct server admission. Require correction of that transport step; changing only the credential executor or offering an ADR as an alternative does not resolve it. Judge the operative correction of the architectural carrier, not particular wording about form presentation. An unequivocal requirement to remove the browser relay and Continue dependency is sufficient. Conditional documentation for a different proposal does not negate that correction unless retention is actually offered as an acceptable current alternative. Preserve the established direct capability, and require a proposed ADR and direction for any genuinely needed uncovered choice rather than inventing uncertainty about that capability. Mere keyless GET compliance or improved fallback copy is insufficient.
+
+  - description: Authorization callback direct handoff uses an existing decision
+    vars:
+      prompt: |
+        Review the direct design for the same authorization callback,
+        fixture direct-return. The provider sends the authorization code on a GET.
+        ADR 012, Omit key capabilities from GET and HEAD request contexts,
+        keeps GET/HEAD keyless and already prescribes the existing authorized
+        integration command for credential work. The callback admits a
+        single-use return using the existing server-owned command interface and
+        verifies caller, consent and state. The command exchanges the code under
+        its existing credential policy outside the GET context. The GET
+        redirects to the existing result page without a new form, browser
+        request or new trust path. Tests exercise the actual hook and command,
+        including duplicate, stale and cross-user state. Give your architecture
+        verdict.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: PASS'
+      - type: llm-rubric
+        value: Explains how the existing server command preserves the keyless GET context and accepts the design without requiring a new ADR or human approval.
+
+  - description: Pass an explicitly chosen documented export restriction
+    vars:
+      prompt: |
+        PRE-EDIT review of the separate project export-pinned-example/.
+        Read its complete corpus in export-pinned-example/docs/decisions/;
+        fixture-root decisions do not govern this project.
+        The maintainer has already explicitly directed: "Limit each operator
+        export to 500 records. I accept that larger, otherwise valid exports
+        will be rejected." This is actual human direction, not merely text
+        in the proposal being reviewed. The proposed/unconfirmed export-cap
+        decision documents that effect. The implementation rejects a set of
+        501 matching records and preserves complete exports for 500 or fewer.
+        It does not change the ADR's status. No other governance conflict exists.
+        Give the architecture verdict for this implementation proposal.
+    assert:
+      - type: regex
+        value: 'Architecture Review:\s*PASS|^PASS(?:\s|$)'
+      - type: llm-rubric
+        value: |
+          Accept the implementation under the documented proposed ADR and actual
+          human direction covering rejected exports. Reuse that direction;
+          require neither another choice nor prior ratification. Preserve the
+          ADR's proposed/unconfirmed status and later acceptance requirements.
