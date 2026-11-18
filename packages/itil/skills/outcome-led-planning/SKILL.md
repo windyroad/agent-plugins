@@ -42,6 +42,8 @@ Local mode needs no GitHub account or Project. When GitHub is selected, read [th
 
 Keep one authoritative plan separate from the outcome. In GitHub, the child increment issues together form the plan. Each child carries its own part. Remove or mark superseded any complete plan copied into the Now issue. Keep Now/Next/Later summaries and current-revision headings out of the outcome ticket and its comments. In Local tracking, keep separate Outcome and Delivery plan sections in the existing record. Save continuity in a permitted document location outside runtime configuration directories. Keep updates proportional.
 
+Derive the remaining capability from the confirmed outcome and applicable decisions before selecting a foundation. Before calling a new API or other mechanism a prerequisite, trace the intended consumer's actual path and computation, compare direct reuse of existing capabilities, and establish what required behavior is missing. Where relevant, distinguish a producer's outputs from the direct inputs of the computation the consumer must run. Safe deployment and a rollback floor do not themselves establish necessity or beneficiary value. Keep useful API-only increments when their consumer need and dependency are evidenced; do not defer a contradiction in the proposed contract merely because consumer migration comes later.
+
 Include:
 
 - **Outcome reference:** point to the confirmed result and completion evidence.

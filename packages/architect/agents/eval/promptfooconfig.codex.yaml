@@ -18,6 +18,113 @@ prompts:
 
 tests:
 
+  - description: Loading contract file-backed API-first plan must resolve the consumer computation
+    vars:
+      prompt: |
+        PRE-EDIT architecture review for the standalone project in projection-example/.
+        Read projection-example/docs/proposals/public-record-bootstrap-r1.md
+        and the relevant full decisions in projection-example/docs/decisions/.
+        Return your verdict and substantive findings.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: ISSUES FOUND'
+      - type: llm-rubric
+        value: |
+          Flag the proposed client loading/computation contract, not merely
+          performance or test gaps. The current-public-rows/producer-output
+          continuation is not established as restoring the shared recent-record
+          projection and following its declared direct inputs. The representation
+          ADR does not authorize replacing that contract. Pass if the reviewer
+          identifies this substantive conflict and requires resolving it before
+          treating the API as a migration prerequisite. Explicit successor-ADR
+          and human-direction language is required when proposing to retain the
+          incompatible replacement; do not require both resolution routes.
+          Allow actual downstream public-output composition, but do not
+          invent an unstated downstream projection to justify this plan or defer
+          the contract question until browser edits.
+
+  - description: Loading contract rejects an API prerequisite that replaces the shared projection
+    vars:
+      prompt: |
+        PRE-EDIT review. Treat these inline facts as complete.
+        Accepted loading decision: the same projection definition runs on
+        server and browser. GET restores its complete state and paired
+        direct-input positions; the browser processes its declared inputs.
+        Another producer's public outputs may be those direct inputs.
+        A separate accepted decision exposes producer outputs through ordinary
+        feeds and selects their media type at the canonical resource URL.
+        Plan R1 adds complete display rows plus that same producer's output
+        continuation. It calls this API the prerequisite for migrating the
+        existing browser projection away from its private state/input feeds.
+        Browser migration is deferred. R1 does not identify a downstream
+        projection, its definition or its direct inputs. The rows omit
+        future-affecting eviction state. Cursor ordering, authority, rollback
+        and byte limits are covered. Review R1's architecture.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: ISSUES FOUND'
+      - type: llm-rubric
+        value: |
+          Identify the unresolved projection/loading contract in the API now,
+          despite deferred browser work. Display rows and the same producer's
+          output cursor do not restore that producer with its direct inputs.
+          Output/media-type approval does not authorize that replacement.
+          Require alignment of that consumer contract before accepting the
+          migration prerequisite. If instead proposing to retain an incompatible
+          replacement, require a proposed ADR and explicit human direction.
+          Either resolution route is sufficient; no new ADR is needed merely
+          to expose outputs already covered by a decision. Allow a genuinely
+          defined downstream projection consuming public outputs; do not impose
+          access to private upstream inputs on it or merely discuss cursor safety.
+
+  - description: Loading contract accepts public outputs as a downstream direct input
+    vars:
+      prompt: |
+        PRE-EDIT review. Treat these facts as complete.
+        Accepted decisions require the same projection definition on server
+        and browser, restoring complete state with paired direct-input
+        positions, then following those declared inputs. Direct inputs may
+        be another producer's public output feed, without its private inputs.
+        The proposed category-count projection consumes sanitized transaction
+        publications. Server and browser use the same category-count fold.
+        GET restores all count state and its position in that public feed;
+        both then process later corrections and removals through that feed.
+        Required tests establish equivalence, empty initialization, authority,
+        continuation and cleanup. No new runtime path or performance change
+        is proposed: this review clarifies an existing documented composition.
+        Review the architecture.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: PASS'
+      - type: llm-rubric
+        value: |
+          Accept the documented downstream projection: public outputs are its
+          direct inputs and the same fold runs on both sides. Do not require
+          private producer inputs, a new ADR, or reject GET initialization.
+
+  - description: Loading contract requires direction for an uncovered computation placement
+    vars:
+      prompt: |
+        PRE-EDIT review. Treat these inline facts as complete.
+        An accepted ADR only chooses the media type and canonical URL for
+        published output events; it says nothing about where consumer
+        computations run. The current browser and server share a projection
+        definition. Plan R1 replaces browser execution with a display-only
+        client following server-computed rows. Its title calls it a transport
+        cleanup and it cites that media-type ADR. The computation placement
+        changes deliberately; no other decision covers it and no human has
+        directed that change. Authority and continuation are preserved.
+        Review R1's architecture.
+    assert:
+      - type: regex
+        value: 'Architecture Review:.*(ISSUES FOUND|NEEDS DIRECTION)'
+      - type: llm-rubric
+        value: |
+          Identify a material undocumented computation-placement choice.
+          Require a proposed ADR and explicit human direction before dependent
+          implementation. Do not invent an existing ADR conflict from current
+          code or media-type selection alone, or pass as transport-only cleanup.
+
   - description: Flag a new cumulative cap on operator exports
     vars:
       prompt: |

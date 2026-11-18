@@ -23,7 +23,7 @@ Each ADR records only one independently changeable headline decision. Split mult
 
 1. Read `docs/decisions/README.md` — the generated **Decisions Compendium**. It carries every ADR's chosen option, confirmation criteria, and relationship graph in a compact form (~40 KB vs ~1.6 MB for the full body set; ~40× reduction). **This is the routine load surface for compliance review** (per ADR-077). If `docs/decisions/README.md` does not exist, fall back to globbing `docs/decisions/*.md` (skip the absent README) — the project may predate ADR-077 or be a fresh install. If `docs/decisions/` itself does not exist, that is fine; proceed noting that no prior decisions are recorded. **Load a specific ADR's full body** (`docs/decisions/<NNN>-*.md`) **only when the compendium entry is insufficient for the current review** — deep-dive on a contested change, evolving a decision, ratifying a new ADR via `/wr-architect:create-adr`, or confirming a substance question the compendium summary does not resolve. The per-ADR body remains the authoritative substance (ADR-031); the compendium is a derived view.
 2. Read the file(s) being edited to understand the current state and proposed change
-3. Review the proposed change against existing decisions (if any)
+3. Validate the architectural premise against the confirmed outcome and existing decisions before accepting the plan's own acceptance criteria as requirements. A plan may encode an unapproved architectural change in its claimed prerequisite. Then review the proposed mechanisms.
 4. Check for workarounds before deciding PASS. Review new mechanisms introduced to resolve earlier findings as fresh design choices. A workaround can respect an existing decision and still need a decision of its own.
 5. Report: PASS if compliant, or list issues requiring attention
 
@@ -80,6 +80,37 @@ For each `accepted` decision in `docs/decisions/`:
 These staleness flags are informational only. They do NOT cause an ISSUES FOUND verdict.
 
 ### Existing Decision Compliance
+
+Validate the plan's architectural premise before reviewing its implementation
+details. Trace the intended consumer, the computation it runs, its required
+inputs and the proposed boundary against the applicable decisions. Where
+projections are involved, distinguish a producer's outputs from that producer's
+own direct inputs; outputs may be valid direct inputs to a different downstream
+projection. An approved representation, endpoint or feed does not independently
+approve changing computation placement or a loading contract. A claimed API
+prerequisite needs this check now even when consumer migration is deferred.
+Name an actual conflict, or flag a material uncovered choice as an undocumented
+decision through the existing direction process. Do not invent a universal
+client/server architecture or reject a composition the adopter's ADRs permit.
+
+When a decision requires the same projection definition on server and client,
+check which projection the proposed GET restores and which events the client
+will process. Continuing that producer from its own outputs is not continuing
+it from its declared direct inputs. The resemblance of GET-then-follow protocols
+does not establish compliance. A distinct downstream projection may consume
+those outputs, but the plan must identify its definition, complete state and
+direct-input boundary; do not invent that composition to make an unspecified
+plan fit. Report the unresolved contract or actual conflict before accepting
+the API as a migration prerequisite, even if no client code changes yet.
+
+For a claimed consumer-migration prerequisite, include the proposed consumer
+computation and its input provenance in the review. Compare them with the
+specific decision's chosen loading/computation contract, not a generic summary
+such as "GET then follow a feed." If the plan leaves that computation or input
+boundary unresolved, return **ISSUES FOUND / [Unresolved Contract]** rather than
+calling the premise compliant and postponing the question to migration. An API
+may still have independent value; that does not prove its claimed necessity or
+compatibility with a different consumer contract.
 
 For each accepted or proposed decision in `docs/decisions/`:
 - Does the proposed change conflict with the decision's outcome?

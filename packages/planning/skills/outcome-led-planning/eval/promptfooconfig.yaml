@@ -38,6 +38,36 @@ prompts:
   - '{{prompt}}'
 
 tests:
+  - description: Planner challenges an unsupported API prerequisite despite an Architect PASS
+    vars:
+      prompt: |
+        {"tracking":"local","prompt":"Tabletop only; no tools. Act as the independent planning critic for R1. The outcome and ASAP timeframe are confirmed: existing browser consumers use canonical published feeds while preserving the accepted shared projection model. Accepted loading decisions require server and browser to run the same projection definition from its declared direct inputs, which may be public outputs of another producer. Media-type approval chooses only representation addressing. R1 proposes complete display rows plus the same producer's own output continuation, then a later browser migration. It identifies no downstream projection, definition or direct inputs and provides no evidence that the existing shared fold cannot consume the public feed already available. It calls the API necessary to establish a supported rollback floor, with safe deployment and complete cursor tests. An independent architect returned PASS, considering cursor and authority details. Other reviews are not yet complete. Assess the increment and sequence; describe what proceeds."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Withhold planning PASS and dependent implementation for the unsupported
+          prerequisite, rather than accepting safe release/rollback or another
+          critic's PASS as proof of necessity/value. Trace the intended consumer
+          and shared computation against the confirmed outcome and decisions;
+          compare direct reuse with the new API before selecting Now. Have the
+          architect resolve the actual loading-contract question and reassess a
+          materially revised plan. Preserve the outcome and allow useful API-only
+          increments when justified; do not mandate browser-first delivery or
+          invent a new discovery increment, report or human gate by default.
+
+  - description: Planner retains an evidenced API foundation with independent value
+    vars:
+      prompt: |
+        {"tracking":"local","prompt":"Tabletop only; no tools. Act as the independent planning critic for R2. The confirmed outcome is that authorized external consumers and the browser can follow a shared public category-count projection ASAP. Local tracking is saved. Relevant decisions permit this composition: category-count consumes sanitized public transaction publications, and the same count fold runs on server and browser. The public feed is already available, but an inspected deployed external reporting client cannot run that fold and requires complete current counts with paired input progress. No existing endpoint supplies count state. R2 delivers that API to this actual client now, restoring all count state and its direct-input position; both server and the later browser follow the public transaction feed. Source/caller inspection establishes that reuse of the raw feed alone cannot serve the reporting client's required current counts. The bounded API slice includes normal verification, delivery and cleanup, while browser adoption stays provisional. No speculative cache/framework is included. All five reviews for this exact revision are recorded PASS with no unresolved conditions, and project-specific performance/risk checks are satisfied. Assess the foundation's value and sequence and state the next step without claiming execution."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Accept the evidenced independently useful API foundation and its
+          consumer dependency, preserving later browser work and the full
+          outcome. Proceed within the existing assessment and authority without
+          forcing browser migration into Now, demanding a duplicate review or
+          discovery increment, or imposing private upstream inputs on the count
+          projection. Describe execution and verification without fabricating them.
   - description: Capture keeps requirements in the outcome and delivery steps in the increments
     vars:
       prompt: |

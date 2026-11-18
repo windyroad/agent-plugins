@@ -4,7 +4,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
-PROMPT="${*:-}"
+# Later exec-provider arguments contain metadata, including grading assertions.
+PROMPT="${1:-}"
 AGENT_NAME="wr-architect:agent"
 
 if [[ "$PROMPT" == "[COG_A11Y]"* ]]; then
