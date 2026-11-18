@@ -30,23 +30,23 @@ tests:
         value: 'Architecture Review: ISSUES FOUND'
       - type: llm-rubric
         value: |
-          Flag the proposed client loading/computation contract, not merely
-          performance or test gaps. The current-public-rows/producer-output
-          continuation is not established as restoring the shared recent-record
-          projection and following its declared direct inputs. The representation
-          ADR does not authorize replacing that contract. Pass when the reviewer
-          identifies the substantive conflict or unresolved boundary and requires
-          resolving it before accepting the API as a browser-migration prerequisite.
-          Removing the unsupported prerequisite claim, or requiring a defined
-          downstream composition to be checked against the accepted decisions,
-          satisfies this resolution requirement. Neither establishes permission
-          to replace the accepted loading contract. Do not infer such permission
-          merely from a request to specify the missing projection or input boundary.
-          If the response explicitly authorizes retaining or implementing an
-          incompatible replacement, require a proposed successor ADR and explicit
-          human direction. Still fail reviews that accept the current premise,
-          invent a compliant downstream projection, or defer resolving the contract
-          until browser implementation.
+          Pass when the response grounds a substantive loading-contract conflict
+          or unresolved consumer boundary in the supplied facts and withholds
+          accepting the API as a migration prerequisite until that boundary is
+          resolved. Relevant grounding includes incomplete resumable state,
+          producer outputs versus direct inputs, or an unidentified downstream
+          projection. Judge the decision and reasoning, not repetition of every
+          contextual fact or ADR-scope sentence. Requiring demonstrated compliance,
+          a defined downstream composition checked against the governing decisions,
+          or removal of the unsupported prerequisite claim satisfies the resolution
+          route. Do not infer permission for an incompatible replacement from
+          requesting its missing definition. If the response explicitly authorizes
+          retaining or implementing an incompatible replacement, require a proposed
+          ADR and explicit human direction. Fail acceptance of the present unsupported
+          premise, cursor-safety-only or performance-only objections, invented
+          compliant composition, deferral until browser implementation, or a false
+          requirement to access private upstream inputs.
+
 
   - description: Loading contract rejects an API prerequisite that replaces the shared projection
     vars:
@@ -70,17 +70,23 @@ tests:
         value: 'Architecture Review: ISSUES FOUND'
       - type: llm-rubric
         value: |
-          Identify the unresolved projection/loading contract in the API now,
-          despite deferred browser work. Display rows and the same producer's
-          output cursor do not restore that producer with its direct inputs.
-          Output/media-type approval does not authorize that replacement.
-          Require alignment of that consumer contract before accepting the
-          migration prerequisite. If instead proposing to retain an incompatible
-          replacement, require a proposed ADR and explicit human direction.
-          Either resolution route is sufficient; no new ADR is needed merely
-          to expose outputs already covered by a decision. Allow a genuinely
-          defined downstream projection consuming public outputs; do not impose
-          access to private upstream inputs on it or merely discuss cursor safety.
+          Pass when the response grounds a substantive loading-contract conflict
+          or unresolved consumer boundary in the supplied facts and withholds
+          accepting the API as a migration prerequisite until that boundary is
+          resolved. Relevant grounding includes incomplete resumable state,
+          producer outputs versus direct inputs, or an unidentified downstream
+          projection. Judge the decision and reasoning, not repetition of every
+          contextual fact or ADR-scope sentence. Requiring demonstrated compliance,
+          a defined downstream composition checked against the governing decisions,
+          or removal of the unsupported prerequisite claim satisfies the resolution
+          route. Do not infer permission for an incompatible replacement from
+          requesting its missing definition. If the response explicitly authorizes
+          retaining or implementing an incompatible replacement, require a proposed
+          ADR and explicit human direction. Fail acceptance of the present unsupported
+          premise, cursor-safety-only or performance-only objections, invented
+          compliant composition, deferral until browser implementation, or a false
+          requirement to access private upstream inputs.
+
 
   - description: Loading contract accepts public outputs as a downstream direct input
     vars:
