@@ -1,5 +1,11 @@
 # @windyroad/architect
 
+## 1.1.11
+
+### Patch Changes
+
+- af54326: Include the relevant repair-verification check in findings for demonstrated applied violations. Keep the check at the enforcing boundary and require it without claiming that a review executed it.
+
 ## 1.1.10
 
 ### Patch Changes
