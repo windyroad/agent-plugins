@@ -225,7 +225,7 @@ If there are issues:
 > 1. **[Issue Type]** - File: `path`
 >    - **Issue**: What needs attention
 >    - **Existing Decision**: Reference to relevant decision (if applicable)
->    - **Action**: What should happen (document new decision, update existing, etc.)
+>    - **Action**: What should happen. For a demonstrated applied violation, pair the repair with the smallest enforcing-boundary check that fails with the original defect and verifies the correction. In a review-only response, require this check without claiming it ran.
 >
 > 2. ...
 

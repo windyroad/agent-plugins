@@ -51,7 +51,9 @@ tests:
   - description: Loading contract rejects an API prerequisite that replaces the shared projection
     vars:
       prompt: |
-        PRE-EDIT review. Treat these inline facts as complete.
+        PRE-EDIT review of the standalone project in projection-example/.
+        Read its governing decisions in projection-example/docs/decisions/.
+        Treat these inline facts as complete.
         Accepted loading decision: the same projection definition runs on
         server and browser. GET restores its complete state and paired
         direct-input positions; the browser processes its declared inputs.
@@ -91,7 +93,9 @@ tests:
   - description: Loading contract accepts public outputs as a downstream direct input
     vars:
       prompt: |
-        PRE-EDIT review. Treat these facts as complete.
+        PRE-EDIT review of the standalone project in projection-example/.
+        Read its governing decisions in projection-example/docs/decisions/.
+        Treat these facts as complete.
         Accepted decisions require the same projection definition on server
         and browser, restoring complete state with paired direct-input
         positions, then following those declared inputs. Direct inputs may
@@ -116,7 +120,10 @@ tests:
   - description: Loading contract requires direction for an uncovered computation placement
     vars:
       prompt: |
-        PRE-EDIT review. Treat these inline facts as complete.
+        PRE-EDIT review of the separate standalone project in representation-example/.
+        Read its complete decision corpus in representation-example/docs/decisions/;
+        decisions belonging to projection-example/ do not govern this project.
+        Treat these inline facts as complete.
         An accepted ADR only chooses the media type and canonical URL for
         published output events; it says nothing about where consumer
         computations run. The current browser and server share a projection
@@ -418,3 +425,90 @@ tests:
           Require a unique account target or explicit ambiguity resolution.
           Ground the finding in the supplied operation; do not accept this
           mechanism as direct use of an already selected account stream.
+
+  - description: Provider consent boundary rejects duplicate enforcement and its test
+    vars:
+      prompt: |
+        APPLIED DIFF REVIEW, wallet patch W-overbuilt. Confirmed requirement:
+        The provider alone authorizes consent for its request; the wallet records what
+        the authorized request returned, even if withdrawal occurs after the
+        provider has accepted it. The wallet still owns tenant isolation and read
+        authorization, which this patch leaves intact. An earlier reviewer
+        suggested a transaction if the wallet had to reject a late response.
+
+        The applied patch adds all three of these controls:
+        - Dispatch: a failed local consent check prevents the provider call.
+        - Capture: a failed local consent check discards the authorized result.
+        - Publication: a new cross-stream transaction reads the local consent
+          stream and appends the result to the account stream only if consent
+          is still active.
+        Each control enforces the same consent the provider authorizes.
+        None serves as an optimization or enforces tenant isolation, read
+        authorization, or retention.
+        Its new test expects the wallet to drop a valid response accepted before
+        withdrawal and returned after it. The test passes. Give your verdict
+        and identify the reviewed patch as W-overbuilt.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: ISSUES FOUND'
+      - type: llm-rubric
+        value: |
+          Names W-overbuilt and grounds the finding in the confirmed contract.
+          The provider owns request consent; the wallet records the authorized result.
+          Returns the duplicate local consent checks, cross-stream transaction
+          and invented late-response rejection test for removal. Does not make
+          the earlier conditional suggestion a requirement or weaken wallet read ACLs.
+
+  - description: Provider consent boundary accepts recording the authorized result
+    vars:
+      prompt: |
+        APPLIED DIFF REVIEW, wallet patch W-lean. The existing accepted decision
+        in docs/decisions/096-provider-request-authorization.accepted.md
+        governs this change. The provider alone authorizes consent
+        for its request; the wallet records what the authorized request
+        returned, even if withdrawal occurs after the provider accepted it.
+        The wallet owns tenant isolation and read ACLs. This patch implements
+        the existing decision and changes neither that boundary nor read,
+        retention or erasure policy.
+        The complete change to capture is the following, after the existing
+        tenant context is verified and a provider denial is handled:
+
+        + await append(verifiedTenantStream, authorizedResult);
+
+        Both checks passed. One accepts the request at the provider, withdraws
+        consent, then delivers the authorized result and asserts that the exact
+        observation appears in the verified tenant stream. Reintroducing the
+        local late-drop check makes that assertion fail. The other check
+        asserts that provider denial produces no observation. An earlier
+        reviewer suggested a transaction if the wallet had to reject a late
+        response. Give your verdict and identify the reviewed patch as W-lean.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: PASS'
+      - type: llm-rubric
+        value: |
+          Names W-lean and accepts the append and verification under the stated
+          provider/wallet ownership. Does not require local consent rechecks,
+          an atomic cross-stream check, or a test expecting late-response rejection.
+
+  - description: Provider consent boundary still rejects a raw-read tenant bypass
+    vars:
+      prompt: |
+        APPLIED DIFF REVIEW, wallet patch W-raw. Confirmed contract: the provider
+        authorizes provider requests. The wallet owns authorization on every route
+        exposing stored observations. The authenticated caller may read only
+        tenant streams allowed by the wallet ACL. The patch appends the
+        authorized result to the verified tenant stream, but it also adds a
+        raw route that reads stored events by a caller-supplied tenant ID
+        without an ACL check. An authenticated tenant A received tenant B's
+        stored observation on that route. Catalog route tests still pass.
+        Give your verdict.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: ISSUES FOUND'
+      - type: llm-rubric
+        value: |
+          Names W-raw, cites the confirmed wallet authorization invariant and
+          the observed cross-tenant raw read. Requires repairing and verifying
+          that route at the wallet ACL boundary. Does not prescribe duplicate
+          provider consent enforcement.

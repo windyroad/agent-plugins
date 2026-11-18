@@ -98,7 +98,9 @@ tests:
   - description: Loading contract rejects an API prerequisite that replaces the shared projection
     vars:
       prompt: |
-        PRE-EDIT review. Treat these inline facts as complete.
+        PRE-EDIT review of the standalone project in projection-example/.
+        Read its governing decisions in projection-example/docs/decisions/.
+        Treat these inline facts as complete.
         Accepted loading decision: the same projection definition runs on
         server and browser. GET restores its complete state and paired
         direct-input positions; the browser processes its declared inputs.
@@ -138,7 +140,9 @@ tests:
   - description: Loading contract accepts public outputs as a downstream direct input
     vars:
       prompt: |
-        PRE-EDIT review. Treat these facts as complete.
+        PRE-EDIT review of the standalone project in projection-example/.
+        Read its governing decisions in projection-example/docs/decisions/.
+        Treat these facts as complete.
         Accepted decisions require the same projection definition on server
         and browser, restoring complete state with paired direct-input
         positions, then following those declared inputs. Direct inputs may
@@ -163,7 +167,10 @@ tests:
   - description: Loading contract requires direction for an uncovered computation placement
     vars:
       prompt: |
-        PRE-EDIT review. Treat these inline facts as complete.
+        PRE-EDIT review of the separate standalone project in representation-example/.
+        Read its complete decision corpus in representation-example/docs/decisions/;
+        decisions belonging to projection-example/ do not govern this project.
+        Treat these inline facts as complete.
         An accepted ADR only chooses the media type and canonical URL for
         published output events; it says nothing about where consumer
         computations run. The current browser and server share a projection
