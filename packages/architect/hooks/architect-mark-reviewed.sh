@@ -28,14 +28,8 @@ fi
 case "$SUBAGENT" in
   *architect*)
     # Parse verdict from agent output text (no temp file needed).
-    # Anchored to the canonical heading shape from
-    # packages/architect/agents/agent.md "How to Report"
-    # (`**Architecture Review: PASS**` / `## Architecture Review: PASS`, and
-    # their ISSUES FOUND / NEEDS DIRECTION equivalents).
-    # Tolerates optional `> ` blockquote prefix + leading whitespace.
-    # Anchored matches prevent P181 narrative false positives. Exactly one
-    # canonical verdict on the first nonblank line is required so examples
-    # and conflicting output fail closed.
+    # The shared consumer requires one unquoted authoritative heading. Its
+    # bounded alias and quote/history rules are identical on both runtimes.
     AGENT_OUTPUT=$(_get_tool_output)
     VERDICT=$(printf '%s\n' "$AGENT_OUTPUT" | architect_verdict)
 
@@ -58,7 +52,8 @@ case "$SUBAGENT" in
         fi
         ;;
       FAIL|"")
-        # Fail closed: issues and unparseable output do not unlock edits.
+        # Do not mint a PASS receipt for findings or unknown output.
+        # Existing advisory handling never waives substantive review duties.
         ;;
     esac
 

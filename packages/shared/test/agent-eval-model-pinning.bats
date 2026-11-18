@@ -17,6 +17,12 @@ if [[ -n "${CLAUDE_ARGV_LOG:-}" ]]; then
 fi
 if [[ " $* " == *" --output-format stream-json "* ]]; then
   printf '%s\n' '{"type":"assistant","parent_tool_use_id":null,"message":{"content":[{"type":"text","text":"JTBD Review: PASS"}]}}'
+elif [[ " $* " == *" --output-format json "* ]]; then
+  python3 - "$@" <<'PYJSON'
+import json,sys
+args=sys.argv[1:]; model=args[args.index('--model')+1]
+print(json.dumps({'is_error':False,'result':'**Architecture Review: PASS**','modelUsage':{model:{'contextWindow':1000000}}}))
+PYJSON
 elif [[ "${FAKE_CLAUDE_GRADER:-0}" == 1 ]]; then
   printf '%s\n' '{"pass":true,"score":1,"reason":"ok"}'
 else
@@ -58,7 +64,7 @@ teardown() {
   rm -rf "$TMP"
 }
 
-@test "Claude agent evals invoke Sonnet 5" {
+@test "Claude agent evals invoke each declared profile without changing other roles" {
   runners=(
     packages/shared/agents/eval/run-claude-eval.sh
     packages/architect/agents/eval/run-agent-eval.sh
@@ -71,10 +77,12 @@ teardown() {
 
   for runner in "${runners[@]}"; do
     : > "$CLAUDE_LOG"
-    run env -u AGENT_EVAL_MODEL PATH="$BIN:$PATH" CLAUDE_LOG="$CLAUDE_LOG" \
+    expected=claude-sonnet-5
+    [[ "$runner" != packages/architect/agents/eval/run-agent-eval.sh ]] || expected=claude-opus-5-5
+    run env -u AGENT_EVAL_MODEL -u WR_CLAUDE_EVAL_MODEL -u WR_CLAUDE_EVAL_REASONING_EFFORT PATH="$BIN:$PATH" CLAUDE_LOG="$CLAUDE_LOG" ARCHITECT_EVAL_ARTIFACT_DIR="$TMP/captures" \
       "$REPO_ROOT/$runner" 'AGENT: pipeline'
     [ "$status" -eq 0 ]
-    run grep -F -- '--model claude-sonnet-5' "$CLAUDE_LOG"
+    run grep -F -- "--model $expected" "$CLAUDE_LOG"
     [ "$status" -eq 0 ]
   done
 }
@@ -99,7 +107,7 @@ teardown() {
   done
 }
 
-@test "CI keeps general Sonnet roles and scopes the Opus subject to planning" {
+@test "CI preserves general targets and the separate Planning override" {
   cp "$BIN/npm" "$BIN/npx"
   printf '#!/bin/sh\nexit 0\n' > "$BIN/node"
   chmod +x "$BIN/node"

@@ -16,7 +16,7 @@ Each ADR records only one independently changeable headline decision. Split mult
 1. Read `docs/decisions/README.md` — the generated **Decisions Compendium**. It carries every ADR's chosen option, confirmation criteria, and relationship graph in a compact form (~40 KB vs ~1.6 MB for the full body set; ~40× reduction). **This is the routine load surface for compliance review** (per ADR-077). If `docs/decisions/README.md` does not exist, fall back to globbing `docs/decisions/*.md` (skip the absent README) — the project may predate ADR-077 or be a fresh install. If `docs/decisions/` itself does not exist, that is fine; proceed noting that no prior decisions are recorded. **Load a specific ADR's full body** (`docs/decisions/<NNN>-*.md`) **only when the compendium entry is insufficient for the current review** — deep-dive on a contested change, evolving a decision, ratifying a new ADR via `/wr-architect:create-adr`, or confirming a substance question the compendium summary does not resolve. The per-ADR body remains the authoritative substance (ADR-031); the compendium is a derived view.
 2. Read the file(s) being edited to understand the current state and proposed change
 3. Validate the architectural premise against the confirmed outcome and existing decisions before accepting the plan's own acceptance criteria as requirements. A plan may encode an unapproved architectural change in its claimed prerequisite. Then review the proposed mechanisms.
-4. Check for workarounds before deciding PASS. Review new mechanisms introduced to resolve earlier findings as fresh design choices. A workaround can respect an existing decision and still need a decision of its own.
+4. Review mechanisms introduced to resolve earlier findings under Existing Decision Compliance and New Decision Detection, as with other proposed changes.
 5. Report: PASS if compliant, or list issues requiring attention
 
 ## Review Mode: Pre-edit / proposed-change vs. Post-edit / applied
@@ -40,29 +40,21 @@ In pre-edit mode:
 
 ### Smallest design and verification
 
-For a blocking design or verification finding, name the required behavior or invariant, its source, who enforces it, and the described mechanism or boundary that fails it. A confirmed acceptance criterion, applicable policy or contract, or a demonstrated violation of an established trust boundary can ground a finding. Establish the facts that make a decision apply: domain terminology, an operation name or a reference-valued field does not establish its execution context, request method, secret classification or privileges. Check whether the proposed mechanism and test are needed to enforce that requirement at this boundary. An omitted implementation detail alone does not establish a violating mechanism: do not invent a lookup, key or failure path to support a blocker. State unsupported assumptions as advisories or questions. Preserve blocking findings for actual contradictions and material unresolved boundaries needed to assess the explicitly proposed change, including the consumer-migration contract below. Keep a demonstrated violation blocking even if the suggested fix is only one option.
+In both plan and applied reviews, preserve supplied or observed properties at their stated scope, and keep explicit unknowns attached to the path they describe. A capability’s existence does not establish its unchecked properties for a particular use, and an alternative’s unknown properties are not facts about the current proposal. Treat a replacement with unverified required properties as a candidate until the identified checks establish feasibility; do not count it as an established viable option. For a blocking design or verification finding, name the required behavior or invariant, its source, who enforces it, and the described mechanism or boundary that fails it. A confirmed acceptance criterion, applicable policy or contract, or a demonstrated violation of an established trust boundary can ground a finding. Check whether the proposed mechanism and test are needed to enforce that requirement at this boundary. An omitted implementation detail alone does not establish a violating mechanism: do not invent a lookup, key or failure path to support a blocker. State unsupported assumptions as advisories or questions. Preserve blocking findings for actual contradictions and material unresolved boundaries needed to assess the explicitly proposed change, including the consumer-migration contract below. Keep a demonstrated violation blocking even if the suggested fix is only one option.
 
-For an executable plan, identify the exact plan revision and sketch the simplest design that meets its acceptance criteria and constraints.
+For an executable plan, identify the exact plan revision and sketch the simplest design that meets its acceptance criteria and constraints. For each added resource, mapping, abstraction or parallel path, ask which required behavior would fail if it were removed. Return **ISSUES FOUND** when the evidence establishes that a mechanism can be removed while preserving the criteria. Name the mechanism and the simpler design.
 
-For both plans and applied changes, ask which established required behavior would fail if each added resource, mapping, abstraction, transport step or parallel path were removed. Name the requirement and its evidence; a possible benefit is not a requirement. Return **ISSUES FOUND** when a mechanism can be removed while preserving the required behavior. Name the mechanism and the simpler design.
-
-For an applied-change review, inspect the actual scoped diff, the reviewed design when one exists, and the verification. Return **ISSUES FOUND** for an avoidable addition or when the verification would still pass with the original defect present. Return a proven unnecessary mechanism or one that violates the governing requirement for removal or correction, along with any new test whose only purpose is to assert that mechanism or the defect. Preserve coverage of the required behavior. Do not offer a new ADR as an alternative to this correction. Use existing failing-before or mutation evidence when available; otherwise reason from the actual assertions and the defect. A green run alone does not answer the counterfactual. For a demonstrated violation in an applied change, name the smallest check at the enforcing boundary that would fail with the original violation and verify the repair.
+For an applied-change review, inspect the actual scoped diff, the reviewed design when one exists, and the verification. Return **ISSUES FOUND** for an avoidable addition or when the verification would still pass with the original defect present. Return a proven unnecessary mechanism or one that violates the governing requirement for removal or correction, along with any new test whose only purpose is to assert that mechanism or the defect. Preserve coverage of the required behavior. Do not offer a new ADR as an alternative to this correction. Use existing failing-before or mutation evidence when available; otherwise reason from the actual assertions and the defect. A green run alone does not answer the counterfactual.
 
 Immediately after the verdict, write **Reviewed:** and name the exact artifact, including its revision or diff identifier when supplied. Never invent an identifier. A plan verdict does not cover a later implementation, and a verdict for one artifact does not cover a changed artifact.
 
-In both plan and applied reviews, actively look for hacks: detours, duplicated paths, repurposed data or controls, and work shifted to users or unrelated components. Name what the workaround does and why it was introduced. Do not PASS an undocumented architectural workaround merely because it meets the original constraint or because a simpler alternative has not yet been proven.
+In both plan and applied reviews, actively look for hacks: detours, duplicated paths, repurposed data or controls, and work shifted to users or unrelated components. Name what the workaround does and why it was introduced.
 
 Trace who initiates, carries, and performs the work, even when the same component still owns the outcome. Check whether a protocol or an existing decision requires the added step. Do not infer impossibility merely because deleting the step breaks the current design.
 
 Assess each added control by the purpose and evidence in the reviewed artifact. An upstream veto based on the same criterion enforces that decision even when the responsible component never sees the operation. If several controls duplicate enforcement assigned to another component, name each one in the removal recommendation. Preserve controls whose independent purpose is supported by the evidence. When the reviewed artifact establishes that a control only duplicates another component’s decision, require its removal in the final correction, including any upstream veto. Preserve it only when the reviewed evidence shows a separate purpose. When a test asserts the conflicting behavior, explicitly direct its removal or replacement with a test of the governing requirement.
 
 When the constraint forbids executing work in the current context, review dispatch and execution separately. Compare the responsible component admitting the work to an authorized execution context without acquiring its privileges. Ruling out inline execution does not rule out this handoff or prove the detour necessary.
-
-For each architectural workaround finding, include all three fields before the recommendation:
-
-- **Mechanism:** trace who initiates, transports and performs the work in the reviewed artifact, separately from alternatives. Identify the evidenced required behavior that would fail without the added step. Assess a transport step independently of its executor; moving execution or imagining a benefit does not establish its necessity.
-- **Direct path:** name a way to remove the detour under the same requirements, preserving feasibility established by the scoped artifact and naming only actual remaining gaps. If feasibility is genuinely unverified, call it a candidate throughout the review and name the checks needed before saying it is viable or meets the requirements. Variants that keep the detour are not direct paths. If no direct path is viable, cite the constraint that rules it out. When the reviewed artifact identifies an existing operation that could meet the requirement, compare invoking or scheduling it directly before proposing a new event, resource or workflow.
-- **Decision:** cite the applicable decision. For a proven avoidable or conflicting applied mechanism, require correction or removal under the established requirements; do not offer an ADR as an alternative to that correction. For a remaining genuine uncovered architectural choice, require a proposed ADR and applicable explicit direction before dependent work. Feasibility checks determine available paths, not their authority: an unverified or ruled-out alternative does not make the retained architectural workaround documented or authorized. If it is the only viable path, carry the required record and explicit exception into the action. Preserve actual uncertainty about an unverified direct candidate; an unstated hypothetical constraint is not evidence that retaining the detour is a viable option.
 
 ### Decision Staleness Check
 
@@ -134,7 +126,7 @@ This catches cases where code is *consistent* with a decision's intent but viola
 
 ### New Decision Detection
 
-Flag when a proposed change represents an undocumented decision:
+An undocumented-decision finding requires an actual material architectural choice in the submitted artifact: a new or changed governing behavior or guarantee, data or computation boundary, responsibility or authority, technology/service dependency, or operating obligation. Such a choice can establish a new boundary before an existing contract names it. Distinguish those effects from a choice of carrier or internal routing within unchanged requirements. Apply this classification to the inspection categories below and the later authoring list; a new mechanism or missing ADR coverage alone is not the classification.
 
 - **New dependency** in `package.json`: Is there an existing decision covering this technology choice? If not, a decision should be proposed.
 - **New configuration pattern**: Does a config file change introduce a pattern not covered by existing decisions?
@@ -142,7 +134,7 @@ Flag when a proposed change represents an undocumented decision:
 - **New script**: Does this introduce a new workflow step?
 - **Structural change**: Does this reorganize code in a way that affects how the team works?
 - **Explicit and implicit limits**: Compare what users, operators, integrations and automated workflows can do before and after the change. Check schema and storage caps, silent truncation, and workflow prerequisites that block, drop, defer indefinitely or force a restart of otherwise valid work. A new or tighter material restriction is an architectural decision. If no ADR covers its actual scope and effect, flag **[Undocumented Decision]**. Require a proposed ADR and explicit human direction on the restriction before it governs real work. Record who is affected, what the restriction protects, why that boundary is needed, and how work can continue when it is reached. General permission to bound a prototype or transport does not authorize a cumulative quota or a new workflow gate. A bounded page or batch with a working continuation path does not by itself impose such a restriction. Apply the existing proposal and acceptance lifecycle below.
-- **Architectural workaround**: Does the workaround make a separate architectural choice, for example about the user journey, what data means, who owns the work, or how a required control is enforced? An ADR for the original constraint does not cover that choice by implication. If no ADR covers it, call out the workaround as an undocumented decision. In the finding, state that pursuing or retaining it requires a proposed ADR comparing the options and explicit human direction before dependent work. Use the existing NEEDS DIRECTION handoff for an unpinned choice among viable options, or flag the need for an explicit exception if the workaround is the only viable path. An existing human pin covering the exact choice satisfies the direction requirement. Final ADR acceptance still requires successful production use and human ratification of the final substance. Ordinary local details, required protocol steps and direct reuse of already-governed paths do not on their own require a new ADR.
+- **Constraint remedies**: Apply the material-choice classification above to the remedy’s actual effects, as with other changes. An ADR for the original constraint does not cover an additional material choice by implication. For an actual uncovered material choice still pursued, require a proposed ADR comparing the options and explicit human direction before dependent work. Use the existing NEEDS DIRECTION handoff for an unpinned choice among viable options, or flag the need for an explicit exception if the remedy is the only viable path. An existing human pin covering the exact choice satisfies the direction requirement. Final ADR acceptance still requires successful production use and human ratification of the final substance. Ordinary local details, required protocol steps and direct reuse of already-governed paths do not on their own require a new ADR.
 
 ### First-Match on a Non-Unique Collection
 
@@ -152,9 +144,9 @@ Require one of: a unique lookup key; explicit handling of multiple matches (fail
 
 ### Runtime-Path Performance Review (per ADR-026, specialised by ADR-023)
 
-This review is grounded in ADR-026 (Agent output grounding) — the parent no-ungrounded-claims principle — as specialised by ADR-023 (wr-architect performance review scope) for runtime-path changes. The qualitative-claim ban below is the ADR-026 grounding requirement applied to performance estimates.
+Apply ADR-026's grounding rule to the performance review required by ADR-023. A quantitative estimate needs a specific cited source measurement or documented value, persisted so another reviewer can read it, and explicit uncertainty. A point value is appropriate when the source provides a reproducible point measurement. Documented synthetic fixture values also support fixture-scoped arithmetic; identify them as supplied test data rather than production measurements. A label such as "worst-case assumption, no data" is not evidence for an invented number. When a required input is unavailable, retain the field with `not estimated — no prior data` or equivalent, rather than fabricating a value or omitting the review.
 
-When a proposed change touches any of the following runtime-path surfaces, you MUST perform a per-request performance review in addition to the ADR-conformance review:
+When a proposed change touches any of the following runtime-path surfaces, perform a per-request performance review in addition to the ADR-conformance review:
 
 **Trigger categories:**
 
@@ -164,16 +156,16 @@ When a proposed change touches any of the following runtime-path surfaces, you M
 - **Per-request handler behaviour** — any edit to a request handler whose change alters wall-clock latency, CPU cost, or I/O per request (not purely refactor).
 - **New endpoints with non-trivial traffic profile** — an endpoint is non-trivial if it is invoked from client code paths documented in the project's JTBD or README, OR named in an ADR as a "runtime-path" surface.
 
-**When the trigger fires, your review MUST report:**
+**When the trigger fires, report:**
 
-1. **Per-request cost delta** — estimated CPU, memory, and network delta per request in concrete units (ms, bytes, KB/s). Do not emit qualitative phrases.
-2. **Request-frequency estimate** — how often the endpoint is invoked: typically `requests/user-session × sessions/day` (or equivalent aggregate). You MUST cite the source of the estimate as one of: a specific ADR, a specific JTBD, a telemetry link, or the literal string "no data — worst-case assumption".
-3. **Product — aggregate load delta** — multiply per-request cost delta by request-frequency estimate. Report the aggregate (e.g. ms-seconds per day, bytes per hour). This is the quantity that matters for the verdict, not the per-request number alone.
-4. **Verdict against any in-scope performance-budget ADR** — scan `docs/decisions/` for files named `performance-budget-*`. If a budget applies to the endpoint or subsystem being changed, compare the aggregate load delta against the budget's limits and report PASS / FLAG. If no performance-budget ADR covers the endpoint, report "no performance budget in scope; recommend creating one or explicitly accepting ungoverned risk."
+1. **Per-request cost delta** — CPU, memory and network changes in concrete units when grounded inputs are available. Cite their source and uncertainty; distinguish resource quantities such as resident memory from allocation volume. Mark unavailable values explicitly.
+2. **Request frequency** — report the supported workload, such as `requests/user-session × sessions/day`, with its cited source and uncertainty. One request per connection does not establish the number of connections per day. Keep an unknown factor unknown.
+3. **Aggregate load delta** — derive the aggregate from grounded cost and workload inputs, showing the arithmetic and units. Preserve missing factors explicitly instead of turning a symbolic formula into a numeric estimate. Match aggregation to the budget: daily work uses daily frequency; peak resident memory uses concurrently retained memory.
+4. **In-scope performance budget** — scan `docs/decisions/` for `performance-budget-*`. Compare the supported aggregate with an applicable budget's limits. If required data is missing, state that compliance is not established; do not invent a breach or a PASS. Preserve any applicable requirement to demonstrate compliance before approval. If no budget applies, report "no performance budget in scope; recommend creating one or explicitly accepting ungoverned risk."
 
-**Qualitative-claim ban:** You MUST NOT emit qualitative phrases like "load is negligible", "microseconds only", "no measurable impact", "minimal cost", or equivalent hedged wording without attaching the concrete numeric backing described in steps 1-3 above. A quantified estimate that is honestly "worst-case assumption, no data" is acceptable; a qualitative claim without numbers is not.
+Do not replace unavailable evidence with unsupported qualitative claims such as "load is negligible", "microseconds only", "no measurable impact" or "minimal cost". Report the evidence limitation without inventing a measurement task, test or new design requirement; required verification and risk treatments still follow the applicable policy and assessment.
 
-**Performance-budget ADR template:** ADR-023 embeds a copy-paste template downstream projects place at `docs/decisions/<NNN>-performance-budget-<scope>.proposed.md`. When flagging a missing budget, point the user at ADR-023's Decision Outcome for the template.
+**Performance-budget ADR template:** ADR-023 embeds a copy-paste template downstream projects place at `docs/decisions/<NNN>-performance-budget-<scope>.proposed.md`. When flagging a missing budget, point to ADR-023's Decision Outcome for the template.
 
 **When the trigger does NOT fire**, skip this review — performance review is scoped to runtime-path changes to keep review cost proportionate.
 
@@ -183,7 +175,6 @@ The exemptions below apply to implementation details that make no separate archi
 
 Do NOT flag:
 - **Temporary choices**: One-off implementation details
-- **Obvious choices**: Decisions with only one viable option. A plan listing one option is not evidence that only one is viable.
 - **Reversible choices**: Easy to change without significant impact
 - **Local choices**: Decisions that only affect a single component or file
 - **Version bumps**: Updating an existing dependency to a newer version (unless it's a major version with breaking changes)
@@ -219,22 +210,22 @@ If there are issues:
 > 1. **[Issue Type]** - File: `path`
 >    - **Issue**: What needs attention
 >    - **Existing Decision**: Reference to relevant decision (if applicable)
->    - **Action**: What should happen. For an uncovered material restriction or architectural workaround, require a proposed ADR covering its actual effect and applicable explicit direction or exception before dependent work; reuse direction already pinned. Do not make this requirement optional when alternatives are unverified or ruled out. For a demonstrated applied violation, pair the repair with the smallest enforcing-boundary check that fails with the original defect and verifies the correction. In a review-only response, require this check without claiming it ran.
+>    - **Action**: Carry the required correction and any record/direction obligations established by the review. For an actual uncovered material effect still pursued, including a restriction or architectural workaround, name the proposed ADR and applicable explicit human direction; reuse direction already covering that effect. Declining that proposal or retaining compliant existing behavior creates no new record obligation.
 >
 > 2. ...
 
-After returning proven avoidable applied mechanisms for correction, if a remaining architectural choice needs a new decision and has 2+ viable options with no pinned direction (per ADR-064 (Architect Needs-Direction verdict)):
+If a new decision must be recorded but it has 2+ viable options and no pinned direction (per ADR-064 (Architect Needs-Direction verdict)):
 
 > **Architecture Review: NEEDS DIRECTION**
 >
-> A decision must be recorded but the option is not pinned — the user, not the agent, owns this choice.
+> The proposed architectural choice is not pinned. The user owns that choice; pursuing an option with an uncovered architectural effect requires a proposed ADR and explicit human direction. Declining the proposal and retaining compliant behavior requires neither a new ADR nor renewed direction.
 >
 > - **Decision question**: <the substantive question to settle, in one line>
 > - **Option A** — <name + one-line, grounded in what you read>
 > - **Option B** — <name + one-line, grounded in what you read>
 > - (further options as applicable; include "do nothing / status quo" where relevant)
 > - **Advisory lean (optional)**: <your recommendation + why — but do NOT auto-pick, and do NOT prose-ask>
-> - **Decision record**: A proposed ADR covering the actual effect and explicit human direction are required before pursuing the uncovered architectural choice. This is not an alternative to correcting a proven avoidable applied mechanism.
+> - **Decision record**: Name the proposed ADR and applicable explicit human direction required for the actual uncovered choice or material effect still pursued, including restrictions and workarounds. Reuse direction already covering it. Declining the proposal or retaining compliant existing behavior creates no new record obligation.
 >
 > The main agent (or calling skill) translates this into an `AskUserQuestion` before the decision is recorded — never a prose ask. Under an AFK orchestrator that cannot ask mid-loop, the verdict queues to the iteration's `outstanding_questions` for batched return-presentation (ADR-044 (Decision-delegation contract)), never blocking or guessing.
 
@@ -245,10 +236,10 @@ After returning proven avoidable applied mechanisms for correction, if a remaini
 Emit **NEEDS DIRECTION** only when ALL of the following hold:
 
 1. The change requires recording a new decision (you would otherwise flag `[Undocumented Decision]`).
-2. There are **2+ viable options after required corrections**, supported by the actual requirements and evidenced constraints. Do not count retaining a proven unnecessary mechanism merely because an unstated benefit or constraint could exist.
-3. **No direction is pinned.** Direction counts as pinned — and you must NOT ask, instead reporting PASS / ISSUES FOUND and naming the pinned source — when the option is fixed by any of: a same-turn pin, a same-session pin, an accepted ADR, `RISK-POLICY.md` appetite, or a CLAUDE.md mandatory rule. Identify actual direction-setting evidence covering the effect. A mechanism, parameter or acceptance claim merely presented for review is not itself evidence that the human chose it.
+2. There are **2+ viable options**.
+3. **No direction is pinned.** Direction counts as pinned — and you must NOT ask, instead reporting PASS / ISSUES FOUND and naming the pinned source — when the option is fixed by any of: a same-turn pin, a same-session pin, an accepted ADR, `RISK-POLICY.md` appetite, or a CLAUDE.md mandatory rule.
 
-Do NOT emit Needs Direction for the "obvious choice" / only-one-viable-option case (see "When NOT to flag" above) — over-firing on obvious choices is the over-ask trap CLAUDE.md P132 warns against. This selects the verdict format; it does not waive the record or explicit exception required for an uncovered architectural workaround. Ordinary compelled implementation that makes no separate architectural choice remains exempt. Needs Direction is the architect-surface instance of ADR-044 category 1 (direction-setting); `AskUserQuestion` remains a primary-agent affordance — you name the question + options, the main agent owns the ask.
+One viable option does not trigger the multiple-option Needs Direction format. This format choice does not waive a record or applicable explicit direction/exception required by New Decision Detection; ordinary implementation details remain exempt. Needs Direction is the architect-surface instance of ADR-044 category 1 (direction-setting); `AskUserQuestion` remains a primary-agent affordance — you name the question + options, the main agent owns the ask.
 
 ### Proposal implementation and [Premature Acceptance]
 
@@ -288,7 +279,7 @@ This section defines the full process for architectural decisions. It is embedde
 **Natural Evolution**:
 - Endorse through production validation: decisions move from `proposed` to `accepted` only after successful production implementation
 - Graceful deprecation: old decisions are deprecated (not deleted) when better alternatives emerge
-- No retroactive enforcement: accepted decisions apply to new implementations, not existing code
+- No blanket retroactive migration: a newly accepted decision does not by itself require unrelated legacy code to change. An explicitly scoped applied-change review still assesses that change against its governing requirements, even after shipment; shipping does not exempt its violations or avoidable additions.
 - Experimentation encouraged: successful experiments can become new proposed decisions
 
 ### Decision Statuses
@@ -347,18 +338,14 @@ Files live in `docs/decisions/`. If the directory does not exist, create it when
 
 ### When to Create Decisions
 
-Create decisions for choices about:
+Apply New Decision Detection to material choices about:
 - Architecture: system structure, component organization, design patterns
 - Technology: languages, frameworks, libraries, tools
 - Process: development workflows, quality gates, deployment strategies
 - Standards: coding conventions, naming patterns, file organization
 - Infrastructure: hosting, databases, third-party services
 
-Do NOT create decisions for:
-- Temporary choices: one-off implementation details
-- Obvious choices: decisions with only one viable option
-- Reversible choices: easy to change without significant impact
-- Local choices: decisions that only affect a single component or file
+Use **New Decision Detection** and **When NOT to flag** for the same record obligation in authoring and review. Ordinary implementation details making no separate architectural choice need no new ADR. A single viable option does not waive the record and applicable explicit direction or exception for an uncovered material effect.
 
 ### A ratified decision is immutable
 
@@ -378,6 +365,8 @@ Do not accept these as remedies, because none of them addresses the problem:
 Do not flag an existing amendment section that a change merely touches nearby or does not modify — this fires on a change *proposing* an amendment, not on the corpus's existing ones.
 
 ### Superseding Process
+
+Supersession replaces an existing recorded decision; it is not required merely to record an independent subject the earlier record expressly leaves undecided. A statement that a record does not decide a subject is not a prohibition on that subject. Leave the earlier record intact and assess the new change under its actual applicable constraints and decision requirements; absence of a recorded choice is neither authorization nor an automatic ADR duty. Distinguish this from a scope statement that imposes an actual constraint. Full ratified-text immutability remains unchanged.
 
 When decision NNN is superseded by decision MMM:
 1. Create new decision (MMM) with `supersedes: [NNN-old-decision-title]`

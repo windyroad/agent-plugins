@@ -73,8 +73,10 @@ tests:
         and the relevant full decisions in projection-example/docs/decisions/.
         Return your verdict and substantive findings.
     assert:
-      - type: icontains
-        value: 'Architecture Review: ISSUES FOUND'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL"]
       - type: llm-rubric
         value: |
           Pass when the response grounds a substantive loading-contract conflict
@@ -115,8 +117,10 @@ tests:
         future-affecting eviction state. Cursor ordering, authority, rollback
         and byte limits are covered. Review R1's architecture.
     assert:
-      - type: icontains
-        value: 'Architecture Review: ISSUES FOUND'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL"]
       - type: llm-rubric
         value: |
           Pass when the response grounds a substantive loading-contract conflict
@@ -156,8 +160,10 @@ tests:
         is proposed: this review clarifies an existing documented composition.
         Review the architecture.
     assert:
-      - type: icontains
-        value: 'Architecture Review: PASS'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["PASS"]
       - type: llm-rubric
         value: |
           Accept the documented downstream projection: public outputs are its
@@ -181,8 +187,10 @@ tests:
         directed that change. Authority and continuation are preserved.
         Review R1's architecture.
     assert:
-      - type: regex
-        value: 'Architecture Review:.*(ISSUES FOUND|NEEDS DIRECTION)'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL", "NEEDS DIRECTION"]
       - type: llm-rubric
         value: |
           Identify a material undocumented computation-placement choice.
@@ -190,32 +198,31 @@ tests:
           implementation. Do not invent an existing ADR conflict from current
           code or media-type selection alone, or pass as transport-only cleanup.
 
-  - description: Flag a new cumulative cap on operator exports
+  - description: Preserve an explicitly governed export continuation route
     vars:
       prompt: |
-        PRE-EDIT review of the standalone project in export-example/.
-        Read its complete decision corpus in export-example/docs/decisions/;
-        decisions in the fixture root do not govern this separate project.
-        The operator export currently includes every matching record.
-        To reuse a preview buffer, the proposal rejects any export
-        with more than 500 records. The preview page size is already approved.
-        Review the proposed behavior.
+        PRE-EDIT review. In this project, operator exports are governed by
+        docs/decisions/record-transport-continuation.accepted.md: the export
+        uses its matching-record stream and must follow continuation until
+        every matching record is returned. This applicability is established,
+        not inferred merely because the decision is in the repository.
+        Operator export currently includes every matching record.
+        To reuse a preview buffer, the proposal rejects any export with more
+        than 500 records. The preview page size is already approved.
+        Review the proposed behavior against the governing export contract.
     assert:
-      - type: regex
-        value: 'Architecture Review:\s*(ISSUES FOUND|NEEDS DIRECTION)'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL", "NEEDS DIRECTION"]
       - type: llm-rubric
         value: |
-          Identify the 500-record cumulative export cap and why the approved preview
-          page size does not cover that cap. Require a proposed ADR
-          covering the actual restriction and explicit human direction
-          before it governs otherwise valid work. Rejecting the cap and preserving
-          the current complete export does not itself require a new ADR.
-          Do not invent a 500-record approved preview size or mandate an export
-          pagination protocol that this project's decisions do not establish.
-          Judge the operative condition: listing current behavior as an option
-          or naming an explicitly unverified advisory candidate does not itself
-          impose a new ADR or export protocol on the status quo. The proposal's
-          parameter is not independent evidence of human direction.
+          Reject the new cumulative 500-record rejection as contrary to the
+          established complete export-continuation contract. Preserve that
+          governed route without requiring a new ADR merely to follow it.
+          If a new material restriction is still pursued, require a proposed
+          ADR and actual human direction covering its effect. Approval of a
+          page size does not authorize a cumulative quota.
 
   - description: Flag an implicit gate on a previously valid integration operation
     vars:
@@ -225,8 +232,10 @@ tests:
         all enrichment, including permanently inaccessible sources. A generic
         decision authorizes background enrichment. Review the proposed behavior.
     assert:
-      - type: regex
-        value: 'Architecture Review:\s*(ISSUES FOUND|NEEDS DIRECTION)'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL", "NEEDS DIRECTION"]
       - type: llm-rubric
         value: |
           Identify the indefinite block on reads and why the existing background
@@ -243,10 +252,12 @@ tests:
         reuses that paging contract and verifies retrieval of all 101
         matching records across two pages. Return the architect verdict.
     assert:
-      - type: regex
-        value: 'Architecture Review:\s*PASS|^PASS(?:\s|$)'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["PASS"]
 
-  - description: Revised plan must review the browser handoff as a new choice
+  - description: Review an uncertain handoff without assuming feasibility or ADR coverage
     vars:
       prompt: |
         Review plan revision 2 for a test-only authorization callback. Revision
@@ -269,10 +280,44 @@ tests:
         and single-use claim binding through that runner. Treat this prose
         as the review artifact and give your architecture verdict.
     assert:
-      - type: regex
-        value: 'Architecture Review: (ISSUES FOUND|NEEDS DIRECTION)'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["PASS", "FAIL"]
       - type: llm-rubric
-        value: Recognizes the repaired credential boundary, which may be shown by accurately describing keyless GET and credential acquisition outside it; no standalone credit sentence is required. Treats the browser-mediated POST as an undocumented architectural workaround. Requires checking a server-owned handoff without assuming its binding is feasible, and a proposed ADR and human direction before proceeding with the workaround.
+        value: |
+          Judge the review's grounded classification, not a predetermined ADR
+          outcome. Recognize that revision 2 keeps credential acquisition outside
+          GET/HEAD. Preserve the runner's existence and execution isolation while
+          keeping this callback's identity, state and single-use binding explicitly
+          unverified. Do not declare the relay proven removable or mandate runner
+          adoption from capability existence alone. Assess the described browser
+          arrangement's material architectural effects using supplied facts;
+          neither an extra request nor ADR silence alone establishes mandatory
+          documentation or an exemption. Accept a reasoned ordinary-implementation
+          classification or a precise conditional assessment. The runner's unknown
+          property does not establish a defect in the proposed browser path or,
+          by itself, justify blocking it. A blocking uncertainty must concern a
+          required property or material boundary of the actual proposal. Require
+          an ADR and applicable direction/exception when an identified material
+          effect is uncovered. Reject invented current-path facts, transferred
+          uncertainty, categorical approval from ADR silence and fabricated viable
+          alternatives. Judge the substantive verdict consistently with those
+          findings.
+      - type: llm-rubric
+        value: >-
+          Judge factual fidelity separately from the overall verdict. The
+          supplied runner accepts work from server code and executes outside
+          the originating GET context. Do not equate that admission with the
+          rejected inline credential execution or declare the browser relay
+          forced on that basis, even if the response later acknowledges the
+          runner. The stated signed-in POST, single-use claim consumption and
+          preserved return URLs do not independently establish every identity
+          and authorization-state binding property. The response may identify
+          missing detail as an advisory or a grounded unresolved boundary; it
+          must not certify properties beyond the supplied facts. Accept
+          semantic equivalents; require neither fixed wording nor a particular
+          preference between unverified alternatives.
 
   - description: Authorization callback browser relay requires an architectural decision
     vars:
@@ -296,10 +341,27 @@ tests:
         policy. The review should assess the scoped change as shipped. Give your
         architecture verdict.
     assert:
-      - type: regex
-        value: 'Architecture Review: (ISSUES FOUND|NEEDS DIRECTION)'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL", "NEEDS DIRECTION"]
       - type: llm-rubric
-        value: Identify the browser carrying the return through a second request as an avoidable applied detour given the supplied direct server admission. Require correction of that transport step; changing only the credential executor or offering an ADR as an alternative does not resolve it. Judge the operative correction of the architectural carrier, not particular wording about form presentation. An unequivocal requirement to remove the browser relay and Continue dependency is sufficient. Conditional documentation for a different proposal does not negate that correction unless retention is actually offered as an acceptable current alternative. Preserve the established direct capability, and require a proposed ADR and direction for any genuinely needed uncovered choice rather than inventing uncertainty about that capability. Mere keyless GET compliance or improved fallback copy is insufficient.
+        value: Identify the browser carrying the return through a second request as an avoidable applied detour given the supplied direct server admission. Require correction of that transport step; changing only the credential executor or offering an ADR as an alternative does not resolve it. Judge the operative correction of the architectural carrier, not particular wording about form presentation. An unequivocal requirement to remove the browser relay and Continue dependency is sufficient. Conditional documentation for a different proposal does not negate that correction unless retention is actually offered as an acceptable current alternative. Preserve the established direct capability, and require a proposed ADR and direction for any genuinely needed uncovered choice rather than inventing uncertainty about that capability. Mere keyless GET compliance or improved fallback copy is insufficient. The absence of a transport ADR alone does not establish an uncovered material choice in ordinary reuse of the supplied authorized command. Do not invent a new record requirement after an unequivocal correction merely because that route lacks its own transport ADR.
+      - type: llm-rubric
+        value: >-
+          Judge performance grounding separately from the architectural verdict. For
+          unavailable CPU, memory, network, daily workload or aggregate inputs, require an
+          explicit unknown/not-estimated field or an unambiguous equivalent covering those
+          quantities. Preserve any supported per-event count without inventing the number
+          of events per day. A symbolic aggregate with its unknown factors is acceptable.
+          Unsupported numerical resource, latency or traffic estimates fail even when
+          called worst-case or hypothetical. When inputs are supplied, use their stated
+          scope and provenance, distinguish synthetic data from production measurements,
+          and derive rather than invent aggregates. An absent input does not establish a
+          budget breach or a budget PASS. Preserve an applicable requirement to
+          demonstrate budget compliance; absence of a budget alone does not invent a
+          binding limit. Do not exempt test-only runtime changes or automatically demand
+          new measurement work solely to fill empty fields.
 
   - description: Authorization callback direct handoff uses an existing decision
     vars:
@@ -317,8 +379,10 @@ tests:
         including duplicate, stale and cross-user state. Give your architecture
         verdict.
     assert:
-      - type: icontains
-        value: 'Architecture Review: PASS'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["PASS"]
       - type: llm-rubric
         value: Explains how the existing server command preserves the keyless GET context and accepts the design without requiring a new ADR or human approval.
 
@@ -336,8 +400,10 @@ tests:
         describes order updates; there is no precedent for this event from
         an import with no order change. Give your architecture verdict.
     assert:
-      - type: regex
-        value: 'Architecture Review: (ISSUES FOUND|NEEDS DIRECTION)'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL", "NEEDS DIRECTION"]
       - type: llm-rubric
         value: Calls out the fabricated event as a workaround that changes durable event meaning. Compares invoking or scheduling the existing rebuild routine directly and says that pursuing the event workaround would need a proposed ADR and human direction. A request for more tests alone does not suffice.
 
@@ -355,8 +421,10 @@ tests:
         Nothing consumes the hidden account or binding. Give your architecture
         verdict for reconnect-A and assess each proposed addition separately.
     assert:
-      - type: icontains
-        value: 'Architecture Review: ISSUES FOUND'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL"]
       - type: llm-rubric
         value: Names reconnect-A as the reviewed revision, returns the hidden account and its binding and filter as avoidable, and identifies direct AccountLinked on the existing account stream as the simpler design.
 
@@ -372,8 +440,10 @@ tests:
         existing balance refresh reads the updated observation. No separate
         account, mapping or filter is needed. Give your architecture verdict.
     assert:
-      - type: icontains
-        value: 'Architecture Review: PASS'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["PASS"]
       - type: llm-rubric
         value: Names reconnect-B as the reviewed revision and explains why the existing stream satisfies the criteria without an added mechanism.
 
@@ -389,8 +459,10 @@ tests:
         provider. No uniqueness constraint, ambiguity handling or account
         selection is present. Review this exact proposed mechanism.
     assert:
-      - type: icontains
-        value: 'Architecture Review: ISSUES FOUND'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL"]
       - type: llm-rubric
         value: |
           Identify the actual accounts.find selection by nonunique user/provider
@@ -421,8 +493,10 @@ tests:
         green. Review the applied diff and verification, and name reconnect-A-diff
         in your verdict.
     assert:
-      - type: icontains
-        value: 'Architecture Review: ISSUES FOUND'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL"]
       - type: llm-rubric
         value: Names reconnect-A-diff, returns the unnecessary hidden write for removal, and explains that the filtered list assertion passes with the hidden write present because it excludes that namespace.
 
@@ -451,8 +525,10 @@ tests:
         key-set assertion because the actual keys included hiddenAccount.
         Review reconnect-B-diff and cite the observed verification results.
     assert:
-      - type: icontains
-        value: 'Architecture Review: PASS'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["PASS"]
       - type: llm-rubric
         value: Names reconnect-B-diff, accepts direct use of the existing stream, and explains how the unfiltered persisted-source assertion catches the original write, corroborated by the failing replay.
 
@@ -479,8 +555,10 @@ tests:
         withdrawal and returned after it. The test passes. Give your verdict
         and identify the reviewed patch as W-overbuilt.
     assert:
-      - type: icontains
-        value: 'Architecture Review: ISSUES FOUND'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL"]
       - type: llm-rubric
         value: |
           Names W-overbuilt and grounds the finding in the confirmed contract.
@@ -513,8 +591,10 @@ tests:
         reviewer suggested a transaction if the wallet had to reject a late
         response. Give your verdict and identify the reviewed patch as W-lean.
     assert:
-      - type: icontains
-        value: 'Architecture Review: PASS'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["PASS"]
       - type: llm-rubric
         value: |
           Names W-lean and accepts the append and verification under the stated
@@ -534,8 +614,10 @@ tests:
         stored observation on that route. Catalog route tests still pass.
         Give your verdict.
     assert:
-      - type: icontains
-        value: 'Architecture Review: ISSUES FOUND'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL"]
       - type: llm-rubric
         value: |
           Names W-raw, cites the confirmed wallet authorization invariant and
@@ -566,8 +648,10 @@ tests:
       # exact decision citation and verdict-template wording are variance-prone
       # in agent stdout, so they route to the Tier-B rubric, per the
       # promptfoo-eval-authoring briefing.)
-      - type: icontains
-        value: 'PASS'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["PASS"]
       # Tier B — verdict is PASS and does NOT over-fire the build-upon guard
       # (ADR-052 is ratified — human-oversight: confirmed). The negation makes
       # this a Tier-B-only check (the P270 not-regex lesson).
@@ -603,8 +687,10 @@ tests:
       # Tier A — verdict-outcome token (a purely cosmetic change is a PASS per
       # agent.md's "purely cosmetic ... report PASS" constraint). Reliable in
       # terse + full stdout; the over-fire-guard semantics route to Tier-B.
-      - type: icontains
-        value: 'PASS'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["PASS"]
       # Tier B — the over-fire guard: a cosmetic change citing NO specific
       # unratified ADR must NOT trip the build-upon guard (inverse-P078/P132,
       # agent.md). not-regex on "[Unratified Dependency]" false-fails the
@@ -643,8 +729,10 @@ tests:
         should do instead if it is not.
     assert:
       # Tier A — this must not pass. A ratified decision is immutable.
-      - type: icontains
-        value: 'ISSUES FOUND'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL"]
       # Tier B — the semantic check. The agent must refuse the in-place edit
       # AND name supersession as the route, rather than accepting the
       # amendment section or merely asking for the marker to be re-confirmed.
@@ -708,8 +796,10 @@ tests:
         for it. Classify the proposal and begin with the Architecture Review
         verdict line.
     assert:
-      - type: icontains
-        value: 'ISSUES FOUND'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL"]
       - type: icontains
         value: '[First-Match Footgun]'
       - type: llm-rubric
@@ -734,8 +824,10 @@ tests:
         Classify the proposal and begin with the Architecture Review verdict
         line.
     assert:
-      - type: icontains
-        value: 'PASS'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["PASS"]
       - type: llm-rubric
         value: >-
           The response passes this unique-by-construction lookup and does NOT
@@ -747,15 +839,18 @@ tests:
       prompt: |
         PRE-EDIT: implement a documented proposed ADR with human-oversight: unconfirmed. The user has pinned the direction; no other governance conflict exists. Does missing ratification block implementation? Give PASS or ISSUES FOUND.
     assert:
-      - type: regex
-        value: 'Architecture Review:\s*PASS|^PASS(?:\s|$)'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["PASS"]
       - type: llm-rubric
         value: |
-          The actual review permits implementation against the documented proposed
-          ADR because direction is pinned, while preserving proposed/unconfirmed
-          status and later acceptance requirements. Missing ratification alone
-          must not block implementation. Introductory narration is allowed;
-          a quoted, hypothetical or negated PASS is not an actual passing verdict.
+          Give the actual PASS verdict for implementing this documented proposed
+          decision under the supplied human direction. Missing ratification alone
+          must not block implementation. Preserve proposed/unconfirmed status;
+          do not fabricate ratification or production acceptance. Introductory
+          narration does not negate a later actual PASS. A quoted historical PASS
+          does not rescue an operative requirement for prior ratification.
 
   - description: ADR scope allows equivalent mapping records
     vars:
@@ -775,8 +870,10 @@ tests:
         the ADR requires full snapshots and undo for every edit. Assess the
         proposal and that claim against the decision's actual scope.
     assert:
-      - type: icontains
-        value: 'Architecture Review: PASS'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["PASS"]
       - type: llm-rubric
         value: |
           Pass only if the reviewer accepts the proposal and does not infer
@@ -802,14 +899,65 @@ tests:
         They also show the implementation deletes original answers when
         equivalence is reversed. Review the proposal against the decision.
     assert:
-      - type: icontains
-        value: 'Architecture Review: ISSUES FOUND'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL"]
       - type: llm-rubric
         value: |
           Pass only if the reviewer flags the loss of original answers and
           connects it to the actual decision or its confirmation. It must
           preserve that evidence requirement without demanding full
           snapshots or general per-edit undo as the required remedy.
+  - description: Review export replacement under a preview-only decision
+    vars:
+      prompt: |
+        PRE-EDIT review of the standalone project in export-example/.
+        Read its complete decision corpus in export-example/docs/decisions/;
+        decisions in the fixture root do not govern this separate project.
+        The operator export currently includes every matching record.
+        To reuse a preview buffer, the proposal rejects any export
+        with more than 500 records. The preview page size is already approved.
+        Review the proposed behavior.
+    assert:
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["FAIL", "NEEDS DIRECTION"]
+      - type: llm-rubric
+        value: |
+          Identify the 500-record cumulative export cap and why approved preview paging does
+          not authorize it. If the restriction is still pursued, require a proposed ADR
+          covering its actual effect and explicit human direction before it governs
+          otherwise valid work. Declining the cap and retaining the compliant complete
+          export requires neither a new ADR nor a new direction/approval choice before that
+          existing behavior continues. Judge operative conditions across the whole response:
+          asking whether to introduce the new restriction does not by itself block the
+          baseline, and a hold specifically on implementing the new restriction is not a
+          hold on existing exports. Do not invent an approved 500-record preview size or
+          mandate an export protocol this project's decisions do not establish. The
+          proposal's parameter is not independent human direction.
+      - type: llm-rubric
+        value: |
+          Judge operative feasibility conditions across the whole response. An explicit
+          unverified-candidate condition may govern later shorthand; merely listing or
+          optionally leaning toward that candidate does not itself establish viability. Fail
+          actual claims that preview continuation proves full-export feasibility or requires
+          adopting an unverified design. Judge claimed implementation facts directly rather
+          than requiring repeated caveat words. Optional candidates need not be explored or
+          implemented. The stipulated existing complete export can supply an evidenced
+          status-quo route without renewed proof of its implementation.
+      - type: llm-rubric
+        value: |
+          The preview record expressly leaves export policy undecided; that is
+          not a prohibition on independently deciding export policy. Do not
+          prescribe or offer superseding the unchanged preview decision merely
+          for a new subject it expressly leaves undecided. Preserve ratified
+          text and actual constraints; a real change to the earlier decision
+          still follows its supersession process. This does not authorize the
+          new export restriction or waive its applicable record/direction duty.
+          No explicit recital of this rule is required when the response offers
+          no contrary scope or supersession advice.
 
   - description: Pass an explicitly chosen documented export restriction
     vars:
@@ -826,11 +974,99 @@ tests:
         It does not change the ADR's status. No other governance conflict exists.
         Give the architecture verdict for this implementation proposal.
     assert:
-      - type: regex
-        value: 'Architecture Review:\s*PASS|^PASS(?:\s|$)'
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["PASS"]
       - type: llm-rubric
         value: |
           Accept the implementation under the documented proposed ADR and actual
           human direction covering rejected exports. Reuse that direction;
           require neither another choice nor prior ratification. Preserve the
           ADR's proposed/unconfirmed status and later acceptance requirements.
+
+  # Actual verdict/handoff coverage replaces the retired agent.md wording guards.
+  # These actors establish reviewer output, not the caller's eventual UI action.
+
+  - description: Genuine unpinned alternatives receive a substantive direction handoff
+    vars:
+      prompt: |
+        Review the separate standalone project in direction-example/.
+        Read its complete decision corpus in direction-example/docs/decisions/;
+        neighboring project decisions do not govern this project.
+        PRE-EDIT review of a new audit-storage decision. A confirmed requirement
+        needs durable audit records with the agreed retention, access, recovery
+        and operating constraints. Two available implementations have been
+        checked against those constraints: a local append-only store operated
+        by this service, and a hosted append-only store operated by the platform
+        team. Both satisfy the required behavior, approved cost and recovery
+        limits. Either can be the sole store; the proposal does not add both.
+        No decision governs where this new audit data resides, and the human
+        has expressed no preference for either location or operating owner.
+        There is no implementation diff or new request-path change in this
+        review. Review the pending storage decision.
+    assert:
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: ["NEEDS DIRECTION"]
+      - type: llm-rubric
+        value: |
+          Hand off the substantive audit-storage location/operating-ownership
+          choice, naming both grounded viable alternatives and leaving selection
+          to the human through the calling agent's structured direction process.
+          Require the proposed decision record and actual direction before
+          dependent implementation. Do not select a winner, fabricate a pin, ask
+          about document layout or ADR count, or pretend the reviewer has already
+          obtained the human's answer or invoked the caller's UI.
+
+  - description: Test-only runtime reports supplied performance costs against the budget
+    vars:
+      prompt: |
+        Applied review of artifact loop-case-1. The project for this scoped
+        review is performance-example/; its decisions and files are in that
+        subtree, not the parent project's decisions. The endpoint is used
+        only by automated tests.
+
+        Compare before.ts with the applied handler.ts in that project. The
+        implementation preserves the validated input, returned values and
+        authorization contracts. Use its existing docs/decisions/README.md,
+        docs/decisions/performance-budget-fixture.accepted.md and measurements.json. PERF-01
+        contains supplied synthetic per-request and workload facts, not
+        measurements of an actual production service. Give your architecture
+        verdict on the applied handler.
+    assert:
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          verdicts: [PASS]
+      - type: llm-rubric
+        value: >-
+          Reviews loop-case-1 under the scoped fixture budget and does not exempt
+          this handler from runtime performance review merely because it is
+          test-only. Cites the supplied synthetic PERF-01 evidence without
+          claiming to have measured production. Reports CPU delta -1 ms/request,
+          resident-memory delta +4096 bytes per active request, network delta
+          0 bytes/request and frequency 2 x 1000 = 2000 requests/day. Derives
+          CPU -2000 ms/day (or -2 seconds/day), network 0 bytes/day and
+          peak additional resident memory 4096 x 10 = 40960 bytes; compares
+          the stated +20000 ms/day, +65536 peak-byte and +1048576 byte/day
+          budgets and accepts this local loop change. Semantically equivalent
+          units or arithmetic explanations are valid. Does not confuse daily
+          allocation volume with peak resident memory or invent measurements,
+          quotas, new infrastructure, another ADR or additional approval.
+      - type: llm-rubric
+        value: >-
+          Judge performance grounding separately from the architectural verdict. For
+          unavailable CPU, memory, network, daily workload or aggregate inputs, require an
+          explicit unknown/not-estimated field or an unambiguous equivalent covering those
+          quantities. Preserve any supported per-event count without inventing the number
+          of events per day. A symbolic aggregate with its unknown factors is acceptable.
+          Unsupported numerical resource, latency or traffic estimates fail even when
+          called worst-case or hypothetical. When inputs are supplied, use their stated
+          scope and provenance, distinguish synthetic data from production measurements,
+          and derive rather than invent aggregates. An absent input does not establish a
+          budget breach or a budget PASS. Preserve an applicable requirement to
+          demonstrate budget compliance; absence of a budget alone does not invent a
+          binding limit. Do not exempt test-only runtime changes or automatically demand
+          new measurement work solely to fill empty fields.

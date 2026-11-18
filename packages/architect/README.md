@@ -89,3 +89,9 @@ npx @windyroad/architect --uninstall
 ## Licence
 
 [MIT](../../LICENSE)
+
+## Development qualification
+
+The declared Claude evaluation profile is `claude-opus-5-5` with medium effort requested; Codex evaluation uses `gpt-6.1-sol` / medium. Captures bind the returned verdict to the supplied source and exposed model metadata. Requested effort is kept separate from independently observed effort. A declared profile is not a passing result, and these targets impose no model minimum or change to runtime inheritance. Known Sonnet 5 compatibility failures remain failed evidence; passing another profile does not erase them.
+
+The completion consumer recognizes one unquoted canonical verdict heading or the bounded bold `Architecture verdict` form. A quoted-only heading creates no PASS receipt; quoted history cannot override a current unquoted verdict. Duplicate, conflicting and malformed authoritative headings remain unrecognized. Unknown evidence follows the existing advisory policy and never supplies a missing substantive review or waives findings.

@@ -1,0 +1,22 @@
+{
+  "kind": "synthetic-qualification-input",
+  "id": "PERF-01",
+  "scope": "/fixture-values, 256 records per request",
+  "provenance": "Supplied fixture values, not measurements of an actual production service",
+  "before": {
+    "cpuMsPerRequest": 4,
+    "residentBytesPerActiveRequest": 8192,
+    "networkBytesPerRequest": 2048
+  },
+  "after": {
+    "cpuMsPerRequest": 3,
+    "residentBytesPerActiveRequest": 12288,
+    "networkBytesPerRequest": 2048
+  },
+  "residentDefinition": "Additive retained resident memory attributable to each concurrently active request for its lifetime; shared memory is excluded; these are not allocation-volume measurements",
+  "workload": {
+    "requestsPerSession": 2,
+    "sessionsPerDay": 1000,
+    "maximumConcurrentRequests": 10
+  }
+}

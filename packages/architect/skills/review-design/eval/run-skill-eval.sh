@@ -9,4 +9,4 @@ SKILL_MD="$SCRIPT_DIR/../SKILL.md"
   exit 2
 }
 
-exec claude -p --append-system-prompt "$(cat "$SKILL_MD")" "$@"
+exec claude -p --append-system-prompt "$(cat "$SKILL_MD")" -- "${1:?prompt argument is required}"

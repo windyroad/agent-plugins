@@ -80,7 +80,7 @@ Build a self-contained prompt for the architect subagent that includes:
 - Any explicit scope from the user
 - Label the request `PLAN REVIEW` for a proposed plan or `APPLIED DIFF REVIEW` for changes on disk. Request review against the project's ADRs and ask for any violations, gaps that need a new ADR, or compliance questions.
 
-For an applied review, also request the simplest-design comparison and original-defect verification check. Ask which additions can be removed and whether the actual verification would pass with the original defect present. For a plan review, give the exact plan revision and ask the architect to sketch the simplest design that meets its acceptance criteria and constraints. In either mode, require the report to name the artifact it reviewed.
+For an applied review, also request the simplest-design comparison and review of the supplied original-defect verification. Ask which additions can be removed and whether the actual verification would pass with the original defect present. For a plan review, give the exact plan revision and ask the architect to sketch the simplest design that meets its acceptance criteria and constraints. In either mode, require the report to name the artifact it reviewed.
 
 Ask the reviewer to ground each blocking design or verification finding in the applicable requirement, its source, the enforcement owner, and evidence from the artifact. Ask whether the suggested mechanism or test is needed at that boundary.
 

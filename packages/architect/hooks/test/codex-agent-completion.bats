@@ -98,7 +98,7 @@ guarded_edit() {
   [ ! -e "$MARKER" ]
 }
 
-@test "issues and malformed output fail closed" {
+@test "issues and malformed output do not create PASS receipts" {
   dispatch "$(spawn wr-architect:agent)"
   dispatch "$(close '**Architecture Review: ISSUES FOUND**')"
   [ ! -e "$MARKER" ]
@@ -200,4 +200,109 @@ native_stop() {
   dispatch "$(native_stop first-id)"
   dispatch "$(guarded_edit)"
   [ -f "$MARKER" ]
+}
+
+
+close_text() {
+  jq -cn --arg session "$SESSION" --arg cwd "$CLAUDE_PROJECT_DIR" --arg target "$TARGET" --arg text "$1" \
+    '{session_id:$session,cwd:$cwd,tool_name:"multi_agent_v1__close_agent",tool_input:{target:$target},tool_response:{previous_status:{completed:$text}}}'
+}
+
+@test "verdict contract: native completion accepts the unquoted alias and ignores quoted history" {
+  local text
+  for text in \
+    '**Architecture verdict: PASS, with advisories.** The scoped change is compliant.' \
+    $'**Architecture Review: PASS**\n\n> **Architecture Review: ISSUES FOUND**\n\n```markdown\n**Architecture verdict: ISSUES FOUND**\n```'; do
+    rm -f "$MARKER" "$HASH" "$PLAN"
+    TARGET="contract-valid-$RANDOM"
+    dispatch "$(spawn wr-architect:agent)"
+    dispatch "$(close_text "$text")"
+    [ -f "$MARKER" ]
+    [ -f "$HASH" ]
+    [ -f "$PLAN" ]
+  done
+}
+
+@test "verdict contract: native quotes conflicts and malformed headings supply no PASS receipt" {
+  local text
+  for text in \
+    '> **Architecture Review: PASS**' \
+    '> **Architecture verdict: PASS**' \
+    'The example says **Architecture verdict: PASS**' \
+    $'```markdown\n**Architecture verdict: PASS**\n```' \
+    $'**Architecture Review: PASS**\n**Architecture verdict: ISSUES FOUND**' \
+    $'**Architecture verdict: PASS** **Architecture Review: ISSUES FOUND**' \
+    $'**Architecture Review: PASS**\n**Architecture verdict: UNKNOWN**' \
+    $'**Architecture Review: PASS**\n```markdown\nunfinished' \
+    '**Architecture verdict: ISSUES FOUND**' \
+    '**Architecture verdict: NEEDS DIRECTION**'; do
+    rm -f "$MARKER" "$HASH" "$PLAN"
+    TARGET="contract-invalid-$RANDOM"
+    dispatch "$(spawn wr-architect:agent)"
+    dispatch "$(close_text "$text")"
+    [ ! -e "$MARKER" ]
+    [ ! -e "$HASH" ]
+    [ ! -e "$PLAN" ]
+  done
+}
+
+@test "verdict contract: unknown native evidence remains advisory without inventing approval" {
+  dispatch "$(spawn wr-architect:agent)"
+  dispatch "$(close_text '> **Architecture Review: PASS**')"
+  [ ! -e "$MARKER" ]
+  run bash -c 'printf "%s" "$1" | "$2/architect-enforce-edit.sh"' -- "$(guarded_edit)" "$HOOK_DIR"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *'action permitted'* ]]
+  [ ! -e "$MARKER" ]
+}
+
+@test "plain verdict: native completion consumes explicit values without presentation markup" {
+  local value expected text
+  for value in PASS 'ISSUES FOUND' 'NEEDS DIRECTION'; do
+    rm -f "$MARKER" "$HASH" "$PLAN"
+    TARGET="plain-value-$RANDOM"
+    text="Architecture Review: $value"
+    dispatch "$(spawn wr-architect:agent)"
+    dispatch "$(close_text "$text")"
+    expected="$value"
+    [ "$value" != 'ISSUES FOUND' ] || expected=FAIL
+    run bash -c 'source "$1"; architect_verdict' -- "$HOOK_DIR/lib/architect-verdict.sh" <<< "$text"
+    [ "$status" -eq 0 ]
+    [ "$output" = "$expected" ]
+    if [ "$value" = PASS ]; then
+      [ -f "$MARKER" ]
+      [ -f "$HASH" ]
+      [ -f "$PLAN" ]
+    else
+      [ ! -e "$MARKER" ]
+      [ ! -e "$HASH" ]
+      [ ! -e "$PLAN" ]
+    fi
+  done
+}
+
+@test "plain verdict: native completion preserves quoted history and rejects mixed authority" {
+  local text
+  text=$'Architecture Review: PASS\n> Architecture Review: ISSUES FOUND\n```markdown\nArchitecture Review: NEEDS DIRECTION\n```'
+  dispatch "$(spawn wr-architect:agent)"
+  dispatch "$(close_text "$text")"
+  [ -f "$MARKER" ]
+  for text in \
+    '> Architecture Review: PASS' \
+    'The example says Architecture Review: PASS' \
+    $'```markdown\nArchitecture Review: PASS\n```' \
+    'Architecture Review: PASS unless approved' \
+    $'Architecture Review: PASS\n**Architecture Review: ISSUES FOUND**' \
+    $'**Architecture Review: PASS**\nArchitecture Review: ISSUES FOUND' \
+    $'Architecture Review: PASS\nArchitecture Review: PASS' \
+    $'Architecture Review: PASS\nArchitecture Review: UNKNOWN' \
+    $'Architecture Review: PASS\n```markdown\nunfinished'; do
+    rm -f "$MARKER" "$HASH" "$PLAN"
+    TARGET="plain-invalid-$RANDOM"
+    dispatch "$(spawn wr-architect:agent)"
+    dispatch "$(close_text "$text")"
+    [ ! -e "$MARKER" ]
+    [ ! -e "$HASH" ]
+    [ ! -e "$PLAN" ]
+  done
 }

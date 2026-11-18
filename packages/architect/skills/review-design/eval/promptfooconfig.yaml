@@ -62,3 +62,36 @@ tests:
           directs the team to create a new ADR that supersedes it. Editing the
           existing ADR is allowed only if that ADR is still unratified. FAIL
           if it suggests adding an amendment section to the ratified ADR.
+
+  - description: Applied delegation reviews supplied verification without inventing a new test duty
+    vars:
+      prompt: |
+        Prepare the request you would send to the architect for this applied
+        review. All context is supplied below; do not run tools, invoke a
+        reviewer or perform the review yourself. Return only that delegation
+        request.
+
+        Checkout /fixture/repo, HEAD 123abc, staged patch digest 456def,
+        artifact reconnect-A. The confirmed plan changes a selector on an
+        existing verified account stream and forbids a hidden discovery
+        source. ADR 017 requires the existing account stream for this return.
+        The applied patch appends AccountDiscovered to hiddenAccount and then
+        AccountLinked to account. Its new test checks the last AccountLinked
+        event and checks the persisted keys after filtering to /verified/.
+        hiddenAccount is under /provider-discovery/. That test passed.
+        Separate policy requires cross-user authorization coverage; that
+        existing suite passed and remains required. No other verification
+        requirement is supplied. Review the actual patch and verification.
+    assert:
+      - type: llm-rubric
+        value: >-
+          Judges the actual drafted delegation request, not a self-report of
+          compliance. It identifies the applied artifact and supplied patch
+          binding, carries the hidden append, filtered assertion and observed
+          green result, and asks the reviewer to assess original-defect coverage
+          and the governing requirement. It preserves the separate cross-user
+          verification requirement. It does not command the reviewer to invent
+          or mandate a new test for every finding, invent another independent
+          testing prerequisite, or claim the green filtered test proves absence
+          of hidden writes. Asking whether supplied verification misses the
+          defect or whether a needed correction has adequate coverage is valid.

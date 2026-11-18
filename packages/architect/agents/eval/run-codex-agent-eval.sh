@@ -7,6 +7,8 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 # Later exec-provider arguments contain metadata, including grading assertions.
 PROMPT="${1:-}"
 AGENT_NAME="wr-architect:agent"
+EVAL_MODEL="${WR_CODEX_EVAL_MODEL:-gpt-6.1-sol}"
+EVAL_EFFORT="${WR_CODEX_EVAL_REASONING_EFFORT:-medium}"
 
 if [[ "$PROMPT" == "[COG_A11Y]"* ]]; then
   AGENT_NAME="wr-architect-cog-a11y"
@@ -54,19 +56,40 @@ test -f "$CODEX_HOME/agents/wr-architect-cog-a11y.toml"
 cp -R "$SCRIPT_DIR/fixtures/repo/." "$TMP_REPO/"
 git -C "$TMP_REPO" init --quiet
 
-OUTPUT="$(codex exec \
-  --ephemeral \
+set +e
+codex exec \
+  --model "$EVAL_MODEL" \
+  -c "model_reasoning_effort=\"$EVAL_EFFORT\"" \
+  --json --output-last-message "$TMP_PACK_DIR/review-output.txt" \
   --cd "$TMP_REPO" \
   -c 'approval_policy="never"' \
   --sandbox read-only \
   --dangerously-bypass-hook-trust \
   "Spawn the installed custom collaborator agent named ${AGENT_NAME}. Wait for it and close that same agent. Do not substitute another agent or perform the review inline. Return the collaborator's final output verbatim without adding a verdict label or summary.
 
-${PROMPT}" </dev/null)"
+${PROMPT}" </dev/null > "$TMP_PACK_DIR/review-events.jsonl"
+CODEX_STATUS=$?
+set -e
+
+# Keep runtime records only in the isolated home long enough to verify the
+# actual reviewer child. Requested flags and parent launch headers are not proof.
+set +e
+python3 "$SCRIPT_DIR/verify-codex-eval-profile.py" \
+  "$CODEX_HOME" "$TMP_PACK_DIR/review-events.jsonl" \
+  "$TMP_PACK_DIR/review-output.txt" "$EVAL_MODEL" "$EVAL_EFFORT" \
+  "$AGENT_NAME" "$CODEX_STATUS" > "$TMP_PACK_DIR/review-profile.json"
+PROFILE_STATUS=$?
+set -e
+if [[ -n "${WR_CODEX_EVAL_PROFILE_MANIFEST:-}" ]]; then
+  cp "$TMP_PACK_DIR/review-profile.json" "$WR_CODEX_EVAL_PROFILE_MANIFEST"
+fi
+printf 'ARCHITECT_CODEX_EVAL_PROFILE: ' >&2
+cat "$TMP_PACK_DIR/review-profile.json" >&2
+[[ ! -f "$TMP_PACK_DIR/review-output.txt" ]] || cat "$TMP_PACK_DIR/review-output.txt"
+[[ "$CODEX_STATUS" -eq 0 ]] || exit "$CODEX_STATUS"
+[[ "$PROFILE_STATUS" -eq 0 ]] || exit "$PROFILE_STATUS"
 
 [[ ! -e "$TMP_REPO/forbidden.txt" ]] || {
   echo "run-codex-agent-eval.sh: reviewer changed the read-only fixture" >&2
   exit 3
 }
-
-printf '%s\n' "$OUTPUT"

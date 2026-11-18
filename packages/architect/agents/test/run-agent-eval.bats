@@ -6,6 +6,7 @@ setup() {
   TMP="$(mktemp -d)"
   mkdir -p "$TMP/bin"
   export PATH="$TMP/bin:$PATH"
+  export ARCHITECT_EVAL_ARTIFACT_DIR="$TMP/captures"
 
   cat > "$TMP/bin/claude" <<'MOCK'
 #!/usr/bin/env bash
@@ -16,7 +17,15 @@ p=pathlib.Path.cwd()
 pathlib.Path(os.environ['FAKE_CLAUDE_CAPTURE']).write_text(json.dumps({'cwd':str(p),'args':sys.argv[1:],'ratified_fixture':(p/'docs/decisions/052-ratified-fixture.md').is_file(),'unratified_fixture':(p/'docs/decisions/074-unratified-fixture.proposed.md').is_file(),'ambient_project':(p/'CLAUDE.md').exists()}))
 PY
 fi
-printf '%s\n' "${FAKE_CLAUDE_STDOUT:-Architecture Review: PASS}"
+if [[ "${FAKE_CLAUDE_STATUS:-0}" != 0 ]]; then
+  printf '%s\n' "${FAKE_CLAUDE_STDOUT:-Architecture Review: PASS}"
+else
+  python3 - "$@" <<'PYRESULT'
+import json,os,sys
+args=sys.argv[1:]; model=args[args.index('--model')+1]
+print(json.dumps({'is_error':False,'result':os.environ.get('FAKE_CLAUDE_STDOUT','Architecture Review: PASS'),'modelUsage':{model:{'contextWindow':1000000}}}))
+PYRESULT
+fi
 printf '%s\n' "${FAKE_CLAUDE_STDERR:-}" >&2
 exit "${FAKE_CLAUDE_STATUS:-0}"
 MOCK
@@ -45,12 +54,12 @@ teardown() {
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"Architecture Review: PASS"* ]]
-  [ -z "$stderr" ]
+  [[ "$stderr" == *"ARCHITECT_CLAUDE_EVAL_PROFILE:"* ]]
 }
 
 @test "isolates fixture inspection and transports only the scenario with the production agent" {
   export FAKE_CLAUDE_CAPTURE="$TMP/capture.json"
-  export AGENT_EVAL_MODEL="fixture-model"
+  export WR_CLAUDE_EVAL_MODEL="fixture-model"
   run "$DRIVER" 'self-contained schema scenario' 'provider metadata must stay out'
   [ "$status" -eq 0 ]
   python3 - "$FAKE_CLAUDE_CAPTURE" "${BATS_TEST_DIRNAME}/../agent.md" <<'PY'
