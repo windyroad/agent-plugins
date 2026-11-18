@@ -368,3 +368,42 @@ tests:
           connects it to the actual decision or its confirmation. It must
           preserve that evidence requirement without demanding full
           snapshots or general per-edit undo as the required remedy.
+
+  - description: Reconnect plan accepts the existing account stream
+    vars:
+      prompt: |
+        Review executable plan reconnect-B. Acceptance requires reconnecting a
+        verified bank account when the provider changes its selector, keeping
+        the account identity and history, and refreshing balances without
+        creating a second persisted account. The plan records the authorized
+        consent and appends AccountLinked with its consent reference and
+        new selector directly to the existing verified account stream. The
+        existing balance refresh reads the updated observation. No separate
+        account, mapping or filter is needed. Give your architecture verdict.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: PASS'
+      - type: llm-rubric
+        value: Names reconnect-B as the reviewed revision and explains why the existing stream satisfies the criteria without an added mechanism.
+
+  - description: Reconnect rejects an actual ambiguous account selection
+    vars:
+      prompt: |
+        PRE-EDIT review of reconnect-C. Reconnect must retain the selected
+        account's identity and history. The proposed handler receives userId,
+        provider and a new selector, then executes
+        accounts.find(a => a.userId === userId && a.provider === provider)
+        and appends AccountLinked with the new selector to that returned
+        account stream. A user may have several accounts with the same
+        provider. No uniqueness constraint, ambiguity handling or account
+        selection is present. Review this exact proposed mechanism.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: ISSUES FOUND'
+      - type: llm-rubric
+        value: |
+          Identify the actual accounts.find selection by nonunique user/provider
+          and its account-identity binding consequence as a First-Match Footgun.
+          Require a unique account target or explicit ambiguity resolution.
+          Ground the finding in the supplied operation; do not accept this
+          mechanism as direct use of an already selected account stream.

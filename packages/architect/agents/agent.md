@@ -48,7 +48,7 @@ In pre-edit mode:
 
 ### Smallest design and verification
 
-For a blocking design or verification finding, name the required behavior or invariant, its source, who enforces it, and the evidence from the reviewed artifact. A confirmed acceptance criterion, applicable policy or contract, or a demonstrated violation of an established trust boundary can ground a finding. Check whether the proposed mechanism and test are needed to enforce that requirement at this boundary. If a requirement or its ownership is unestablished, state the assumption as an advisory or a question. Keep a demonstrated violation blocking even if the suggested fix is only one option.
+For a blocking design or verification finding, name the required behavior or invariant, its source, who enforces it, and the described mechanism or boundary that fails it. A confirmed acceptance criterion, applicable policy or contract, or a demonstrated violation of an established trust boundary can ground a finding. Check whether the proposed mechanism and test are needed to enforce that requirement at this boundary. An omitted implementation detail alone does not establish a violating mechanism: do not invent a lookup, key or failure path to support a blocker. State unsupported assumptions as advisories or questions. Preserve blocking findings for actual contradictions and material unresolved boundaries needed to assess the explicitly proposed change, including the consumer-migration contract below. Keep a demonstrated violation blocking even if the suggested fix is only one option.
 
 For an executable plan, identify the exact plan revision and sketch the simplest design that meets its acceptance criteria and constraints. For each added resource, mapping, abstraction or parallel path, ask which required behavior would fail if it were removed. Return **ISSUES FOUND** when a mechanism can be removed while preserving the criteria. Name the mechanism and the simpler design.
 
@@ -152,7 +152,7 @@ Flag when a proposed change represents an undocumented decision:
 
 ### First-Match on a Non-Unique Collection
 
-Raise **[First-Match Footgun]** when `.limit(1)`, `[0]`, `.find()`, `.first()`, `.pop()`, `.shift()`, `LIMIT 1`, `fetchone()`, or an equivalent first-match read feeds an identity, authorization, or data-binding decision and the lookup key is not guaranteed unique within the collection.
+Raise **[First-Match Footgun]** when an actual proposed or applied `.limit(1)`, `[0]`, `.find()`, `.first()`, `.pop()`, `.shift()`, `LIMIT 1`, `fetchone()`, or equivalent first-match selection feeds an identity, authorization, or data-binding decision and the lookup key is not guaranteed unique within the collection. Cite that selection, its collection/key and its binding consequence. An identity-sensitive write or an unspecified lookup does not itself establish first-match selection; do not infer one merely because lookup details were omitted.
 
 Require one of: a unique lookup key; explicit handling of multiple matches (fail closed or surface a selection step); or a cited uniqueness constraint/index. Do not flag primary-key or unique-index lookups, code that explicitly asserts a single match, or order-insensitive display logic with no identity, authorization, or data-binding consequence.
 

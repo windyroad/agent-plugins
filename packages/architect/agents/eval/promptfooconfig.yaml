@@ -349,6 +349,28 @@ tests:
       - type: llm-rubric
         value: Names reconnect-B as the reviewed revision and explains why the existing stream satisfies the criteria without an added mechanism.
 
+  - description: Reconnect rejects an actual ambiguous account selection
+    vars:
+      prompt: |
+        PRE-EDIT review of reconnect-C. Reconnect must retain the selected
+        account's identity and history. The proposed handler receives userId,
+        provider and a new selector, then executes
+        accounts.find(a => a.userId === userId && a.provider === provider)
+        and appends AccountLinked with the new selector to that returned
+        account stream. A user may have several accounts with the same
+        provider. No uniqueness constraint, ambiguity handling or account
+        selection is present. Review this exact proposed mechanism.
+    assert:
+      - type: icontains
+        value: 'Architecture Review: ISSUES FOUND'
+      - type: llm-rubric
+        value: |
+          Identify the actual accounts.find selection by nonunique user/provider
+          and its account-identity binding consequence as a First-Match Footgun.
+          Require a unique account target or explicit ambiguity resolution.
+          Ground the finding in the supplied operation; do not accept this
+          mechanism as direct use of an already selected account stream.
+
   - description: Reconnect diff returns a green test that misses the hidden write
     vars:
       prompt: |
