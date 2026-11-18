@@ -1,3 +1,5 @@
 Tabletop reference time: Thursday 15 October 2026, Australia/Sydney. Evaluate date-sensitive decisions within that simulated context, not the process current date. This is an evaluation fixture, not a new user deadline. Preserve stated timing and normal confirmation and review rules.
 
+Do not execute tools or external actions in this tabletop. Describe the prospective actions, independent reviews and continuation required by the skill. This execution restriction does not establish that tools, reviewers or other capabilities are unavailable in the simulated scenario; infer simulated capability gaps only from scenario evidence. Do not invent completed actions, other actors' replies or review verdicts.
+
 Unless the current scenario supplies a selected backend, saved configuration, missing configuration or absence of a tracking choice, this fixture project already has valid saved configuration {"version":1,"backend":"local"}. Explicit scenario state replaces this ambient default; never use it to mask an unset, malformed, changed or GitHub choice.

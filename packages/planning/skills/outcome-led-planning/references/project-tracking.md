@@ -39,12 +39,22 @@ Before starting or resuming implementation, or claiming a contribution, compare
 the assessed plan with current evidence of relevant unfinished sibling work.
 Selecting an assessed Now is not execution admission: labels, nonoverlapping
 files, a released task claim or a running watcher cannot make unfinished
-increment delivery disappear. Keep required publication, installation and
-acceptance current until verified; do not start a sibling's implementation as
+increment delivery disappear. Attribute each unfinished condition to the
+increment whose assessed scope and acceptance own it. A remaining outcome-level
+criterion alone does not reopen an accepted increment or extend its reviewed
+revision: plan and assess a successor for that remaining scope. Reopen prior
+acceptance only when concrete evidence contradicts it or establishes an unmet
+condition within its actual scope. Keep that increment's required publication,
+installation and acceptance current until verified; do not start a sibling's implementation as
 "preparation" while these remain. Preserve already-started work and reconcile
 one current continuation with the outcome owner rather than silently relabelling
 it or claiming it was delivered. Use bounded current evidence, not an exhaustive
-history audit for every task.
+history audit for every task. Use successful native relationship reads to
+establish sibling scope. A stale non-child reference, an old horizon on a closed
+child or an omitted historical acceptance summary alone is not evidence of
+unfinished delivery; do not invent missing links or reopen completion on that
+basis. Investigate positive current evidence of an outstanding obligation even
+when its issue was closed or relabelled.
 
 The outcome owner may explicitly replace an increment through the existing
 material-replan assessment. Retain each still-required result and unmet
