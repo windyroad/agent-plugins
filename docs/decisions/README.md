@@ -11,13 +11,13 @@ Compact rendered index of every ADR's chosen option, confirmation criteria, and 
 
 For deep-dive — creating, evolving, ratifying, or contesting a decision — open the per-ADR file directly. `/wr-architect:create-adr`, `/wr-architect:capture-adr`, and `/wr-architect:review-decisions` all keep the full body in scope. Decision Drivers, Considered Options bodies, Pros and Cons, Consequences narrative, and Reassessment Criteria are intentionally NOT in this routine view — they live in the per-ADR body.
 
-**Total ADRs:** 142 (127 in-force, 15 historical)
+**Total ADRs:** 143 (128 in-force, 15 historical)
 
 ---
 
 ## In-force decisions
 
-_127 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
+_128 ADRs. These are the current rules. The architect agent reads this section first for routine compliance review._
 
 ### ADR-002 — Monorepo with Independently Installable Per-Plugin Packages
 **Status:** proposed | **Oversight:** confirmed
@@ -642,6 +642,9 @@ _127 ADRs. These are the current rules. The architect agent reads this section f
 **Chosen:** Chosen option: **"Owned context for isolated tabletop evaluations"**, because this evaluation class needs control of its simulated context and does not execute a skill graph.
 
 ### ADR-144 — Installed instructions for general reviewer fallback
+**Status:** proposed | **Oversight:** unconfirmed
+
+### ADR-145 — Architect report completeness at the existing review boundary
 **Status:** proposed | **Oversight:** unconfirmed
 
 ---
