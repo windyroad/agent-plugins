@@ -1,5 +1,11 @@
 # @windyroad/problem
 
+## 3.7.7
+
+### Patch Changes
+
+- f9efb6b: Keep one increment in execution through required release and acceptance. Check actual unfinished delivery before owners or contributors start another increment, while preserving useful parallel tasks within the current increment and assessed replacements with explicit acceptance transfers.
+
 ## 3.7.6
 
 ### Patch Changes
