@@ -26,7 +26,7 @@ need, considering current priorities, capability and authority, and state that
 choice to its owner. Do not ask the human to choose when that freedom is already
 established. Clarify only genuinely missing scope or conflicting direction.
 
-In GitHub, find the open, assessed Now among the outcome’s child increments using the coordination protocol. In Local tracking, follow the existing delivery plan. Choosing or
+In GitHub, find the open, assessed Now among the outcome’s child increments using the coordination protocol. In Local tracking, follow the existing delivery plan. Before claiming or resuming work, establish [increment admission](../outcome-led-planning/references/project-tracking.md#admit-one-increment-to-execution) from actual unfinished delivery, not the Horizon label or availability of a task. Choosing or
 promoting increments belongs to its outcome owner. Bind your contribution to the
 selected outcome, current increment/revision and task before claiming work.
 Finishing a task permits a fresh outcome choice within standing open scope;

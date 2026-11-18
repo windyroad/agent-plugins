@@ -32,6 +32,36 @@ Optional `contributors` mappings may identify an agent account and responsible h
 
 **GitHub:** read [the GitHub coordination protocol](github-coordination.md) before planning, claims or issue/Project mutations. Issues carry outcome → increment → task; an optional selected Project mirrors them. For missing or incomplete selected setup, invoke the installed [setup-github-tracking skill](../../setup-github-tracking/SKILL.md); reuse verified complete setup, preserve equivalent existing configuration and verify actual saved results. Backend choice grants no authentication, access, messaging, public visibility or recurring automation authority.
 
+## Admit one increment to execution
+
+Execute one increment per outcome through its required release and acceptance.
+Before starting or resuming implementation, or claiming a contribution, compare
+the assessed plan with current evidence of relevant unfinished sibling work.
+Selecting an assessed Now is not execution admission: labels, nonoverlapping
+files, a released task claim or a running watcher cannot make unfinished
+increment delivery disappear. Keep required publication, installation and
+acceptance current until verified; do not start a sibling's implementation as
+"preparation" while these remain. Preserve already-started work and reconcile
+one current continuation with the outcome owner rather than silently relabelling
+it or claiming it was delivered. Use bounded current evidence, not an exhaustive
+history audit for every task.
+
+The outcome owner may explicitly replace an increment through the existing
+material-replan assessment. Retain each still-required result and unmet
+acceptance condition on an identified receiving increment, verify the saved
+transfer, and establish the one continuation before dependent execution. A
+blocked label or releasing a contribution claim is not that replacement. Never
+report a transferred condition as passed or weaken the confirmed outcome.
+Conversely, actual verified acceptance permits the successor even when issue
+closure or horizon cleanup is still pending; administrative closure is not an
+additional acceptance gate.
+
+Useful parallel tasks and safe integration slices within the admitted increment
+remain permitted under the project's dependency, claim and CI rules. Keep watched
+operations with their owners. Preparation exceptions apply within that increment,
+not to implementing another increment. Contributor claim limits and increment
+admission are separate checks; neither substitutes for the other.
+
 ## Expose useful contributions without reserving the backlog
 
 The outcome owner selects and replans Now. The increment owner keeps acceptance, sequence and integration clear, exposes bounded opportunities and resolves overlap. Planning MUST consider tasks within the increment without hogging all work. A starting battle plan describes likely work, dependencies and parallel opportunities; it does not precreate, assign or reserve every future task.

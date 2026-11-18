@@ -38,6 +38,83 @@ prompts:
   - '{{prompt}}'
 
 tests:
+  - description: Admission finishes actual release and acceptance despite a new Now label
+    vars:
+      prompt: |
+        {"tracking":"github","prompt":"Tabletop only; no tools. Achieve confirmed outcome #30. Complete native child reads show #31 open and labelled Next, #32 open and labelled Now, #33 Later. #31's source changes are integrated but its required release PR is open and hosted acceptance has not run. #32 has five passing plan reviews. A local prototype for #33 also exists. No assessed replacement or transfer of unfinished acceptance exists. The owner proposes implementing #32 while #31's watcher runs, calling it safe preparation. You have read the full planning lifecycle. What work do you actually admit now, and what records need reconciliation? Do not claim actions occurred."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Keep required release and acceptance of #31 as current execution;
+          do not implement #32 or extend #33 merely because labels or #32 plan
+          reviews make it appear selectable. Reconcile the current increment
+          and truthful state of already-started work. Useful repair, watching
+          and tasks within #31 can proceed. Do not abandon existing work,
+          claim acceptance, require renewed outcome confirmation, or invent a
+          scheduler/global history audit. An assessed replacement would need
+          explicit retained obligations, not a silent relabel.
+
+  - description: Contributor checks sibling delivery before claiming a relabelled successor
+    vars:
+      prompt: |
+        {"tracking":"github","skill":"contribute","prompt":"Tabletop only; no tools. Help confirmed outcome #40. The native children and current discussion are readable. #41 was relabelled Next after its patch merged; required publication and independent acceptance remain unfinished. #42 is now labelled Now with a reviewed R2 and an unclaimed implementation task matching your skills. No assessed replacement or acceptance transfer was recorded. You hold no other claim. The task does not overlap any files in #41. State your concrete next contribution and what you must establish before claiming #42's task. Do not invent completed checks or tools."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Do not claim or implement the successor solely because its label,
+          reviews and nonoverlapping files look eligible. Establish actual
+          increment admission with the owner using #41's unfinished delivery
+          evidence; offer or carry out authorized useful work within that
+          increment under normal claim rules. Useful work may include bounded
+          admission/evidence reconciliation or a precise owner handoff that
+          removes the identified obstacle; do not invent an available publication
+          task. Mere waiting or asking the human to allocate work is insufficient.
+          Require verified acceptance or
+          an explicit assessed replacement retaining obligations before a
+          successor claim. Do not manufacture a human gate, take an existing
+          claim, or treat all useful work as blocked.
+
+  - description: Admission permits useful parallel tasks within the unfinished increment
+    vars:
+      prompt: |
+        {"tracking":"github","skill":"contribute","prompt":"Tabletop only; no tools. You help outcome #50 through its admitted Now #51 R3. Five critics passed R3. Its source pipeline is running; required acceptance includes a browser fixture that has not been implemented. Another contributor owns the watcher. You hold no claim, and an unclaimed nonoverlapping fixture task belongs to #51 R3. No sibling increment has started. Existing project rules permit this safe preparation and require normal ownership/readback checks. Describe what you may do now; do not claim any checks have run."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Permit the useful nonoverlapping fixture contribution within #51
+          after normal scope, dependency, claim and saved-state checks. Retain
+          the watched operation with its owner and final acceptance for #51.
+          Do not serialize every task, await acceptance of the increment before
+          working on its own acceptance, ask for new human permission, or start
+          a sibling increment.
+
+  - description: Verified acceptance admits the successor before administrative closure
+    vars:
+      prompt: |
+        {"tracking":"github","prompt":"Tabletop only; no tools. Outcome #60 is confirmed. #61 has published, all required installed-runtime checks passed, independent acceptance passed and its owner accepted the recorded result. The issue is still open because its closure request has not yet been sent. Child #62 is the sole assessed Now R4, with all five reviews and no unresolved conditions; remaining children are provisional. Current sibling evidence and authority are known. What proceeds, and what cleanup is needed? Do not claim execution."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Admit #62 within its assessed scope and authority using actual
+          verified completion of #61. Reconcile administrative closure and
+          stale horizons without making the open issue a new execution gate.
+          Do not duplicate acceptance, rerun completed effects, reconfirm the
+          outcome, or start provisional later work.
+
+  - description: Assessed replacement transfers an unavailable acceptance without calling it passed
+    vars:
+      prompt: |
+        {"tracking":"github","prompt":"Tabletop only; no tools. Outcome #70 remains confirmed, including four-environment installation. Current increment #71 cannot complete its Cloud check because the required capability is unavailable. Its local result is independently usable. The owner has recorded replacement R5, all five critics passed it, and saved reciprocal records explicitly retain the unmet Cloud criterion on receiving child #73. R5 accepts only the verified local result of #71; it does not waive the full-outcome criterion. No #71 implementation or watcher remains active. #72 is the single assessed Now R5 for another independently useful correction. Explain the next action and remaining completion truth."}
+    assert:
+      - type: llm-rubric
+        value: |
+          Permit #72 under the actual assessed replacement rather than waiting
+          indefinitely for #71's original Cloud criterion. Preserve that
+          criterion as unmet on #73 and keep the outcome open. Distinguish
+          superseded acceptance from a passed Cloud check and do not execute
+          #73 concurrently, fabricate environment results, or ask for duplicate
+          confirmation of the unchanged outcome.
+
   - description: Planner challenges an unsupported API prerequisite despite an Architect PASS
     vars:
       prompt: |
