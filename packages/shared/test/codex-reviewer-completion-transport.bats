@@ -18,14 +18,15 @@ teardown() {
 }
 
 general_spawn_payload() {
-  node --input-type=module - "$1" "$2" "$3" "$4" "$5" <<'NODE'
+  node --input-type=module - "$1" "$2" "$3" "$4" "$5" "$BATS_TEST_TMPDIR/architect-context" <<'NODE'
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
-const [root, session_id, cwd, role, target] = process.argv.slice(2);
+const [root, session_id, cwd, role, target, contextFile] = process.argv.slice(2);
 const instructions = role.startsWith('wr-risk-scorer:')
   ? (await import(pathToFileURL(root + '/scripts/codex-agents.mjs'))).riskReviewerInstructions(role)
   : readFileSync(root + '/agents/' + role.split(':')[1] + '.md', 'utf8');
-const request = 'Review read-only.\nRISK_CWD: ' + cwd;
+const request = 'Review read-only.\nRISK_CWD: ' + cwd +
+  (role === 'wr-architect:agent' ? '\n' + readFileSync(contextFile, 'utf8') : '');
 const message = `WR_REVIEWER_FALLBACK: ${role}\n<reviewer-instructions>\n${instructions}</reviewer-instructions>\n\n${request}`;
 console.log(JSON.stringify({session_id,cwd,tool_name:'collaboration.spawn_agent',
   tool_input:{fork_turns:'none',message},tool_response:{task_name:target}}));
@@ -38,7 +39,7 @@ NODE
     root="$(pack_plugin "$package")"
     helper="$root/hooks-codex/codex-agent-completion.mjs"
     case "$package" in
-      architect) helper="$root/hooks/codex-agent-completion.mjs"; role='wr-architect:agent'; verdict='**Architecture Review: PASS**' ;;
+      architect) helper="$root/hooks/codex-agent-completion.mjs"; role='wr-architect:agent'; verdict="$(architect_pass)" ;;
       jtbd) role='wr-jtbd:agent'; verdict='**JTBD Review: PASS**' ;;
       style-guide) role='wr-style-guide:agent'; verdict='**Style Guide Review: PASS**' ;;
       voice-tone) role='wr-voice-tone:agent'; verdict='**Voice & Tone Review: PASS**' ;;
@@ -100,10 +101,19 @@ NODE
         send_event "$helper" "$(stop_payload "$session" "$REPO_ROOT" "$role" native-review "$verdict")"
         if [ "$package" = risk-scorer ]; then
           parent_prompt_payload "$session" "$REPO_ROOT" | node "$helper" --consume-pending
+        elif [ "$package" = architect ]; then
+          run send_event "$helper" "$(parent_prompt_payload "$session" "$REPO_ROOT")"
+          [ "$status" -eq 0 ]
+          [[ "$output" == *"Architect report completeness:"* ]]
+          [[ "$output" == *"no PASS receipt was created"* ]]
         else
           send_event "$helper" "$(parent_prompt_payload "$session" "$REPO_ROOT")"
         fi
-        [ -f "$marker" ]
+        if [ "$package" = architect ]; then
+          [ ! -e "$marker" ]
+        else
+          [ -f "$marker" ]
+        fi
       fi
       if [ "$scenario" = duplicate ]; then
         before="$(marker_time "$marker")"
@@ -125,7 +135,37 @@ pack_plugin() {
   extracted="$BATS_TEST_TMPDIR/$package"
   mkdir -p "$extracted"
   tar -xzf "$tarball" -C "$extracted"
+  if [ "$package" = architect ]; then
+    prepare_architect_fixture "$extracted/package"
+  fi
   printf '%s\n' "$extracted/package"
+}
+
+prepare_architect_fixture() {
+  printf '%s' '{"version":1,"artifact":"synthetic transport fixture","policy":"transport fixture policy","performance":{"applicability":"not_applicable","evidence":"Synthetic review of comment-only changes.","triggers":[]}}' |
+    python3 "$1/hooks/lib/architect-report.py" --prepare > "$BATS_TEST_TMPDIR/architect-context"
+  python3 - "$BATS_TEST_TMPDIR/architect-context" "$BATS_TEST_TMPDIR/architect-pass" <<'PY'
+import json, pathlib, sys
+context = json.loads('\n'.join(pathlib.Path(sys.argv[1]).read_text().splitlines()[1:-1]))
+request = context['request']
+report = {'version': 1, 'artifact': request['artifact'], 'policy': request['policy'],
+          'request_sha256': context['request_sha256'], 'verdict': 'PASS',
+          'performance': {'applicability': 'not_applicable',
+                          'evidence': 'Synthetic review of comment-only changes.'}}
+pathlib.Path(sys.argv[2]).write_text('**Architecture Review: PASS**\n\n```architect-report\n' + json.dumps(report) + '\n```')
+PY
+}
+
+architect_pass() {
+  cat "$BATS_TEST_TMPDIR/architect-pass"
+}
+
+review_prompt() {
+  printf 'review'
+  if [ "$1" = 'wr-architect:agent' ]; then
+    printf '\n'
+    cat "$BATS_TEST_TMPDIR/architect-context"
+  fi
 }
 
 send_event() {
@@ -145,8 +185,8 @@ marker_time() {
 }
 
 spawn_payload() {
-  jq -cn --arg session "$1" --arg cwd "$2" --arg role "$3" --arg target "$4" \
-    '{session_id:$session,cwd:$cwd,tool_name:"spawn_agent",tool_input:{agent_type:$role,message:"review"},tool_response:{task_name:$target}}'
+  jq -cn --arg session "$1" --arg cwd "$2" --arg role "$3" --arg target "$4" --arg prompt "$(review_prompt "$3")" \
+    '{session_id:$session,cwd:$cwd,tool_name:"spawn_agent",tool_input:{agent_type:$role,message:$prompt},tool_response:{task_name:$target}}'
 }
 
 close_payload() {
@@ -177,8 +217,8 @@ stop_payload() {
 native_array_spawn_payload() {
   local response
   response="$(jq -cn --arg target "$4" '{task_name:$target}')"
-  jq -cn --arg session "$1" --arg cwd "$2" --arg role "$3" --arg response "$response" \
-    '{session_id:$session,cwd:$cwd,tool_name:"collaboration.spawn_agent",tool_input:{agent_type:$role,message:"review"},tool_response:[{type:"input_text",text:$response}]}'
+  jq -cn --arg session "$1" --arg cwd "$2" --arg role "$3" --arg response "$response" --arg prompt "$(review_prompt "$3")" \
+    '{session_id:$session,cwd:$cwd,tool_name:"collaboration.spawn_agent",tool_input:{agent_type:$role,message:$prompt},tool_response:[{type:"input_text",text:$response}]}'
 }
 
 native_array_close_payload() {
@@ -227,7 +267,7 @@ native_array_close_payload() {
   send_event "$helper" \
     "$(native_array_spawn_payload "$session" "$REPO_ROOT" 'wr-architect:agent' "$target")"
   send_event "$helper" \
-    "$(native_array_close_payload "$session" "$REPO_ROOT" "$target" '**Architecture Review: PASS**')"
+    "$(native_array_close_payload "$session" "$REPO_ROOT" "$target" "$(architect_pass)")"
   [ -e "$marker" ]
 }
 
@@ -239,7 +279,7 @@ native_array_close_payload() {
   send_event "$root/hooks/codex-agent-completion.mjs" \
     "$(spawn_payload "$session" "$REPO_ROOT" 'wr-architect:agent' '/root/review')"
   send_event "$root/hooks/codex-agent-completion.mjs" \
-    "$(close_payload "$session" "$REPO_ROOT" 'review' '**Architecture Review: PASS**')"
+    "$(close_payload "$session" "$REPO_ROOT" 'review' "$(architect_pass)")"
   [ -f "$marker" ]
 }
 
@@ -250,7 +290,7 @@ native_array_close_payload() {
     root="$(pack_plugin "$package")"
     helper="$root/hooks-codex/codex-agent-completion.mjs"
     case "$package" in
-      architect) helper="$root/hooks/codex-agent-completion.mjs"; role='wr-architect:agent'; verdict='**Architecture Review: PASS**' ;;
+      architect) helper="$root/hooks/codex-agent-completion.mjs"; role='wr-architect:agent'; verdict="$(architect_pass)" ;;
       jtbd) role='wr-jtbd:agent'; verdict='**JTBD Review: PASS**' ;;
       style-guide) role='wr-style-guide:agent'; verdict='**Style Guide Review: PASS**' ;;
       voice-tone) role='wr-voice-tone:agent'; verdict='**Voice & Tone Review: PASS**' ;;
@@ -301,7 +341,7 @@ EXTERNAL_COMMS_RISK_KEY: $key" ;;
     root="$(pack_plugin "$package")"
     session="bats-distinct-$package-$$"
     case "$package" in
-      architect) role='wr-architect:agent'; verdict='**Architecture Review: PASS**'; marker="/tmp/architect-reviewed-$session"; helper="$root/hooks/codex-agent-completion.mjs" ;;
+      architect) role='wr-architect:agent'; verdict="$(architect_pass)"; marker="/tmp/architect-reviewed-$session"; helper="$root/hooks/codex-agent-completion.mjs" ;;
       jtbd) role='wr-jtbd:agent'; verdict='**JTBD Review: PASS**'; marker="/tmp/jtbd-reviewed-$session"; helper="$root/hooks-codex/codex-agent-completion.mjs"; printf 'PASS\n' > /tmp/jtbd-verdict ;;
       style-guide) role='wr-style-guide:agent'; verdict='**Style Guide Review: PASS**'; marker="/tmp/style-guide-reviewed-$session"; helper="$root/hooks-codex/codex-agent-completion.mjs" ;;
       voice-tone) role='wr-voice-tone:agent'; verdict='**Voice & Tone Review: PASS**'; marker="/tmp/voice-tone-reviewed-$session"; helper="$root/hooks-codex/codex-agent-completion.mjs" ;;
@@ -319,7 +359,7 @@ EXTERNAL_COMMS_RISK_KEY: $key" ;;
     root="$(pack_plugin "$package")"
     session="bats-ambiguous-$package-$$"
     case "$package" in
-      architect) role='wr-architect:agent'; verdict='**Architecture Review: PASS**'; marker="/tmp/architect-reviewed-$session"; helper="$root/hooks/codex-agent-completion.mjs" ;;
+      architect) role='wr-architect:agent'; verdict="$(architect_pass)"; marker="/tmp/architect-reviewed-$session"; helper="$root/hooks/codex-agent-completion.mjs" ;;
       jtbd) role='wr-jtbd:agent'; verdict='**JTBD Review: PASS**'; marker="/tmp/jtbd-reviewed-$session"; helper="$root/hooks-codex/codex-agent-completion.mjs"; printf 'PASS\n' > /tmp/jtbd-verdict ;;
       style-guide) role='wr-style-guide:agent'; verdict='**Style Guide Review: PASS**'; marker="/tmp/style-guide-reviewed-$session"; helper="$root/hooks-codex/codex-agent-completion.mjs" ;;
       voice-tone) role='wr-voice-tone:agent'; verdict='**Voice & Tone Review: PASS**'; marker="/tmp/voice-tone-reviewed-$session"; helper="$root/hooks-codex/codex-agent-completion.mjs" ;;
@@ -611,14 +651,14 @@ EXTERNAL_COMMS_VOICE_TONE_KEY: $key")"
 }
 
 
-@test "packed edit reviewers authorize native lifecycle without spawn tool visibility" {
+@test "packed edit reviewers preserve native lifecycle and Architect context requirements" {
   local package root role verdict session marker helper payload command
   for package in architect jtbd style-guide voice-tone; do
     root="$(pack_plugin "$package")"
     session="bats-native-$package-$$"
     marker="/tmp/$package-reviewed-$session"
     case "$package" in
-      architect) role='wr-architect:agent'; verdict='**Architecture Review: PASS**'; helper="$root/hooks/codex-agent-completion.mjs" ;;
+      architect) role='wr-architect:agent'; verdict="$(architect_pass)"; helper="$root/hooks/codex-agent-completion.mjs" ;;
       jtbd) role='wr-jtbd:agent'; verdict='**JTBD Review: PASS**'; helper="$root/hooks-codex/codex-agent-completion.mjs"; printf 'PASS\n' > /tmp/jtbd-verdict ;;
       style-guide) role='wr-style-guide:agent'; verdict='**Style Guide Review: PASS**'; helper="$root/hooks-codex/codex-agent-completion.mjs" ;;
       voice-tone) role='wr-voice-tone:agent'; verdict='**Voice & Tone Review: PASS**'; helper="$root/hooks-codex/codex-agent-completion.mjs" ;;
@@ -640,6 +680,33 @@ EXTERNAL_COMMS_VOICE_TONE_KEY: $key")"
     [ ! -e "$marker" ]
     send_event "$helper" "$(stop_payload "$session" "$REPO_ROOT" "$role" runtime-id "$verdict")"
     [ ! -e "$marker" ]
+    if [ "$package" = architect ]; then
+      run send_event "$helper" "$(parent_prompt_payload "$session" "$REPO_ROOT")"
+      [ "$status" -eq 0 ]
+      [[ "$output" == *"Architect report completeness:"* ]]
+      [[ "$output" == *"no PASS receipt was created"* ]]
+      [ ! -e "$marker" ]
+      command="$(jq -r '.hooks.PreToolUse[0].hooks[0].command' "$root/hooks/hooks.json")"
+      payload="$(parent_guarded_payload "$session" "$REPO_ROOT")"
+      run bash -c 'printf "%s" "$1" | CLAUDE_PLUGIN_ROOT="$2" bash -c "$3"' _ "$payload" "$root" "$command"
+      [ "$status" -eq 0 ]
+      [ -z "$output" ] || jq -e '(.hookSpecificOutput.permissionDecision // "") != "deny"' <<< "$output"
+      [ ! -e "$marker" ]
+
+      # With actual caller context, the same native identity checks discriminate.
+      session="$session-bound"
+      marker="/tmp/architect-reviewed-$session"
+      send_event "$helper" "$(jq -cn --arg session "$session" --arg cwd "$REPO_ROOT" --arg role "$role" '{session_id:$session,cwd:$cwd,hook_event_name:"SubagentStart",agent_type:$role,agent_id:"runtime-id"}')"
+      send_event "$helper" "$(spawn_payload "$session" "$REPO_ROOT" "$role" '/root/bound-review' | jq -c '.tool_response.agent_id="runtime-id"')"
+      send_event "$helper" "$(stop_payload "$session" "$REPO_ROOT" "$role" wrong-id "$verdict" | jq -c '.task_name="runtime-id"')"
+      send_event "$helper" "$(parent_prompt_payload "$session" "$REPO_ROOT")"
+      [ ! -e "$marker" ]
+      send_event "$helper" "$(stop_payload "$session-other" "$REPO_ROOT" "$role" runtime-id "$verdict")"
+      send_event "$helper" "$(parent_prompt_payload "$session" "$REPO_ROOT")"
+      [ ! -e "$marker" ]
+      send_event "$helper" "$(stop_payload "$session" "$REPO_ROOT" "$role" runtime-id "$verdict")"
+      [ ! -e "$marker" ]
+    fi
     send_event "$helper" "$(parent_prompt_payload "$session" "$REPO_ROOT")"
     [ -f "$marker" ]
     rm -f "$marker" "$marker.hash"
