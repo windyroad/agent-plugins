@@ -656,10 +656,12 @@ tests:
           discards a confirmed required capability. Missing explanation of a mechanism's
           purpose does not prove it unnecessary.
 
-          An authenticated principal may select a target stream when the wallet ACL permits
-          that access. Do not demand principal-derived target selection or an own-tenant-only
-          restriction without supporting authority. Do not add duplicate provider-consent
-          enforcement. Catalog-only tests do not verify the demonstrated unauthorized read.
+          Judge actual access consequences. An authenticated principal may select a target
+          stream when the wallet ACL permits that access. Reject an explicit unsupported
+          own-tenant-only restriction or denial of ACL-authorized selected/shared targets.
+          Resolving a target from authenticated context does not alone establish such a
+          restriction; do not infer a prohibition absent from the response. Do not add duplicate
+          provider-consent enforcement. Catalog-only tests do not verify the unauthorized read.
 
           The applied raw-read handler changes I/O. Its performance obligation remains in
           scope even when a correction would remove it. Accept explicit unknown cost,

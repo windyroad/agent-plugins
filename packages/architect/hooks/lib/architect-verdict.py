@@ -4,13 +4,13 @@ import re
 import sys
 
 VALUES = r'(PASS|ISSUES FOUND|NEEDS DIRECTION)'
-CANON_BOLD = re.compile(r' {0,3}\*\*Architecture Review: ' + VALUES + r'\*\*[ \t]*$')
-CANON_PLAIN = re.compile(r' {0,3}Architecture Review: ' + VALUES + r'[ \t]*$')
-CANON_H2 = re.compile(r' {0,3}##[ \t]+Architecture Review: ' + VALUES + r'[ \t]*$')
-ALIAS_BOLD = re.compile(r' {0,3}\*\*Architecture verdict: ' + VALUES +
+CANON_BOLD = re.compile(r' {0,3}\*\*(?i:Architecture Review): ' + VALUES + r'\*\*[ \t]*$')
+CANON_PLAIN = re.compile(r' {0,3}(?i:Architecture Review): ' + VALUES + r'[ \t]*$')
+CANON_H2 = re.compile(r' {0,3}##[ \t]+(?i:Architecture Review): ' + VALUES + r'[ \t]*$')
+ALIAS_BOLD = re.compile(r' {0,3}\*\*(?i:Architecture verdict): ' + VALUES +
                         r'(, with advisories)?\.?\*\*(?:[ \t]+.*)?$')
-RESERVED_START = re.compile(r' {0,3}(?:(?:\*\*|##[ \t]+)Architecture (?:Review|verdict):|Architecture Review:)')
-RESERVED_TOKEN = re.compile(r'(?:(?:\*\*|##[ \t]+)Architecture (?:Review|verdict):|Architecture Review:)')
+RESERVED_START = re.compile(r' {0,3}(?:(?:\*\*|##[ \t]+)(?i:Architecture (?:Review|verdict)):|(?i:Architecture Review):)')
+RESERVED_TOKEN = re.compile(r'(?:(?:\*\*|##[ \t]+)(?i:Architecture (?:Review|verdict)):|(?i:Architecture Review):)')
 ADVISORY_SUFFIX = re.compile(r'[ \t]+\(with advisories\)[ \t]*$')
 FENCE = re.compile(r' {0,3}(`{3,}|~{3,})(.*)$')
 QUOTE_OR_INDENT = re.compile(r'(?: {0,3}>| {4}|[ ]*\t)')

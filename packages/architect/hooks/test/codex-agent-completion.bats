@@ -230,6 +230,7 @@ close_text() {
   local text
   for text in \
     '**Architecture verdict: PASS, with advisories.** The scoped change is compliant.' \
+    $'## Architecture review: PASS\n\n> **architecture review: ISSUES FOUND**\n```markdown\n**architecture verdict: ISSUES FOUND**\n```' \
     $'**Architecture Review: PASS**\n\n> **Architecture Review: ISSUES FOUND**\n\n```markdown\n**Architecture verdict: ISSUES FOUND**\n```'; do
     rm -f "$MARKER" "$HASH" "$PLAN"
     TARGET="contract-valid-$RANDOM"
@@ -246,6 +247,9 @@ close_text() {
   for text in \
     '> **Architecture Review: PASS**' \
     '> **Architecture verdict: PASS**' \
+    '## Architecture review: pass' \
+    $'**Architecture Review: PASS**\n## architecture review: ISSUES FOUND' \
+    $'**Architecture Review: PASS**\n**architecture verdict: UNKNOWN**' \
     'The example says **Architecture verdict: PASS**' \
     $'```markdown\n**Architecture verdict: PASS**\n```' \
     $'**Architecture Review: PASS**\n**Architecture verdict: ISSUES FOUND**' \

@@ -217,6 +217,9 @@ No conflicts. Note: earlier sessions reported ISSUES FOUND on adjacent files but
   local text
   for text in \
     '> **Architecture verdict: PASS**' \
+    '## Architecture review: pass' \
+    $'**Architecture Review: PASS**\n## architecture review: ISSUES FOUND' \
+    $'**Architecture Review: PASS**\n**architecture verdict: UNKNOWN**' \
     'The example says **Architecture verdict: PASS**' \
     $'```markdown\n**Architecture verdict: PASS**\n```' \
     $'**Architecture Review: PASS**\n**Architecture verdict: ISSUES FOUND**' \
@@ -327,4 +330,13 @@ No conflicts. Note: earlier sessions reported ISSUES FOUND on adjacent files but
     [ ! -e "$HASH_MARKER" ]
     [ ! -e "$PLAN_MARKER" ]
   done
+}
+
+@test "heading label casing preserves bound Claude receipt and shared verdict" {
+  local text=$'## Architecture review: PASS\n\n> **architecture review: ISSUES FOUND**\n```markdown\n**architecture verdict: ISSUES FOUND**\n```'
+  INPUT=$(_make_input "$text")
+  echo "$INPUT" | "$HOOK"
+  [ -f "$REVIEW_MARKER" ]
+  run bash -c 'source "$1"; architect_verdict' -- "$HOOKS_DIR/lib/architect-verdict.sh" <<< "$text"
+  [ "$output" = PASS ]
 }
