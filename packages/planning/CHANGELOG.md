@@ -1,5 +1,11 @@
 # @windyroad/planning
 
+## 0.7.8
+
+### Patch Changes
+
+- fcb8945: Keep delivery plans and their history on child increments when creating or updating outcomes, comments and replans. Preserve confirmed results, evidence and required constraints while keeping operational next actions on increments and tasks.
+
 ## 0.7.7
 
 ### Patch Changes
