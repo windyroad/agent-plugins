@@ -21,7 +21,7 @@ teardown() {
 }
 
 dispatch() {
-  printf '%s' "$1" | node "$HOOK_DIR/codex-agent-completion.mjs"
+  printf '%s' "$1" | python3 "$BATS_TEST_DIRNAME/architect-report-fixtures.py" | node "$HOOK_DIR/codex-agent-completion.mjs"
 }
 
 spawn() {
@@ -126,38 +126,51 @@ guarded_edit() {
 native_start() {
   jq -cn --arg session "$SESSION" --arg cwd "$CLAUDE_PROJECT_DIR" --arg id "${1:-$TARGET}" '{session_id:$session,cwd:$cwd,hook_event_name:"SubagentStart",agent_type:"wr-architect:agent",agent_id:$id}'
 }
+native_registration() {
+  local path
+  for path in "$TMPDIR"/codex-review-transport/registration-*.json; do
+    if jq -e --arg target "$TARGET" '.source == "subagent-start" and .target == $target' "$path" >/dev/null; then
+      printf '%s\n' "$path"
+      return
+    fi
+  done
+  return 1
+}
 native_stop() {
   jq -cn --arg session "$SESSION" --arg cwd "$CLAUDE_PROJECT_DIR" --arg id "${1:-$TARGET}" '{session_id:$session,cwd:$cwd,hook_event_name:"SubagentStop",agent_type:"wr-architect:agent",agent_id:$id,last_assistant_message:"**Architecture Review: PASS**"}'
 }
-@test "native architecture lifecycle authorizes parent edit without spawn tool events" {
+@test "native architecture without attributable dispatch advises without approval" {
   dispatch "$(native_start)"
   dispatch "$(native_stop)"
   [ ! -e "$MARKER" ]
   dispatch "$(guarded_edit)"
-  [ -f "$MARKER" ]
+  [ ! -e "$MARKER" ]
   run bash -c 'printf "%s" "$1" | "$2/architect-enforce-edit.sh"' -- "$(guarded_edit)" "$HOOK_DIR"
   [ "$status" -eq 0 ]
 }
 @test "native architecture stop cannot use task alias to mask wrong opaque id" {
+  dispatch "$(spawn wr-architect:agent)"
   dispatch "$(native_start)"
   dispatch "$(native_stop wrong-id | jq -c --arg alias "$TARGET" '.task_name=$alias')"
   dispatch "$(guarded_edit)"
   [ ! -e "$MARKER" ]
 }
 @test "native architecture stop cannot select another parent" {
+  dispatch "$(spawn wr-architect:agent)"
   dispatch "$(native_start)"
   dispatch "$(native_stop | jq -c '.session_id="other-parent"')"
   dispatch "$(guarded_edit)"
   [ ! -e "$MARKER" ]
 }
 @test "native architecture duplicate start preserves age and binding" {
+  dispatch "$(spawn wr-architect:agent)"
   dispatch "$(native_start)"
-  first="$(cat "$TMPDIR"/codex-review-transport/registration-*.json)"
+  first="$(cat "$(native_registration)")"
   dispatch "$(native_start)"
-  [ "$(cat "$TMPDIR"/codex-review-transport/registration-*.json)" = "$first" ]
+  [ "$(cat "$(native_registration)")" = "$first" ]
   echo changed > "$CLAUDE_PROJECT_DIR/docs/decisions/new.md"
   dispatch "$(native_start)"
-  [ "$(cat "$TMPDIR"/codex-review-transport/registration-*.json)" = "$first" ]
+  [ "$(cat "$(native_registration)")" = "$first" ]
   dispatch "$(native_stop)"
   dispatch "$(guarded_edit)"
   [ ! -e "$MARKER" ]
@@ -184,14 +197,19 @@ native_stop() {
   [ ! -e "$MARKER" ]
 }
 @test "native architecture expired registration cannot authorize an edit" {
+  dispatch "$(spawn wr-architect:agent)"
   dispatch "$(native_start)"
-  node -e 'const fs=require("fs");const p=process.argv[1];const d=JSON.parse(fs.readFileSync(p));d.createdAt=Date.now()-4000000;fs.writeFileSync(p,JSON.stringify(d));' "$TMPDIR"/codex-review-transport/registration-*.json
+  node -e 'const fs=require("fs");const p=process.argv[1];const d=JSON.parse(fs.readFileSync(p));d.createdAt=Date.now()-4000000;fs.writeFileSync(p,JSON.stringify(d));' "$(native_registration)"
   dispatch "$(native_stop)"
   dispatch "$(guarded_edit)"
   [ ! -e "$MARKER" ]
 }
 @test "native architecture registrations support concurrent exact identities" {
+  TARGET=first-id
+  dispatch "$(spawn wr-architect:agent)"
   dispatch "$(native_start first-id)"
+  TARGET=second-id
+  dispatch "$(spawn wr-architect:agent)"
   dispatch "$(native_start second-id)"
   dispatch "$(native_stop second-id)"
   dispatch "$(guarded_edit)"
@@ -299,6 +317,45 @@ close_text() {
     $'Architecture Review: PASS\n```markdown\nunfinished'; do
     rm -f "$MARKER" "$HASH" "$PLAN"
     TARGET="plain-invalid-$RANDOM"
+    dispatch "$(spawn wr-architect:agent)"
+    dispatch "$(close_text "$text")"
+    [ ! -e "$MARKER" ]
+    [ ! -e "$HASH" ]
+    [ ! -e "$PLAN" ]
+  done
+}
+
+@test "advisory annotation: native completion consumes the same nonblocking PASS suffix across presentations" {
+  local text
+  for text in \
+    '**Architecture Review: PASS** (with advisories)' \
+    '## Architecture Review: PASS (with advisories)' \
+    'Architecture Review: PASS (with advisories)' \
+    '**Architecture verdict: PASS** (with advisories)'; do
+    rm -f "$MARKER" "$HASH" "$PLAN"
+    TARGET="advisory-valid-$RANDOM"
+    dispatch "$(spawn wr-architect:agent)"
+    dispatch "$(close_text "$text")"
+    [ -f "$MARKER" ]
+    [ -f "$HASH" ]
+    [ -f "$PLAN" ]
+  done
+}
+
+@test "advisory annotation: native completion does not promote quoted conditional or conflicting output" {
+  local text
+  for text in \
+    '> **Architecture Review: PASS** (with advisories)' \
+    'The example says **Architecture Review: PASS** (with advisories)' \
+    $'```markdown\n**Architecture Review: PASS** (with advisories)\n```' \
+    '**Architecture Review: PASS** (unless approved)' \
+    '**Architecture Review: PASS** (with advisories) unless approved' \
+    $'**Architecture Review: PASS** (with advisories)\nArchitecture Review: ISSUES FOUND' \
+    $'**Architecture Review: PASS** (with advisories) **Architecture Review: ISSUES FOUND**' \
+    $'**Architecture Review: PASS** (with advisories)\n**Architecture Review: PASS**' \
+    '**Architecture Review: ISSUES FOUND** (with advisories)'; do
+    rm -f "$MARKER" "$HASH" "$PLAN"
+    TARGET="advisory-invalid-$RANDOM"
     dispatch "$(spawn wr-architect:agent)"
     dispatch "$(close_text "$text")"
     [ ! -e "$MARKER" ]

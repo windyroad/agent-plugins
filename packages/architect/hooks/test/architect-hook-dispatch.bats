@@ -142,3 +142,34 @@ EOF
   [[ "$output" == *'unavailable'* ]]
   [[ "$output" != *'permissionDecision'* ]]
 }
+
+@test "completion advice composes with later advice and substantive denial" {
+  make_fake_dispatcher
+  cat > "$FAKE_ROOT/hooks/codex-agent-completion.mjs" <<'JS'
+import fs from 'node:fs';
+fs.appendFileSync(process.env.TRACE, 'codex-agent-completion.mjs\n');
+console.log(JSON.stringify({systemMessage:'Architect report completeness: missing assessment; mechanical proof is advisory.'}));
+JS
+  cat > "$FAKE_ROOT/hooks/architect-enforce-edit.sh" <<'SH'
+#!/bin/bash
+echo 'architect-enforce-edit.sh' >> "$TRACE"
+echo '{"systemMessage":"Other mechanical evidence unavailable."}'
+SH
+  chmod +x "$FAKE_ROOT/hooks/architect-enforce-edit.sh"
+  run env TRACE="$TRACE" bash "$FAKE_ROOT/hooks/architect-dispatch.sh" pre-tool <<<'{"tool_name":"Edit"}'
+  [ "$status" -eq 0 ]
+  run jq -e '.systemMessage | contains("Architect report completeness") and contains("Other mechanical evidence")' <<<"$output"
+  [ "$status" -eq 0 ]
+  [ "$(cat "$TRACE")" = $'codex-agent-completion.mjs\narchitect-enforce-edit.sh\narchitect-oversight-marker-discipline.sh' ]
+
+  cat > "$FAKE_ROOT/hooks/architect-oversight-marker-discipline.sh" <<'SH'
+#!/bin/bash
+echo 'architect-oversight-marker-discipline.sh' >> "$TRACE"
+echo '{"hookSpecificOutput":{"permissionDecision":"deny","permissionDecisionReason":"Known substantive finding"}}'
+SH
+  chmod +x "$FAKE_ROOT/hooks/architect-oversight-marker-discipline.sh"
+  run env TRACE="$TRACE" bash "$FAKE_ROOT/hooks/architect-dispatch.sh" pre-tool <<<'{"tool_name":"Edit"}'
+  [ "$status" -eq 0 ]
+  run jq -e '.hookSpecificOutput.permissionDecision == "deny" and .hookSpecificOutput.permissionDecisionReason == "Known substantive finding" and (.systemMessage | contains("Architect report completeness") and contains("Other mechanical evidence"))' <<<"$output"
+  [ "$status" -eq 0 ]
+}

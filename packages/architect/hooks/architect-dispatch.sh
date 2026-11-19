@@ -22,6 +22,9 @@ collect_gate_output() {
     parsed='{"systemMessage":"Governance evidence unavailable: malformed evaluator output; action permitted."}'
   fi
   if printf '%s' "$parsed" | jq -e '.hookSpecificOutput.permissionDecision == "deny"' >/dev/null 2>&1; then
+    if [ -n "$ADVISORIES" ]; then
+      parsed="$(printf '%s\n%s' "$ADVISORIES" "$parsed" | jq -s '.[-1] + {systemMessage: [ .[] | .systemMessage // empty ] | join("\n")}')"
+    fi
     printf '%s\n' "$parsed"
     exit 0
   fi
@@ -35,7 +38,11 @@ flush_advisories() {
 run_gate() {
   local output status child="$1"
   shift
-  output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/$child" "$@" 2>/dev/null)"
+  if [[ "$child" == *.mjs ]]; then
+    output="$(printf '%s' "$INPUT" | node "$SCRIPT_DIR/$child" "$@" 2>/dev/null)"
+  else
+    output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/$child" "$@" 2>/dev/null)"
+  fi
   status=$?
   if [ "$status" -ne 0 ]; then
     collect_gate_output '{"systemMessage":"Governance evaluator unavailable; action permitted. A crashed hook output was discarded."}'
@@ -79,17 +86,31 @@ if messages:
     fi
     ;;
   user-prompt)
-    printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs"
+    completion_output="$(printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs" 2>/dev/null)"
+    if [ "$?" -ne 0 ]; then
+      completion_output='{"systemMessage":"Governance evaluator unavailable; mechanical evidence remains advisory."}'
+    fi
     detect_output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/architect-detect.sh")"
     stale_output="$(printf '%s' "$INPUT" | "$SCRIPT_DIR/staleness-check.sh")"
-    [ -z "$detect_output" ] || printf '%s\n' "$detect_output"
-    [ -z "$stale_output" ] || printf '%s\n' "$stale_output"
+    COMPLETION_OUTPUT="$completion_output" DETECT_OUTPUT="$detect_output" STALE_OUTPUT="$stale_output" python3 -c '
+import json,os
+warnings=[]
+try:
+    warnings=[item["systemMessage"] for item in map(json.loads, os.environ["COMPLETION_OUTPUT"].splitlines()) if isinstance(item,dict) and isinstance(item.get("systemMessage"),str)]
+except (ValueError, TypeError):
+    warnings=["Governance completion evidence unavailable; mechanical evidence remains advisory."]
+context=[value for key in ("DETECT_OUTPUT", "STALE_OUTPUT") if (value:=os.environ[key])]+warnings
+result={}
+if warnings: result["systemMessage"]="\n".join(warnings)
+if context: result["hookSpecificOutput"]={"hookEventName":"UserPromptSubmit","additionalContext":"\n".join(context)}
+if result: print(json.dumps(result))
+'
     ;;
   subagent-start|subagent-stop)
     printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs"
     ;;
   pre-tool)
-    printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs"
+    run_gate codex-agent-completion.mjs
     case "$(tool_name)" in
       Edit|Write)
         run_gate architect-enforce-edit.sh
@@ -113,7 +134,8 @@ if messages:
         run_side_effect architect-slide-marker.sh || true
         ;;
       collaboration.spawn_agent|collaboration.wait_agent|collaboration.interrupt_agent|collaborationspawn_agent|collaborationwait_agent|collaborationinterrupt_agent|spawn_agent|wait_agent|interrupt_agent|close_agent|multi_agent_v1__spawn_agent|multi_agent_v1__wait_agent|multi_agent_v1__close_agent)
-        printf '%s' "$INPUT" | node "$SCRIPT_DIR/codex-agent-completion.mjs"
+        run_gate codex-agent-completion.mjs
+        flush_advisories
         ;;
       Edit|Write)
         run_side_effect architect-refresh-hash.sh || true

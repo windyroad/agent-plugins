@@ -166,7 +166,7 @@ cat <<EOF
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
     "permissionDecision": "deny",
-    "permissionDecisionReason": "BLOCKED: Cannot edit '${BASENAME}' without architecture review. You MUST first delegate to wr-architect:agent using the Agent tool (subagent_type: 'wr-architect:agent'). The architect will review against existing decisions in docs/decisions/ and flag if a new decision should be documented. After the review completes, this file will be unblocked automatically. ${ARCHITECT_GATE_REASON}"
+    "permissionDecisionReason": "BLOCKED: Cannot edit '${BASENAME}' without architecture review. Use the request-preparation and completion contract in /wr-architect:review-design and its runtime-native wr-architect:agent path. The architect will review against existing decisions in docs/decisions/ and flag if a new decision should be documented. A bound, structurally complete PASS may create a review receipt. Missing or malformed mechanical evidence remains advisory and does not waive substantive review obligations or known findings. ${ARCHITECT_GATE_REASON}"
   }
 }
 EOF

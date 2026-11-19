@@ -11,11 +11,12 @@ ALIAS_BOLD = re.compile(r' {0,3}\*\*Architecture verdict: ' + VALUES +
                         r'(, with advisories)?\.?\*\*(?:[ \t]+.*)?$')
 RESERVED_START = re.compile(r' {0,3}(?:(?:\*\*|##[ \t]+)Architecture (?:Review|verdict):|Architecture Review:)')
 RESERVED_TOKEN = re.compile(r'(?:(?:\*\*|##[ \t]+)Architecture (?:Review|verdict):|Architecture Review:)')
+ADVISORY_SUFFIX = re.compile(r'[ \t]+\(with advisories\)[ \t]*$')
 FENCE = re.compile(r' {0,3}(`{3,}|~{3,})(.*)$')
 QUOTE_OR_INDENT = re.compile(r'(?: {0,3}>| {4}|[ ]*\t)')
 
 
-def heading(line):
+def heading_body(line):
     for pattern in (CANON_BOLD, CANON_H2, CANON_PLAIN):
         match = pattern.fullmatch(line)
         if match:
@@ -24,6 +25,15 @@ def heading(line):
     if match and (not match.group(2) or match.group(1) == 'PASS'):
         return match.group(1)
     return None
+
+
+def heading(line):
+    # Normalize the same nonblocking PASS annotation for every supported form.
+    # All other text still uses the existing bounded heading/body grammar.
+    annotation = ADVISORY_SUFFIX.search(line)
+    if annotation and heading_body(line[:annotation.start()]) == 'PASS':
+        return 'PASS'
+    return heading_body(line)
 
 
 def without_inline_code(line):

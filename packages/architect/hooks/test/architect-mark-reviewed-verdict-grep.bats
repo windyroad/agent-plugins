@@ -38,7 +38,7 @@ print(json.dumps({
     'tool_input': {'subagent_type': 'wr-architect:agent'},
     'tool_response': {'content': [{'type': 'text', 'text': text}]}
 }))
-" "$text"
+" "$text" | python3 "$BATS_TEST_DIRNAME/architect-report-fixtures.py"
 }
 
 # ---------------------------------------------------------------------------
@@ -286,6 +286,41 @@ No conflicts. Note: earlier sessions reported ISSUES FOUND on adjacent files but
     $'Architecture Review: PASS\nArchitecture Review: PASS' \
     $'Architecture Review: PASS\nArchitecture Review: UNKNOWN' \
     $'Architecture Review: PASS\n```markdown\nunfinished'; do
+    rm -f "$REVIEW_MARKER" "$HASH_MARKER" "$PLAN_MARKER"
+    printf '%s' "$(_make_input "$text")" | "$HOOK"
+    [ ! -e "$REVIEW_MARKER" ]
+    [ ! -e "$HASH_MARKER" ]
+    [ ! -e "$PLAN_MARKER" ]
+  done
+}
+
+@test "advisory annotation: Claude consumes the same nonblocking PASS suffix across presentations" {
+  local text
+  for text in \
+    '**Architecture Review: PASS** (with advisories)' \
+    '## Architecture Review: PASS (with advisories)' \
+    'Architecture Review: PASS (with advisories)' \
+    '**Architecture verdict: PASS** (with advisories)'; do
+    rm -f "$REVIEW_MARKER" "$HASH_MARKER" "$PLAN_MARKER"
+    printf '%s' "$(_make_input "$text")" | "$HOOK"
+    [ -f "$REVIEW_MARKER" ]
+    [ -f "$HASH_MARKER" ]
+    [ -f "$PLAN_MARKER" ]
+  done
+}
+
+@test "advisory annotation: Claude does not promote quoted conditional or conflicting output" {
+  local text
+  for text in \
+    '> **Architecture Review: PASS** (with advisories)' \
+    'The example says **Architecture Review: PASS** (with advisories)' \
+    $'```markdown\n**Architecture Review: PASS** (with advisories)\n```' \
+    '**Architecture Review: PASS** (unless approved)' \
+    '**Architecture Review: PASS** (with advisories) unless approved' \
+    $'**Architecture Review: PASS** (with advisories)\nArchitecture Review: ISSUES FOUND' \
+    $'**Architecture Review: PASS** (with advisories) **Architecture Review: ISSUES FOUND**' \
+    $'**Architecture Review: PASS** (with advisories)\n**Architecture Review: PASS**' \
+    '**Architecture Review: ISSUES FOUND** (with advisories)'; do
     rm -f "$REVIEW_MARKER" "$HASH_MARKER" "$PLAN_MARKER"
     printf '%s' "$(_make_input "$text")" | "$HOOK"
     [ ! -e "$REVIEW_MARKER" ]

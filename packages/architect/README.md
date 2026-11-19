@@ -41,7 +41,7 @@ This walks you through creating an ADR in [MADR 4.0](https://adr.github.io/madr/
 /wr-architect:capture-adr
 ```
 
-The `capture-adr` skill is the foreground-lightweight aside-invocation variant of `create-adr` (per ADR-032 background-capture pattern). Use it when an architecture decision surfaces mid-conversation and you want the ADR scaffold drafted without losing the operational thread.
+The `capture-adr` skill is the foreground-lightweight aside-invocation variant of `create-adr` (the aside-capture path). Use it when an architecture decision surfaces mid-conversation and you want the ADR scaffold drafted without losing the operational thread.
 
 **Review recorded decisions that lack human oversight:**
 
@@ -49,7 +49,7 @@ The `capture-adr` skill is the foreground-lightweight aside-invocation variant o
 /wr-architect:review-decisions
 ```
 
-The `review-decisions` skill drains the set of ADRs that were recorded without a human confirming the chosen option (per ADR-066). It surfaces each decision's chosen option and alternatives via AskUserQuestion so you confirm, amend, or reject the auto-made call, then writes a `human-oversight: confirmed` marker. Detection is a token-cheap grep over ADR frontmatter; a session-start nudge reports the unoversighted count. New ADRs created through `create-adr` are born oversighted, so the unconfirmed set only shrinks.
+The `review-decisions` skill surfaces recorded decisions that still need human review. It presents each chosen option and alternatives so you can confirm, amend or reject them. A session-start nudge reports unconfirmed records. Proposed implementation does not imply acceptance: final acceptance requires successful actual production use and human ratification of the final substance.
 
 **Run an on-demand architecture compliance review:**
 
@@ -95,3 +95,5 @@ npx @windyroad/architect --uninstall
 The declared Claude evaluation profile is `claude-opus-5-5` with medium effort requested; Codex evaluation uses `gpt-6.1-sol` / medium. Captures bind the returned verdict to the supplied source and exposed model metadata. Requested effort is kept separate from independently observed effort. A declared profile is not a passing result, and these targets impose no model minimum or change to runtime inheritance. Known Sonnet 5 compatibility failures remain failed evidence; passing another profile does not erase them.
 
 The completion consumer recognizes one unquoted canonical verdict heading or the bounded bold `Architecture verdict` form. A quoted-only heading creates no PASS receipt; quoted history cannot override a current unquoted verdict. Duplicate, conflicting and malformed authoritative headings remain unrecognized. Unknown evidence follows the existing advisory policy and never supplies a missing substantive review or waives findings.
+
+For current report-completeness evidence, use the request-preparation and completion contract in `wr-architect:review-design`. It binds a typed assessment to caller-supplied facts through the existing shared consumer. Explicit unknown inputs can form a complete assessment; disputed applicability remains unresolved. These checks establish structure and binding, not citation truth, arithmetic or architectural correctness. A heading-only legacy PASS remains recognizable but supplies no new completeness-backed receipt. Missing or malformed mechanical proof remains advisory and permits execution without supplying a missing substantive review.

@@ -54,13 +54,11 @@ For an executable plan, identify the exact plan revision and sketch the simplest
 
 For an applied-change review, inspect the actual scoped diff, the reviewed design when one exists, and the verification. Return **ISSUES FOUND** for an avoidable addition or when the verification would still pass with the original defect present. Return a proven unnecessary mechanism or one that violates the governing requirement for removal or correction, along with any new test whose only purpose is to assert that mechanism or the defect. Preserve coverage of the required behavior. Do not offer a new ADR as an alternative to this correction. Use existing failing-before or mutation evidence when available; otherwise reason from the actual assertions and the defect. A green run alone does not answer the counterfactual.
 
-Immediately after the verdict, write **Reviewed:** and name the exact artifact, including its revision or diff identifier when supplied. Never invent an identifier. A plan verdict does not cover a later implementation, and a verdict for one artifact does not cover a changed artifact.
-
 In both plan and applied reviews, actively look for hacks: detours, duplicated paths, repurposed data or controls, and work shifted to users or unrelated components. Name what the workaround does and why it was introduced.
 
 Trace who initiates, carries, and performs the work, even when the same component still owns the outcome. Check whether a protocol or an existing decision requires the added step. Do not infer impossibility merely because deleting the step breaks the current design.
 
-Assess each added control by the purpose and evidence in the reviewed artifact. An upstream veto based on the same criterion enforces that decision even when the responsible component never sees the operation. If several controls duplicate enforcement assigned to another component, name each one in the removal recommendation. Preserve controls whose independent purpose is supported by the evidence. When the reviewed artifact establishes that a control only duplicates another component’s decision, require its removal in the final correction, including any upstream veto. Preserve it only when the reviewed evidence shows a separate purpose. When a test asserts the conflicting behavior, explicitly direct its removal or replacement with a test of the governing requirement.
+Assess each added control by the purpose and evidence in the reviewed artifact. An upstream veto based on the same criterion enforces that decision even when the responsible component never sees the operation. When the reviewed artifact establishes that a control duplicates enforcement assigned to another component, require removal of that duplicated enforcement in the final correction, including any upstream veto. Preserve any independently supported purpose of the control when correcting the duplication. Name each established duplicate in the removal recommendation. When a test asserts the conflicting behavior, explicitly direct its removal or replacement with a test of the governing requirement.
 
 When the constraint forbids executing work in the current context, review dispatch and execution separately. Compare the responsible component admitting the work to an authorized execution context without acquiring its privileges. Ruling out inline execution does not rule out this handoff or prove the detour necessary.
 
@@ -164,7 +162,7 @@ When a proposed change touches any of the following runtime-path surfaces, perfo
 - **Per-request handler behaviour** — any edit to a request handler whose change alters wall-clock latency, CPU cost, or I/O per request (not purely refactor).
 - **New endpoints with non-trivial traffic profile** — an endpoint is non-trivial if it is invoked from client code paths documented in the project's JTBD or README, OR named in an ADR as a "runtime-path" surface.
 
-**When the trigger fires, report:**
+**Assess these four items when a trigger fires:**
 
 1. **Per-request cost delta** — CPU, memory and network changes in concrete units when grounded inputs are available. Cite their source and uncertainty; distinguish resource quantities such as resident memory from allocation volume. Mark unavailable values explicitly.
 2. **Request frequency** — report the supported workload, such as `requests/user-session × sessions/day`, with its cited source and uncertainty. One request per connection does not establish the number of connections per day. Keep an unknown factor unknown.
@@ -205,6 +203,32 @@ When a change includes a new or modified decision file in `docs/decisions/`:
 When referencing decision IDs (ADR-<NNN>), problem IDs (P<NNN>), or JTBD IDs in prose output, always include the human-readable title on first mention. Use the format `ADR-013 (Skill manifest in package.json)`, not bare `ADR-013`.
 
 ## How to Report
+
+When the caller supplies a prepared `architect-review-context` JSON fence, return one unquoted `architect-report` JSON fence after the findings. These top-level labels are reserved operative protocol; examples must be quoted/nested or use a nonreserved label such as `json`. Copy `version: 1`, `artifact`, `policy` and the supplied `request_sha256`; do not compute a digest or invent scope. Include `verdict` matching the authoritative heading exactly (`PASS`, `ISSUES FOUND` or `NEEDS DIRECTION`).
+
+The payload's `performance` contains `applicability` (`required`, `not_applicable`, `unknown` or `disputed`) and attributable `evidence`. Assess the caller's facts independently. An unresolved disagreement is `disputed`, with the contested fact and evidence; low traffic cannot cancel another established trigger. Unknown caller applicability cannot become verified nonapplicability by assertion.
+
+When applicable, `performance.assessments` has separate `cpu`, `memory`, `network`, `workload`, `aggregate` and `budget` objects. Each has `state` (`supported`, `unavailable` or `disputed`) and a substantive `assessment` string. Supported or disputed entries also include `source` and `uncertainty`. Use the existing performance rules: preserve unknown inputs rather than inventing measurements. A disputed entry does not settle the assessment. Use this single typed assessment instead of duplicating its data in a second table.
+
+If no prepared context is supplied, provide the ordinary report below and state that mechanical completeness evidence is unavailable. Do not fabricate a digest or imply that this makes a complete prose review substantively invalid. Missing or malformed mechanical proof remains advisory and permits execution; it supplies no approval and does not waive known findings or substantive review obligations.
+
+Assemble the report in this order, in both review modes:
+
+1. The verdict, immediately followed by **Reviewed:** naming the exact artifact and any supplied revision or diff identifier. Never invent an identifier. A plan verdict does not cover a later implementation, nor does one artifact's verdict cover a changed artifact.
+2. Findings or the substantive direction handoff, as applicable.
+3. When a Runtime-Path Performance Review trigger applies, fill the typed assessment when prepared context is supplied; otherwise use the compact assessment below. Follow that section's existing grounding, calculation and budget rules. Each resource has its own entry, containing a supported value or explicit unknown. Keep the assessment when nonblocking or when another finding already determines the verdict. Apply the same triggers to test-only paths.
+
+   | Item | Assessment |
+   |---|---|
+   | CPU per request | <supported delta with source and uncertainty, or explicit unknown> |
+   | Memory per request | <supported delta with source and uncertainty, or explicit unknown> |
+   | Network per request | <supported delta with source and uncertainty, or explicit unknown> |
+   | Workload | <supported frequency with source and uncertainty, or explicit unknown> |
+   | Aggregate load | <derived resource totals with units, or explicit unknowns> |
+   | Budget status | <comparison, compliance not established, or no budget in scope> |
+4. Other nonblocking advisories.
+
+The examples below illustrate the verdict and findings portion only; they do not replace applicable assessments.
 
 If the change is compliant and no new decision is needed:
 

@@ -84,6 +84,16 @@ For an applied review, also request the simplest-design comparison and review of
 
 Ask the reviewer to ground each blocking design or verification finding in the applicable requirement, its source, the enforcement owner, and evidence from the artifact. Ask whether the suggested mechanism or test is needed at that boundary.
 
+Prepare attributable review context for this request: its exact artifact/revision reference, applicable policy reference, and evidence for the existing performance trigger categories. Categories are alternatives: cache, quota, response, handler and new_endpoint. Record `required`, `not_applicable` or `unknown`; an unavailable diff stays unknown. Do not infer applicability from filenames or make low traffic a blanket exemption. The reviewer independently assesses these facts.
+
+Create a JSON request object with `version: 1`, `artifact`, `policy`, and `performance` containing `applicability`, an attributable `evidence` string and `triggers` (category/evidence objects; empty for unknown or nonapplicable). Use the existing plugin consumer to issue the digest envelope:
+
+```bash
+python3 "<architect-plugin-root>/hooks/lib/architect-report.py" --prepare < request-context.json
+```
+
+Include that prepared `architect-review-context` fence in the assessment prompt. Preserve the actual prompt for the completion check. The digest binds these caller-supplied facts, not their factual truth. Never ask the read-only reviewer to calculate it.
+
 The architect permits implementation against documented proposals without prior ratification. It flags **[Premature Acceptance]** when acceptance lacks either final human ratification or successful actual production-use evidence. Apply this distinction to plans and edits alike; missing ratification alone does not block building.
 
 ### 5. Delegate to the architect agent
@@ -107,6 +117,10 @@ prompt: <constructed review prompt from step 4>
 The Codex installer generates `.codex/agents/wr-architect-agent.toml` from the installed plugin's `agents/agent.md` and registers the exact identity `wr-architect:agent`. SessionStart repairs the user-scoped registration when needed. Adopter projects do not need to ship their own agent configuration. Prefer that named reviewer. If it is unavailable, or the native tool cannot select named reviewers, use an independent general/default subagent with `fork_turns: "none"`. Prepare its message with `node "<architect-plugin-root>/hooks/lib/codex-completion-input.mjs" --fallback-prompt wr-architect:agent "<architect-plugin-root>/agents/agent.md" < request.txt`, where `request.txt` contains the original review request and `<architect-plugin-root>` is the installed plugin root. Pass the output verbatim. Preserve read-only scope, wait for completion, then call `interrupt_agent` once on that child. The normal hook verifies the installed instructions and completed review before recording a result. A substantive FAIL still requires remediation; never write a marker manually. The repo-local `.codex/agents/wr-architect.toml`, kept in sync from `packages/architect/agents/agent.md` by `scripts/sync-codex-agents.mjs`, remains the short-name `wr-architect` alias for source-repo dogfooding.
 
 Wait for the agent to complete.
+
+Check the returned report against the original prepared request through the same consumer used by both completion paths. Pass JSON with `prompt` (the actual request) and `output` (the returned report) on stdin to `python3 "<architect-plugin-root>/hooks/lib/architect-report.py" --evaluate`.
+
+Keep its recognized verdict, completeness and receipt eligibility distinct. Structural completeness does not establish source truth, arithmetic or ADR compliance. A dispute remains unresolved; unknown resource inputs can satisfy completeness. Ask the reviewer to finish a demonstrably omitted required assessment before describing that obligation as fulfilled. Unavailable mechanical proof alone does not prove that legacy prose is substantively incomplete. Missing/malformed evidence advises and permits execution without a fabricated PASS receipt; known substantive failures remain actionable. Do not convert schema failure into an edit denial or automatic model retry.
 
 Match the verdict to the requested artifact and confirm that the selected patch or plan revision is still current before using it. A changed artifact needs a fresh applicable review. A missing mechanical receipt after a completed applicable review follows the existing fail-open policy; it does not erase a substantive finding or supply an absent review.
 

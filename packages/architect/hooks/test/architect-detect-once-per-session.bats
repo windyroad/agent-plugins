@@ -37,6 +37,7 @@ run_hook() {
   [ "${#output}" -gt 500 ]
   [[ "$output" == *"MANDATORY ARCHITECTURE CHECK"* ]]
   [[ "$output" == *"wr-architect:agent"* ]]
+  [[ "$output" == *"wr-architect:review-design"* ]]
   [[ "$output" == *"SCOPE:"* ]]
 }
 
@@ -55,6 +56,7 @@ run_hook() {
   # Terse reminder names the gate AND the delegation affordance.
   [[ "$output" == *"architecture"* ]] || [[ "$output" == *"ARCHITECTURE"* ]]
   [[ "$output" == *"wr-architect:agent"* ]]
+  [[ "$output" == *"wr-architect:review-design"* ]]
   # Full SCOPE block is NOT re-emitted.
   [[ "$output" != *"Does NOT apply to"* ]]
 }

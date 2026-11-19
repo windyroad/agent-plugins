@@ -757,10 +757,14 @@ tests:
         and state checks and let the command acquire credentials under its own
         policy. The review should assess the scoped change as shipped. Give your
         architecture verdict.
+        ```architect-review-context
+        {"request":{"artifact":"shipped authorization callback excerpt","performance":{"applicability":"required","evidence":"The supplied applied handler returns HTML and adds a browser POST.","triggers":[{"category":"handler","evidence":"Browser resubmission adds per-request I/O."},{"category":"response","evidence":"The handler returns a new hidden-input HTML response."}]},"policy":"scoped fixture decisions and supplied Architect instructions","version":1},"request_sha256":"be8848c08411133a7d79d1fb4a78410e7a7261f94811166b81f5cfbac3b05c11"}
+        ```
     assert:
       - type: javascript
         value: file://assert-verdict.cjs
         config:
+          require_report: true
           verdicts: ["FAIL", "NEEDS DIRECTION"]
       - type: llm-rubric
         value: Identify the browser carrying the return through a second request as an avoidable applied detour given the supplied direct server admission. Require correction of that transport step; changing only the credential executor or offering an ADR as an alternative does not resolve it. Judge the operative correction of the architectural carrier, not particular wording about form presentation. An unequivocal requirement to remove the browser relay and Continue dependency is sufficient. Conditional documentation for a different proposal does not negate that correction unless retention is actually offered as an acceptable current alternative. Preserve the established direct capability, and require a proposed ADR and direction for any genuinely needed uncovered choice rather than inventing uncertainty about that capability. Mere keyless GET compliance or improved fallback copy is insufficient. The absence of a transport ADR alone does not establish an uncovered material choice in ordinary reuse of the supplied authorized command. Do not invent a new record requirement after an unequivocal correction merely because that route lacks its own transport ADR.
@@ -779,6 +783,16 @@ tests:
           demonstrate budget compliance; absence of a budget alone does not invent a
           binding limit. Do not exempt test-only runtime changes or automatically demand
           new measurement work solely to fill empty fields.
+      - type: llm-rubric
+        value: >-
+          Judge every blocking authorization or control-purpose finding against the supplied facts.
+          Omitted implementation or purpose detail alone does not establish that an Origin check
+          substitutes for command authorization, bypasses policy, or conflicts with it. Fail an
+          additional blocking finding that asserts such an unsupported mechanism even if its
+          requested removal overlaps the valid relay correction. Accept explicit uncertainty or
+          nonblocking advice that does not invent a violating mechanism. Preserve findings grounded
+          in actual contradictory evidence.
+
 
   - description: Authorization callback direct handoff uses an existing decision
     vars:
@@ -856,10 +870,14 @@ tests:
         contains supplied synthetic per-request and workload facts, not
         measurements of an actual production service. Give your architecture
         verdict on the applied handler.
+        ```architect-review-context
+        {"request":{"artifact":"loop-case-1","performance":{"applicability":"required","evidence":"The before/after handler changes CPU and retained memory, with supplied fixture measurements.","triggers":[{"category":"handler","evidence":"The applied handler changes per-request loop work and retained memory."}]},"policy":"performance-example decisions and supplied synthetic PERF-01","version":1},"request_sha256":"031ef5fda3d6b9a0929ccf7970a07c0a485bd5a701be4fb3829e8a07e2e6db5b"}
+        ```
     assert:
       - type: javascript
         value: file://assert-verdict.cjs
         config:
+          require_report: true
           verdicts: [PASS]
       - type: llm-rubric
         value: >-
@@ -891,3 +909,47 @@ tests:
           demonstrate budget compliance; absence of a budget alone does not invent a
           binding limit. Do not exempt test-only runtime changes or automatically demand
           new measurement work solely to fill empty fields.
+
+  - description: Over-fire guard — cosmetic change, no cite, no [Unratified Dependency]
+    vars:
+      prompt: |
+        PRE-EDIT architecture gate. Review this PROPOSED change (not yet
+        applied) against the existing decisions in docs/decisions/.
+
+        Proposed change: a formatting-only refactor to an existing shell hook
+        — it re-indents a `case` block to align the branch arms and fixes a
+        typo in a code comment. There is NO behaviour change, NO new
+        dependency, and the change cites no ADR and implements no specific
+        decision. It is a purely cosmetic tidy-up.
+
+        Classify the alignment of this proposal and give your verdict inline,
+        beginning with the `Architecture Review:` verdict line. State
+        explicitly whether you raise an [Unratified Dependency] flag.
+        ```architect-review-context
+        {"request":{"artifact":"proposed cosmetic shell-hook excerpt","performance":{"applicability":"not_applicable","evidence":"Indentation and a comment typo only; the prompt states there is no behavior change.","triggers":[]},"policy":"scoped fixture decisions and supplied Architect instructions","version":1},"request_sha256":"6ffc36db2268f92a041df3730a96064b4657db7c654171d4c9f653ca67a4573e"}
+        ```
+    assert:
+      # Tier A — verdict-outcome token (a purely cosmetic change is a PASS per
+      # agent.md's "purely cosmetic ... report PASS" constraint). Reliable in
+      # terse + full stdout; the over-fire-guard semantics route to Tier-B.
+      - type: javascript
+        value: file://assert-verdict.cjs
+        config:
+          require_report: true
+          verdicts: ["PASS"]
+      # Tier B — the over-fire guard: a cosmetic change citing NO specific
+      # unratified ADR must NOT trip the build-upon guard (inverse-P078/P132,
+      # agent.md). not-regex on "[Unratified Dependency]" false-fails the
+      # correct "does NOT raise [Unratified Dependency]" — so Tier-B only.
+      - type: llm-rubric
+        value: |
+          The response does NOT raise an [Unratified Dependency] flag. The
+          proposed change is purely cosmetic and cites no specific ADR, so the
+          build-upon guard must not fire on it (ambient/transitive dependence
+          on governed code must never trip the guard — the inverse-P078/P132
+          over-fire guard). PASS if no [Unratified Dependency] flag is raised
+          (a verdict of PASS, or any other verdict that does not include an
+          Unratified Dependency finding, satisfies this). An output that
+          explicitly says it does NOT raise the flag PASSES. FAIL only if the
+          response raises an [Unratified Dependency] finding against this
+          cosmetic, dependency-free change.

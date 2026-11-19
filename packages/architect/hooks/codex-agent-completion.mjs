@@ -66,6 +66,40 @@ function diagnostic(reason, input) {
   } catch { rmSync(temporary, { force: true }); }
 }
 
+function reviewContext(prompt) {
+  const result = spawnSync("python3", [join(hookDir, "lib", "architect-report.py"), "--context"], { input: typeof prompt === "string" ? prompt : "", encoding: "utf8" });
+  try { return result.status === 0 ? JSON.parse(result.stdout) : null; } catch { return null; }
+}
+
+function sameBinding(left, right) {
+  return ["parentSession", "role", "target", "root", "physical", "policyHash"].every(key => left[key] === right[key]);
+}
+
+function freshRegistration(value) {
+  const age = Date.now() - value.createdAt;
+  return Number.isFinite(age) && age >= 0 && age < ttl;
+}
+
+function joinNativeContext(native, dispatched, opaqueChild) {
+  if (native.source !== "subagent-start" || dispatched.reviewerTransport !== undefined ||
+      opaqueChild !== native.target || dispatched.opaqueChild !== opaqueChild ||
+      !sameBinding(native, dispatched) || !freshRegistration(native) || !freshRegistration(dispatched)) return;
+  const path = registeredPath(native);
+  const current = JSON.parse(readFileSync(path, "utf8"));
+  if (!sameBinding(current, native) || current.createdAt !== native.createdAt) return;
+  const incoming = dispatched.reviewContext;
+  if (current.reviewContext && JSON.stringify(current.reviewContext) !== JSON.stringify(incoming)) {
+    current.reviewContext = null;
+    current.contextConflict = true;
+  } else if (!current.contextConflict) current.reviewContext = incoming;
+  const stat = statSync(path);
+  const temporary = `${path}.${process.pid}.tmp`;
+  writeFileSync(temporary, JSON.stringify(current), { mode: 0o600 });
+  renameSync(temporary, path);
+  // Context attribution must not refresh the original evidence lifetime.
+  utimesSync(path, stat.atime, stat.mtime);
+}
+
 function reapTransport() {
   if (!existsSync(transportDir())) return;
   for (const name of readdirSync(transportDir())) {
@@ -109,6 +143,11 @@ function rememberNative(input) {
       if (previous[key] !== registered[key]) return diagnostic("native-registration-conflict", input);
     }
   }
+  const dispatchedPath = statePath(input.session_id, target);
+  if (existsSync(dispatchedPath)) {
+    try { joinNativeContext(registered, JSON.parse(readFileSync(dispatchedPath, "utf8")), target); }
+    catch { diagnostic("native-context-unavailable", input); }
+  }
   mkdirSync(riskDir(input.session_id), { recursive: true });
   try { writeFileSync(nativePath(input.session_id), "", { flag: "wx", mode: 0o600 }); }
   catch (error) { if (error?.code !== "EEXIST") throw error; }
@@ -120,18 +159,30 @@ function remember(input) {
   const result = response(input);
   const target = normalizeTarget(result.agent_id ?? result.task_name);
   if (!target) return;
-  if (!dispatch?.reviewerTransport && existsSync(nativePath(input.session_id))) {
+  if (existsSync(nativePath(input.session_id)) &&
+      (existsSync(receiptPath(input.session_id, target, ".done")) || existsSync(statePath(input.session_id, target, ".done")))) return;
+  if (!dispatch && existsSync(nativePath(input.session_id))) {
     clearGeneralReview(input, role, target, { state: statePath(input.session_id, target),
       registration: registrationPath(input.session_id, target), receipt: receiptPath(input.session_id, target) });
     return;
   }
   mkdirSync(riskDir(input.session_id), { recursive: true });
-  clear(input.session_id, target);
-  if (!dispatch) return;
+  if (!dispatch) { clear(input.session_id, target); return; }
   const bound = checkout(input.cwd || process.cwd());
   const hash = bound && policyHash(bound.root);
-  if (!bound || !hash) return diagnostic(bound ? "policy-hash-failed" : "invalid-spawn-checkout", input);
-  const registered = { parentSession: input.session_id, role, target, reviewerTransport: dispatch.reviewerTransport, reviewerInstructionsHash: dispatch.reviewerInstructionsHash, ...bound, policyHash: hash, createdAt: Date.now() };
+  if (!bound || !hash) {
+    clear(input.session_id, target);
+    return diagnostic(bound ? "policy-hash-failed" : "invalid-spawn-checkout", input);
+  }
+  const registered = { parentSession: input.session_id, role, target, reviewerTransport: dispatch.reviewerTransport, reviewerInstructionsHash: dispatch.reviewerInstructionsHash, ...bound, policyHash: hash, createdAt: Date.now(),
+    opaqueChild: result.agent_id, reviewContext: reviewContext(dispatch.prompt) };
+  const nativeRegistration = registrationPath(input.session_id, `native:${target}`);
+  if (existsSync(nativeRegistration)) {
+    try { joinNativeContext(JSON.parse(readFileSync(nativeRegistration, "utf8")), registered, result.agent_id); }
+    catch { diagnostic("native-context-unavailable", input); }
+    return;
+  }
+  clear(input.session_id, target);
   writeFileSync(statePath(input.session_id, target), JSON.stringify(registered), { mode: 0o600 });
   mkdirSync(transportDir(), { recursive: true, mode: 0o700 });
   writeFileSync(registrationPath(input.session_id, target), JSON.stringify(registered), { mode: 0o600 });
@@ -150,7 +201,26 @@ function valid(registered, input, target, age) {
 }
 
 function writeMarker(input, registered, target, output, completedAt, claim, done) {
-  const synthetic = { ...input, session_id: registered.parentSession, cwd: registered.root, tool_name: "Agent", tool_input: { subagent_type: role }, tool_response: { content: [{ type: "text", text: output }] } };
+  let context = registered.reviewContext;
+  if (registered.source === "subagent-start") {
+    try {
+      const current = JSON.parse(readFileSync(registeredPath(registered), "utf8"));
+      context = sameBinding(current, registered) && current.createdAt === registered.createdAt && freshRegistration(current) && !current.contextConflict ? current.reviewContext : null;
+    } catch { context = null; }
+  }
+  const checked = spawnSync("python3", [join(hookDir, "lib", "architect-report.py"), "--evaluate"], { input: JSON.stringify({ context, output }), encoding: "utf8" });
+  let evaluated;
+  try { evaluated = checked.status === 0 ? JSON.parse(checked.stdout) : null; } catch { evaluated = null; }
+  if (evaluated?.receipt_eligible !== true) {
+    rmSync(claim, { force: true });
+    diagnostic(evaluated?.completeness === "complete" ? "non-pass-output" : "report-completeness-unverified", input);
+    if (evaluated?.completeness !== "complete") {
+      process.stdout.write(JSON.stringify({ systemMessage: `Architect report completeness: ${evaluated?.diagnostic || "report evaluator unavailable"}. Mechanical evidence remains advisory; no PASS receipt was created. Substantive review obligations and known findings still apply.` }) + "\n");
+    }
+    return false;
+  }
+  const prompt = `\x60\x60\x60architect-review-context\n${JSON.stringify(context)}\n\x60\x60\x60`;
+  const synthetic = { ...input, session_id: registered.parentSession, cwd: registered.root, tool_name: "Agent", tool_input: { subagent_type: role, prompt }, tool_response: { content: [{ type: "text", text: output }] } };
   const result = spawnSync(join(hookDir, "architect-mark-reviewed.sh"), { cwd: registered.root, env: process.env, input: JSON.stringify(synthetic), encoding: "utf8" });
   if (result.status !== 0) {
     rmSync(claim, { force: true });

@@ -24,6 +24,15 @@ _parse_input
 
 SESSION_ID=$(_get_session_id)
 
+# Architecture reviews own their receipt lifetime through the marker writer.
+# Generic activity sliding must not refresh prior approval after an incomplete,
+# malformed, failed or direction-requiring architecture review.
+if [ "$(_get_tool_name)" = "Agent" ]; then
+  case "$(_get_subagent_type)" in
+    *architect*) exit 0 ;;
+  esac
+fi
+
 # P368: the successful standalone helper invocation and its PostToolUse event
 # are the only place where the confirming session id and artefact path coexist.
 OVERSIGHT_PATH=$(printf '%s' "$_HOOK_INPUT" | python3 -c '

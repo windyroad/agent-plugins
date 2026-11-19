@@ -33,6 +33,22 @@ case "$SUBAGENT" in
     AGENT_OUTPUT=$(_get_tool_output)
     VERDICT=$(printf '%s\n' "$AGENT_OUTPUT" | architect_verdict)
 
+    # A recognizable verdict and an attributable complete report are separate.
+    # Failure here is advisory, never an action denial or architectural FAIL.
+    REPORT_RESULT=$(printf '%s' "$_HOOK_INPUT" | python3 "$SCRIPT_DIR/lib/architect-report.py" --hook)
+    RECEIPT_ELIGIBLE=$(printf '%s' "$REPORT_RESULT" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("receipt_eligible") is True)' 2>/dev/null)
+    printf '%s' "$REPORT_RESULT" | python3 -c '
+import json,sys
+try: result=json.load(sys.stdin)
+except (ValueError, TypeError): result={}
+if result.get("completeness") != "complete":
+    detail=result.get("diagnostic", "report evaluator unavailable")
+    print(json.dumps({"systemMessage": "Architect report completeness: " + str(detail) + ". Mechanical evidence remains advisory; no PASS receipt was created. Substantive review obligations and known findings still apply."}))
+'
+    if [ "$VERDICT" = "PASS" ] && [ "$RECEIPT_ELIGIBLE" != "True" ]; then
+      exit 0
+    fi
+
     # Substance-aware drift hash + atomic verdict-write (ADR-009 amendment
     # 2026-06-06). The marker + hash file are written as an atomic pair via
     # `_atomic_mark_with_hash` so a PASS never silently fails to persist

@@ -24,7 +24,7 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 if [ -d "$PROJECT_DIR/docs/decisions" ]; then
   if has_announced "architect" "$SESSION_ID"; then
     cat <<'HOOK_OUTPUT'
-MANDATORY architecture gate active (docs/decisions/ present). Delegate to wr-architect:agent before editing project files. See turn-1 instructions for full scope and exclusions.
+MANDATORY architecture review (docs/decisions/). Use /wr-architect:review-design's request/completion contract and runtime-native wr-architect:agent path before edits. See turn-1 scope/exclusions.
 HOOK_OUTPUT
   else
     cat <<'HOOK_OUTPUT'
@@ -37,8 +37,10 @@ CI workflows, hook scripts, build scripts, and decision files. This is
 proactive. Do not wait for the user to ask.
 
 REQUIRED ACTIONS:
-1. Use the Agent tool to delegate to wr-architect:agent
-   (subagent_type: "wr-architect:agent")
+1. Use the request-preparation and completion contract in
+   /wr-architect:review-design. Delegate through its existing runtime-native
+   wr-architect:agent path. Preserve the actual request and check the
+   returned assessment against it.
 2. The architect will review proposed changes against existing decisions
    in docs/decisions/ and flag when new decisions should be documented
 3. Do NOT edit project files without architect review FIRST

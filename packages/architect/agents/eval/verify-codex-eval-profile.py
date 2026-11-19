@@ -5,11 +5,23 @@ import json
 from pathlib import Path
 import sys
 
+EXPECTED_NOTICE = (
+    '1. Use the request-preparation and completion contract in\n'
+    '   /wr-architect:review-design. Delegate through its existing runtime-native\n'
+    '   wr-architect:agent path. Preserve the actual request and check the\n'
+    '   returned assessment against it.'
+)
+
 
 def verify(home, events, output, model, effort, role, cli_status):
     result = {
         "requested": {"model": model, "effort": effort, "role": role},
         "cli_status": int(cli_status), "verified": False, "children": [],
+        "parent_hook_context": {
+            "status": "unverified",
+            "expected_notice_sha256": hashlib.sha256(EXPECTED_NOTICE.encode()).hexdigest(),
+            "records": [],
+        },
     }
     try:
         starts = {
@@ -30,6 +42,32 @@ def verify(home, events, output, model, effort, role, cli_status):
                 with path.open() as stream:
                     first = json.loads(next(stream))
                     meta = first.get("payload", {})
+                    if first.get("type") == "session_meta" and meta.get("id") == parent:
+                        for number, line in enumerate(stream, start=2):
+                            try:
+                                record = json.loads(line)
+                            except (ValueError, TypeError):
+                                continue
+                            if not isinstance(record, dict):
+                                continue
+                            payload = record.get("payload", {})
+                            if (not isinstance(payload, dict) or record.get("type") != "response_item"
+                                    or payload.get("type") != "message" or payload.get("role") != "developer"):
+                                continue
+                            content = payload.get("content", [])
+                            if not isinstance(content, list):
+                                continue
+                            text = "".join(item["text"] for item in content if isinstance(item, dict)
+                                           and item.get("type") in ("input_text", "text")
+                                           and isinstance(item.get("text"), str))
+                            if EXPECTED_NOTICE in text:
+                                observation = result["parent_hook_context"]
+                                observation["status"] = "observed"
+                                observation["records"].append({
+                                    "session_id": parent, "record_line": number,
+                                    "message_sha256": hashlib.sha256(text.encode()).hexdigest(),
+                                })
+                        continue
                     source = meta.get("source", {})
                     if first.get("type") != "session_meta" or not isinstance(source, dict):
                         continue
