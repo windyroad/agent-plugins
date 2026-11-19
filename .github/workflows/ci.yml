@@ -274,7 +274,7 @@ jobs:
       - name: Install browser test engines
         run: |
           cat /etc/apt/apt-mirrors.txt
-          sudo sed -i '\|^http://azure\.archive\.ubuntu\.com/ubuntu/|d' /etc/apt/apt-mirrors.txt
+          printf 'https://archive.ubuntu.com/ubuntu/\tpriority:1\nhttps://security.ubuntu.com/ubuntu/\tpriority:2\n' | sudo tee /etc/apt/apt-mirrors.txt
           npx playwright install --with-deps chromium webkit
       - name: Build selected public documentation
         run: npm run website:build
